@@ -154,7 +154,7 @@ jobs:
               pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
               pip3 install -r requirements-dev.txt
-              pip3 install ta-lib==0.4.28
+              pip3 install ta-lib==0.4.32
               pip3 install .
             TEST_BUILD: |
               /home/runner/work/PKScreener/PKScreener/dist/pkscreenercli.bin --testbuild
@@ -174,7 +174,7 @@ jobs:
               pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
               pip3 install -r requirements-dev.txt
-              ARCHFLAGS="-arch x86_64 -arch arm64" python3 -m pip install -U ta-lib==0.4.28
+              python3 -m pip install -U ta-lib==0.4.32
               pip3 install .
             TEST_BUILD: |
               /Users/runner/work/PKScreener/PKScreener/dist/pkscreenercli.run --testbuild
