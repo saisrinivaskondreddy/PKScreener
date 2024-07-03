@@ -116,7 +116,7 @@ jobs:
         make
         sudo make install
         cd /home/runner/work/PKScreener/PKScreener/
-        pip3 install ta-lib==0.4.28
+        pip3 install ta-lib==0.4.32
 
     - name: Setup Python environment for triggers on Ubuntu
       shell: bash
@@ -134,7 +134,7 @@ jobs:
         python3 -m pip install --upgrade pip
         pip3 install -r requirements.txt
         pip3 install -r requirements-dev.txt
-        pip3 install ta-lib==0.4.28
+        pip3 install ta-lib==0.4.32
         pip3 install .
 
     - name: Setup Python environment for triggers on Windows
