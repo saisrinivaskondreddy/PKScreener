@@ -2308,25 +2308,38 @@ class ScreeningStatistics:
         key4 = "200DMA"
         saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
         if confFilter == 4:
-            # 10 ema>20 eMA > 55 ema >200 smaeach OF THE ema AND THE 200 sma SEPARATED BY LESS THAN 1%(ideally 0.1% TO 0.5%) DURING CONFLUENCE
+            maxRecentDays = int(self.configManager.superConfluenceMaxReviewDays)
+            recentCurrentDay = 1
+            isSuperConfluence = False
             reversedData = data[::-1]  # Reverse the dataframe
-            ema_10 = pktalib.EMA(reversedData["Close"],10).tail(1).iloc[0]
-            ema_20 = pktalib.EMA(reversedData["Close"],20).tail(1).iloc[0]
-            ema_55 = pktalib.EMA(reversedData["Close"],55).tail(1).iloc[0]
-            sma_200 = pktalib.SMA(reversedData["Close"],200).tail(1).iloc[0]
-            smaRange = sma_200 * percentage
-            if ema_10 >= ema_20 and ema_20 >= ema_55 and ema_55 >= sma_200:
-                superbConfluence = (ema_10 - sma_200 <= smaRange) and \
-                                    (ema_20 - sma_200 <= smaRange) and \
-                                    (ema_55 - sma_200 <= smaRange)
-                screenDict["MA-Signal"] = (
-                    saved[0] 
-                    + colorText.BOLD
-                    + (colorText.GREEN)
-                    + "SuperGoldenConfluence"
-                    + colorText.END
-                )
-                saveDict["MA-Signal"] = saved[1] + "SuperGoldenConfluence"
+            emas = self.configManager.superConfluenceEMAPeriods.split(",")
+            if len(emas) < 3:
+                emas = [8,21,55]
+            while recentCurrentDay <= maxRecentDays:
+                # 8 ema>21 ema > 55 ema >200 sma each OF THE ema AND THE 200 sma SEPARATED BY LESS THAN 1%(ideally 0.1% TO 0.5%) DURING CONFLUENCE
+                ema_8 = pktalib.EMA(reversedData["Close"],int(emas[0])).tail(recentCurrentDay).head(1).iloc[0]
+                ema_21 = pktalib.EMA(reversedData["Close"],int(emas[1])).tail(recentCurrentDay).head(1).iloc[0]
+                ema_55 = pktalib.EMA(reversedData["Close"],int(emas[2])).tail(recentCurrentDay).head(1).iloc[0]
+                sma_200 = pktalib.SMA(reversedData["Close"],200).tail(recentCurrentDay).head(1).iloc[0]
+                smaRange = sma_200 * percentage
+                if (ema_8 >= ema_21 or ema_8 >= sma_200) and (ema_21 >= ema_55 or ema_21 >= sma_200) and ema_55 >= sma_200:
+                    superbConfluence = ((ema_8 - sma_200 <= smaRange) and \
+                                        (ema_21 - sma_200 <= smaRange) and \
+                                        (ema_55 - sma_200 <= smaRange)) or \
+                                        (abs(ema_55 - sma_200) <= smaRange)
+                    screenDict["MA-Signal"] = (
+                        saved[0] 
+                        + colorText.BOLD
+                        + (colorText.GREEN)
+                        + "SuperGoldenConfluence"
+                        + colorText.END
+                    )
+                    saveDict["MA-Signal"] = saved[1] + "SuperGoldenConfluence"
+                    isSuperConfluence = True
+                if isSuperConfluence:
+                    break
+                recentCurrentDay += 1
+            if isSuperConfluence:
                 return superbConfluence
             
         is20DMACrossover50DMA = (recent["SSMA20"].iloc[0] >= recent["SMA"].iloc[0]) and \

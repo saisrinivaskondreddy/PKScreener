@@ -95,6 +95,8 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.minimumChangePercentage = 0
         self.daysToLookback = 22 * self.backtestPeriodFactor  # 1 month
         self.periods = [1,2,3,4,5,10,15,22,30]
+        self.superConfluenceEMAPeriods = '8,21,55'
+        self.superConfluenceMaxReviewDays = 3
         if self.maxBacktestWindow > self.periods[-1]:
             self.periods.extend(self.maxBacktestWindow)
         MarketHours().setMarketOpenHourMinute(self.marketOpen)
@@ -191,6 +193,8 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "showunknowntrends", "y" if self.showunknowntrends else "n")
             parser.set("config", "shuffle", "y" if self.shuffleEnabled else "n")
             parser.set("config", "soundAlertForMonitorOptions", str(self.soundAlertForMonitorOptions))
+            parser.set("config", "superConfluenceEMAPeriods", str(self.superConfluenceEMAPeriods))
+            parser.set("config", "superConfluenceMaxReviewDays", str(self.superConfluenceMaxReviewDays))
             parser.set("config", "telegramImageCompressionRatio", str(self.telegramImageCompressionRatio))
             parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
             parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
@@ -367,6 +371,12 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.vcpVolumeContractionRatio = input(
                     f"[+] Ratio of volume of recent largest to pullback candles for VCP. (number)(Optimal = 0.4, Current: {colorText.FAIL}{self.vcpVolumeContractionRatio}{colorText.END}): "
                 ) or self.vcpVolumeContractionRatio
+                self.superConfluenceEMAPeriods = input(
+                    f"[+] Comma separated EMA periods for super-confluence-checks. (numbers)(Optimal = 8,21,55, Current: {colorText.FAIL}{self.superConfluenceEMAPeriods}{colorText.END}): "
+                ) or self.superConfluenceEMAPeriods
+                self.superConfluenceMaxReviewDays = input(
+                    f"[+] Max number of review days for super-confluence-checks. (number)(Optimal = 3, Current: {colorText.FAIL}{self.superConfluenceMaxReviewDays}{colorText.END}): "
+                ) or self.superConfluenceMaxReviewDays
             except Exception as e:
                 default_logger().debug(e,exc_info=True)
                 from time import sleep
@@ -416,6 +426,8 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "showunknowntrends", str(self.showunknowntrendsPrompt))
                 parser.set("config", "shuffle", str(self.shuffle))
                 parser.set("config", "soundAlertForMonitorOptions", str(self.soundAlertForMonitorOptions))
+                parser.set("config", "superConfluenceEMAPeriods", str(self.superConfluenceEMAPeriods))
+                parser.set("config", "superConfluenceMaxReviewDays", str(self.superConfluenceMaxReviewDays))
                 parser.set("config", "telegramImageCompressionRatio", str(self.telegramImageCompressionRatio))
                 parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
                 parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
@@ -557,6 +569,8 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.maxNumResultRowsInMonitor = int(parser.get("config", "maxNumResultRowsInMonitor"))
                 self.vcpVolumeContractionRatio = float(parser.get("config", "vcpVolumeContractionRatio"))
                 self.soundAlertForMonitorOptions = str(parser.get("config", "soundAlertForMonitorOptions"))
+                self.superConfluenceEMAPeriods = str(parser.get("config", "superConfluenceEMAPeriods"))
+                self.superConfluenceMaxReviewDays = str(parser.get("config", "superConfluenceMaxReviewDays"))
                 self.telegramImageCompressionRatio = float(parser.get("config", "telegramImageCompressionRatio"))
                 self.telegramImageFormat = str(parser.get("config", "telegramImageFormat"))
                 self.telegramImageQualityPercentage = int(parser.get("config", "telegramImageQualityPercentage"))

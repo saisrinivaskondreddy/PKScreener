@@ -2,22 +2,8 @@
 
 ## What's New?
 1. [v0.45.20240703.453] release
-* Super confluence option added (10 EMA > 20 EMA > 55 EMA > 200 SMA within 1-2%). Try X > 12 > 7 > 3 > Option 4.
-* Sound alerts for configured options in pkscreener.ini when running in monitoring mode (option -m)
-* Moved the telegram image quality/size and compression parameters to pkscreener.ini to make it configurable and under control.
-* Defined configurable option for sleep interval between data fetches for pinned scanners. Check out pinnedmonitorsleepintervalseconds value in pkscreener.ini config file.
-* Defined configurable market-open and close hour:minute in pkscreener.ini config file so that if you would like pre-open-market-data as well, you can configure it and run it locally.
-* Fixed a bug for piped scanners wherein after being pinned, it was not updating the data regularly.
-* Docker builds for multi-arch fixed. Now you have docker build targeted at amd64, arm/v7 as well as arm64 architectures. Download docker desktop now and run with "docker run -it pkjmesra/pkscreener:latest" Enjoy!
-* Added a Quick Backtest Mode (Try T > B followed by the n-th day/candle) for which you'd like to get the maximum potential profitability analysis.
-* Added many new pre-defined piped scanner
-* Modified ATR trailing stop scanner to get better results. Try X > 12 > 30.
-* Telegram bot reverted back to the older non-LGPL licensed version
-* Moved a number of columns to always-hidden-columns in the pkscreener.ini config file. You can edit it to show the hidden columns on your console.
-* Now set how many results you want displayed by changing the number maxdisplayresults in pkscreener.ini
-* Run scans over the index, by choosing index option 0 and providing the index symbol like ^NSEI etc. You should know the index symbol on your own(Yahoo finance?) and it must start with ^
-* You can now pin the just-finished-scan even when the result count is zero.
-* NOTE: To fit all result columns on your screen, switch to smaller font size in your console.
+* Super confluence option modified to be configurable. In the pkscreener.ini filoe, you can configure which EMAs you would like to have super-confluence tested with. For example, by default it is 8,21,55 but you can change superconfluenceemaperiods to 10,20,55 as well. Similarly, change superconfluencemaxreviewdays to suitable number of days within which you would like the tool to review for super-confluence. By default it is set to 3 days. (8/10 EMA >= 21/20 EMA >= 55 EMA >= 200 SMA within 1-2%). Try X > 12 > 7 > 3 > Option 4.
+
 
 ## Older Releases
 * [https://github.com/pkjmesra/PKScreener/releases] : Discarded to save on storage costs!
