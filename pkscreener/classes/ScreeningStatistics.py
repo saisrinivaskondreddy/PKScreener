@@ -1159,6 +1159,58 @@ class ScreeningStatistics:
         cond4 = cond3 and (recent["Close"].iloc[0] > recent["EMA200"].iloc[0])
         return cond4
     
+    def getMorningOpen(self,df):
+        open = df["Open"][0]
+        index = 0
+        while open is np.nan and index < len(df):
+            open = df["Open"][index + 1]
+            index += 1
+        return open
+    
+    def getMorningClose(self,df):
+        close = df["Close"][-1]
+        index = len(df)
+        while close is np.nan and index >= 0:
+            close = df["Close"][index - 1]
+            index -= 1
+        return close
+    
+    def findIntradayOpenSetup(self,df,df_intraday,saveDict,screenDict,buySellAll=1):
+        if df is None or len(df) == 0 or df_intraday is None or len(df_intraday) == 0:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        previousDay = data.head(1)
+        prevDayHigh = previousDay["High"].iloc[0]
+        prevDayLow = previousDay["Low"].iloc[0]
+        candleDurations = [1,5,10,15,30]
+        int_df = None
+        hasIntradaySetup = False
+        for candle1MinuteNumberSinceMarketStarted in candleDurations:
+            try:
+                int_df = df_intraday[df_intraday.index <=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30').to_datetime64()]
+            except:
+                int_df = df_intraday[df_intraday.index <=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30', utc=True)]
+                pass
+            if int_df is not None and len(int_df) > 0:
+                combinedCandle = {"Open":self.getMorningOpen(int_df), "High":max(int_df["High"]), 
+                                "Low":min(int_df["Low"]),"Close":self.getMorningClose(int_df),
+                                "Adj Close":int_df["Adj Close"][-1],"Volume":sum(int_df["Volume"])}
+                openPrice = combinedCandle["Open"]
+                lowPrice = combinedCandle["Low"]
+                closePrice = combinedCandle["Close"]
+                highPrice = combinedCandle["High"]
+                if buySellAll == 1 or buySellAll == 3:
+                    hasIntradaySetup = openPrice == lowPrice and openPrice < prevDayHigh and closePrice > prevDayHigh
+                elif buySellAll == 2 or buySellAll == 3:
+                    hasIntradaySetup = openPrice == highPrice and openPrice > prevDayLow and closePrice < prevDayLow
+                if hasIntradaySetup:
+                    saveDict["B/S"] = f"{'Buy' if buySellAll == 1 else ('Sell' if buySellAll == 2 else 'All')}-{candle1MinuteNumberSinceMarketStarted}m"
+                    screenDict["B/S"] = (colorText.GREEN if buySellAll == 1 else (colorText.FAIL if buySellAll == 2 else colorText.WARN)) + f"{'Buy' if buySellAll == 1 else ('Sell' if buySellAll == 2 else 'All')}-{candle1MinuteNumberSinceMarketStarted}m" + colorText.END
+                    break
+        return hasIntradaySetup
+    
     # Find stocks that opened higher than the previous high
     def findHigherOpens(self, df):
         if df is None or len(df) == 0:

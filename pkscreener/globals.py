@@ -1260,7 +1260,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             sendMessageToTelegramChannel(message=message, user=userPassedArgs.user)
         return None, None
     
-    if executeOption == 30:
+    if executeOption == 30 or executeOption == 32:
         selectedMenu = m2.find(str(executeOption))
         if len(options) >= 4:
             if str(options[3]).isnumeric():
@@ -1277,6 +1277,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             return None, None
         else:
             selectedChoice["3"] = str(maLength)
+    if executeOption == 30:
         if userPassedArgs.options is None:
             Utility.tools.clearScreen(forceTop=True)
             atrSensitivity = input(colorText.WARN + f"Enter the ATR Trailing Stop Sensitivity (Multiplier) value (Optimal:1, Current={configManager.atrTrailingStopSensitivity}):") or configManager.atrTrailingStopSensitivity
