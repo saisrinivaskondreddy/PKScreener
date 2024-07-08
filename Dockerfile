@@ -26,7 +26,7 @@
 # docker buildx build --load --platform linux/arm64/v8,linux/amd64 --tag pkjmesra/pkscreener:latest . --no-cache
 # docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag pkjmesra/pkscreener:latest . --no-cache
 
-FROM pkjmesra/pkscreener:latest as base
+FROM pkjmesra/pkscreener:base as base
 ENV PYTHONUNBUFFERED 1
 WORKDIR /
 RUN rm -rf /PKScreener-main main.zip* && \

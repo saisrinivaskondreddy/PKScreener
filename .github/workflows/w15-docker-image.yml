@@ -95,7 +95,7 @@ jobs:
       run: |
         docker buildx create --use
         docker buildx build --push \
-          --tag pkjmesra/pkscreener:latest \
+          --tag pkjmesra/pkscreener:base \
           --platform linux/amd64,linux/arm64/v8 \
           -f ./Dockerfile_base . --no-cache
         docker buildx build --push \
