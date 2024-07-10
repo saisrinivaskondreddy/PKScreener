@@ -55,6 +55,27 @@ level0MenuDict = {
     "H": "Help / About Developer",
     "Z": "Exit (Ctrl + C)",
 }
+level1_index_options_sectoral= {
+    "1": "Nifty Auto (^CNXAUTO)",
+    "2": "Nifty Bank (^NSEBANK)",
+    "3": "Nifty Financial Services (NIFTY_FIN_SERVICE.NS)",
+    "4": "Nifty Financial Services 25/50 (^CNXFIN)",
+    "5": "Nifty Financial Services Ex Bank",
+    "6": "Nifty FMCG",
+    "7": "Nifty Healthcare",
+    "8": "Nifty IT",
+    "9": "Nifty Media",
+    "10": "Nifty Metal",
+    "11": "Nifty Pharma",
+    "12": "Nifty Private Bank",
+    "13": "Nifty PSU Bank",
+    "14": "Nifty Realty",
+    "15": "Nifty Consumer Durables",
+    "16": "Nifty Oil and Gas",
+    "17": "Nifty MidSmall Financial Services",
+    "18": "Nifty MidSmall Healthcare",
+    "19": "Nifty MidSmall IT & Telecom",
+}
 level1_P_MenuDict = {
     "1": "Predefined Piped Scanners",
     "2": "Define my custom Piped Scanner",
