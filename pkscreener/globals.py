@@ -591,6 +591,7 @@ def initPostLevel0Execution(
 
 def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=False):
     global selectedChoice, userPassedArgs, listStockCodes
+    listStockCodes = [] if listStockCodes is None or len(listStockCodes) == 0 else listStockCodes
     if executeOption is None:
         if indexOption is not None and indexOption != "W":
             Utility.tools.clearScreen()
@@ -606,13 +607,20 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
             )
             selectedMenu = m1.find(indexOption)
             m2.renderForMenu(selectedMenu=selectedMenu, skip=skip)
-            stockIndexCode = "2"
+            stockIndexCode = "18"
             if indexOption == "S":
+                indexKeys = level1_index_options_sectoral.keys()
                 stockIndexCode = input(
                     colorText.BOLD + colorText.FAIL + "[+] Select option: "
-                ) or "2"
+                ) or str(len(indexKeys))
                 OutputControls().printOutput(colorText.END, end="")
-                listStockCodes = [level1_index_options_sectoral[str(stockIndexCode)].split("(")[1].split(")")[0]]
+                
+                if stockIndexCode == str(len(indexKeys)):
+                    for indexCode in indexKeys:
+                        if indexCode != str(len(indexKeys)):
+                            listStockCodes.append(level1_index_options_sectoral[str(indexCode)].split("(")[1].split(")")[0])
+                else:
+                    listStockCodes = [level1_index_options_sectoral[str(stockIndexCode)].split("(")[1].split(")")[0]]
                 selectedMenu.menuKey = "0" # Reset because user must have selected specific index menu with single stock
                 Utility.tools.clearScreen()
                 m2.renderForMenu(selectedMenu=selectedMenu, skip=skip)

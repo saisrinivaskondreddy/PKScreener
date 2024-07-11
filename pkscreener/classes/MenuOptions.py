@@ -56,23 +56,26 @@ level0MenuDict = {
     "Z": "Exit (Ctrl + C)",
 }
 level1_index_options_sectoral= {
-    "1": "Nifty Auto (^CNXAUTO)",
-    "2": "Nifty Bank (^NSEBANK)                             ",
-    "3": "Nifty Consumption (^CNXCONSUM)",
-    "4": "Nifty Financial Services (NIFTY_FIN_SERVICE.NS)   ",
-    "5": "Nifty Financial Services 25/50 (^CNXFIN)",
-    "6": "Nifty FMCG (^CNXFMCG)                             ",
-    "7": "Nifty Healthcare (NIFTY_HEALTHCARE.NS)",
-    "8": "Nifty IT (^CNXIT)                                 ",
-    "9": "Nifty Media (^CNXMEDIA)",
-    "10": "Nifty Metal (^CNXMETAL)                          ",
-    "11": "Nifty Pharma (^CNXPHARMA)",
-    "12": "Nifty Private Bank (NIFTY_PVT_BANK.NS)           ",
-    "13": "Nifty PSU Bank (^CNXPSUBANK)",
-    "14": "Nifty Realty (^CNXREALTY)                        ",
-    "15": "Nifty Consumer Durables (NIFTY_CONSR_DURBL.NS)",
-    "16": "Nifty Oil and Gas (NIFTY_OIL_AND_GAS.NS)         ",
-    "17": "Nifty MidSmall Healthcare (NIFTY_MIDSML_HLTH.NS)",
+    "1": "Nifty (^NSEI)                                     ",
+    "2": "BSE Sensex (^BSESN)",
+    "3": "Nifty Auto (^CNXAUTO)                             ",
+    "4": "Nifty Bank (^NSEBANK)",
+    "5": "Nifty Consumption (^CNXCONSUM)                    ",
+    "6": "Nifty Financial Services (NIFTY_FIN_SERVICE.NS)",
+    "7": "Nifty Financial Services 25/50 (^CNXFIN)          ",
+    "8": "Nifty FMCG (^CNXFMCG)",
+    "9": "Nifty Healthcare (NIFTY_HEALTHCARE.NS)            ",
+    "10": "Nifty IT (^CNXIT)",
+    "11": "Nifty Media (^CNXMEDIA)                           ",
+    "12": "Nifty Metal (^CNXMETAL)",
+    "13": "Nifty Pharma (^CNXPHARMA)                        ",
+    "14": "Nifty Private Bank (NIFTY_PVT_BANK.NS)",
+    "15": "Nifty PSU Bank (^CNXPSUBANK)                     ",
+    "16": "Nifty Realty (^CNXREALTY)",
+    "17": "Nifty Consumer Durables (NIFTY_CONSR_DURBL.NS)   ",
+    "18": "Nifty Oil and Gas (NIFTY_OIL_AND_GAS.NS)",
+    "19": "Nifty MidSmall Healthcare (NIFTY_MIDSML_HLTH.NS) ",
+    "20": "All of the above",
 }
 level1_P_MenuDict = {
     "1": "Predefined Piped Scanners",
@@ -175,7 +178,7 @@ level1_X_MenuDict = {
     "N": "Nifty Prediction using Artifical Intelligence (Use for Gap-Up/Gap-Down/BTST/STBT)",
     "E": "Live Index Scan : 5 EMA for Intraday",
     "S": "Sectoral Indices",
-    "0": "Screen stocks/index by the stock/index names (NSE Stock Code, e.g. SBIN,BANKINDIA or Yahoo Finance index symbol, e.g. ^NSEI, ^NSEBANK, ^BSESN)",
+    "0": "Screen stocks by the stock names",
     "1": "Nifty 50          ",
     "2": "Nifty Next 50     ",
     "3": "Nifty 100         ",
@@ -891,15 +894,16 @@ class menus:
     def renderLevel2_Sectoral_Menus(
         self, skip=[], asList=False, renderStyle=None, parent=None
     ):
+        indexKeys = level1_index_options_sectoral.keys()
         menuText = self.fromDictionary(
             level1_index_options_sectoral,
-            renderExceptionKeys=["2"],
+            renderExceptionKeys=[str(len(indexKeys))],
             renderStyle=renderStyle
             if renderStyle is not None
             else MenuRenderStyle.TWO_PER_ROW,
             skip=skip,
             parent=parent,
-        ).render(asList=asList,coloredValues=["2"] if not asList else [])
+        ).render(asList=asList,coloredValues=[str(len(indexKeys))] if not asList else [])
         if asList:
             return menuText
         else:
@@ -917,7 +921,7 @@ class menus:
 
     Enter your choice > (default is """
                     + colorText.WARN
-                    + (self.find('2') or menu().create('?','?')).keyTextLabel().strip()
+                    + (self.find(str(len(indexKeys))) or menu().create('?','?')).keyTextLabel().strip()
                     + ")  "
                     "" + colorText.END
                 )
