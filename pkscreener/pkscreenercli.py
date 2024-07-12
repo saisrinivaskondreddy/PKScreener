@@ -413,7 +413,8 @@ def runApplication():
         maxdisplayresults = configManager.maxdisplayresults
         configManager.maxdisplayresults = 2000
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
-        if len(args.options.split(":")) >= 3:
+        runOptions = []
+        if len(args.options.split(":")) >= 4:
             runOptions = [args.options]
         else:
             runOptions =  menus.allMenus(topLevel="C", index=12)
@@ -424,6 +425,9 @@ def runApplication():
         # Delete any existing data from the previous run.
         configManager.deleteFileWithPattern(pattern="stock_data_*.pkl")
         for runOption in runOptions:
+            analysisOptions = runOption.split("|")
+            analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
+            runOption = "|".join(analysisOptions)
             args.options = runOption
             try:
                 results,plainResults = main(userArgs=args,optionalFinalOutcome_df=optionalFinalOutcome_df)
@@ -453,42 +457,43 @@ def runApplication():
         configManager.maxdisplayresults = maxdisplayresults
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
         if optionalFinalOutcome_df is not None:
-            final_df = None
-            optionalFinalOutcome_df.drop('FairValue', axis=1, inplace=True, errors="ignore")
-            df_grouped = optionalFinalOutcome_df.groupby("Stock")
-            for stock, df_group in df_grouped:
-                if stock == "PORTFOLIO":
-                    if final_df is None:
-                        final_df = df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]
-                    else:
-                        final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
-            if final_df is not None and not final_df.empty:
-                shouldSuppress = not OutputControls().enableMultipleLineOutput
-                from PKDevTools.classes.SuppressOutput import SuppressOutput
-                with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
-                    final_df.rename(
-                        columns={
-                            "LTP": "Morning Portfolio",
-                            "SqrOffLTP": "SqrOff Portfolio",
-                            "EoDLTP": "EoD Portfolio",
-                            },
-                            inplace=True,
-                        )
-                mark_down = colorText.miniTabulator().tabulate(
-                                    final_df,
-                                    headers="keys",
-                                    tablefmt=colorText.No_Pad_GridFormat,
-                                    showindex = False
-                                ).encode("utf-8").decode(Utility.STD_ENCODING)
-                OutputControls().printOutput(mark_down)
-                sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
-                                    user="-1001785195297",
-                                    tabulated_results=mark_down,
-                                    markdown_results=mark_down,
-                                    caption="IntradayAnalysis - Morning alert vs Market Close",
-                                    pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
-                                    pngExtension= ".png"
-                                    )
+            try:
+                final_df = None
+                optionalFinalOutcome_df.drop('FairValue', axis=1, inplace=True, errors="ignore")
+                df_grouped = optionalFinalOutcome_df.groupby("Stock")
+                for stock, df_group in df_grouped:
+                    if stock == "PORTFOLIO":
+                        if final_df is None:
+                            final_df = df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]
+                        else:
+                            final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
+            except:
+                pass
+                if final_df is not None and not final_df.empty:
+                    with pd.option_context('mode.chained_assignment', None):
+                        final_df.rename(
+                            columns={
+                                "LTP": "Morning Portfolio",
+                                "SqrOffLTP": "SqrOff Portfolio",
+                                "EoDLTP": "EoD Portfolio",
+                                },
+                                inplace=True,
+                            )
+                    mark_down = colorText.miniTabulator().tabulate(
+                                        final_df,
+                                        headers="keys",
+                                        tablefmt=colorText.No_Pad_GridFormat,
+                                        showindex = False
+                                    ).encode("utf-8").decode(Utility.STD_ENCODING)
+                    OutputControls().printOutput(mark_down)
+                    sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
+                                        user="-1001785195297",
+                                        tabulated_results=mark_down,
+                                        markdown_results=mark_down,
+                                        caption="IntradayAnalysis - Morning alert vs Market Close",
+                                        pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
+                                        pngExtension= ".png"
+                                        )
     else:
         if args.barometer:
             sendGlobalMarketBarometer(userArgs=args)
@@ -674,7 +679,7 @@ def pkscreenercli():
                 traceback.print_exc()
             pass
     try:
-        OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None)).printOutput("",end="\r")
+        OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis)).printOutput("",end="\r")
         configManager.getConfig(ConfigManager.parser)
         import atexit
         atexit.register(exitGracefully)
