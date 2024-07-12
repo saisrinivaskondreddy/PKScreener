@@ -406,13 +406,18 @@ def runApplication():
     args.pipedmenus = savedPipedArgs
     if args.options is not None:
         args.options = args.options.replace("::",":").replace("\"","").replace("'","")
+        if args.options.upper().startswith("C"):
+            args.runintradayanalysis = True
     if args.runintradayanalysis:
         from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS
         maxdisplayresults = configManager.maxdisplayresults
         configManager.maxdisplayresults = 2000
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
-        runOptions =  menus.allMenus(topLevel="C", index=12)
-        runOptions.extend(PREDEFINED_PIPED_MENU_OPTIONS)
+        if len(args.options.split(":")) >= 3:
+            runOptions = [args.options]
+        else:
+            runOptions =  menus.allMenus(topLevel="C", index=12)
+            runOptions.extend(PREDEFINED_PIPED_MENU_OPTIONS)
         optionalFinalOutcome_df = None
         import pkscreener.classes.Utility as Utility
         import pandas as pd
@@ -457,29 +462,30 @@ def runApplication():
                         final_df = df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]
                     else:
                         final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
-            final_df.rename(
-                columns={
-                    "LTP": "Morning Portfolio",
-                    "SqrOffLTP": "SqrOff Portfolio",
-                    "EoDLTP": "EoD Portfolio",
-                    },
-                    inplace=True,
-                )
-            mark_down = colorText.miniTabulator().tabulate(
-                                final_df,
-                                headers="keys",
-                                tablefmt=colorText.No_Pad_GridFormat,
-                                showindex = False
-                            ).encode("utf-8").decode(Utility.STD_ENCODING)
-            OutputControls().printOutput(mark_down)
-            sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
-                                user="-1001785195297",
-                                tabulated_results=mark_down,
-                                markdown_results=mark_down,
-                                caption="IntradayAnalysis - Morning alert vs Market Close",
-                                pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
-                                pngExtension= ".png"
-                                )
+            if final_df is not None and not final_df.empty:
+                final_df.rename(
+                    columns={
+                        "LTP": "Morning Portfolio",
+                        "SqrOffLTP": "SqrOff Portfolio",
+                        "EoDLTP": "EoD Portfolio",
+                        },
+                        inplace=True,
+                    )
+                mark_down = colorText.miniTabulator().tabulate(
+                                    final_df,
+                                    headers="keys",
+                                    tablefmt=colorText.No_Pad_GridFormat,
+                                    showindex = False
+                                ).encode("utf-8").decode(Utility.STD_ENCODING)
+                OutputControls().printOutput(mark_down)
+                sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
+                                    user="-1001785195297",
+                                    tabulated_results=mark_down,
+                                    markdown_results=mark_down,
+                                    caption="IntradayAnalysis - Morning alert vs Market Close",
+                                    pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
+                                    pngExtension= ".png"
+                                    )
     else:
         if args.barometer:
             sendGlobalMarketBarometer(userArgs=args)

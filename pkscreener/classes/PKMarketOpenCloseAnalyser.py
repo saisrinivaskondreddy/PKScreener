@@ -94,10 +94,11 @@ class PKMarketOpenCloseAnalyser:
         try:
             shouldSuppress = not OutputControls().enableMultipleLineOutput
             with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
-                PKMarketOpenCloseAnalyser.diffMorningCandleDataWithLatestDailyCandleData(screen_df,save_df, updatedCandleData, allDailyCandles,runOptionName=runOptionName,filteredListOfStocks=filteredListOfStocks)
+                save_df, screen_df = PKMarketOpenCloseAnalyser.diffMorningCandleDataWithLatestDailyCandleData(screen_df,save_df, updatedCandleData, allDailyCandles,runOptionName=runOptionName,filteredListOfStocks=filteredListOfStocks)
         except:
             pass
         Utility.tools.saveStockData(allDailyCandles,PKMarketOpenCloseAnalyser.configManager,1,False,False, True)
+        return save_df, screen_df
 
     def ensureIntradayStockDataExists():
         # Ensure that the intraday_stock_data_<date>.pkl file exists
@@ -425,3 +426,4 @@ class PKMarketOpenCloseAnalyser:
             save_df.drop('index', axis=1, inplace=True, errors="ignore")
         if 'index' in screen_df.columns:
             screen_df.drop('index', axis=1, inplace=True, errors="ignore")
+        return save_df, screen_df

@@ -36,6 +36,8 @@ from PKDevTools.classes.Committer import Committer
 from PKDevTools.classes.MarketHours import MarketHours
 from PKNSETools.PKNSEStockDataFetcher import nseStockDataFetcher
 
+MORNING_ALERT_HOUR = 9
+MORNING_ALERT_MINUTE = 27
 argParser = argparse.ArgumentParser()
 required = False
 argParser.add_argument(
@@ -547,14 +549,14 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
                 daysInPast -=1
             tryCommitOutcomes(options)
         else:
-            if not barometerTriggered and (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=9,minute=37)):
+            if not barometerTriggered and (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=MORNING_ALERT_HOUR,minute=MORNING_ALERT_MINUTE)):
                 # Send the global market barometer trigger
                 barometerTriggered = True
                 resp = triggerRemoteScanAlertWorkflow("X:12 --barometer", branch)
 
-            # If the job got triggered before, let's wait until 9:37AM (3 min for job setup, so effectively it will be 9:40am)
-            while (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=9,minute=37)):
-                sleep(60) # Wait for 9:37AM
+            # If the job got triggered before, let's wait until alert time (3 min for job setup, so effectively it will be 9:40am)
+            while (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=MORNING_ALERT_HOUR,minute=MORNING_ALERT_MINUTE)):
+                sleep(60) # Wait for alert time
             resp = triggerRemoteScanAlertWorkflow(scanOptions, branch)
             if resp.status_code == 204:
                 sleep(5)
