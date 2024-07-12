@@ -2380,12 +2380,13 @@ def removedUnusedColumns(screenResults, saveResults, dropAdditionalColumns=[], u
                     if col in saveResults.columns:
                         saveResults.drop(col, axis=1, inplace=True, errors="ignore")
         if screenResults is not None:
-            screenResults.drop(f"LTP{period}", axis=1, inplace=True, errors="ignore")
-            screenResults.drop(f"Growth{period}", axis=1, inplace=True, errors="ignore")
-            if len(dropAdditionalColumns) > 0:
-                for col in dropAdditionalColumns:
-                    if col in screenResults.columns:
-                        screenResults.drop(col, axis=1, inplace=True, errors="ignore")
+            with pd.option_context('mode.chained_assignment', None):
+                screenResults.drop(f"LTP{period}", axis=1, inplace=True, errors="ignore")
+                screenResults.drop(f"Growth{period}", axis=1, inplace=True, errors="ignore")
+                if len(dropAdditionalColumns) > 0:
+                    for col in dropAdditionalColumns:
+                        if col in screenResults.columns:
+                            screenResults.drop(col, axis=1, inplace=True, errors="ignore")
     return summaryReturns
 
 

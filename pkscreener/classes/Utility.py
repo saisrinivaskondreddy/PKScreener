@@ -211,16 +211,17 @@ class tools:
             else:
                 needsWriting = True
             if df is not None and len(df) > 0:
-                df.sort_values(by=["Stock"], ascending=True, inplace=True)
-                df.to_pickle(lastScreened)
-                if choices is not None and df_save is not None:
-                    df_s = df_save.copy()
-                    df_s.reset_index(inplace=True)
-                    newStocks = df_s["Stock"].to_json(orient='records', lines=True).replace("\n","").replace("\"","").split(",")
-                    items.extend(newStocks)
-                    stockList = sorted(list(filter(None,list(set(items)))))
-                    finalStocks = ",".join(stockList)
-                    needsWriting = True
+                with pd.option_context('mode.chained_assignment', None):
+                    df.sort_values(by=["Stock"], ascending=True, inplace=True)
+                    df.to_pickle(lastScreened)
+                    if choices is not None and df_save is not None:
+                        df_s = df_save.copy()
+                        df_s.reset_index(inplace=True)
+                        newStocks = df_s["Stock"].to_json(orient='records', lines=True).replace("\n","").replace("\"","").split(",")
+                        items.extend(newStocks)
+                        stockList = sorted(list(filter(None,list(set(items)))))
+                        finalStocks = ",".join(stockList)
+                        needsWriting = True
             if needsWriting:
                 with open(fileName, 'w') as f:
                     f.write(finalStocks)

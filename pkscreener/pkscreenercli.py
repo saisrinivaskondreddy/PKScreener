@@ -463,14 +463,17 @@ def runApplication():
                     else:
                         final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
             if final_df is not None and not final_df.empty:
-                final_df.rename(
-                    columns={
-                        "LTP": "Morning Portfolio",
-                        "SqrOffLTP": "SqrOff Portfolio",
-                        "EoDLTP": "EoD Portfolio",
-                        },
-                        inplace=True,
-                    )
+                shouldSuppress = not OutputControls().enableMultipleLineOutput
+                from PKDevTools.classes.SuppressOutput import SuppressOutput
+                with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
+                    final_df.rename(
+                        columns={
+                            "LTP": "Morning Portfolio",
+                            "SqrOffLTP": "SqrOff Portfolio",
+                            "EoDLTP": "EoD Portfolio",
+                            },
+                            inplace=True,
+                        )
                 mark_down = colorText.miniTabulator().tabulate(
                                     final_df,
                                     headers="keys",
