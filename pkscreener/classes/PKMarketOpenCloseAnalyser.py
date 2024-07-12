@@ -42,6 +42,9 @@ from PKDevTools.classes.MarketHours import MarketHours
 from PKDevTools.classes.log import default_logger
 from PKDevTools.classes.OutputControls import OutputControls
 from PKDevTools.classes.SuppressOutput import SuppressOutput
+from PKDevTools.classes.MarketHours import MarketHours
+
+configManager = tools()
 
 STD_ENCODING=sys.stdout.encoding if sys.stdout is not None else 'utf-8'
 
@@ -339,6 +342,8 @@ class PKMarketOpenCloseAnalyser:
         dayHighDiffs = []
         sqrOffDiffs = []
         index = 0
+        ts = None
+        row = None
         scrStats = ScreeningStatistics(PKMarketOpenCloseAnalyser.configManager, default_logger())
         for stock in stocks:
             try:
@@ -363,6 +368,25 @@ class PKMarketOpenCloseAnalyser:
                                            afterTimestamp=updatedCandleData[stock]["index"][-1],
                                            nthCrossover=1,
                                            upDirection=True)
+                # saveDictionary = {}
+                # screeningDictionary = {}
+                # nextSellMinute = 1
+                # foundNextSellCandle = False
+                # index = None
+                # while not foundNextSellCandle:
+                #     try:
+                #         # Let's only consider those candles that are right after the alert issue-time in the mornings
+                #         index = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+PKMarketOpenCloseAnalyser.configManager.morninganalysiscandlenumber+nextSellMinute}:00+05:30').to_datetime64()
+                #         df = df[df.index <=  index]
+                #     except:
+                #         index = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+PKMarketOpenCloseAnalyser.configManager.morninganalysiscandlenumber+nextSellMinute}:00+05:30', utc=True)
+                #         df = df[df.index <=  index]
+                #         pass
+                #     foundNextSellCandle = scrStats.findATRTrailingStops(df=df,sensitivity=configManager.atrTrailingStopSensitivity, atr_period=configManager.atrTrailingStopPeriod,ema_period=configManager.atrTrailingStopEMAPeriod,buySellAll=2,saveDict=saveDictionary,screenDict=screeningDictionary)
+                #     nextSellMinute += 1
+                # if foundNextSellCandle:
+                #     ts = df.tail(len(df)-index +1).head(1).index[-1]
+                #     row = df[df.index == ts]
                 highTS, highRow = scrStats.findIntradayHighCrossover(df=df)
                 # buySell_df = scrStats.computeBuySellSignals(updatedCandleData[stock]["data"])
                 # OutputControls().printOutput(buySell_df)
