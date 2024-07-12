@@ -1787,6 +1787,17 @@ def addOrRunPipedMenus():
     if userPassedArgs is None or (userPassedArgs is not None and userPassedArgs.answerdefault is None):
         shouldAddMoreIntoPipe = input(colorText.FAIL + "[+] Select [Y/N] (Default:N): " + colorText.END) or 'n'
     if shouldAddMoreIntoPipe.lower() != 'y':
+        OutputControls().printOutput(
+            colorText.GREEN
+            + f"[+] Would you also like to run morning vs day close intraday analysis for this selection ?"
+            + colorText.END
+        )
+        shouldRunIntradayAnalysis = input(colorText.FAIL + "[+] Select [Y/N] (Default:N): " + colorText.END) or 'n'
+        shouldRunIntradayAnalysis = shouldRunIntradayAnalysis.lower() == 'y'
+        if shouldRunIntradayAnalysis:
+            analysisOptions = userPassedArgs.pipedmenus.split("|")
+            analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
+            userPassedArgs.pipedmenus = "|".join(analysisOptions)
         launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
         launcher = f"python3.11 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
         monitorOption = f'"{userPassedArgs.pipedmenus}"'
@@ -1794,9 +1805,10 @@ def addOrRunPipedMenus():
         requestingUser = f" -u {userPassedArgs.user}" if userPassedArgs.user is not None else ""
         enableLog = f" -l" if userPassedArgs.log else ""
         backtestParam = f" --backtestdaysago {userPassedArgs.backtestdaysago}" if userPassedArgs.backtestdaysago else ""
-        OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{colorText.END}")
+        runIntradayAnalysisParam = f" --runintradayanalysis" if shouldRunIntradayAnalysis else ""
+        OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{colorText.END}")
         sleep(2)
-        os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}")
+        os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}")
         userPassedArgs.pipedmenus = None
         OutputControls().printOutput(
                 colorText.GREEN
