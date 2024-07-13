@@ -78,6 +78,9 @@ from PKDevTools.classes.Utils import random_user_agent
 from pkscreener.classes.ArtTexts import getArtText
 from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
 
+import PIL.Image
+PIL.Image.MAX_IMAGE_PIXELS = None
+
 configManager = ConfigManager.tools()
 configManager.getConfig(ConfigManager.parser)
 nseFetcher = nseStockDataFetcher()

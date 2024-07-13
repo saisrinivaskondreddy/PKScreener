@@ -2237,17 +2237,25 @@ def printNotifySaveScreenedResults(
                         maxcolwidths=Utility.tools.getMaxColumnWidths(saveResultsTrimmed)
                     ).encode("utf-8").decode(STD_ENCODING)
                     try:
-                        caption_df = saveResultsTrimmed[['LTP','%Chng','Volume']].head(5)
-                        caption_df.loc[:, "LTP"] = caption_df.loc[:, "LTP"].apply(
-                            lambda x: str(int(round(float(x),0)))
-                        )
-                        caption_df.loc[:, "%Chng"] = caption_df.loc[:, "%Chng"].apply(
-                            lambda x: f'{int(round(float(x.split(" ")[0].replace("%","")),0))}%'
-                        )
-                        caption_df.loc[:, "Volume"] = caption_df.loc[:, "Volume"].apply(
-                            lambda x: f'{int(round(float(x.replace("x","")),0))}x' if (len(x.replace("x","").strip()) > 0 and not pd.isna(float(x.replace("x","")))) else ''
-                        )
-                        caption_df.rename(columns={"%Chng": "Ch%","Volume":"Vol"}, inplace=True)
+                        if "EoDDiff" in saveResultsTrimmed.columns:
+                            caption_df = saveResultsTrimmed[['LTP','DayHighDiff','EoDDiff']].tail(5)
+                            for col in caption_df.columns:
+                                caption_df.loc[:, col] = caption_df.loc[:, col].apply(
+                                    lambda x: str(int(round(float(x),0))) if "%" not in str(x) else str(x)
+                                )
+                            caption_df.rename(columns={"DayHighDiff": "Hgh","EoDDiff":"EoD"}, inplace=True)
+                        else:
+                            caption_df = saveResultsTrimmed[['LTP','%Chng','Volume']].head(5)
+                            caption_df.loc[:, "LTP"] = caption_df.loc[:, "LTP"].apply(
+                                lambda x: str(int(round(float(x),0)))
+                            )
+                            caption_df.loc[:, "%Chng"] = caption_df.loc[:, "%Chng"].apply(
+                                lambda x: f'{int(round(float(x.split(" ")[0].replace("%","")),0))}%'
+                            )
+                            caption_df.loc[:, "Volume"] = caption_df.loc[:, "Volume"].apply(
+                                lambda x: f'{int(round(float(x.replace("x","")),0))}x' if (len(x.replace("x","").strip()) > 0 and not pd.isna(float(x.replace("x","")))) else ''
+                            )
+                            caption_df.rename(columns={"%Chng": "Ch%","Volume":"Vol"}, inplace=True)
                     except:
                         cols = [list(saveResultsTrimmed.columns)[0]]
                         cols.extend(list(saveResultsTrimmed.columns[5:]))
@@ -2259,7 +2267,7 @@ def printNotifySaveScreenedResults(
                         headers="keys",
                         tablefmt=colorText.No_Pad_GridFormat,
                         maxcolwidths=[None,None,4,3]
-                    ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("x  ","x")
+                    ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("Hgh  |","Hgh|").replace("EoD  |","EoD|").replace("x  ","x")
                     caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
                     caption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text}{pipedTitle}" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
                 if not testing: # and not userPassedArgs.runintradayanalysis:
