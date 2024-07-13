@@ -457,16 +457,16 @@ def runApplication():
         configManager.maxdisplayresults = maxdisplayresults
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
         if optionalFinalOutcome_df is not None and not optionalFinalOutcome_df.empty:
+            final_df = None
             try:
-                final_df = None
                 optionalFinalOutcome_df.drop('FairValue', axis=1, inplace=True, errors="ignore")
                 df_grouped = optionalFinalOutcome_df.groupby("Stock")
                 for stock, df_group in df_grouped:
                     if stock == "PORTFOLIO":
                         if final_df is None:
-                            final_df = df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]
+                            final_df = df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
                         else:
-                            final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
+                            final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
             except:
                 pass
             if final_df is not None and not final_df.empty:
@@ -479,10 +479,6 @@ def runApplication():
                             },
                             inplace=True,
                         )
-                    columnsToBeDropped = ["Breakout(22Prds)","Trend(22Prds)"]
-                    for col in columnsToBeDropped:
-                        if col in final_df.columns:
-                            final_df.drop(col, axis=1, inplace=True, errors="ignore")
                 mark_down = colorText.miniTabulator().tabulate(
                                     final_df,
                                     headers="keys",
