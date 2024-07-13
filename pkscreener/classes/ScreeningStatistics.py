@@ -2287,7 +2287,7 @@ class ScreeningStatistics:
         cond1 = recent["Close"].iloc[0] > 1.01*recent["Close"].iloc[1]
         # Volume at least 5% higher than previous volume
         cond6 = recent["Volume"].iloc[0] > 1.05*recent["Volume"].iloc[1]
-        cond2 = cond1 and (recent["Close"].iloc[0] > recent["SMA20"].iloc[0])
+        cond2 = cond1 and cond6 and (recent["Close"].iloc[0] > recent["SMA20"].iloc[0])
         cond3 = cond2 and (recent["Close"].iloc[1] > recent["High"].iloc[2])
         cond4 = cond3 and (recent["Volume"].iloc[0] > 1.05*recent["SMA20V"].iloc[0])
         cond5 = cond4 and (recent["Volume"].iloc[1] > recent["SMA20V"].iloc[0])
