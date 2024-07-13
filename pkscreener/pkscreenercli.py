@@ -406,7 +406,7 @@ def runApplication():
     args.pipedmenus = savedPipedArgs
     if args.options is not None:
         args.options = args.options.replace("::",":").replace("\"","").replace("'","")
-        if args.options.upper().startswith("C"):
+        if args.options.upper().startswith("C") or "C:" in args.options.upper():
             args.runintradayanalysis = True
     if args.runintradayanalysis:
         from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS
@@ -456,7 +456,7 @@ def runApplication():
                     traceback.print_exc()
         configManager.maxdisplayresults = maxdisplayresults
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
-        if optionalFinalOutcome_df is not None:
+        if optionalFinalOutcome_df is not None and not optionalFinalOutcome_df.empty:
             try:
                 final_df = None
                 optionalFinalOutcome_df.drop('FairValue', axis=1, inplace=True, errors="ignore")
