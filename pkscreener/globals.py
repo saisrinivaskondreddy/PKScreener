@@ -1484,7 +1484,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 consumers = None
             if menuOption in ["C"]:
                 runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-                saveResults, screenResults = PKMarketOpenCloseAnalyser.runOpenCloseAnalysis(stockDictPrimary,endOfdayCandles,screenResults, saveResults,runOptionName=runOptionName,filteredListOfStocks=listStockCodes)
+                if saveResults is not None and not saveResults.empty:
+                    saveResults, screenResults = PKMarketOpenCloseAnalyser.runOpenCloseAnalysis(stockDictPrimary,endOfdayCandles,screenResults, saveResults,runOptionName=runOptionName,filteredListOfStocks=listStockCodes)
             if downloadOnly and menuOption in ["X"]:
                 screener.getFreshMFIStatus(stock="LatestCheckedOnDate")
                 screener.getFairValue(stock="LatestCheckedOnDate", force=True)
@@ -1666,6 +1667,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 os.system(f"{launcher} -a Y -m {scannerOptionQuoted}")
 
     if userPassedArgs is not None:
+        existingTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs.pipedtitle is not None else ""
+        choiceSegments = menuChoiceHierarchy.split(">")
+        choiceSegments = f"{choiceSegments[-2]} > {choiceSegments[-1]}" if len(choiceSegments)>=4 else f"{choiceSegments[-1]}"
+        userPassedArgs.pipedtitle = f'{existingTitle}{choiceSegments}[{len(saveResults)}]'
         if userPassedArgs.runintradayanalysis:
             analysis_df = screenResults.copy()
             analysis_df.reset_index(inplace=True)
@@ -1677,10 +1682,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
             return optionalFinalOutcome_df, saveResults
         else:
-            existingTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs.pipedtitle is not None else ""
-            choiceSegments = menuChoiceHierarchy.split(">")
-            choiceSegments = f"{choiceSegments[-2]} > {choiceSegments[-1]}" if len(choiceSegments)>=4 else f"{choiceSegments[-1]}"
-            userPassedArgs.pipedtitle = f'{existingTitle}{choiceSegments}[{len(saveResults)}]'
             return screenResults, saveResults
 
 def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
@@ -2243,7 +2244,8 @@ def printNotifySaveScreenedResults(
                                 caption_df.loc[:, col] = caption_df.loc[:, col].apply(
                                     lambda x: str(int(round(float(x),0))) if "%" not in str(x) else str(x)
                                 )
-                            caption_df.rename(columns={"DayHighDiff": "Hgh","EoDDiff":"EoD"}, inplace=True)
+                            with pd.option_context('mode.chained_assignment', None):
+                                caption_df.rename(columns={"DayHighDiff": "Hgh","EoDDiff":"EoD"}, inplace=True)
                         else:
                             caption_df = saveResultsTrimmed[['LTP','%Chng','Volume']].head(5)
                             caption_df.loc[:, "LTP"] = caption_df.loc[:, "LTP"].apply(
