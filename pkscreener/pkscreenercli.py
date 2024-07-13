@@ -469,31 +469,35 @@ def runApplication():
                             final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDLTP","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
             except:
                 pass
-                if final_df is not None and not final_df.empty:
-                    with pd.option_context('mode.chained_assignment', None):
-                        final_df.rename(
-                            columns={
-                                "LTP": "Morning Portfolio",
-                                "SqrOffLTP": "SqrOff Portfolio",
-                                "EoDLTP": "EoD Portfolio",
-                                },
-                                inplace=True,
-                            )
-                    mark_down = colorText.miniTabulator().tabulate(
-                                        final_df,
-                                        headers="keys",
-                                        tablefmt=colorText.No_Pad_GridFormat,
-                                        showindex = False
-                                    ).encode("utf-8").decode(Utility.STD_ENCODING)
-                    OutputControls().printOutput(mark_down)
-                    sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
-                                        user="-1001785195297",
-                                        tabulated_results=mark_down,
-                                        markdown_results=mark_down,
-                                        caption="IntradayAnalysis - Morning alert vs Market Close",
-                                        pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
-                                        pngExtension= ".png"
-                                        )
+            if final_df is not None and not final_df.empty:
+                with pd.option_context('mode.chained_assignment', None):
+                    final_df.rename(
+                        columns={
+                            "LTP": "Morning Portfolio",
+                            "SqrOffLTP": "SqrOff Portfolio",
+                            "EoDLTP": "EoD Portfolio",
+                            },
+                            inplace=True,
+                        )
+                    columnsToBeDropped = ["Breakout(22Prds)","Trend(22Prds)"]
+                    for col in columnsToBeDropped:
+                        if col in final_df.columns:
+                            final_df.drop(col, axis=1, inplace=True, errors="ignore")
+                mark_down = colorText.miniTabulator().tabulate(
+                                    final_df,
+                                    headers="keys",
+                                    tablefmt=colorText.No_Pad_GridFormat,
+                                    showindex = False
+                                ).encode("utf-8").decode(Utility.STD_ENCODING)
+                OutputControls().printOutput(mark_down)
+                sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
+                                    user="-1001785195297",
+                                    tabulated_results=mark_down,
+                                    markdown_results=mark_down,
+                                    caption="IntradayAnalysis - Morning alert vs Market Close",
+                                    pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
+                                    pngExtension= ".png"
+                                    )
     else:
         if args.barometer:
             sendGlobalMarketBarometer(userArgs=args)

@@ -418,12 +418,12 @@ class PKMarketOpenCloseAnalyser:
         columns = save_df.columns
         lastIndex = len(save_df)
         for col in columns:
-            if col in ["Stock", "Pattern", "LTP", "SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff", "EoDLTP", "EoDDiff", "%Chng"]:
+            if col in ["Stock", "LTP@Alert", "Pattern", "LTP", "SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff", "EoDLTP", "EoDDiff", "%Chng"]:
                 if col == "Stock":
                     save_df.loc[lastIndex,col] = "PORTFOLIO"
                 elif col == "Pattern":
                     save_df.loc[lastIndex,col] = runOptionName if runOptionName is not None else ""
-                elif col in ["LTP", "SqrOffLTP","SqrOffDiff", "EoDLTP", "EoDDiff","DayHigh","DayHighDiff"]:
+                elif col in ["LTP", "LTP@Alert", "SqrOffLTP","SqrOffDiff", "EoDLTP", "EoDDiff","DayHigh","DayHighDiff"]:
                     save_df.loc[lastIndex,col] = round(sum(save_df[col].dropna(inplace=False).astype(float)),2)
                 elif col == "%Chng":
                     ltpSum = sum(save_df["LTP"].dropna(inplace=False).astype(float))
@@ -446,8 +446,11 @@ class PKMarketOpenCloseAnalyser:
         PKMarketOpenCloseAnalyser.allIntradayCandles = None
         screen_df.replace(np.nan, "", regex=True)
         save_df.replace(np.nan, "", regex=True)
-        if 'index' in save_df.columns:
-            save_df.drop('index', axis=1, inplace=True, errors="ignore")
-        if 'index' in screen_df.columns:
-            screen_df.drop('index', axis=1, inplace=True, errors="ignore")
+        # Drop the unnecessary columns for this scanner type to make way for other columns to be fitted nicely on screen
+        columnsToBeDropped = ["Breakout(22Prds)","MA-Signal","Trend(22Prds)","index","EoDLTP"]
+        for col in columnsToBeDropped:
+            if col in save_df.columns:
+                save_df.drop(col, axis=1, inplace=True, errors="ignore")
+            if col in screen_df.columns:
+                screen_df.drop(col, axis=1, inplace=True, errors="ignore")
         return save_df, screen_df

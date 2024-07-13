@@ -707,6 +707,8 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
             default_logger().debug(e, exc_info=True)
             pass
         columnsToBeDeleted = ["MFI","FVDiff","ConfDMADifference","bbands_ulr_ratio_max5", "RSIi"]
+        if "EoDDiff" in saveResults.columns:
+            columnsToBeDeleted.extend(["Trend","Breakout"])
         if userPassedArgs is not None and userPassedArgs.options is not None and userPassedArgs.options.upper().startswith("C"):
             columnsToBeDeleted.append("FairValue")
         if executeOption == 27 and "ATR" in screenResults.columns: # ATR Cross
