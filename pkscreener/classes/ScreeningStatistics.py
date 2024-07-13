@@ -2283,10 +2283,13 @@ class ScreeningStatistics:
         recent = data.head(3)
         if len(recent) < 3:
             return False
-        cond1 = recent["Close"].iloc[0] > recent["Close"].iloc[1]
+        # Price at least 1% higher than previous close
+        cond1 = recent["Close"].iloc[0] > 1.01*recent["Close"].iloc[1]
+        # Volume at least 5% higher than previous volume
+        cond6 = recent["Volume"].iloc[0] > 1.05*recent["Volume"].iloc[1]
         cond2 = cond1 and (recent["Close"].iloc[0] > recent["SMA20"].iloc[0])
         cond3 = cond2 and (recent["Close"].iloc[1] > recent["High"].iloc[2])
-        cond4 = cond3 and (recent["Volume"].iloc[0] > recent["SMA20V"].iloc[0])
+        cond4 = cond3 and (recent["Volume"].iloc[0] > 1.05*recent["SMA20V"].iloc[0])
         cond5 = cond4 and (recent["Volume"].iloc[1] > recent["SMA20V"].iloc[0])
         return cond5
 
