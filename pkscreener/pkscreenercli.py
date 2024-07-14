@@ -380,7 +380,7 @@ def warnAboutDependencies():
             input("Press any key to try anyway...")
     
 def runApplication():
-    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit
+    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions
     # From a previous call to main with args, it may have been mutated.
     # Let's stock to the original args passed by user
     try:
@@ -454,6 +454,8 @@ def runApplication():
                 OutputControls().printOutput(e)
                 if args.log:
                     traceback.print_exc()
+            resetUserMenuChoiceOptions()
+
         configManager.maxdisplayresults = maxdisplayresults
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
         if optionalFinalOutcome_df is not None and not optionalFinalOutcome_df.empty:

@@ -663,6 +663,8 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
 def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,executeOption, reversalOption):
     # Publish to gSheet with https://github.com/burnash/gspread
     global menuChoiceHierarchy, userPassedArgs
+    if saveResults is None:
+        return
     try:
         isTrading = PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday()[0]
         if "RUNNER" not in os.environ.keys() and (isTrading or userPassedArgs.monitor or ("RSIi" in saveResults.columns)) and configManager.calculatersiintraday:
@@ -754,6 +756,11 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
 def isInterrupted():
     global keyboardInterruptEventFired
     return keyboardInterruptEventFired
+
+def resetUserMenuChoiceOptions():
+    global menuChoiceHierarchy, userPassedArgs
+    menuChoiceHierarchy = ""
+    userPassedArgs.pipedtitle = ""
 
 def refreshStockData(startupoptions=None):
     global consumers,stockDictPrimary, loadedStockData, listStockCodes, stockDictSecondary
@@ -1674,8 +1681,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         if userPassedArgs.runintradayanalysis:
             analysis_df = screenResults.copy()
             analysis_df.reset_index(inplace=True)
-            if 'index' in analysis_df.columns:
+            if analysis_df is not None and 'index' in analysis_df.columns:
                 analysis_df.drop('index', axis=1, inplace=True, errors="ignore")
+            analysis_df = analysis_df[["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]]
             if optionalFinalOutcome_df is None:
                 optionalFinalOutcome_df = analysis_df
             else:
@@ -2164,6 +2172,8 @@ def printNotifySaveScreenedResults(
         ).encode("utf-8").decode(STD_ENCODING)
         copyScreenResults = screenResults.copy()
         hiddenColumns = configManager.alwaysHiddenDisplayColumns.split(",")
+        if userPassedArgs.runintradayanalysis:
+            hiddenColumns.remove("Pattern")
         for col in screenResults.columns:
             if col in hiddenColumns:
                 copyScreenResults.drop(col, axis=1, inplace=True, errors="ignore")
