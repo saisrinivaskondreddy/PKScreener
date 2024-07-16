@@ -2829,6 +2829,12 @@ def saveNotifyResultsFile(
         pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0) if needsCalc else None
         filename = Utility.tools.promptSaveResults(choices,
             saveResults, defaultAnswer=defaultAnswer,pastDate=pastDate)
+        # User triggered telegram bot request
+        # Group user Ids are < 0, individual ones are > 0
+        if filename is not None and user is not None and int(str(user)) > 0:
+            sendMessageToTelegramChannel(
+                document_filePath=filename, caption=caption, user=user
+            )
         OutputControls().printOutput(
             colorText.BOLD
             + colorText.WARN
