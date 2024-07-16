@@ -68,6 +68,8 @@ args = argParser.parse_args()
 def update_text(token: SpanToken):
     """Update the text contents of a span token and its children.
     `InlineCode` tokens are left unchanged."""
+    if token is None:
+        return
     if isinstance(token, RawText) and args.type == "text":
         if args.find in token.content and args.replace not in token.content:
             print(f"Replacing <{args.find}> in <{token.content}> to <{args.replace}>")
@@ -83,7 +85,7 @@ def update_text(token: SpanToken):
             if args.replace not in token.target:
                 token.target = token.target.replace(args.find, args.replace)
 
-    if not isinstance(token, InlineCode) and hasattr(token, "children"):
+    if not isinstance(token, InlineCode) and hasattr(token, "children") and token.children is not None:
         for child in token.children:
             update_text(child)
 
@@ -111,8 +113,9 @@ def update_block(token: BlockToken):
             HTMLBlock,
         ),
     ):
-        for child in token.children:
-            update_text(child)
+        if hasattr(token, "children") and token.children is not None:
+            for child in token.children:
+                update_text(child)
 
     for child in token.children:
         if isinstance(
