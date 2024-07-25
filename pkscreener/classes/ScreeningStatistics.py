@@ -2366,6 +2366,7 @@ class ScreeningStatistics:
             ema8CrossedEMA55 = False
             ema21CrossedEMA55 = False
             emasCrossedSMA200 = False
+            silverCross = False
             while recentCurrentDay <= maxRecentDays:
                 # 8 ema>21 ema > 55 ema >200 sma each OF THE ema AND THE 200 sma SEPARATED BY LESS THAN 1%(ideally 0.1% TO 0.5%) DURING CONFLUENCE
                 if len(emas) >= 1:
@@ -2388,17 +2389,26 @@ class ScreeningStatistics:
                 if superbConfluence:
                     screenDict["MA-Signal"] = (
                         saved[0] 
-                        + colorText.BOLD
                         + (colorText.GREEN)
-                        + f"SuperGoldenConfluence(-{recentCurrentDay-1} day)"
+                        + f"SuperGoldenConf.(-{recentCurrentDay-1} day)"
                         + colorText.END
                     )
-                    saveDict["MA-Signal"] = saved[1] + "SuperGoldenConfluence"
-                    break
+                    saveDict["MA-Signal"] = saved[1] + f"SuperGoldenConf(-{recentCurrentDay-1} day)"
+                    return superbConfluence
+                elif ema8CrossedEMA21 and ema8CrossedEMA55 and ema21CrossedEMA55:
+                    screenDict["MA-Signal"] = (
+                        saved[0] 
+                        + (colorText.WHITE)
+                        + f"SilverCrossConf.(-{recentCurrentDay-1} day)"
+                        + colorText.END
+                    )
+                    saveDict["MA-Signal"] = saved[1] + f"SilverCrossConf.(-{recentCurrentDay-1} day)"
+                    silverCross = True
+                
                 recentCurrentDay += 1
-            if superbConfluence:
-                return superbConfluence
             
+            if silverCross:
+                return True
         is20DMACrossover50DMA = (recent["SSMA20"].iloc[0] >= recent["SMA"].iloc[0]) and \
                             (recent["SSMA20"].iloc[1] <= recent["SMA"].iloc[1])
         is50DMACrossover200DMA = (recent["SMA"].iloc[0] >= recent["LMA"].iloc[0]) and \
