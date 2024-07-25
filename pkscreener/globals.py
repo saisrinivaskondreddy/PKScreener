@@ -1144,6 +1144,14 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             )
             if maLength == 0 and respChartPattern in [1, 2, 3, 6, 9]:
                 maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
+            if maLength == 4 and respChartPattern == 3: # Super-confluence setup
+                configManager.superConfluenceMaxReviewDays = input(
+                    f"[+] Max number of review days for super-confluence-checks. (number)(Optimal = 3-7, Current: {colorText.FAIL}{configManager.superConfluenceMaxReviewDays}{colorText.END}): "
+                ) or configManager.superConfluenceMaxReviewDays
+                configManager.superConfluenceEMAPeriods = input(
+                    f"[+] Comma separated EMA periods for super-confluence-crossovers in the same order. (numbers)(Optimal = 8,21,55, Current: {colorText.FAIL}{configManager.superConfluenceEMAPeriods}{colorText.END}): "
+                ) or configManager.superConfluenceEMAPeriods
+                configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
         if (
             respChartPattern is None
             or insideBarToLookback is None
@@ -1692,7 +1700,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             return screenResults, saveResults
 
-def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
+def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption): 
     global stockDictPrimary,stockDictSecondary, configManager, defaultAnswer, userPassedArgs, loadedStockData
     if menuOption not in ["C"]:
         stockDictPrimary = Utility.tools.loadStockData(
