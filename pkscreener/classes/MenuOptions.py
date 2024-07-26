@@ -35,7 +35,7 @@ configManager = ConfigManager.tools()
 MENU_SEPARATOR = ""
 LINE_SEPARATOR = "\n"
 MAX_SUPPORTED_MENU_OPTION = 33
-MAX_MENU_OPTION = 41
+MAX_MENU_OPTION = 42
 
 level0MenuDict = {
     "X": "Scanners",
@@ -240,6 +240,7 @@ level2_X_MenuDict = {
     "30": "ATR Trailing Stops(Swing Paper Trading)",
     "31": "High Momentum(RSI,MFI,CCI)     ",
     "32": "Intraday Breakout/Breakdown setup     ",
+    "33": "Potential Profitable setups",
     # "32": "High Momentum(14)",
     # "28": "Extremely bullish daily close      ",
     # "29": "Rising RSI                      ",

@@ -2479,6 +2479,44 @@ class ScreeningStatistics:
                 (confFilter == 2 and isDeadCrossOver)
         return False
 
+    # - 200 MA is rising for at least 3 months.
+    # - 50 MA is above 200MA
+    # - Current price is above 20Osma and preferably above 50 to 100
+    # - Current price is at least above 100 % from 52week low
+    # - The stock should have made a 52 week high at least once every 4 to 6 month
+    def findPotentialProfitableEntries(self, df, full_df, saveDict, screenDict):
+        if df is None or len(df) == 0:
+            return False
+        data = full_df.copy()
+        one_week = 5
+        if len(data) < 45 * one_week:
+            return False
+        reversedData = data[::-1]  # Reverse the dataframe
+        lma_200 = reversedData["LMA"]
+        sma_50 = reversedData["SMA"]
+        full52Week = reversedData.tail(50 * one_week)
+        full52WeekLow = full52Week["Low"].min()
+        #200 MA is rising for at least 3 months
+        today = 1
+        while today <= one_week * 12: # last 3 months
+            if lma_200.tail(today).head(1).iloc[0] < lma_200.tail(today + 1).head(1).iloc[0]:
+                return False
+            today += 1
+        # 50 MA is above 200MA
+        if sma_50.iloc[0] <= lma_200.iloc[0]:
+            return False
+        # Current price is above 20Osma and preferably above 50 to 100
+        recentClose = reversedData["Close"].iloc[0]
+        if recentClose < lma_200.iloc[0] or recentClose < 50 or recentClose > 100:
+            return False
+        # Current price is at least above 100 % from 52week low
+        if recentClose <= 2*full52WeekLow:
+            return False
+        # The stock should have made a 52 week high at least once every 4 to 6 month
+        highAsc = reversedData.sort_values(by=["High"], ascending=True)
+        return True
+
+    
     #@measure_time
     # Validate if share prices are consolidating
     def validateConsolidation(self, df, screenDict, saveDict, percentage=10):

@@ -1330,7 +1330,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if executeOption == 42:
         Utility.tools.getLastScreenedResults(defaultAnswer)
         return None, None
-    if executeOption >= MAX_SUPPORTED_MENU_OPTION and executeOption <= MAX_MENU_OPTION:
+    if executeOption > MAX_SUPPORTED_MENU_OPTION and executeOption < MAX_MENU_OPTION:
         OutputControls().printOutput(
             colorText.BOLD
             + colorText.FAIL

@@ -566,7 +566,7 @@ class StockScreener:
                         or (executeOption == 9 and hasMinVolumeRatio)
                         or (executeOption == 10 and isPriceRisingByAtLeast2Percent)
                         or (executeOption == 11 and isShortTermBullish)
-                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32] and isValidityCheckMet)
+                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33] and isValidityCheckMet)
                         or (executeOption == 21 and (mfiStake > 0 and reversalOption in [3,5]))
                         or (executeOption == 21 and (mfiStake < 0 and reversalOption in [6,7]))
                         or (executeOption == 21 and (fairValueDiff > 0 and reversalOption in [8]))
@@ -711,7 +711,7 @@ class StockScreener:
 
     def performValidityCheckForExecuteOptions(self,executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,buySellAll=3,intraday_data=None):
         isValid = True
-        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32]:
+        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33]:
             return True
         if executeOption == 11:
             isValid = screener.validateShortTermBullish(
@@ -757,6 +757,8 @@ class StockScreener:
             isValid = screener.findHighMomentum(processedData)
         elif executeOption == 32: # findIntradayOpenSetup
             isValid = screener.findIntradayOpenSetup(processedData,intraday_data,saveDictionary,screeningDictionary,buySellAll=buySellAll)
+        elif executeOption == 33: # findPotentialProfitableEntries
+            isValid = screener.findPotentialProfitableEntries(processedData,fullData, saveDictionary,screeningDictionary)
         return isValid        
                     
     def performBasicVolumeChecks(self, executeOption, volumeRatio, screeningDictionary, saveDictionary, processedData, configManager, screener):
