@@ -1327,7 +1327,7 @@ class menus:
             else MenuRenderStyle.STANDALONE,
             skip=skip,
             parent=parent,
-        ).render(asList=asList,coloredValues=["1"] if not asList else [])
+        ).render(asList=asList,coloredValues=["4"] if not asList else [])
         if asList:
             return menuText
         else:
@@ -1345,7 +1345,7 @@ class menus:
 
     Enter your choice > (default is """
                     + colorText.WARN
-                    + (self.find("1") or menu().create('?','?')).keyTextLabel().strip() + ")"
+                    + (self.find("4") or menu().create('?','?')).keyTextLabel().strip() + ")"
                     + colorText.END
                 )
             return menuText

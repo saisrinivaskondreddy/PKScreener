@@ -409,10 +409,11 @@ class PKMarketOpenCloseAnalyser:
                 continue
         diffColumns = ["LTP@Alert", "AlertTime", "SqrOff", "SqrOffLTP", "SqrOffDiff","DayHighTime","DayHigh","DayHighDiff", "EoDLTP", "EoDDiff"]
         diffValues = [morningAlertLTPs, morningTimestamps, sellTimestamps, sellLTPs, sqrOffDiffs,dayHighTimestamps,dayHighLTPs, dayHighDiffs,eodLTPs, eodDiffs]
-        for col in diffColumns:
-            save_df[col] = diffValues[diffColumns.index(col)]
-            screen_df.loc[:, col] = save_df.loc[:, col].apply(
-                lambda x: x if col in ["LTP@Alert","AlertTime", "SqrOff", "SqrOffLTP", "EoDLTP","DayHigh","DayHighTime"] else ((colorText.GREEN if x >= 0 else colorText.FAIL) + str(x) + colorText.END)
+        for column in diffColumns:
+            columnName = column
+            save_df[columnName] = diffValues[diffColumns.index(columnName)]
+            screen_df.loc[:, columnName] = save_df.loc[:, columnName].apply(
+                lambda x: x if columnName in ["LTP@Alert","AlertTime", "SqrOff", "SqrOffLTP", "EoDLTP","DayHigh","DayHighTime"] else ((colorText.GREEN if x >= 0 else colorText.FAIL) + str(x) + colorText.END)
             )
 
         columns = save_df.columns

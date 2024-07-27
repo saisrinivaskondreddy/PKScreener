@@ -683,8 +683,12 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
                 ascending = [reversalOption in [9]]
         elif executeOption == 7:
             if reversalOption in [3]:
-                sortKey = ["Volume","MA-Signal"]
-                ascending = [False, False]
+                if "SuperConfSort" in saveResults.columns:
+                    sortKey = ["SuperConfSort","Volume"]
+                    ascending = [True, True]
+                else:
+                    sortKey = ["Volume","MA-Signal"]
+                    ascending = [False, False]
         elif executeOption == 23:
             sortKey = ["bbands_ulr_ratio_max5"] if "bbands_ulr_ratio_max5" in screenResults.columns else ["Volume"]
             ascending = [False]
@@ -711,6 +715,8 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
         columnsToBeDeleted = ["MFI","FVDiff","ConfDMADifference","bbands_ulr_ratio_max5", "RSIi"]
         if "EoDDiff" in saveResults.columns:
             columnsToBeDeleted.extend(["Trend","Breakout"])
+        if "SuperConfSort" in saveResults.columns:
+            columnsToBeDeleted.extend(["SuperConfSort"])
         if userPassedArgs is not None and userPassedArgs.options is not None and userPassedArgs.options.upper().startswith("C"):
             columnsToBeDeleted.append("FairValue")
         if executeOption == 27 and "ATR" in screenResults.columns: # ATR Cross
@@ -1236,6 +1242,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     menuChoiceHierarchy,
                     False,
                     None,
+                    executeOption
                 )
                 if defaultAnswer is None:
                     input("Press <Enter> to continue...")
@@ -1267,6 +1274,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 menuChoiceHierarchy,
                 False,
                 None,
+                executeOption
             )
             if defaultAnswer is None:
                 input("Press <Enter> to continue...")
@@ -1601,6 +1609,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             menuChoiceHierarchy,
                             testing,
                             user=user,
+                            executeOption=executeOption
                         )
                     except Exception as e:
                         default_logger().debug(e, exc_info=True)
@@ -1688,10 +1697,15 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         userPassedArgs.pipedtitle = f'{existingTitle}{choiceSegments}[{len(saveResults)}]'
         if userPassedArgs.runintradayanalysis:
             analysis_df = screenResults.copy()
+            index_columns = ["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
+            final_index_columns = []
+            for column in index_columns:
+                if column in analysis_df.columns:
+                    final_index_columns.append(column)
+            analysis_df = analysis_df[final_index_columns]
             analysis_df.reset_index(inplace=True)
             if analysis_df is not None and 'index' in analysis_df.columns:
-                analysis_df.drop('index', axis=1, inplace=True, errors="ignore")
-            analysis_df = analysis_df[["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]]
+                analysis_df.drop('index', axis=1, inplace=True, errors="ignore")            
             if optionalFinalOutcome_df is None:
                 optionalFinalOutcome_df = analysis_df
             else:
@@ -2134,7 +2148,7 @@ def updateMenuChoiceHierarchy():
     return menuChoiceHierarchy
 
 def printNotifySaveScreenedResults(
-    screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None
+    screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None
 ):
     global userPassedArgs, elapsed_time
     if userPassedArgs.monitor is not None:
@@ -2182,6 +2196,8 @@ def printNotifySaveScreenedResults(
         hiddenColumns = configManager.alwaysHiddenDisplayColumns.split(",")
         if userPassedArgs.runintradayanalysis:
             hiddenColumns.remove("Pattern")
+        if executeOption in [33]:
+            hiddenColumns.remove("52Wk-L")
         for col in screenResults.columns:
             if col in hiddenColumns:
                 copyScreenResults.drop(col, axis=1, inplace=True, errors="ignore")

@@ -2,7 +2,8 @@
 
 ## What's New?
 1. [v0.45.20240725.471] release
-* Super confluence option modified to be configurable. In the pkscreener.ini filoe, you can configure which EMAs you would like to have super-confluence tested with. For example, by default it is 8,21,55 but you can change superconfluenceemaperiods to 10,20,55 as well. Similarly, change superconfluencemaxreviewdays to suitable number of days within which you would like the tool to review for super-confluence. By default it is set to 3 days. (8/10 EMA >= 21/20 EMA >= 55 EMA >= 200 SMA within 1-2%). Try X > 12 > 7 > 3 > Option 4.
+* Potential profitable setups (Try menu option 33. X > 12 > 33) with condtions such that 200 MA is rising for at least 3 months, 50 MA is above 200MA, Current price is above 20Osma and preferably above 50 to 100, Current price is at least above 100 % from 52week low, the stock should have made a 52 week high at least once every 4 to 6 month.
+* Super confluence option modified to be configurable. In the pkscreener.ini filoe, you can configure which EMAs you would like to have super-confluence tested with. For example, by default it is 8,21,55 but you can change superconfluenceemaperiods to 10,20,55 as well. Similarly, change superconfluencemaxreviewdays to suitable number of days within which you would like the tool to review for super-confluence. By default it is set to 3 days. (8/10 EMA >= 21/20 EMA >= 55 EMA >= 200 SMA within 0-2%). Try X > 12 > 7 > 3 > Option 4.
 * Intraday Breakout setup at Day Open (open==low or high with open/close >< previous day high/low price) : Try the X > 12 > 32 option with Buy, Sell or All options.
 * Sectoral Indices integrated. Try X > S. Then go on and select whichever scanner menu you would like to select.
 

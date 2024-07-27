@@ -1373,11 +1373,11 @@ class tools:
         m3 = menus()
         m3.renderForMenu(menu,asList=True)
         lMenu =  m3.find(str(respChartPattern))
-        maLength = tools.promptSubMenuOptions(lMenu)
+        maLength = tools.promptSubMenuOptions(lMenu,defaultOption= "4" if respChartPattern == 3 else "1" )
         return maLength
     
     # Prompt for submenu options
-    def promptSubMenuOptions(menu=None):
+    def promptSubMenuOptions(menu=None, defaultOption="1"):
         try:
             tools.promptMenus(menu=menu)
             resp = int(
@@ -1386,7 +1386,7 @@ class tools:
                     + colorText.WARN
                     + """[+] Select Option:"""
                     + colorText.END
-                ) or "1"
+                ) or defaultOption
             )
             if resp >= 0 and resp <= 10:
                 return resp

@@ -2384,25 +2384,38 @@ class ScreeningStatistics:
                 ema8CrossedEMA21 = (ema_8 >= ema_21 and ema_8_prev <= ema_21_prev) or ema8CrossedEMA21
                 ema8CrossedEMA55 = (ema_8 >= ema_55 and ema_8_prev <= ema_55_prev) or ema8CrossedEMA55
                 ema21CrossedEMA55 = (ema_21 >= ema_55 and ema_21_prev <= ema_55_prev) or ema21CrossedEMA55
-                emasCrossedSMA200 = ((sma_200 <= min(ema_8, ema_21, ema_55)) and (abs(ema9 - sma_200) / sma_200 <= percentage)) or emasCrossedSMA200
+                ema_min = min(ema_8, ema_21, ema_55)
+                emasCrossedSMA200 = ((sma_200 <= ema_min and sma_200 <= ema_55) and (abs(ema_min - sma_200) / sma_200 <= percentage)) or emasCrossedSMA200
                 superbConfluence = sum([ema8CrossedEMA21, ema8CrossedEMA55, ema21CrossedEMA55, emasCrossedSMA200]) >= 4
                 if superbConfluence:
+                    indexDate = PKDateUtilities.dateFromYmdString(str(data.index[recentCurrentDay-1]).split(" ")[0])
+                    dayDate = f"{indexDate.day}/{indexDate.month}"
                     screenDict["MA-Signal"] = (
                         saved[0] 
                         + (colorText.GREEN)
-                        + f"SuperGoldenConf.(-{recentCurrentDay-1} day)"
+                        + f"SuperGoldenConf.({dayDate})"
                         + colorText.END
                     )
-                    saveDict["MA-Signal"] = saved[1] + f"SuperGoldenConf(-{recentCurrentDay-1} day)"
+                    saveDict["MA-Signal"] = saved[1] + f"SuperGoldenConf(-{dayDate})"
+                    screenDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200"] = f"{colorText.GREEN if (ema_8>=ema_21 and ema_8>=ema_55) else (colorText.WARN if (ema_8>=ema_21 or ema_8>=ema_55) else colorText.FAIL)}{round(ema_8,1)}{colorText.END},{colorText.GREEN if ema_21>=ema_55 else colorText.FAIL}{round(ema_21,1)}{colorText.END},{round(ema_55,1)}, {colorText.GREEN if sma_200<= ema_55 else colorText.FAIL}{round(sma_200,1)}{colorText.END}"
+                    saveDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200"] = f"{round(ema_8,1)},{round(ema_21,1)},{round(ema_55,1)}, {round(sma_200,1)}"
+                    saveDict[f"SuperConfSort"] = 0 if ema_8>=ema_21 and ema_8>=ema_55 and ema_21>=ema_55 and sma_200<=ema_55 else (1 if (ema_8>=ema_21 or ema_8>=ema_55) else (2 if sma_200<=ema_55 else 3))
+                    screenDict[f"SuperConfSort"] = saveDict[f"SuperConfSort"]
                     return superbConfluence
                 elif ema8CrossedEMA21 and ema8CrossedEMA55 and ema21CrossedEMA55:
+                    indexDate = PKDateUtilities.dateFromYmdString(str(data.index[recentCurrentDay-1]).split(" ")[0])
+                    dayDate = f"{indexDate.day}/{indexDate.month}"
                     screenDict["MA-Signal"] = (
                         saved[0] 
                         + (colorText.WHITE)
-                        + f"SilverCrossConf.(-{recentCurrentDay-1} day)"
+                        + f"SilverCrossConf.({dayDate})"
                         + colorText.END
                     )
-                    saveDict["MA-Signal"] = saved[1] + f"SilverCrossConf.(-{recentCurrentDay-1} day)"
+                    saveDict["MA-Signal"] = saved[1] + f"SilverCrossConf.({dayDate})"
+                    screenDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200"] = f"{colorText.GREEN if (ema_8>=ema_21 and ema_8>=ema_55) else (colorText.WARN if (ema_8>=ema_21 or ema_8>=ema_55) else colorText.FAIL)}{round(ema_8,1)}{colorText.END},{colorText.GREEN if ema_21>=ema_55 else colorText.FAIL}{round(ema_21,1)}{colorText.END},{round(ema_55,1)}, {colorText.GREEN if sma_200<= ema_55 else colorText.FAIL}{round(sma_200,1)}{colorText.END}"
+                    saveDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200"] = f"{round(ema_8,1)},{round(ema_21,1)},{round(ema_55,1)}, {round(sma_200,1)}"
+                    saveDict[f"SuperConfSort"] = 0 if ema_8>=ema_21 and ema_8>=ema_55 and ema_21>=ema_55 and sma_200<=ema_55 else (1 if (ema_8>=ema_21 or ema_8>=ema_55) else (2 if sma_200<=ema_55 else 3))
+                    screenDict[f"SuperConfSort"] = saveDict[f"SuperConfSort"]
                     silverCross = True
                 
                 recentCurrentDay += 1
@@ -2503,17 +2516,24 @@ class ScreeningStatistics:
                 return False
             today += 1
         # 50 MA is above 200MA
-        if sma_50.iloc[0] <= lma_200.iloc[0]:
+        if sma_50.tail(1).head(1).iloc[0] <= lma_200.tail(1).head(1).iloc[0]:
             return False
         # Current price is above 20Osma and preferably above 50 to 100
-        recentClose = reversedData["Close"].iloc[0]
-        if recentClose < lma_200.iloc[0] or recentClose < 50 or recentClose > 100:
+        recentClose = reversedData["Close"].tail(1).head(1).iloc[0]
+        if recentClose < lma_200.tail(1).head(1).iloc[0] or recentClose < 50 or recentClose > 100:
             return False
         # Current price is at least above 100 % from 52week low
         if recentClose <= 2*full52WeekLow:
             return False
         # The stock should have made a 52 week high at least once every 4 to 6 month
         highAsc = reversedData.sort_values(by=["High"], ascending=True)
+        highs = highAsc.tail(13)
+        dateDiffs = highs.index.to_series().diff().dt.days
+        index = 0
+        while index < 12:
+            if abs(dateDiffs.tail(12).iloc[index]) >= 120: # max 6 months = 120 days
+                return False
+            index += 1
         return True
 
     
