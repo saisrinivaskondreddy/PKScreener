@@ -88,7 +88,9 @@ Multiple Indices to choose from:
      N > Nifty Prediction using Artifical Intelligence (Use for Gap-Up/Gap-Down/BTST/STBT)
      E > Live Index Scan : 5 EMA for Intraday
 
-     0 > Screen stocks/index by the stock/index names (NSE Stock Code, e.g. SBIN,BANKINDIA or Yahoo Finance index symbol, e.g. ^NSEI, ^NSEBANK, ^BSESN)
+     S > Sectoral Indices
+
+     0 > Screen stocks by the stock names
      1 > Nifty 50          	2 > Nifty Next 50     	3 > Nifty 100         
      4 > Nifty 200         	5 > Nifty 500         	6 > Nifty Smallcap 50 
      7 > Nifty Smallcap 100	8 > Nifty Smallcap 250	9 > Nifty Midcap 50   
@@ -117,7 +119,10 @@ Followin scanners are already implemented.
     25 > Lower Highs,Lows (Watch for Rev.)	26 > Stocks with stock-split/bonus/dividends
     27 > ATR Cross                      	28 > Bullish Higher Opens           
     29 > Intraday Bid/Ask Build-up      	30 > ATR Trailing Stops(Swing Paper Trading)
-    31 > High Momentum(RSI,MFI,CCI)     
+    31 > High Momentum(RSI,MFI,CCI)     	32 > Intraday Breakout/Breakdown setup     
+    33 > Potential Profitable setups
+
+     42 > Show Last Screened Results   
            	
 ```
 ## Running Piped Scanners
@@ -136,7 +141,8 @@ Multiple pre-defined piped scanners
     13 > Volume Scanners | ATR Cross | Intraday RSI b/w 0 to 54             	14 > VCP (Mark Minervini) | Chart Patterns | MA Support
     15 > VCP | Chart Patterns | MA Support                                  	16 > Already Breaking out | VCP (Minervini) | Chart Patterns | MA Support
     17 > ATR Trailing Stops | VCP (Minervini)                               	18 > VCP | ATR Trailing Stops
-    19 > Nifty 50,Nifty Bank | VCP | ATR Trailing Stops                     
+    19 > Nifty 50,Nifty Bank | VCP | ATR Trailing Stops                     	20 > Volume Scanners | High Momentum | Breaking Out Now | ATR Cross | VCP | ATR Trailing Stops
+    21 > BullCross-MA | Fair Value Buy Opportunities                    
 
 ```
 

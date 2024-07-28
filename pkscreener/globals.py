@@ -1118,7 +1118,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 elif defaultAnswer == "Y" and user is not None:
                     # bot mode
                     insideBarToLookback = 7 if respChartPattern in [1, 2] else 0.02
-                    maLength = 1 if respChartPattern in [3] else 0
+                    maLength = 4 if respChartPattern in [3] else 0
                 else:
                     (
                         respChartPattern,
