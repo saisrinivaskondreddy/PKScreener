@@ -129,6 +129,11 @@ Followin scanners are already implemented.
 
 https://github.com/pkjmesra/PKScreener/assets/1358101/9e579371-1035-400a-9f65-139d8407f6c7
 
+## Running Intraday analysis of Piped Scanners
+
+https://github.com/user-attachments/assets/5f6e2774-a8e5-4a99-9f7c-aa5850f9707d
+
+
 Multiple pre-defined piped scanners
 
 ```
