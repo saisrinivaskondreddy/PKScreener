@@ -355,6 +355,8 @@ jobs:
         git push -v -u origin +actions-data-download
 
     - name: Delete this workflow run
+      continue-on-error: true
+      if: ${{ inputs.skipDownload == '' && startsWith(runner.os, 'Linux' ) }}
       shell: bash
       run: |
         gh run list --status success --limit 500 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
