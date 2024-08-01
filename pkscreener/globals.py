@@ -1579,6 +1579,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     corp_dfs = [dividend_df, bonus_df, stockSplit_df]
                     shareable_strings = []
                     shouldSend = False
+                    corp_columns = ["Div.Date","Ratio","Record","Split","OldFV","NewFV"]
+                    caption_df = None
+                    caption_results = ""
                     for corp_df in corp_dfs:
                         if corp_df is None:
                             continue
@@ -1593,16 +1596,37 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                                 # showindex = False,
                                 maxcolwidths=Utility.tools.getMaxColumnWidths(dividend_df)
                             ).encode("utf-8").decode(STD_ENCODING)
+                            
+                            if corp_columns[0] in corp_df.columns:
+                                caption_df = corp_df[[corp_columns[0]]]
+                            elif corp_columns[1] in corp_df.columns:
+                                caption_df = corp_df[[corp_columns[1],corp_columns[2]]]
+                            elif corp_columns[3] in corp_df.columns:
+                                caption_df = corp_df[[corp_columns[3],corp_columns[4],corp_columns[5]]]
+                                with pd.option_context('mode.chained_assignment', None):
+                                    caption_df["FV"] = caption_df[corp_columns[4]].astype(str) + ":" + caption_df[corp_columns[5]].astype(str)
+                                    caption_df = caption_df[[corp_columns[3],"FV"]]
+                            if caption_df is not None:
+                                # caption_df.reset_index(inplace=True)
+                                caption_df = caption_df.head(3)
+                                caption_results = caption_results + "\n" + colorText.miniTabulator().tabulate(
+                                    caption_df,
+                                    headers="keys",
+                                    tablefmt=colorText.No_Pad_GridFormat,
+                                    maxcolwidths=None
+                                    ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("Hgh  |","Hgh|").replace("EoD  |","EoD|").replace("x  ","x")
                             shouldSend = True
                         shareable_strings.append(tab_results)
                         OutputControls().printOutput(tab_results)
                     if shouldSend:
+                        caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
+                        caption = f"Stocks with dividends/bonus/splits. Samples:<pre>{caption_results}</pre>" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
                         sendQuickScanResult(
                             menuChoiceHierarchy,
                             user,
                             shareable_strings[0],
                             Utility.tools.removeAllColorStyles(shareable_strings[0]),
-                            "NSE Stocks with dividends/bonus/splits soon",
+                            caption,
                             f"PKS_X_12_26_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
                             ".png",
                             addendum=shareable_strings[1],
@@ -1612,6 +1636,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             summaryLabel = "NSE Stocks with corporate action type stock split:",
                             detailLabel = None,
                             )
+                        
                 elif "|" not in userPassedArgs.options:
                     try:
                         printNotifySaveScreenedResults(
@@ -2294,7 +2319,7 @@ def printNotifySaveScreenedResults(
                     ).encode("utf-8").decode(STD_ENCODING)
                     try:
                         if "EoDDiff" in saveResultsTrimmed.columns:
-                            caption_df = saveResultsTrimmed[['LTP','DayHighDiff','EoDDiff']].tail(5)
+                            caption_df = saveResultsTrimmed[['LTP','DayHighDiff','EoDDiff']].tail(configManager.telegramSampleNumberRows)
                             for col in caption_df.columns:
                                 caption_df.loc[:, col] = caption_df.loc[:, col].apply(
                                     lambda x: str(int(round(float(x),0))) if "%" not in str(x) else str(x)
@@ -2302,7 +2327,7 @@ def printNotifySaveScreenedResults(
                             with pd.option_context('mode.chained_assignment', None):
                                 caption_df.rename(columns={"DayHighDiff": "Hgh","EoDDiff":"EoD"}, inplace=True)
                         else:
-                            caption_df = saveResultsTrimmed[['LTP','%Chng','Volume']].head(5)
+                            caption_df = saveResultsTrimmed[['LTP','%Chng','Volume']].head(configManager.telegramSampleNumberRows)
                             caption_df.loc[:, "LTP"] = caption_df.loc[:, "LTP"].apply(
                                 lambda x: str(int(round(float(x),0)))
                             )

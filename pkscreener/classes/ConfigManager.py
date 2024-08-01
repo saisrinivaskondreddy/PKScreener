@@ -98,6 +98,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.superConfluenceEMAPeriods = '8,21,55'
         self.superConfluenceMaxReviewDays = 3
         self.superConfluenceEnforce200SMA = True
+        self.telegramSampleNumberRows = 5
         if self.maxBacktestWindow > self.periods[-1]:
             self.periods.extend(self.maxBacktestWindow)
         MarketHours().setMarketOpenHourMinute(self.marketOpen)
@@ -201,6 +202,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "telegramImageCompressionRatio", str(self.telegramImageCompressionRatio))
             parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
             parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
+            parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
             parser.set("config", "useEMA", "y" if self.useEMA else "n")
             parser.set("config", "vcpVolumeContractionRatio", str(self.vcpVolumeContractionRatio))
 
@@ -440,6 +442,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "telegramImageCompressionRatio", str(self.telegramImageCompressionRatio))
                 parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
                 parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
+                parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
                 parser.set("config", "useEMA", str(self.useEmaPrompt))
                 parser.set("config", "vcpVolumeContractionRatio", str(self.vcpVolumeContractionRatio))
 
@@ -588,6 +591,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.telegramImageCompressionRatio = float(parser.get("config", "telegramImageCompressionRatio"))
                 self.telegramImageFormat = str(parser.get("config", "telegramImageFormat"))
                 self.telegramImageQualityPercentage = int(parser.get("config", "telegramImageQualityPercentage"))
+                self.telegramSampleNumberRows = int(parser.get("config", "telegramSampleNumberRows"))
                 MarketHours().setMarketOpenHourMinute(self.marketOpen)
                 MarketHours().setMarketCloseHourMinute(self.marketClose)
             except configparser.NoOptionError as e:# pragma: no cover
