@@ -140,6 +140,7 @@ results_queue = None
 consumers = None
 logging_queue = None
 mp_manager = None
+analysis_dict = {}
 download_trials = 0
 
 def startMarketMonitor(mp_dict,keyboardevent):
@@ -788,7 +789,7 @@ def closeWorkersAndExit():
     
 # @tracelog
 def main(userArgs=None,optionalFinalOutcome_df=None):
-    global mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
+    global analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
     elapsed_time = 0
     start_time = 0
@@ -803,6 +804,13 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     strategyFilter=[]
     if keyboardInterruptEventFired:
         return None, None
+    
+    if userPassedArgs.runintradayanalysis and "C:" in startupoptions and "|" in startupoptions:
+        firstScanKey = startupoptions.split(">|")[0]
+        if firstScanKey.startswith("X:12:") and firstScanKey in analysis_dict.keys():
+            savedAnalysisDict = analysis_dict.get(firstScanKey)
+            return analysisFinalResults(savedAnalysisDict.get("S1"),savedAnalysisDict.get("S2"),optionalFinalOutcome_df)
+
     screenCounter = multiprocessing.Value("i", 1)
     screenResultsCounter = multiprocessing.Value("i", 0)
     if mp_manager is None:
@@ -1157,6 +1165,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 configManager.superConfluenceEMAPeriods = input(
                     f"[+] Comma separated EMA periods for super-confluence-crossovers in the same order. (numbers)(Optimal = 8,21,55, Current: {colorText.FAIL}{configManager.superConfluenceEMAPeriods}{colorText.END}): "
                 ) or configManager.superConfluenceEMAPeriods
+                enable200SMA = input(
+                    f"[+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if configManager.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
+                ) or ('y' if configManager.superConfluenceEnforce200SMA else 'n')
+                configManager.superConfluenceEnforce200SMA = False if "y" not in str(enable200SMA).lower() else True
                 configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
         if (
             respChartPattern is None
@@ -1696,23 +1708,32 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         choiceSegments = f"{choiceSegments[-2]} > {choiceSegments[-1]}" if len(choiceSegments)>=4 else f"{choiceSegments[-1]}"
         userPassedArgs.pipedtitle = f'{existingTitle}{choiceSegments}[{len(saveResults)}]'
         if userPassedArgs.runintradayanalysis:
-            analysis_df = screenResults.copy()
-            index_columns = ["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
-            final_index_columns = []
-            for column in index_columns:
-                if column in analysis_df.columns:
-                    final_index_columns.append(column)
-            analysis_df = analysis_df[final_index_columns]
-            analysis_df.reset_index(inplace=True)
-            if analysis_df is not None and 'index' in analysis_df.columns:
-                analysis_df.drop('index', axis=1, inplace=True, errors="ignore")            
-            if optionalFinalOutcome_df is None:
-                optionalFinalOutcome_df = analysis_df
-            else:
-                optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
-            return optionalFinalOutcome_df, saveResults
+            return analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df)
         else:
             return screenResults, saveResults
+
+def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df):
+    global analysis_dict, userPassedArgs
+    analysis_df = screenResults.copy()
+    index_columns = ["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
+    final_index_columns = []
+    firstScanKey = userPassedArgs.options.split(">|")[0]
+    for column in index_columns:
+        if column in analysis_df.columns:
+            final_index_columns.append(column)
+    analysis_df = analysis_df[final_index_columns]
+    analysis_df.reset_index(inplace=True)
+    if analysis_df is not None and 'index' in analysis_df.columns:
+        analysis_df.drop('index', axis=1, inplace=True, errors="ignore")            
+    if firstScanKey.startswith("C:"):
+        if optionalFinalOutcome_df is None:
+            optionalFinalOutcome_df = analysis_df
+        else:
+            optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
+    
+    if firstScanKey.startswith("X:12:"):
+        analysis_dict[firstScanKey] = {"S1": screenResults, "S2": saveResults}
+    return optionalFinalOutcome_df, saveResults
 
 def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption): 
     global stockDictPrimary,stockDictSecondary, configManager, defaultAnswer, userPassedArgs, loadedStockData

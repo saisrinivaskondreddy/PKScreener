@@ -424,7 +424,13 @@ def runApplication():
         import pandas as pd
         # Delete any existing data from the previous run.
         configManager.deleteFileWithPattern(pattern="stock_data_*.pkl")
+        analysis_index = 1
         for runOption in runOptions:
+            OutputControls().printOutput(
+                colorText.GREEN
+                + f"[+] Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
+                + colorText.END
+            )
             analysisOptions = runOption.split("|")
             analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
             runOption = "|".join(analysisOptions)
@@ -455,6 +461,7 @@ def runApplication():
                 if args.log:
                     traceback.print_exc()
             resetUserMenuChoiceOptions()
+            analysis_index += 1
 
         configManager.maxdisplayresults = maxdisplayresults
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)

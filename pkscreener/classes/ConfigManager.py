@@ -97,6 +97,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.periods = [1,2,3,4,5,10,15,22,30]
         self.superConfluenceEMAPeriods = '8,21,55'
         self.superConfluenceMaxReviewDays = 3
+        self.superConfluenceEnforce200SMA = True
         if self.maxBacktestWindow > self.periods[-1]:
             self.periods.extend(self.maxBacktestWindow)
         MarketHours().setMarketOpenHourMinute(self.marketOpen)
@@ -194,7 +195,9 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "shuffle", "y" if self.shuffleEnabled else "n")
             parser.set("config", "soundAlertForMonitorOptions", str(self.soundAlertForMonitorOptions))
             parser.set("config", "superConfluenceEMAPeriods", str(self.superConfluenceEMAPeriods))
+            parser.set("config", "superConfluenceEnforce200SMA", "y" if (self.superConfluenceEnforce200SMA) else "n")
             parser.set("config", "superConfluenceMaxReviewDays", str(self.superConfluenceMaxReviewDays))
+            
             parser.set("config", "telegramImageCompressionRatio", str(self.telegramImageCompressionRatio))
             parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
             parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
@@ -377,6 +380,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.superConfluenceMaxReviewDays = input(
                     f"[+] Max number of review days for super-confluence-checks. (number)(Optimal = 3, Current: {colorText.FAIL}{self.superConfluenceMaxReviewDays}{colorText.END}): "
                 ) or self.superConfluenceMaxReviewDays
+                self.superConfluenceEnforce200SMA = str(
+                    input(
+                        f"[+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if self.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
+                    ) or ('y' if self.superConfluenceEnforce200SMA else 'n')
+                ).lower()
             except Exception as e:
                 default_logger().debug(e,exc_info=True)
                 from time import sleep
@@ -427,6 +435,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "shuffle", str(self.shuffle))
                 parser.set("config", "soundAlertForMonitorOptions", str(self.soundAlertForMonitorOptions))
                 parser.set("config", "superConfluenceEMAPeriods", str(self.superConfluenceEMAPeriods))
+                parser.set("config", "superConfluenceEnforce200SMA", str(self.superConfluenceEnforce200SMA))
                 parser.set("config", "superConfluenceMaxReviewDays", str(self.superConfluenceMaxReviewDays))
                 parser.set("config", "telegramImageCompressionRatio", str(self.telegramImageCompressionRatio))
                 parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
@@ -570,6 +579,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.vcpVolumeContractionRatio = float(parser.get("config", "vcpVolumeContractionRatio"))
                 self.soundAlertForMonitorOptions = str(parser.get("config", "soundAlertForMonitorOptions"))
                 self.superConfluenceEMAPeriods = str(parser.get("config", "superConfluenceEMAPeriods"))
+                self.superConfluenceEnforce200SMA = (
+                    False
+                    if "y" not in str(parser.get("config", "superConfluenceEnforce200SMA")).lower()
+                    else True
+                )
                 self.superConfluenceMaxReviewDays = str(parser.get("config", "superConfluenceMaxReviewDays"))
                 self.telegramImageCompressionRatio = float(parser.get("config", "telegramImageCompressionRatio"))
                 self.telegramImageFormat = str(parser.get("config", "telegramImageFormat"))
