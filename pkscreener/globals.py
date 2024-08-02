@@ -1346,7 +1346,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         # Ensure we have the template JSONs from vectorBt
         screener.shouldLog = userPassedArgs.log
         screener.computeBuySellSignals(None)
-
+    if executeOption == 34:
+        if userPassedArgs.options is None:
+            configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price (Optimal:1, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
+            configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
     if executeOption == 42:
         Utility.tools.getLastScreenedResults(defaultAnswer)
         return None, None

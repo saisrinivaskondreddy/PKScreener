@@ -99,6 +99,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.superConfluenceMaxReviewDays = 3
         self.superConfluenceEnforce200SMA = True
         self.telegramSampleNumberRows = 5
+        self.anchoredAVWAPPercentage = 100
         if self.maxBacktestWindow > self.periods[-1]:
             self.periods.extend(self.maxBacktestWindow)
         MarketHours().setMarketOpenHourMinute(self.marketOpen)
@@ -163,6 +164,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.add_section("config")
             parser.add_section("filters")
             parser.set("config", "alwaysHiddenDisplayColumns", str(self.alwaysHiddenDisplayColumns))
+            parser.set("config", "anchoredAVWAPPercentage", str(self.anchoredAVWAPPercentage))
             parser.set("config", "atrtrailingstopemaperiod", str(self.atrTrailingStopEMAPeriod))
             parser.set("config", "atrtrailingstopperiod", str(self.atrTrailingStopPeriod))
             parser.set("config", "atrtrailingstopsensitivity", str(self.atrTrailingStopSensitivity))
@@ -395,6 +397,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 pass
             try:
                 parser.set("config", "alwaysHiddenDisplayColumns", str(self.alwaysHiddenDisplayColumns))
+                parser.set("config", "anchoredAVWAPPercentage", str(self.anchoredAVWAPPercentage))
                 parser.set("config", "atrtrailingstopemaperiod", str(self.atrTrailingStopEMAPeriod))
                 parser.set("config", "atrtrailingstopperiod", str(self.atrTrailingStopPeriod))
                 parser.set("config", "atrtrailingstopsensitivity", str(self.atrTrailingStopSensitivity))
@@ -591,6 +594,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.telegramImageCompressionRatio = float(parser.get("config", "telegramImageCompressionRatio"))
                 self.telegramImageFormat = str(parser.get("config", "telegramImageFormat"))
                 self.telegramImageQualityPercentage = int(parser.get("config", "telegramImageQualityPercentage"))
+                self.anchoredAVWAPPercentage = int(parser.get("config", "anchoredAVWAPPercentage"))
                 self.telegramSampleNumberRows = int(parser.get("config", "telegramSampleNumberRows"))
                 MarketHours().setMarketOpenHourMinute(self.marketOpen)
                 MarketHours().setMarketCloseHourMinute(self.marketClose)

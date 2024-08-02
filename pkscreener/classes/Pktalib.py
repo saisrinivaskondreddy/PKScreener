@@ -79,6 +79,29 @@ else:
 
 class pktalib:
     @classmethod
+    def AVWAP(self,df,anchored_date:pd.Timestamp):
+        # anchored_date = pd.to_datetime('2022-01-30')
+        # Choosing a meaningful anchor point is an essential part of using 
+        # Anchored VWAP effectively. Traders may choose to anchor VWAP to 
+        # a significant event that is likely to impact the stock’s price 
+        # movement, such as an earnings announcement, product launch, or 
+        # other news events. By anchoring VWAP to such events, traders 
+        # can get a more meaningful reference point that reflects the 
+        # sentiment of the market around that time. This can help traders 
+        # identify potential areas of support and resistance more accurately 
+        # and make better trading decisions.
+        with pd.option_context('mode.chained_assignment', None):
+            df["VWAP_D"] = pktalib.VWAP(high=df["High"],low=df["Low"],close=df["Close"],volume=df["Volume"],anchor="D")
+            # If we create a column 'typical_price', it should be identical with 'VWAP_D'
+            df['typical_price'] = (df['High'] + df['Low'] + df['Close'])/3
+            tpp_d = ((df['High'] + df['Low'] + df['Close'])*df['Volume'])/3
+            df['anchored_VWAP'] = tpp_d.where(df.index >= anchored_date).groupby(
+                df.index >= anchored_date).cumsum()/df['Volume'].where(
+                    df.index >= anchored_date).groupby(
+                        df.index >= anchored_date).cumsum()
+        return df['anchored_VWAP']
+
+    @classmethod
     def BBANDS(self, close, timeperiod,std=2, mamode=0):
         try:
             return talib.bbands(close, timeperiod)
@@ -95,10 +118,10 @@ class pktalib:
             return talib.EMA(close, timeperiod)
 
     @classmethod
-    def VWAP(self, high, low, close, volume):
+    def VWAP(self, high, low, close, volume,anchor=None):
         try:
             import pandas_ta as talib
-            return talib.vwap(high, low, close, volume)
+            return talib.vwap(high, low, close, volume,anchor=anchor)
         except Exception:  # pragma: no cover
             # default_logger().debug(e, exc_info=True)
             return None

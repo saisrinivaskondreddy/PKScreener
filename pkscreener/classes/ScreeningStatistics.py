@@ -1031,6 +1031,49 @@ class ScreeningStatistics:
             )
             return not alreadyBrokenout
 
+    def findBullishAVWAP(self, df, screenDict, saveDict):
+        if df is None or len(df) == 0:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        reversedData = data[::-1]  # Reverse the dataframe so that its the oldest date first
+        # Find the anchor point. Find the candle where there's a major dip.
+        majorLow = reversedData["Low"].min()
+        lowRow = reversedData[reversedData["Low"] == majorLow]
+        anchored_date = lowRow.index[0]
+        avwap = pktalib.AVWAP(df=reversedData,anchored_date=anchored_date)
+        recentClose = reversedData["Close"].tail(1).head(1).iloc[0]
+        recentLow = reversedData["Low"].tail(1).head(1).iloc[0]
+        recentAVWAP = reversedData["anchored_VWAP"].tail(1).head(1).iloc[0]
+        recentVol = reversedData["Volume"].tail(1).head(1).iloc[0]
+        prevVol = reversedData["Volume"].tail(2).head(1).iloc[0]
+        avwap.replace(np.inf, np.nan).replace(-np.inf, np.nan).dropna(inplace=True)
+        reversedData = reversedData.tail(len(avwap))
+        diffFromAVWAP = (abs(recentClose-recentAVWAP)/recentAVWAP) * 100
+        x = reversedData.index
+        y = avwap.astype(float)
+        # Create a sequance of integers from 0 to x.size to use in np.polyfit() call
+        x_seq = np.arange(x.size)
+        # call numpy polyfit() method with x_seq, y 
+        fit = np.polyfit(x_seq, y, 1)
+        fit_fn = np.poly1d(fit)
+        slope = fit[0]
+        # print('Slope = ', fit[0], ", ","Intercept = ", fit[1])
+        # print(fit_fn)
+        isBullishAVWAP = (slope <= 1 and # AVWAP is flat
+                recentClose == recentLow and recentLow !=0 and # Open = Low candle
+                recentClose > recentAVWAP and recentAVWAP != 0 and # price near AVWAP
+                recentVol > (self.configManager.volumeRatio)*prevVol and prevVol != 0 and # volumes spiked
+                diffFromAVWAP <= self.configManager.anchoredAVWAPPercentage)
+
+        if isBullishAVWAP:
+            saveDict["AVWAP"] = round(recentAVWAP,2)
+            screenDict["AVWAP"] = round(recentAVWAP,2)
+            saveDict["Anchor"] = str(anchored_date).split(" ")[0]
+            screenDict["Anchor"] = str(anchored_date).split(" ")[0]
+        return isBullishAVWAP
+
     # Find stocks that are bullish intraday: RSI crosses 55, Macd Histogram positive, price above EMA 10
     def findBullishIntradayRSIMACD(self, df):
         if df is None or len(df) == 0:
