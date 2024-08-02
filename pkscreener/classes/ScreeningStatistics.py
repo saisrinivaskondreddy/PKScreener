@@ -1043,6 +1043,7 @@ class ScreeningStatistics:
         lowRow = reversedData[reversedData["Low"] == majorLow]
         anchored_date = lowRow.index[0]
         avwap = pktalib.AVWAP(df=reversedData,anchored_date=anchored_date)
+        recentOpen = reversedData["Open"].tail(1).head(1).iloc[0]
         recentClose = reversedData["Close"].tail(1).head(1).iloc[0]
         recentLow = reversedData["Low"].tail(1).head(1).iloc[0]
         recentAVWAP = reversedData["anchored_VWAP"].tail(1).head(1).iloc[0]
@@ -1062,7 +1063,7 @@ class ScreeningStatistics:
         # print('Slope = ', fit[0], ", ","Intercept = ", fit[1])
         # print(fit_fn)
         isBullishAVWAP = (slope <= 1 and # AVWAP is flat
-                recentClose == recentLow and recentLow !=0 and # Open = Low candle
+                recentOpen == recentLow and recentLow !=0 and # Open = Low candle
                 recentClose > recentAVWAP and recentAVWAP != 0 and # price near AVWAP
                 recentVol > (self.configManager.volumeRatio)*prevVol and prevVol != 0 and # volumes spiked
                 diffFromAVWAP <= self.configManager.anchoredAVWAPPercentage)
