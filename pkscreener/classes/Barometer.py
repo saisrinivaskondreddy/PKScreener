@@ -35,6 +35,10 @@ from PKDevTools.classes import Archiver
 from pkscreener.classes import Utility
 from pkscreener.classes.MarketStatus import MarketStatus
 
+# Get the Global Market Barometer for global and Indian stock markets.
+# This captures the screenshot of the India market and its growth 
+# status by loading it in the browser and simulating the click 
+# behaviour  of the pop-ups.
 async def getScreenshotsForGlobalMarketBarometer():
     # https://scrapeops.io/python-web-scraping-playbook/python-pyppeteer/#how-to-click-on-buttons-with-pyppeteer
     folderPath = Archiver.get_user_outputs_dir()
@@ -65,6 +69,10 @@ async def getScreenshotsForGlobalMarketBarometer():
     await page.screenshot({'path': os.path.join(folderPath,'gmbvaluation.png'), 'clip': {"x":45,"y":420,"width":710,"height":450}})
     await browser.close()
 
+# Gets the valuation of the India Stock Market from the pop-over
+# on the Global Market Barometer. It also takes the screenshot
+# adds the watermarks, repository details and then saves it as a
+# PNG file that can then be shared with others.
 def getGlobalMarketBarometerValuation():
     try:
         asyncio.get_event_loop().run_until_complete(getScreenshotsForGlobalMarketBarometer())

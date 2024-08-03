@@ -22,6 +22,14 @@
     SOFTWARE.
 
 """
+# These are the ASCII art texts that this console application uses as a
+# branding logo. There are multiple art texts in this file and the 
+# caller is free to choose to use any or all of them. However, art text
+# other than the ones listed in this file should be avoided, even if
+# this source is released under MIT license. The trade marks and the
+# Indian flag must always accompany the art texts when being used on the
+# console app or as part of any shareable report.
+
 # Doh, Collosol, Roman, Univers, Electronic
 artText_ansiRegular = """
 ██████  ██   ██ ███████  ██████ ██████  ███████ ███████ ███    ██ ███████ ██████TM 🇮🇳
@@ -181,6 +189,8 @@ artText_Impossible="""
 import random
 
 def getArtText():
+    # See the terms of usage of these art texts at the top of this file
+    # under comments section.
     artTexts = [artText_ansiRegular,artText_Merlin1,artText_dos_rebel,artText_Puffy,artText_Rounded,artText_Standard,artText_Varsity,artText_Collosol,artText_Roman,artText_Electronic,artText_Epic,artText_Isometric3,artText_FlowerPower,artText_Impossible]
     artTexts.extend(artTexts)
     random.shuffle(artTexts)

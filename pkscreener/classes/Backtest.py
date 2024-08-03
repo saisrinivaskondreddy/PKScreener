@@ -36,7 +36,11 @@ from pkscreener.classes.ConfigManager import parser, tools
 configManager = tools()
 configManager.getConfig(parser)
 
-
+# Backtests for a given stock with the data for the past x number of days.
+# Before this gets called, the assumption is that the user must already
+# have run some scanner from the available options. SampleDays is the
+# sampling period for which we need to run the backtests. Generally, a
+# 30 day period or a 180-day period should be more than enough.
 def backtest(
     stock,
     data,
@@ -163,7 +167,9 @@ def backtest(
         pass
     return backTestedData
 
-
+# Prepares a backtest summary based on the color codes of individual days or stocks
+# Based on that it calculates an overall success rate of a given strategy for which
+# this backtest is run.
 def backtestSummary(df):
     summary = {}
     overall = {}
