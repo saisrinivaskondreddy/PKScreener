@@ -800,6 +800,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     user = None if userArgs is None else userArgs.user
     defaultAnswer = None if userArgs is None else userArgs.answerdefault
     userPassedArgs = userArgs
+    runOptionName = ""
     options = []
     strategyFilter=[]
     if keyboardInterruptEventFired:
@@ -809,7 +810,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         firstScanKey = startupoptions.split(">|")[0]
         if firstScanKey.startswith("X:12:") and firstScanKey in analysis_dict.keys():
             savedAnalysisDict = analysis_dict.get(firstScanKey)
-            return analysisFinalResults(savedAnalysisDict.get("S1"),savedAnalysisDict.get("S2"),optionalFinalOutcome_df)
+            return analysisFinalResults(savedAnalysisDict.get("S1"),savedAnalysisDict.get("S2"),optionalFinalOutcome_df,None)
 
     screenCounter = multiprocessing.Value("i", 1)
     screenResultsCounter = multiprocessing.Value("i", 0)
@@ -1522,6 +1523,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 consumers = None
             if menuOption in ["C"]:
                 runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+                if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+                    runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1]
                 if saveResults is not None and not saveResults.empty:
                     saveResults, screenResults = PKMarketOpenCloseAnalyser.runOpenCloseAnalysis(stockDictPrimary,endOfdayCandles,screenResults, saveResults,runOptionName=runOptionName,filteredListOfStocks=listStockCodes)
             if downloadOnly and menuOption in ["X"]:
@@ -1736,11 +1739,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         choiceSegments = f"{choiceSegments[-2]} > {choiceSegments[-1]}" if len(choiceSegments)>=4 else f"{choiceSegments[-1]}"
         userPassedArgs.pipedtitle = f'{existingTitle}{choiceSegments}[{len(saveResults)}]'
         if userPassedArgs.runintradayanalysis:
-            return analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df)
+            return analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOptionName)
         else:
             return screenResults, saveResults
 
-def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df):
+def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOptionName=None):
     global analysis_dict, userPassedArgs
     analysis_df = screenResults.copy()
     index_columns = ["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
@@ -1754,11 +1757,15 @@ def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df):
     if analysis_df is not None and 'index' in analysis_df.columns:
         analysis_df.drop('index', axis=1, inplace=True, errors="ignore")            
     if firstScanKey.startswith("C:"):
-        if optionalFinalOutcome_df is None:
-            optionalFinalOutcome_df = analysis_df
+        if analysis_df is not None and "LTP@Alert" in analysis_df.columns:
+            if optionalFinalOutcome_df is None:
+                optionalFinalOutcome_df = analysis_df
+            else:
+                optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
         else:
+            analysis_df.loc[len(analysis_df),"Stock"] = "BASKET"
+            analysis_df.loc[len(analysis_df),"Pattern"] = runOptionName if runOptionName is not None else ""
             optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
-    
     if firstScanKey.startswith("X:12:"):
         analysis_dict[firstScanKey] = {"S1": screenResults, "S2": saveResults}
     return optionalFinalOutcome_df, saveResults
@@ -2684,6 +2691,8 @@ def runScanners(
                 + f"[+] Starting {'Stock' if menuOption not in ['C'] else 'Intraday'} {'Screening' if menuOption=='X' else ('Analysis' if menuOption == 'C' else 'Backtesting.')}. Press Ctrl+C to stop!"
                 + colorText.END
             )
+            if userPassedArgs.progressstatus is not None:
+                OutputControls().printOutput(f"{colorText.GREEN}{userPassedArgs.progressstatus}{colorText.END}")
         else:
             OutputControls().printOutput(
                 colorText.BOLD

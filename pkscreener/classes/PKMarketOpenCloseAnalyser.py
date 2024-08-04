@@ -421,7 +421,7 @@ class PKMarketOpenCloseAnalyser:
         for col in columns:
             if col in ["Stock", "LTP@Alert", "Pattern", "LTP", "SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff", "EoDLTP", "EoDDiff", "%Chng"]:
                 if col == "Stock":
-                    save_df.loc[lastIndex,col] = "PORTFOLIO"
+                    save_df.loc[lastIndex,col] = "BASKET"
                 elif col == "Pattern":
                     save_df.loc[lastIndex,col] = runOptionName if runOptionName is not None else ""
                 elif col in ["LTP", "LTP@Alert", "SqrOffLTP","SqrOffDiff", "EoDLTP", "EoDDiff","DayHigh","DayHighDiff"]:

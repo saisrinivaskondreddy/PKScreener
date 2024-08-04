@@ -207,6 +207,11 @@ if __name__ == "__main__":
         required=False,
     )
     argParser.add_argument(
+        "--progressstatus",
+        help="Pass default progress status that you'd like to get displayed when running the scans",
+        required=False,
+    )
+    argParser.add_argument(
         "--runintradayanalysis",
         action="store_true",
         help="Run analysis for morning vs EoD LTP values",
@@ -409,16 +414,19 @@ def runApplication():
         if args.options.upper().startswith("C") or "C:" in args.options.upper():
             args.runintradayanalysis = True
     if args.runintradayanalysis:
-        from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS
+        from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
         maxdisplayresults = configManager.maxdisplayresults
         configManager.maxdisplayresults = 2000
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
         runOptions = []
+        otherMenus = []
         if len(args.options.split(":")) >= 4:
             runOptions = [args.options]
         else:
-            runOptions =  menus.allMenus(topLevel="C", index=12)
-            runOptions.extend(PREDEFINED_PIPED_MENU_OPTIONS)
+            runOptions = PREDEFINED_PIPED_MENU_OPTIONS
+            otherMenus =  menus.allMenus(topLevel="C", index=12)
+            if len(otherMenus) > 0:
+                runOptions.extend(otherMenus)
         optionalFinalOutcome_df = None
         import pkscreener.classes.Utility as Utility
         import pandas as pd
@@ -426,11 +434,10 @@ def runApplication():
         configManager.deleteFileWithPattern(pattern="stock_data_*.pkl")
         analysis_index = 1
         for runOption in runOptions:
-            OutputControls().printOutput(
-                colorText.GREEN
-                + f"[+] Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
-                + colorText.END
-            )
+            runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:')}'"
+            indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
+            runOptionName = f"{'[+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
+            args.progressstatus = f"{runOptionName} => Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
             analysisOptions = runOption.split("|")
             analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
             runOption = "|".join(analysisOptions)
@@ -448,7 +455,7 @@ def runApplication():
                 while runPipedScans:
                     runPipedScans = pipeResults(plainResults,args)
                     if runPipedScans:
-                        results, plainResults = main(userArgs=args)
+                        results, plainResults = main(userArgs=args,optionalFinalOutcome_df=optionalFinalOutcome_df)
                 optionalFinalOutcome_df = results
                 if "EoDDiff" not in optionalFinalOutcome_df.columns:
                     # Somehow the file must have been corrupted. Let's re-download
@@ -471,7 +478,7 @@ def runApplication():
                 optionalFinalOutcome_df.drop('FairValue', axis=1, inplace=True, errors="ignore")
                 df_grouped = optionalFinalOutcome_df.groupby("Stock")
                 for stock, df_group in df_grouped:
-                    if stock == "PORTFOLIO":
+                    if stock == "BASKET":
                         if final_df is None:
                             final_df = df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
                         else:
@@ -482,9 +489,9 @@ def runApplication():
                 with pd.option_context('mode.chained_assignment', None):
                     final_df.rename(
                         columns={
-                            "LTP": "Morning Portfolio",
-                            "SqrOffLTP": "SqrOff Portfolio",
-                            "EoDLTP": "EoD Portfolio",
+                            "LTP": "AM Basket Value",
+                            "SqrOffLTP": "SqrOff Basket Value",
+                            "EoDLTP": "EoD Basket Value",
                             },
                             inplace=True,
                         )
