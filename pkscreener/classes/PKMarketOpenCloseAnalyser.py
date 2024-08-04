@@ -427,18 +427,18 @@ class PKMarketOpenCloseAnalyser:
                 elif col in ["LTP", "LTP@Alert", "SqrOffLTP","SqrOffDiff", "EoDLTP", "EoDDiff","DayHigh","DayHighDiff"]:
                     save_df.loc[lastIndex,col] = round(sum(save_df[col].dropna(inplace=False).astype(float)),2)
                 elif col == "%Chng":
-                    ltpSum = sum(save_df["LTP"].dropna(inplace=False).astype(float))
+                    ltpSum = sum(save_df["LTP@Alert"].dropna(inplace=False).astype(float))
                     change_pct = sum(save_df["EoDDiff"].dropna(inplace=False).astype(float))*100/ltpSum
-                    save_df.loc[lastIndex,col] = f"{round(2*change_pct,2)}%" # when summing above for LTP, the total of LTP gets summed up too. Hence *2 here.
+                    save_df.loc[lastIndex,col] = f"{round(change_pct,2)}%"
             else:
                 save_df.loc[lastIndex,col] = ""
             screen_df.loc[lastIndex,col] = save_df.loc[lastIndex,col]
         eodDiff = save_df.loc[lastIndex,"EoDDiff"]
         sqrOffDiff = save_df.loc[lastIndex,"SqrOffDiff"]
         dayHighDiff = save_df.loc[lastIndex,"DayHighDiff"]
-        save_df.loc[lastIndex,"EoDDiff"] = str(eodDiff) + f'({round(100*2*eodDiff/ltpSum,2)}%)'
-        save_df.loc[lastIndex,"SqrOffDiff"] = str(sqrOffDiff) + f'({round(100*2*sqrOffDiff/ltpSum,2)}%)'
-        save_df.loc[lastIndex,"DayHighDiff"] = str(dayHighDiff) + f'({round(100*2*dayHighDiff/ltpSum,2)}%)'
+        save_df.loc[lastIndex,"EoDDiff"] = str(eodDiff) + f'({round(100*eodDiff/ltpSum,2)}%)'
+        save_df.loc[lastIndex,"SqrOffDiff"] = str(sqrOffDiff) + f'({round(100*sqrOffDiff/ltpSum,2)}%)'
+        save_df.loc[lastIndex,"DayHighDiff"] = str(dayHighDiff) + f'({round(100*dayHighDiff/ltpSum,2)}%)'
         screen_df.loc[lastIndex,"EoDDiff"] = (colorText.GREEN if eodDiff >= 0 else colorText.FAIL) + save_df.loc[lastIndex,"EoDDiff"] + colorText.END
         screen_df.loc[lastIndex,"SqrOffDiff"] = (colorText.GREEN if sqrOffDiff >= 0 else colorText.FAIL) + save_df.loc[lastIndex,"SqrOffDiff"] + colorText.END
         screen_df.loc[lastIndex,"DayHighDiff"] = (colorText.GREEN if dayHighDiff >= 0 else colorText.FAIL) + save_df.loc[lastIndex,"DayHighDiff"] + colorText.END

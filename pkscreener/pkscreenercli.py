@@ -394,7 +394,7 @@ def runApplication():
     except:
         pass
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time
-    # args = " -a Y -e -p -u 6186237493 -o C:12: --runintradayanalysis".split(" ")
+    # args = " -a Y -e -p -o C:12: --runintradayanalysis".split(" ")
     # argsv = argParser.parse_known_args(args=args)
     argsv = argParser.parse_known_args()
     args = argsv[0]
@@ -486,18 +486,21 @@ def runApplication():
                 for stock, df_group in df_grouped:
                     if stock == "BASKET":
                         if final_df is None:
-                            final_df = df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
+                            final_df = df_group[["Pattern","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
                         else:
-                            final_df = pd.concat([final_df, df_group[["Pattern","LTP","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
+                            final_df = pd.concat([final_df, df_group[["Pattern","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
             except:
                 pass
             if final_df is not None and not final_df.empty:
                 with pd.option_context('mode.chained_assignment', None):
+                    final_df = final_df[["Pattern","LTP@Alert","LTP","EoDDiff","SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff"]]
                     final_df.rename(
                         columns={
-                            "LTP": "AM Basket Value",
-                            "SqrOffLTP": "SqrOff Basket Value",
-                            "EoDLTP": "EoD Basket Value",
+                            "Pattern": "Scan Name",
+                            "LTP@Alert": "Basket Value@Alert",
+                            "LTP": "Basket Value@EOD",
+                            "SqrOffLTP": "Basket Value@SqrOff",
+                            "DayHigh": "Basket Value@DayHigh",
                             },
                             inplace=True,
                         )
