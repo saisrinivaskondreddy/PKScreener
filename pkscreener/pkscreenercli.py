@@ -394,7 +394,7 @@ def runApplication():
     except:
         pass
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time
-    # args = " -a Y -e -p -u 6186237493 -o X:12:30::D:D:D:D:D".split(" ")
+    # args = " -a Y -e -p -u 6186237493 -o C:12: --runintradayanalysis".split(" ")
     # argsv = argParser.parse_known_args(args=args)
     argsv = argParser.parse_known_args()
     args = argsv[0]
@@ -427,16 +427,21 @@ def runApplication():
             otherMenus =  menus.allMenus(topLevel="C", index=12)
             if len(otherMenus) > 0:
                 runOptions.extend(otherMenus)
-        optionalFinalOutcome_df = None
+        import pandas as pd
+        optionalFinalOutcome_df = pd.DataFrame()
         import pkscreener.classes.Utility as Utility
         import pandas as pd
         # Delete any existing data from the previous run.
         configManager.deleteFileWithPattern(pattern="stock_data_*.pkl")
         analysis_index = 1
         for runOption in runOptions:
-            runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:')}'"
-            indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
-            runOptionName = f"{'[+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
+            try:
+                runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:').replace('D:','D:')}'"
+                indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
+                runOptionName = f"{'[+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
+            except:
+                runOptionName = ""
+                pass
             args.progressstatus = f"{runOptionName} => Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
             analysisOptions = runOption.split("|")
             analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
@@ -456,8 +461,9 @@ def runApplication():
                     runPipedScans = pipeResults(plainResults,args)
                     if runPipedScans:
                         results, plainResults = main(userArgs=args,optionalFinalOutcome_df=optionalFinalOutcome_df)
-                optionalFinalOutcome_df = results
-                if "EoDDiff" not in optionalFinalOutcome_df.columns:
+                if results is not None and len(results) >= len(optionalFinalOutcome_df):
+                    optionalFinalOutcome_df = results
+                if optionalFinalOutcome_df is not None and "EoDDiff" not in optionalFinalOutcome_df.columns:
                     # Somehow the file must have been corrupted. Let's re-download
                     configManager.deleteFileWithPattern(pattern="stock_data_*.pkl")
                     configManager.deleteFileWithPattern(pattern="intraday_stock_data_*.pkl")
@@ -495,6 +501,7 @@ def runApplication():
                             },
                             inplace=True,
                         )
+                    final_df.dropna(inplace=True)
                 mark_down = colorText.miniTabulator().tabulate(
                                     final_df,
                                     headers="keys",

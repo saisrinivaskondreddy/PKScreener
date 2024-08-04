@@ -1745,7 +1745,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
 
 def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOptionName=None):
     global analysis_dict, userPassedArgs
-    analysis_df = screenResults.copy()
+    if screenResults is not None:
+        analysis_df = screenResults.copy()
+    else:
+        analysis_df = pd.DataFrame()
     index_columns = ["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
     final_index_columns = []
     firstScanKey = userPassedArgs.options.split(">|")[0]
@@ -1763,8 +1766,13 @@ def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOp
             else:
                 optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
         else:
-            analysis_df.loc[len(analysis_df),"Stock"] = "BASKET"
-            analysis_df.loc[len(analysis_df),"Pattern"] = runOptionName if runOptionName is not None else ""
+            if analysis_df is not None:
+                analysis_df.loc[len(analysis_df),"Stock"] = "BASKET"
+                analysis_df.loc[len(analysis_df),"Pattern"] = runOptionName if runOptionName is not None else ""
+            else:
+                analysis_df = pd.DataFrame()
+                analysis_df.loc[0,"Stock"] = "BASKET"
+                analysis_df.loc[0,"Pattern"] = runOptionName if runOptionName is not None else ""
             optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
     if firstScanKey.startswith("X:12:"):
         analysis_dict[firstScanKey] = {"S1": screenResults, "S2": saveResults}

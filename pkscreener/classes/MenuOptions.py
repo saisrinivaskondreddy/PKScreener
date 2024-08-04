@@ -92,58 +92,58 @@ level1_P_MenuDict = {
 }
 PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23"]
 PREDEFINED_SCAN_MENU_TEXTS = [
-    "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",
-    "Volume Scanners | High Momentum | ATR Cross",
-    "Volume Scanners | High Momentum                                    ",
-    "Volume Scanners | ATR Cross",
-    "Volume Scanners | High Bid/Ask Build Up                            ",
-    "Volume Scanners | ATR Cross | ATR Trailing Stops",
-    "Volume Scanners | ATR Trailing Stops                               ",
-    "High Momentum | ATR Cross",
-    "High Momentum | ATR Trailing Stop                                  ",
-    "ATR Cross | ATR Trailing Stop",
-    "TTM Sqeeze Buy | Intraday RSI b/w 0 to 54                          ",
-    "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross | Intraday RSI b/w 0 to 54",
-    "Volume Scanners | ATR Cross | Intraday RSI b/w 0 to 54             ",
-    "VCP (Mark Minervini) | Chart Patterns | MA Support",
-    "VCP | Chart Patterns | MA Support                                  ",
-    "Already Breaking out | VCP (Minervini) | Chart Patterns | MA Support",
-    "ATR Trailing Stops | VCP (Minervini)                               ",
-    "VCP | ATR Trailing Stops",
-    "Nifty 50,Nifty Bank | VCP | ATR Trailing Stops                     ",
-    "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross | VCP | ATR Trailing Stops",
-    "BullCross-MA | Fair Value Buy Opportunities                        ",
-    "VCP | Chart Patterns | MA Support | Bullish AVWAP",
-    "VCP (Mark Minervini) | Chart Patterns | MA Support | Bullish AVWAP ",
+    "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",  # 1
+    "Volume Scanners | High Momentum | ATR Cross",                          # 2
+    "Volume Scanners | High Momentum                                    ",  # 3
+    "Volume Scanners | ATR Cross",                                          # 4
+    "Volume Scanners | High Bid/Ask Build Up                            ",  # 5
+    "Volume Scanners | ATR Cross | ATR Trailing Stops",                     # 6
+    "Volume Scanners | ATR Trailing Stops                               ",  # 7
+    "High Momentum | ATR Cross",                                            # 8
+    "High Momentum | ATR Trailing Stop                                  ",  # 9
+    "ATR Cross | ATR Trailing Stop",                                        # 10
+    "TTM Sqeeze Buy | RSI b/w 0 to 54                                   ",  # 11
+    "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross | RSI b/w 0 to 54", # 12
+    "Volume Scanners | ATR Cross | RSI b/w 0 to 54                      ",  # 13
+    "VCP (Mark Minervini) | Chart Patterns | MA Support",                   # 14
+    "VCP | Chart Patterns | MA Support                                  ",  # 15
+    "Already Breaking out | VCP (Minervini) | Chart Patterns | MA Support", # 16
+    "ATR Trailing Stops | VCP (Minervini)                               ",  # 17
+    "VCP | ATR Trailing Stops",                                             # 18
+    "Nifty 50,Nifty Bank | VCP | ATR Trailing Stops                     ",  # 19
+    "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross | VCP | ATR Trailing Stops", # 20
+    "BullCross-MA | Fair Value Buy Opportunities                        ",  # 21
+    "VCP | Chart Patterns | MA Support | Bullish AVWAP",                    # 22
+    "VCP (Mark Minervini) | Chart Patterns | MA Support | Bullish AVWAP ",  # 23
 ]
 level2_P_MenuDict = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:
     level2_P_MenuDict[key] = PREDEFINED_SCAN_MENU_TEXTS[int(key)-1]
 level2_P_MenuDict["M"] = "Back to the Top/Main menu"
 PREDEFINED_SCAN_MENU_VALUES =[
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:27:'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:29:'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:>|X:12:30:1:'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:12:30:1:'",
-    "--systemlaunched -a y -e -o 'X:12:31:>|X:0:27:'",
-    "--systemlaunched -a y -e -o 'X:12:31:>|X:0:30:1:'",
-    "--systemlaunched -a y -e -o 'X:12:27:>|X:0:30:1:'",
-    "--systemlaunched -a y -e -o 'X:12:7:6:1:>|X:0:5:0:54:i 1m'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:>|X:0:5:0:54:i 1m'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:>|X:0:5:0:54:i 1m'",
-    "--systemlaunched -a y -e -o 'X:12:7:8:>|X:12:7:9:1:1:'",
-    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:7:9:1:1:'",
-    "--systemlaunched -a y -e -o 'X:12:2:>|X:12:7:8:>|X:12:7:9:1:1:'",
-    "--systemlaunched -a y -e -o 'X:12:30:1:>|X:12:7:8:'",
-    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:30:1:'",
-    "--systemlaunched -a y -e -o 'X:0:0:^NSEI,^NSEBANK:>|X:12:7:4:>|X:12:30:1:'",
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:>|X:12:7:4:>|X:12:30:1:'",
-    "--systemlaunched -a y -e -o 'X:12:7:9:5:>|X:12:21:8:'",
-    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:7:9:1:1:>|X:12:34:'",
-    "--systemlaunched -a y -e -o 'X:12:7:8:>|X:12:7:9:1:1:>|X:12:34:'",
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:'", # 1
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:27:'",          # 2
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:'",                   # 3
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:'",                   # 4
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:29:'",                   # 5
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:>|X:12:30:1:'",       # 6
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:12:30:1:'",                # 7
+    "--systemlaunched -a y -e -o 'X:12:31:>|X:0:27:'",                      # 8
+    "--systemlaunched -a y -e -o 'X:12:31:>|X:0:30:1:'",                    # 9
+    "--systemlaunched -a y -e -o 'X:12:27:>|X:0:30:1:'",                    # 10
+    "--systemlaunched -a y -e -o 'X:12:7:6:1:>|X:0:5:0:54:'",               # 11
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:>|X:0:5:0:54:'", # 12
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:>|X:0:5:0:54:'",      # 13
+    "--systemlaunched -a y -e -o 'X:12:7:8:>|X:12:7:9:1:1:'",               # 14
+    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:7:9:1:1:'",               # 15
+    "--systemlaunched -a y -e -o 'X:12:2:>|X:12:7:8:>|X:12:7:9:1:1:'",      # 16
+    "--systemlaunched -a y -e -o 'X:12:30:1:>|X:12:7:8:'",                  # 17
+    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:30:1:'",                  # 18
+    "--systemlaunched -a y -e -o 'X:0:0:^NSEI,^NSEBANK:>|X:12:7:4:>|X:12:30:1:'", # 19
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:>|X:12:7:4:>|X:12:30:1:'",  # 20
+    "--systemlaunched -a y -e -o 'X:12:7:9:5:>|X:12:21:8:'",                # 21
+    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:7:9:1:1:>|X:12:34:'",     # 22
+    "--systemlaunched -a y -e -o 'X:12:7:8:>|X:12:7:9:1:1:>|X:12:34:'",     # 23
 ]
 PREDEFINED_PIPED_MENU_OPTIONS = []
 for option in PREDEFINED_SCAN_MENU_VALUES:
