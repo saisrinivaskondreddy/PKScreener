@@ -158,12 +158,12 @@ def finishScreening(
     saveResults,
     user=None,
 ):
-    if "RUNNER" in os.environ.keys():
+    global defaultAnswer, menuChoiceHierarchy, userPassedArgs, selectedChoice
+    if "RUNNER" not in os.environ.keys():
         # There's no need to prompt the user to save xls report or to save data locally.
         # This scan must have been triggered by github workflow by a user or scheduled job
-        return
-    global defaultAnswer, menuChoiceHierarchy, userPassedArgs, selectedChoice
-    saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount)
+        saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount)
+    
     if not testBuild and not downloadOnly and not testing:
         saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
