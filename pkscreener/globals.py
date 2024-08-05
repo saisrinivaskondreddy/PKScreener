@@ -2241,7 +2241,10 @@ def printNotifySaveScreenedResults(
         + colorText.END
         , enableMultipleLineOutput=True
     )
-    pngName = f'PKS_{PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
+    runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+    if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+        runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1]
+    pngName = f'PKS_{runOptionName}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
     pngExtension = ".png"
     eligible = is_token_telegram_configured()
     targetDateG10k = prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, testing, user, pngName, pngExtension, eligible)

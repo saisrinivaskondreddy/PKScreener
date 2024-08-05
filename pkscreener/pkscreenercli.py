@@ -522,8 +522,10 @@ def runApplication():
                                     showindex = False
                                 ).encode("utf-8").decode(Utility.STD_ENCODING)
                 OutputControls().printOutput(mark_down)
+                from PKDevTools.classes.Telegram import get_secrets
+                Channel_Id, _, _, _ = get_secrets()
                 sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
-                                    user="-1001785195297",
+                                    user=Channel_Id,
                                     tabulated_results=mark_down,
                                     markdown_results=mark_down,
                                     caption="IntradayAnalysis - Morning alert vs Market Close",
