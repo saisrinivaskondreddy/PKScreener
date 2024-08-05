@@ -394,6 +394,7 @@ def runApplication():
     except:
         pass
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time
+    from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     # args = " -a Y -e -p -o C:12: --runintradayanalysis".split(" ")
     # argsv = argParser.parse_known_args(args=args)
     argsv = argParser.parse_known_args()
@@ -413,8 +414,17 @@ def runApplication():
         args.options = args.options.replace("::",":").replace("\"","").replace("'","")
         if args.options.upper().startswith("C") or "C:" in args.options.upper():
             args.runintradayanalysis = True
+        try:
+            if args.systemlaunched:
+                choices = f"--systemlaunched -a y -e -o '{args.options.replace('C:','X:').replace('D:','D:')}'"
+                indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
+                choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
+                args.progressstatus = f"[+] {choices} => Running {choices}"
+        except:
+            choices = ""
+            pass
+        
     if args.runintradayanalysis:
-        from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
         maxdisplayresults = configManager.maxdisplayresults
         configManager.maxdisplayresults = 2000
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)

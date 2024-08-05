@@ -2912,9 +2912,15 @@ def saveNotifyResultsFile(
     global userPassedArgs, elapsed_time, selectedChoice
     if user is None and userPassedArgs.user is not None:
         user = userPassedArgs.user
+    if ">|" in userPassedArgs.options:
+        # Let the final results be there. We're mid-way through the screening of some
+        # piped scan. Do not save the intermediate results.
+        return
     caption = f'<b>{menuChoiceHierarchy.split(">")[-1]}</b>'
     if screenResults is not None and len(screenResults) >= 1:
         choices = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+        if userPassedArgs.progressstatus is not None:
+            choices = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1]
         needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
         pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0) if needsCalc else None
         filename = Utility.tools.promptSaveResults(choices,
