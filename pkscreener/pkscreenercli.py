@@ -525,7 +525,7 @@ def runApplication():
                 from PKDevTools.classes.Telegram import get_secrets
                 Channel_Id, _, _, _ = get_secrets()
                 sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
-                                    user=Channel_Id,
+                                    user=int(f"-{Channel_Id}"),
                                     tabulated_results=mark_down,
                                     markdown_results=mark_down,
                                     caption="IntradayAnalysis - Morning alert vs Market Close",
