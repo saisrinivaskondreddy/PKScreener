@@ -437,10 +437,11 @@ def handleSecondaryMenuChoices(
                 launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
                 requestingUser = f" -u {userPassedArgs.user}" if userPassedArgs.user is not None else ""
                 enableLog = f" -l" if userPassedArgs.log else ""
+                enableTelegramMode = f" --telegram" if userPassedArgs.telegram else ""
                 launcher = f"python3.11 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
-                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in quick backtest mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit quick backtest mode.{colorText.END}")
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in quick backtest mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit quick backtest mode.{colorText.END}")
                 sleep(2)
-                os.system(f"{launcher} --systemlaunched -a Y -e --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}")
+                os.system(f"{launcher} --systemlaunched -a Y -e --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}")
                 sys.exit(0)
         elif userPassedArgs is not None and userPassedArgs.options is not None:
             options = userPassedArgs.options.split(":")
@@ -901,10 +902,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 scannerOptionQuoted = scannerOption.replace("'",'"')
                 requestingUser = f" -u {userPassedArgs.user}" if userPassedArgs.user is not None else ""
                 enableLog = f" -l" if userPassedArgs.log else ""
+                enableTelegramMode = f" --telegram" if userPassedArgs.telegram else ""
                 backtestParam = f" --backtestdaysago {userPassedArgs.backtestdaysago}" if userPassedArgs.backtestdaysago else ""
-                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{colorText.END}")
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{colorText.END}")
                 sleep(2)
-                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}")
+                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}")
                 OutputControls().printOutput(
                         colorText.GREEN
                         + f"[+] Finished running all piped scanners!"
@@ -1901,11 +1903,12 @@ def addOrRunPipedMenus():
         scannerOptionQuoted = monitorOption.replace("'",'"').replace(":>",":D:D:D:>").replace("::",":")
         requestingUser = f" -u {userPassedArgs.user}" if userPassedArgs.user is not None else ""
         enableLog = f" -l" if userPassedArgs.log else ""
+        enableTelegramMode = f" --telegram" if userPassedArgs.telegram else ""
         backtestParam = f" --backtestdaysago {userPassedArgs.backtestdaysago}" if userPassedArgs.backtestdaysago else ""
         runIntradayAnalysisParam = f" --runintradayanalysis" if shouldRunIntradayAnalysis else ""
-        OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{colorText.END}")
+        OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{colorText.END}")
         sleep(2)
-        os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}")
+        os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}")
         userPassedArgs.pipedmenus = None
         OutputControls().printOutput(
                 colorText.GREEN
