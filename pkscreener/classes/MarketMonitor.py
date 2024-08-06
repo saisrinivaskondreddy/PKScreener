@@ -252,7 +252,17 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
                         ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("x  ","x")
             telegram_df_tabulated = telegram_df_tabulated.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R")
             choiceSegments = chosenMenu.split(">")
-            chosenMenu = f"{choiceSegments[-2]}>{choiceSegments[-1]}" if (len(choiceSegments)>=4 or len(choiceSegments[-1]) <= 10) else f"{choiceSegments[-1]}"
+            from pkscreener.classes.MenuOptions import PREDEFINED_SCAN_MENU_VALUES
+            choices = f"--systemlaunched -a y -e -o '{screenOptions.replace('C:','X:').replace('D:','D:')}'"
+            indexNum = -1
+            try:
+                indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
+            except:
+                pass
+            optionName = ""
+            if indexNum >= 0:
+                optionName = f"{('P_1_'+str(indexNum +1)+':') if '>|' in choices else optionName}"
+            chosenMenu = f"{optionName}{choiceSegments[-2]}>{choiceSegments[-1]}" if (len(choiceSegments)>=4 or len(choiceSegments[-1]) <= 10) else f"{choiceSegments[-1]}"
             result_output = f"Latest data as of:{dbTimestamp}\n<b>{chosenMenu}</b> [{screenOptions}]\n<pre>{telegram_df_tabulated}</pre>"
             try:
                 filePath = os.path.join(Archiver.get_user_outputs_dir(), f"monitor_outputs_{self.monitorIndex}.txt")

@@ -704,7 +704,7 @@ def pipeResults(prevOutput,args):
     return False
 
 def pkscreenercli():
-    global originalStdOut
+    global originalStdOut, args
     if sys.platform.startswith("darwin"):
         try:
             multiprocessing.set_start_method("fork")
