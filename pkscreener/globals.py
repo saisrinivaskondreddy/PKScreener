@@ -2246,7 +2246,7 @@ def printNotifySaveScreenedResults(
     )
     runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
     if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
-        runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1]
+        runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1].strip()
     pngName = f'PKS_{runOptionName}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
     pngExtension = ".png"
     eligible = is_token_telegram_configured()
@@ -2377,6 +2377,40 @@ def printNotifySaveScreenedResults(
                     caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
                     caption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text}{pipedTitle}" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
                 if not testing: # and not userPassedArgs.runintradayanalysis:
+                    # Also share the kite_basket html/json file.
+                    try:
+                        from PKDevTools.classes import Archiver
+                        with pd.option_context('mode.chained_assignment', None):
+                            kite_basket_df = pd.DataFrame(columns=["product","exchange","tradingsymbol","quantity","transaction_type","order_type","price"], index=saveResultsTrimmed.index)
+                            kite_basket_df["price"] = saveResultsTrimmed["LTP"]
+                            kite_basket_df["quantity"] = 1
+                            kite_basket_df["product"] = "MIS"
+                            kite_basket_df["exchange"] = "NSE"
+                            kite_basket_df["transaction_type"] = "BUY"
+                            kite_basket_df["order_type"] = "LIMIT"
+                            kite_basket_df.reset_index(inplace=True)
+                            kite_basket_df.reset_index(inplace=True, drop=True)
+                            kite_basket_df["tradingsymbol"] = kite_basket_df["Stock"]
+                            kite_basket_df.drop("Stock", axis=1, inplace=True, errors="ignore")
+                            kite_file_path = os.path.join(Archiver.get_user_outputs_dir(), f"{runOptionName}_Kite_Basket.html")
+                            kite_basket_df.to_json(kite_file_path,orient='records',lines=False)
+                            lines = ""
+                            with open(kite_file_path, "r") as f:
+                                lines = f.read()
+                            lines = lines.replace("\"","&quot;").replace("\n","\n,")
+                            htmlContent = f'<html><span><form method="post" action="https://kite.zerodha.com/connect/basket" target="_blank"><input type="hidden" name="api_key" value="gcac8p9oowmserd0"><input type="hidden" name="data" value="{lines}"><input type="submit" value="Review Basket Order on Kite" style="width:250px;height:200px;padding: 0.5rem 1rem; font-weight: 700;"></form></span></html>'
+                            with open(kite_file_path, "w") as f:
+                                f.write(htmlContent)
+                            sendMessageToTelegramChannel(
+                                message=None,
+                                document_filePath=kite_file_path,
+                                caption=f"Review Kite(Zerodha) Basket order for {runOptionName}",
+                                user=user,
+                            )
+                            # os.remove(kite_file_path)
+                    except Exception as e:  # pragma: no cover
+                        default_logger().debug(e, exc_info=True)
+                        pass
                     sendQuickScanResult(
                         f"{reportTitle}{menuChoiceHierarchy}",
                         user,
@@ -2388,6 +2422,7 @@ def printNotifySaveScreenedResults(
                         addendum=tabulated_strategy,
                         addendumLabel=addendumLabel,
                     )
+
                     # Let's send the backtest results now only if the user requested 1-on-1 for scan.
                     if user is not None:
                         # Now let's try and send backtest results
