@@ -536,6 +536,11 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
     # original_stdout = sys.stdout
     # original__stdout = sys.__stdout__
     commitFrequency = [21,34,55,89,144,200]
+    branch = "main"
+
+    # If the job got triggered before, let's wait until alert time (3 min for job setup, so effectively it will be 9:40am)
+    while (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=MORNING_ALERT_HOUR,minute=MORNING_ALERT_MINUTE)):
+        sleep(60) # Wait for alert time
     # Trigger intraday pre-defined piped scanners
     if PKDateUtilities.currentDateTime() <= PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute):
         scanIndex = 1
@@ -546,7 +551,6 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
 
     for key in objectDictionary.keys():
         scanOptions = f'{objectDictionary[key]["td3"]}_D_D_D_D_D'
-        branch = "main"
         options = f'{scanOptions.replace("_",":").replace("B:","X:")}:D:D:D'.replace("::",":")
         if launchLocal:
             # from pkscreener import pkscreenercli
@@ -568,14 +572,12 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
                 daysInPast -=1
             tryCommitOutcomes(options)
         else:
-            # If the job got triggered before, let's wait until alert time (3 min for job setup, so effectively it will be 9:40am)
-            while (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=MORNING_ALERT_HOUR,minute=MORNING_ALERT_MINUTE)):
-                sleep(60) # Wait for alert time
             resp = triggerRemoteScanAlertWorkflow(scanOptions, branch)
             if resp.status_code == 204:
                 sleep(5)
             else:
                 break
+    
     runIntradayAnalysisScans(branch=branch)
 
 def runIntradayAnalysisScans(branch="main"):
