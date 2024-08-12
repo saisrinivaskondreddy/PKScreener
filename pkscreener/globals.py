@@ -50,11 +50,13 @@ from PKDevTools.classes.ColorText import colorText
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
 from PKDevTools.classes.log import default_logger #, tracelog
 from PKDevTools.classes.SuppressOutput import SuppressOutput
+from PKDevTools.classes import Archiver
 from PKDevTools.classes.Telegram import (
     is_token_telegram_configured,
     send_document,
     send_message,
-    send_photo
+    send_photo,
+    send_media_group
 )
 from PKNSETools.morningstartools.PKMorningstarDataFetcher import morningstarDataFetcher
 from PKNSETools.Nasdaq.PKNasdaqIndex import PKNasdaqIndexFetcher
@@ -142,6 +144,7 @@ logging_queue = None
 mp_manager = None
 analysis_dict = {}
 download_trials = 0
+media_group_dict = {}
 
 def startMarketMonitor(mp_dict,keyboardevent):
     from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
@@ -163,12 +166,29 @@ def finishScreening(
         # There's no need to prompt the user to save xls report or to save data locally.
         # This scan must have been triggered by github workflow by a user or scheduled job
         saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount)
-    
     if not testBuild and not downloadOnly and not testing:
         saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
         )
-
+    file_paths = []
+    file_captions = []
+    for attachment in media_group_dict["ATTACHMENTS"]:
+        file_paths.append(attachment["FILEPATH"])
+        file_captions.append(attachment["CAPTION"])
+    resp = send_media_group(user=userPassedArgs.user,
+                                     png_paths=[],
+                                     png_album_caption=None,
+                                     file_paths=file_paths,
+                                     file_captions=file_captions)
+    default_logger().debug(resp.text, exc_info=True)
+    for f in file_paths:
+        try:
+            if "RUNNER" in os.environ.keys():
+                os.remove(f)
+            elif not f.endswith("xlsx"):
+                os.remove(f)
+        except:
+            pass
 
 def getDownloadChoices(defaultAnswer=None):
     global userPassedArgs
@@ -2217,7 +2237,7 @@ def updateMenuChoiceHierarchy():
 def printNotifySaveScreenedResults(
     screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None
 ):
-    global userPassedArgs, elapsed_time
+    global userPassedArgs, elapsed_time, media_group_dict
     if userPassedArgs.monitor is not None:
         return
     MAX_ALLOWED = (configManager.maxdisplayresults if userPassedArgs.maxdisplayresults is None else (int(userPassedArgs.maxdisplayresults) if not testing else 1))
@@ -2377,7 +2397,7 @@ def printNotifySaveScreenedResults(
                     caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
                     finalCaption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text}{pipedTitle}" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
                 if not testing: # and not userPassedArgs.runintradayanalysis:
-                    sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
+                    kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
                     sendQuickScanResult(
                         f"{reportTitle}{menuChoiceHierarchy}",
                         user,
@@ -2389,7 +2409,9 @@ def printNotifySaveScreenedResults(
                         addendum=tabulated_strategy,
                         addendumLabel=addendumLabel,
                     )
-
+                    png_filepath = pngName+pngExtension
+                    media_group_dict["ATTACHMENTS"] = [{"FILEPATH":kite_file_path,"CAPTION":kite_caption.replace('&','n')},
+                                                       {"FILEPATH":png_filepath,"CAPTION":finalCaption.replace('&','n')}]
                     # Let's send the backtest results now only if the user requested 1-on-1 for scan.
                     if user is not None:
                         # Now let's try and send backtest results
@@ -2445,10 +2467,12 @@ def printNotifySaveScreenedResults(
         Utility.tools.setLastScreenedResults(screenResults, saveResults, f"{PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)}_{recordDate if recordDate is not None else ''}")
 
 def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user):
-    if PKDateUtilities.isTradingTime(): # Only during market hours
+    kite_file_path = os.path.join(Archiver.get_user_outputs_dir(), f"{runOptionName}_Kite_Basket.html")
+    kite_caption=f"Review Kite(Zerodha) Basket order for {runOptionName}  - {caption}"
+    global userPassedArgs
+    if PKDateUtilities.isTradingTime() or userPassedArgs.log: # Only during market hours
         # Also share the kite_basket html/json file.
         try:
-            from PKDevTools.classes import Archiver
             with pd.option_context('mode.chained_assignment', None):
                 kite_basket_df = pd.DataFrame(columns=["product","exchange","tradingsymbol","quantity","transaction_type","order_type","price"], index=saveResultsTrimmed.index)
                 kite_basket_df["price"] = saveResultsTrimmed["LTP"]
@@ -2461,25 +2485,26 @@ def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,us
                 kite_basket_df.reset_index(inplace=True, drop=True)
                 kite_basket_df["tradingsymbol"] = kite_basket_df["Stock"]
                 kite_basket_df.drop("Stock", axis=1, inplace=True, errors="ignore")
-                kite_file_path = os.path.join(Archiver.get_user_outputs_dir(), f"{runOptionName}_Kite_Basket.html")
                 kite_basket_df.to_json(kite_file_path,orient='records',lines=False)
                 lines = ""
                 with open(kite_file_path, "r") as f:
                     lines = f.read()
                 lines = lines.replace("\"","&quot;").replace("\n","\n,")
-                htmlContent = f'<html><span><form method="post" action="https://kite.zerodha.com/connect/basket" target="_blank"><input type="hidden" name="api_key" value="gcac8p9oowmserd0"><input type="hidden" name="data" value="{lines}"><input type="submit" value="Review Basket Order on Kite" style="width:250px;height:200px;padding: 0.5rem 1rem; font-weight: 700;"></form></span></html>'
+                style = ".center { margin: 0;position: absolute;top: 50%;left: 50%;-ms-transform: translate(-50%, -50%);transform: translate(-50%, -50%);}"
+                htmlContent = f'<html><style>{style}</style><span><form method="post" action="https://kite.zerodha.com/connect/basket" target="_blank"><input type="hidden" name="api_key" value="gcac8p9oowmserd0"><input type="hidden" name="data" value="{lines}"><div class="center"><input type="submit" value="Review Basket Order on Kite" style="width:250px;height:200px;padding: 0.5rem 1rem; font-weight: 700;"></div></form></span></html>'
                 with open(kite_file_path, "w") as f:
                     f.write(htmlContent)
-                sendMessageToTelegramChannel(
-                    message=None,
-                    document_filePath=kite_file_path,
-                    caption=f"Review Kite(Zerodha) Basket order for {runOptionName}  - {caption}",
-                    user=user,
-                )
+                # sendMessageToTelegramChannel(
+                #     message=None,
+                #     document_filePath=kite_file_path,
+                #     caption=kite_caption,
+                #     user=user,
+                # )
                 # os.remove(kite_file_path)
         except Exception as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
             pass
+    return kite_file_path, kite_caption
 
 def prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, testing, user, pngName, pngExtension, eligible):
     targetDateG10k = None
@@ -2636,13 +2661,13 @@ def sendQuickScanResult(
             detailLabel = detailLabel,
             legendPrefixText = legendPrefixText
         )
-        sendMessageToTelegramChannel(
-            message=None,
-            document_filePath=pngName + pngExtension,
-            caption=caption,
-            user=user,
-        )
-        os.remove(pngName + pngExtension)
+        # sendMessageToTelegramChannel(
+        #     message=None,
+        #     document_filePath=pngName + pngExtension,
+        #     caption=caption,
+        #     user=user,
+        # )
+        # os.remove(pngName + pngExtension)
     except Exception as e:  # pragma: no cover
         default_logger().debug(e, exc_info=True)
         pass
@@ -2954,7 +2979,7 @@ def saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, l
 def saveNotifyResultsFile(
     screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=None
 ):
-    global userPassedArgs, elapsed_time, selectedChoice
+    global userPassedArgs, elapsed_time, selectedChoice, media_group_dict
     if user is None and userPassedArgs.user is not None:
         user = userPassedArgs.user
     if ">|" in userPassedArgs.options:
@@ -2972,10 +2997,13 @@ def saveNotifyResultsFile(
             saveResults, defaultAnswer=defaultAnswer,pastDate=pastDate)
         # User triggered telegram bot request
         # Group user Ids are < 0, individual ones are > 0
-        if filename is not None and user is not None and int(str(user)) > 0:
-            sendMessageToTelegramChannel(
-                document_filePath=filename, caption=menuChoiceHierarchy, user=user
-            )
+        # if filename is not None and user is not None and int(str(user)) > 0:
+        #     sendMessageToTelegramChannel(
+        #         document_filePath=filename, caption=menuChoiceHierarchy, user=user
+        #     )
+        if filename is not None:
+            media_group_dict["ATTACHMENTS"].append({"FILEPATH":filename,"CAPTION":menuChoiceHierarchy.replace('&','n')})
+
         OutputControls().printOutput(
             colorText.BOLD
             + colorText.WARN
@@ -2994,6 +3022,7 @@ def saveNotifyResultsFile(
         )
         if defaultAnswer is None:
             input("Press <Enter> to continue...")
+    return filename
 
 def sendGlobalMarketBarometer(userArgs=None):
     from pkscreener.classes import Barometer
@@ -3042,7 +3071,7 @@ def sendMessageToTelegramChannel(
             default_logger().debug(e, exc_info=True)
     if document_filePath is not None:
         try:
-            if caption is not None:
+            if caption is not None and isinstance(caption,str):
                 caption = f"{caption.replace('&','n')}"
             send_document(document_filePath, (caption if len(caption) <=1024 else ""), userID=user)
             # Breather for the telegram API to be able to send the document
