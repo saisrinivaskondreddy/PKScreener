@@ -1682,7 +1682,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             import traceback
                             traceback.print_exc()
                         pass
-        if menuOption in ["X","C"] and userPassedArgs.monitor is None:
+        if menuOption in ["X","C","P"] and userPassedArgs.monitor is None:
             finishScreening(
                 downloadOnly,
                 testing,
