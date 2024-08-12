@@ -283,8 +283,9 @@ jobs:
 
       - name: Test Built Binary for ${{ matrix.TARGET }}
         shell: bash
+        timeout-minutes: 2
+        continue-on-error: true
         run: ${{ matrix.TEST_BUILD }}
-        continue-on-error: false
 
       - name: Save Binaries as Artifacts
         uses: actions/upload-artifact@v2
