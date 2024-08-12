@@ -1200,7 +1200,7 @@ class tools:
         if response is not None and response.upper() != "N":
             pastDateString = f"{pastDate}_to_" if pastDate is not None else ""
             filename = (
-                f"PKScreener-result_{sheetName}_"
+                f"PKS_{sheetName}_"
                 + pastDateString
                 + PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")
                 + ".xlsx"

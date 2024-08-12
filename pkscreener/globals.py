@@ -170,25 +170,7 @@ def finishScreening(
         saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
         )
-    file_paths = []
-    file_captions = []
-    for attachment in media_group_dict["ATTACHMENTS"]:
-        file_paths.append(attachment["FILEPATH"])
-        file_captions.append(attachment["CAPTION"])
-    resp = send_media_group(user=userPassedArgs.user,
-                                     png_paths=[],
-                                     png_album_caption=None,
-                                     file_paths=file_paths,
-                                     file_captions=file_captions)
-    default_logger().debug(resp.text, exc_info=True)
-    for f in file_paths:
-        try:
-            if "RUNNER" in os.environ.keys():
-                os.remove(f)
-            elif not f.endswith("xlsx"):
-                os.remove(f)
-        except:
-            pass
+        sendMessageToTelegramChannel(mediagroup=True)
 
 def getDownloadChoices(defaultAnswer=None):
     global userPassedArgs
@@ -1682,7 +1664,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             import traceback
                             traceback.print_exc()
                         pass
-        if menuOption in ["X","C","P"] and userPassedArgs.monitor is None:
+        if (menuOption in ["X","C"] and userPassedArgs.monitor is None) or "|" not in userPassedArgs.options:
             finishScreening(
                 downloadOnly,
                 testing,
@@ -2412,6 +2394,7 @@ def printNotifySaveScreenedResults(
                     png_filepath = pngName+pngExtension
                     media_group_dict["ATTACHMENTS"] = [{"FILEPATH":kite_file_path,"CAPTION":kite_caption.replace('&','n')},
                                                        {"FILEPATH":png_filepath,"CAPTION":finalCaption.replace('&','n')}]
+                    media_group_dict["CAPTION"] = caption
                     # Let's send the backtest results now only if the user requested 1-on-1 for scan.
                     if user is not None:
                         # Now let's try and send backtest results
@@ -3002,7 +2985,10 @@ def saveNotifyResultsFile(
         #         document_filePath=filename, caption=menuChoiceHierarchy, user=user
         #     )
         if filename is not None:
-            media_group_dict["ATTACHMENTS"].append({"FILEPATH":filename,"CAPTION":menuChoiceHierarchy.replace('&','n')})
+            if "ATTACHMENTS" not in media_group_dict.keys():
+                media_group_dict["ATTACHMENTS"] = []
+            caption = media_group_dict["CAPTION"] if "CAPTION" in media_group_dict.keys() else menuChoiceHierarchy
+            media_group_dict["ATTACHMENTS"].append({"FILEPATH":filename,"CAPTION":caption.replace('&','n')})
 
         OutputControls().printOutput(
             colorText.BOLD
@@ -3041,43 +3027,67 @@ def sendGlobalMarketBarometer(userArgs=None):
         pass
 
 def sendMessageToTelegramChannel(
-    message=None, photo_filePath=None, document_filePath=None, caption=None, user=None
+    message=None, photo_filePath=None, document_filePath=None, caption=None, user=None, mediagroup=False
 ):
-    global userPassedArgs, test_messages_queue
-    if test_messages_queue is not None:
-        test_messages_queue.append(f"message:{message}\ncaption:{caption}\nuser:{user}\ndocument:{document_filePath}")
-        if len(test_messages_queue) >10:
-            test_messages_queue.pop(0)
-    if user is None and userPassedArgs is not None and userPassedArgs.user is not None:
-        user = userPassedArgs.user
-    if user is not None and caption is not None:
-        caption = f"{caption.replace('&','n')}."
-    if message is not None:
-        try:
-            message = message.replace("&", "n").replace("<","*")
-            send_message(message, userID=user)
-        except Exception as e:  # pragma: no cover
-            default_logger().debug(e, exc_info=True)
+    global userPassedArgs, test_messages_queue, media_group_dict
+    if not mediagroup:
+        if test_messages_queue is not None:
+            test_messages_queue.append(f"message:{message}\ncaption:{caption}\nuser:{user}\ndocument:{document_filePath}")
+            if len(test_messages_queue) >10:
+                test_messages_queue.pop(0)
+        if user is None and userPassedArgs is not None and userPassedArgs.user is not None:
+            user = userPassedArgs.user
+        if user is not None and caption is not None:
+            caption = f"{caption.replace('&','n')}."
+        if message is not None:
+            try:
+                message = message.replace("&", "n").replace("<","*")
+                send_message(message, userID=user)
+            except Exception as e:  # pragma: no cover
+                default_logger().debug(e, exc_info=True)
+        else:
+            message = ""
+        if photo_filePath is not None:
+            try:
+                if caption is not None:
+                    caption = f"{caption.replace('&','n')}"
+                send_photo(photo_filePath, (caption if len(caption) <=1024 else ""), userID=user)
+                # Breather for the telegram API to be able to send the heavy photo
+                sleep(2)
+            except Exception as e:  # pragma: no cover
+                default_logger().debug(e, exc_info=True)
+        if document_filePath is not None:
+            try:
+                if caption is not None and isinstance(caption,str):
+                    caption = f"{caption.replace('&','n')}"
+                send_document(document_filePath, (caption if len(caption) <=1024 else ""), userID=user)
+                # Breather for the telegram API to be able to send the document
+                sleep(2)
+            except Exception as e:  # pragma: no cover
+                default_logger().debug(e, exc_info=True)
     else:
-        message = ""
-    if photo_filePath is not None:
-        try:
-            if caption is not None:
-                caption = f"{caption.replace('&','n')}"
-            send_photo(photo_filePath, (caption if len(caption) <=1024 else ""), userID=user)
-            # Breather for the telegram API to be able to send the heavy photo
-            sleep(2)
-        except Exception as e:  # pragma: no cover
-            default_logger().debug(e, exc_info=True)
-    if document_filePath is not None:
-        try:
-            if caption is not None and isinstance(caption,str):
-                caption = f"{caption.replace('&','n')}"
-            send_document(document_filePath, (caption if len(caption) <=1024 else ""), userID=user)
-            # Breather for the telegram API to be able to send the document
-            sleep(2)
-        except Exception as e:  # pragma: no cover
-            default_logger().debug(e, exc_info=True)
+        file_paths = []
+        file_captions = []
+        if "ATTACHMENTS" in media_group_dict.keys():
+            for attachment in media_group_dict["ATTACHMENTS"]:
+                file_paths.append(attachment["FILEPATH"])
+                file_captions.append(attachment["CAPTION"])
+            resp = send_media_group(user=userPassedArgs.user,
+                                            png_paths=[],
+                                            png_album_caption=None,
+                                            file_paths=file_paths,
+                                            file_captions=file_captions)
+            default_logger().debug(resp.text, exc_info=True)
+            caption = str(len(file_captions))
+            message = file_captions[0]
+        for f in file_paths:
+            try:
+                if "RUNNER" in os.environ.keys():
+                    os.remove(f)
+                elif not f.endswith("xlsx"):
+                    os.remove(f)
+            except:
+                pass
     if user is not None:
         channel_userID="-1001785195297"
         if user != channel_userID:
@@ -3086,7 +3096,6 @@ def sendMessageToTelegramChannel(
                 "Responded back to userId:{0} with {1}.{2}".format(user, caption, message),
                 userID="-1001785195297",
             )
-
 
 def sendTestStatus(screenResults, label, user=None):
     msg = "<b>SUCCESS</b>" if (screenResults is not None and len(screenResults) >= 1) else "<b>FAIL</b>"
