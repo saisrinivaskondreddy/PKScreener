@@ -170,7 +170,7 @@ def finishScreening(
         saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
         )
-        sendMessageToTelegramChannel(mediagroup=True)
+        sendMessageToTelegramChannel(mediagroup=True,user=userPassedArgs.user)
 
 def getDownloadChoices(defaultAnswer=None):
     global userPassedArgs
@@ -3030,13 +3030,13 @@ def sendMessageToTelegramChannel(
     message=None, photo_filePath=None, document_filePath=None, caption=None, user=None, mediagroup=False
 ):
     global userPassedArgs, test_messages_queue, media_group_dict
+    if user is None and userPassedArgs is not None and userPassedArgs.user is not None:
+        user = userPassedArgs.user
     if not mediagroup:
         if test_messages_queue is not None:
             test_messages_queue.append(f"message:{message}\ncaption:{caption}\nuser:{user}\ndocument:{document_filePath}")
             if len(test_messages_queue) >10:
                 test_messages_queue.pop(0)
-        if user is None and userPassedArgs is not None and userPassedArgs.user is not None:
-            user = userPassedArgs.user
         if user is not None and caption is not None:
             caption = f"{caption.replace('&','n')}."
         if message is not None:
@@ -3071,15 +3071,15 @@ def sendMessageToTelegramChannel(
         if "ATTACHMENTS" in media_group_dict.keys():
             for attachment in media_group_dict["ATTACHMENTS"]:
                 file_paths.append(attachment["FILEPATH"])
-                file_captions.append(attachment["CAPTION"])
+                file_captions.append(attachment["CAPTION"].replace('&','n'))
             resp = send_media_group(user=userPassedArgs.user,
                                             png_paths=[],
                                             png_album_caption=None,
                                             file_paths=file_paths,
                                             file_captions=file_captions)
             default_logger().debug(resp.text, exc_info=True)
-            caption = str(len(file_captions))
-            message = file_captions[0]
+            caption = f"{str(len(file_captions))} files sent!"
+            message = media_group_dict["CAPTION"].replace('&','n').replace("<","*") if "CAPTION" in media_group_dict.keys() else "-"
         for f in file_paths:
             try:
                 if "RUNNER" in os.environ.keys():
