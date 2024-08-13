@@ -3084,7 +3084,7 @@ def sendMessageToTelegramChannel(
             for attachment in attachments:
                 file_paths.append(attachment["FILEPATH"])
                 file_captions.append(attachment["CAPTION"].replace('&','n'))
-            if len(file_paths) > 0:
+            if len(file_paths) > 0 and not userPassedArgs.monitor:
                 resp = send_media_group(user=userPassedArgs.user,
                                                 png_paths=[],
                                                 png_album_caption=None,
