@@ -143,16 +143,18 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
                         if rowIndex == 0:
                             # Column names to be repeated for each refresh in respective headers
                             cleanedScreenOptions = screenOptions.replace(":D","")
-                            if cleanedScreenOptions.startswith("|"):
-                                cleanedScreenOptions = cleanedScreenOptions.replace("|","")
-                                pipedFrom = ""
-                                if cleanedScreenOptions.startswith("{"):
-                                    pipedFrom = cleanedScreenOptions.split("}")[0] + "}:"
-                                cleanedScreenOptions = pipedFrom + ":".join(cleanedScreenOptions.split(":")[2:])
-                                cleanedScreenOptions = cleanedScreenOptions.replace(">X:0:","")
-                            widgetHeader = ":".join(cleanedScreenOptions.split(":")[:4])
-                            if "i " in screenOptions:
-                                widgetHeader = f'{":".join(widgetHeader.split(":")[:3])}:i:{cleanedScreenOptions.split("i ")[-1]}'
+                            widgetHeader = self.getScanOptionName(cleanedScreenOptions)
+                            if len(widgetHeader) <= 0:
+                                if cleanedScreenOptions.startswith("|"):
+                                    cleanedScreenOptions = cleanedScreenOptions.replace("|","")
+                                    pipedFrom = ""
+                                    if cleanedScreenOptions.startswith("{"):
+                                        pipedFrom = cleanedScreenOptions.split("}")[0] + "}:"
+                                    cleanedScreenOptions = pipedFrom + ":".join(cleanedScreenOptions.split(":")[2:])
+                                    cleanedScreenOptions = cleanedScreenOptions.replace(">X:0:","")
+                                widgetHeader = ":".join(cleanedScreenOptions.split(":")[:4])
+                                if "i " in screenOptions:
+                                    widgetHeader = f'{":".join(widgetHeader.split(":")[:3])}:i:{cleanedScreenOptions.split("i ")[-1]}'
                             self.monitor_df.loc[startRowIndex,[f"A{startColIndex+1}"]] = colorText.BOLD+colorText.HEAD+(widgetHeader if startColIndex==firstColIndex else col)+colorText.END
                             highlightCols.append(startColIndex)
                         else:
@@ -252,16 +254,7 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
                         ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("x  ","x")
             telegram_df_tabulated = telegram_df_tabulated.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R")
             choiceSegments = chosenMenu.split(">")
-            from pkscreener.classes.MenuOptions import PREDEFINED_SCAN_MENU_VALUES
-            choices = f"--systemlaunched -a y -e -o '{screenOptions.replace('C:','X:').replace('D:','')}'"
-            indexNum = -1
-            try:
-                indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
-            except:
-                pass
-            optionName = ""
-            if indexNum >= 0:
-                optionName = f"{('P_1_'+str(indexNum +1)+':') if '>|' in choices else optionName}"
+            optionName = self.getScanOptionName(screenOptions)
             chosenMenu = f"{choiceSegments[-2]}>{choiceSegments[-1]}" if (len(choiceSegments)>=4 or len(choiceSegments[-1]) <= 10) else f"{choiceSegments[-1]}"
             result_output = f"Latest data as of:{dbTimestamp}\n<b>{optionName}{chosenMenu}</b> [{screenOptions}]\n<pre>{telegram_df_tabulated}</pre>"
             try:
@@ -272,3 +265,15 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
             except:
                 pass
 
+    def getScanOptionName(self, screenOptions):
+        from pkscreener.classes.MenuOptions import PREDEFINED_SCAN_MENU_VALUES
+        choices = f"--systemlaunched -a y -e -o '{screenOptions.replace('C:','X:').replace('D:','')}'"
+        indexNum = -1
+        try:
+            indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
+        except:
+            pass
+        optionName = ""
+        if indexNum >= 0:
+            optionName = f"{('P_1_'+str(indexNum +1)+':') if '>|' in choices else optionName}"
+        return optionName

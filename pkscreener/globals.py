@@ -3077,15 +3077,20 @@ def sendMessageToTelegramChannel(
         file_paths = []
         file_captions = []
         if "ATTACHMENTS" in media_group_dict.keys():
-            for attachment in media_group_dict["ATTACHMENTS"]:
+            attachments = media_group_dict["ATTACHMENTS"]
+            numFiles = len(attachments)
+            if numFiles >= 4:
+                media_group_dict["ATTACHMENTS"] = []
+            for attachment in attachments:
                 file_paths.append(attachment["FILEPATH"])
                 file_captions.append(attachment["CAPTION"].replace('&','n'))
-            resp = send_media_group(user=userPassedArgs.user,
-                                            png_paths=[],
-                                            png_album_caption=None,
-                                            file_paths=file_paths,
-                                            file_captions=file_captions)
-            default_logger().debug(resp.text, exc_info=True)
+            if len(file_paths) > 0:
+                resp = send_media_group(user=userPassedArgs.user,
+                                                png_paths=[],
+                                                png_album_caption=None,
+                                                file_paths=file_paths,
+                                                file_captions=file_captions)
+                default_logger().debug(resp.text, exc_info=True)
             caption = f"{str(len(file_captions))} files sent!"
             message = media_group_dict["CAPTION"].replace('&','n').replace("<","*") if "CAPTION" in media_group_dict.keys() else "-"
         for f in file_paths:
@@ -3101,7 +3106,7 @@ def sendMessageToTelegramChannel(
         if user != channel_userID:
             # Send an update to dev channel
             send_message(
-                "Responded back to userId:{0} with {1}.{2}".format(user, caption, message),
+                f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options}]",
                 userID="-1001785195297",
             )
 
