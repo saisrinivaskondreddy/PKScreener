@@ -427,7 +427,7 @@ def runApplication():
             args.runintradayanalysis = True
         try:
             if args.systemlaunched:
-                choices = f"--systemlaunched -a y -e -o '{args.options.replace('C:','X:').replace('D:','D:')}'"
+                choices = f"--systemlaunched -a y -e -o '{args.options.replace('C:','X:').replace('D:','')}'"
                 indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
                 choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
                 args.progressstatus = f"[+] {choices} => Running {choices}"
@@ -805,11 +805,11 @@ def pkscreenercli():
                 if os.path.exists(filePath):
                     default_logger().info("monitor_outputs_1.txt already exists! This means an instance may already be running. Exiting now...")
                     # Since the file exists, it means, there is another instance running
-                    sys.exit(0)
+                    return
             else:
                 # It should have been launched only during the trading hours
                 default_logger().info("--telegram option must be launched ONLY during NSE trading hours. Exiting now...")
-                sys.exit(0)
+                return
         # Check and see if we're running only the telegram bot
         if args.bot:
             from pkscreener import pkscreenerbot

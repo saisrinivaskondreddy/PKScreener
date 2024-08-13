@@ -296,7 +296,7 @@ def launchIntradayMonitor():
             monitor_proc = Popen(appArgs)
             logger.info(f"{launcher} -a Y -m 'X' -p --telegram launched")
         else:
-            result_outputs = "Monitor is running, but the results are being prepared. Try again in next few seconds."
+            result_outputs = "Intraday Monitor is already running/launching, but the results are being prepared. Try again in the next few seconds."
             logger.info(f"{launcher} -a Y -m 'X' -p --telegram already running")
     except Exception as e:
         result_outputs = "Hmm...It looks like you caught us taking a break! Try again later :-)"
