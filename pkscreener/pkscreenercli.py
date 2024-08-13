@@ -277,9 +277,14 @@ if __name__ == "__main__":
         help="Piped Menus",
         required=False,
     )
-    # args = " -a Y -e -p -u 6186237493 -o X:12:30::D:D:D:D:D".split(" ")
-    # argsv = argParser.parse_known_args(args=args)
-    argsv = argParser.parse_known_args()
+
+    def get_debug_args():
+        return None
+        # return " -a Y -e -l -o X:12:30:D:D:D:D:D".split(" ")
+
+    args = get_debug_args()
+    argsv = argParser.parse_known_args(args=args)
+    # argsv = argParser.parse_known_args()
     args = argsv[0]
     # if sys.argv[0].endswith(".py"):
     #     args.monitor = 'X'
@@ -291,6 +296,7 @@ if __name__ == "__main__":
     dbTimestamp = None
     elapsed_time = None
     configManager = ConfigManager.tools()
+
 
 def exitGracefully():
     from PKDevTools.classes import Archiver
@@ -395,10 +401,15 @@ def runApplication():
         pass
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time
     from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
-    # args = " -a Y -e -p -o C:12: --runintradayanalysis".split(" ")
-    # argsv = argParser.parse_known_args(args=args)
-    argsv = argParser.parse_known_args()
+    args = get_debug_args()
+    argsv = argParser.parse_known_args(args=args)
+    # argsv = argParser.parse_known_args()
     args = argsv[0]
+    if args.user is None:
+        from PKDevTools.classes.Telegram import get_secrets
+        Channel_Id, _, _, _ = get_secrets()
+        if Channel_Id is not None:
+            args.user = int(f"-{Channel_Id}")
     if args.triggertimestamp is None:
         args.triggertimestamp = int(PKDateUtilities.currentDateTimestamp())
     else:
