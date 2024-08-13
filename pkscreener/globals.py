@@ -1631,21 +1631,26 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     if shouldSend:
                         caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
                         caption = f"Stocks with dividends/bonus/splits. Samples:<pre>{caption_results}</pre>" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
+                        png_file = f"PKS_X_12_26_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}"
+                        png_ext = ".png"
                         sendQuickScanResult(
                             menuChoiceHierarchy,
                             user,
                             shareable_strings[0],
                             Utility.tools.removeAllColorStyles(shareable_strings[0]),
                             caption,
-                            f"PKS_X_12_26_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
-                            ".png",
+                            png_file,
+                            png_ext,
                             addendum=shareable_strings[1],
                             addendumLabel="NSE Stocks giving bonus:",
                             backtestSummary=shareable_strings[2],
                             backtestDetail="",
                             summaryLabel = "NSE Stocks with corporate action type stock split:",
                             detailLabel = None,
+                            forceSend=False
                             )
+                        media_group_dict["ATTACHMENTS"] = [{"FILEPATH":png_file+png_ext,"CAPTION":caption.replace('&','n')}]
+                        media_group_dict["CAPTION"] = "Stocks with dividends/bonus/splits."
                         
                 elif "|" not in userPassedArgs.options:
                     try:
@@ -2442,7 +2447,7 @@ def printNotifySaveScreenedResults(
                 + f"[+] Found {len(screenResults) if screenResults is not None else 0} Stocks in {str('{:.2f}'.format(elapsed_time))} sec for {pastDate}. Showing only stocks that met the filter criteria in the filters section of user configuration{(' with portfolio returns:' + summaryReturns) if (len(summaryReturns) > 0) else ''}"
                 + colorText.END
             )
-    elif user is not None:
+    elif user is not None and not str(user).startswith("-"):
         sendMessageToTelegramChannel(
             message=f"No scan results found for {menuChoiceHierarchy}", user=user
         )
@@ -2522,8 +2527,9 @@ def prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, 
                         titleLabelG10k,
                         pngName,
                         pngExtension,
+                        forceSend=True
                     )
-        elif user is not None and eligible:
+        elif user is not None and eligible and not str(user).startswith("-"):
             sendMessageToTelegramChannel(
                 message=f"No scan results found for {menuChoiceHierarchy}", user=user
             )
@@ -2625,7 +2631,8 @@ def sendQuickScanResult(
     backtestDetail="",
     summaryLabel = None,
     detailLabel = None,
-    legendPrefixText = ""
+    legendPrefixText = "",
+    forceSend=False
 ):
     if "PKDevTools_Default_Log_Level" not in os.environ.keys():
         if (("RUNNER" not in os.environ.keys()) or ("RUNNER" in os.environ.keys() and os.environ["RUNNER"] == "LOCAL_RUN_SCANNER")):
@@ -2644,13 +2651,14 @@ def sendQuickScanResult(
             detailLabel = detailLabel,
             legendPrefixText = legendPrefixText
         )
-        # sendMessageToTelegramChannel(
-        #     message=None,
-        #     document_filePath=pngName + pngExtension,
-        #     caption=caption,
-        #     user=user,
-        # )
-        # os.remove(pngName + pngExtension)
+        if forceSend:
+            sendMessageToTelegramChannel(
+                message=None,
+                document_filePath=pngName + pngExtension,
+                caption=caption,
+                user=user,
+            )
+            os.remove(pngName + pngExtension)
     except Exception as e:  # pragma: no cover
         default_logger().debug(e, exc_info=True)
         pass

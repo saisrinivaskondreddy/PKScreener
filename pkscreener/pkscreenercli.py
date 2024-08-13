@@ -541,7 +541,8 @@ def runApplication():
                                     markdown_results=mark_down,
                                     caption="IntradayAnalysis - Morning alert vs Market Close",
                                     pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
-                                    pngExtension= ".png"
+                                    pngExtension= ".png",
+                                    forceSend=True
                                     )
     else:
         if args.barometer:
