@@ -2430,10 +2430,10 @@ class ScreeningStatistics:
                 ema21CrossedEMA55 = (ema_21 >= ema_55 and ema_21_prev <= ema_55_prev) or ema21CrossedEMA55
                 superConfluenceEnforce200SMA = self.configManager.superConfluenceEnforce200SMA
                 ema_min = min(ema_8, ema_21, ema_55)
-                emasCrossedSMA200 = ((abs(ema_55 - sma_200) / sma_200 <= percentage)) or emasCrossedSMA200 # (sma_200 <= ema_min and sma_200 <= ema_55)
+                emasCrossedSMA200 = ((abs(ema_55 - sma_200) / ema_55 <= percentage)) or emasCrossedSMA200 # (sma_200 <= ema_min and sma_200 <= ema_55)
                 if not superConfluenceEnforce200SMA:
                     emasCrossedSMA200 = True
-                superbConfluence = sum([ema8CrossedEMA21, ema8CrossedEMA55, ema21CrossedEMA55, emasCrossedSMA200]) >= 4
+                superbConfluence = sum([ema8CrossedEMA21, emasCrossedSMA200]) >= 2 # ema8CrossedEMA55, ema21CrossedEMA55
                 if superbConfluence:
                     indexDate = PKDateUtilities.dateFromYmdString(str(data.index[recentCurrentDay-1]).split(" ")[0])
                     dayDate = f"{indexDate.day}/{indexDate.month}"

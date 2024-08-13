@@ -1499,9 +1499,9 @@ class tools:
                     input(
                         colorText.BOLD
                         + colorText.WARN
-                        + "\n[+] Enter Percentage within which all MA/EMAs should be (Ideal: 0.1-2%)? (Default=0.5): "
+                        + "\n[+] Enter Percentage within which all MA/EMAs should be (Ideal: 0.1-2%)? (Default=0.8): "
                         + colorText.END
-                    ) or "0.5"
+                    ) or "0.8"
                 )
                 return (resp, percent / 100.0)
             if resp >= 0 and resp <= 9:
