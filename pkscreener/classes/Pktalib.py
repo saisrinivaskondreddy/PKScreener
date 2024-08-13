@@ -182,6 +182,15 @@ class pktalib:
             return talib.MA(close, timeperiod)
 
     @classmethod
+    def TriMA(self, close,length=10):
+        try:
+            import pandas_ta as talib
+            return talib.trima(close=close, length=length)
+        except Exception:  # pragma: no cover
+            # default_logger().debug(e, exc_info=True)
+            return None
+
+    @classmethod
     def MACD(self, close, fast, slow, signal):
         try:
             # import pandas_ta as talib

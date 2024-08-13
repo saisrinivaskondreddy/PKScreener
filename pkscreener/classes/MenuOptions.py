@@ -34,7 +34,7 @@ from pkscreener.classes import VERSION
 configManager = ConfigManager.tools()
 MENU_SEPARATOR = ""
 LINE_SEPARATOR = "\n"
-MAX_SUPPORTED_MENU_OPTION = 34
+MAX_SUPPORTED_MENU_OPTION = 38
 MAX_MENU_OPTION = 42
 
 level0MenuDict = {
@@ -90,7 +90,7 @@ level1_P_MenuDict = {
     "3": "Run Piped Scans Saved So Far",
     "M": "Back to the Top/Main menu",
 }
-PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23"]
+PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25"]
 PREDEFINED_SCAN_MENU_TEXTS = [
     "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",  # 1
     "Volume Scanners | High Momentum | ATR Cross",                          # 2
@@ -115,6 +115,8 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "BullCross-MA | Fair Value Buy Opportunities                        ",  # 21
     "VCP | Chart Patterns | MA Support | Bullish AVWAP",                    # 22
     "VCP (Mark Minervini) | Chart Patterns | MA Support | Bullish AVWAP ",  # 23
+    "BullCross-VWAP | Volume Scanners",                                     # 24
+    "BullCross-VWAP | ATR Cross | ATR Trailing Stop                     ",  # 25
 ]
 level2_P_MenuDict = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:
@@ -144,6 +146,8 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:7:9:5:>|X:12:21:8:'",                # 21
     "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:7:9:1:1:>|X:12:34:'",     # 22
     "--systemlaunched -a y -e -o 'X:12:7:8:>|X:12:7:9:1:1:>|X:12:34:'",     # 23
+    "--systemlaunched -a y -e -o 'X:12:7:9:7:>|X:0:9:2.5:'",                # 24
+    "--systemlaunched -a y -e -o 'X:12:7:9:7:>|X:0:31:>|X:0:30:1:'",        # 25
 ]
 PREDEFINED_PIPED_MENU_OPTIONS = []
 for option in PREDEFINED_SCAN_MENU_VALUES:
@@ -246,10 +250,10 @@ level2_X_MenuDict = {
     "32": "Intraday Breakout/Breakdown setup",
     "33": "Potential Profitable setups    ",
     "34": "Bullish Anchored-VWAP",
-    # "32": "High Momentum(14)",
-    # "28": "Extremely bullish daily close      ",
-    # "29": "Rising RSI                      ",
-    # "30": "RSI entering bullish territory",
+    "35": "Perfect Short Sells (Futures)  ",
+    "36": "Probable Short Sells (Futures)",
+    "37": "Short Sell Candidates (Volume SMA)",
+    "38": "Intraday Short Sell (PSAR / Volume SMA)",
     "42": "Show Last Screened Results",
     "M": "Back to the Top/Main menu",
     "Z": "Exit (Ctrl + C)",
@@ -287,6 +291,7 @@ level4_X_ChartPattern_MASignalMenuDict = {
     "4": "BearCross MA",
     "5": "BullCross MA",
     "6": "MA-Resist",
+    "7": "BullCross VWAP",
     "0": "Cancel",
 }
 

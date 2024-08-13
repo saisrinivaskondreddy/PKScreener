@@ -103,7 +103,7 @@ class StockScreener:
             data = None
             intraday_data = None
             data = self.getRelevantDataForStock(totalSymbols, shouldCache, stock, downloadOnly, printCounter, backtestDuration, hostRef,hostRef.objectDictionaryPrimary, configManager, fetcher, period,None, testData,exchangeName)
-            if executeOption == 32 or (not configManager.isIntradayConfig() and configManager.calculatersiintraday):
+            if str(executeOption) in ["32","38"] or (not configManager.isIntradayConfig() and configManager.calculatersiintraday):
                 # Daily data is already available in "data" above.
                 # We need the intraday data for 1-d RSI values when config is not for intraday
                 intraday_data = self.getRelevantDataForStock(totalSymbols, shouldCache, stock, downloadOnly, printCounter, backtestDuration, hostRef, hostRef.objectDictionarySecondary, configManager, fetcher, "1d","1m", testData,exchangeName)
@@ -566,7 +566,7 @@ class StockScreener:
                         or (executeOption == 9 and hasMinVolumeRatio)
                         or (executeOption == 10 and isPriceRisingByAtLeast2Percent)
                         or (executeOption == 11 and isShortTermBullish)
-                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34] and isValidityCheckMet)
+                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38] and isValidityCheckMet)
                         or (executeOption == 21 and (mfiStake > 0 and reversalOption in [3,5]))
                         or (executeOption == 21 and (mfiStake < 0 and reversalOption in [6,7]))
                         or (executeOption == 21 and (fairValueDiff > 0 and reversalOption in [8]))
@@ -711,7 +711,7 @@ class StockScreener:
 
     def performValidityCheckForExecuteOptions(self,executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,buySellAll=3,intraday_data=None):
         isValid = True
-        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34]:
+        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38]:
             return True
         if executeOption == 11:
             isValid = screener.validateShortTermBullish(
@@ -761,6 +761,15 @@ class StockScreener:
             isValid = screener.findPotentialProfitableEntries(processedData,fullData, saveDictionary,screeningDictionary)
         elif executeOption == 34: # findBullishAVWAP
             isValid = screener.findBullishAVWAP(fullData,screeningDictionary,saveDictionary)
+        elif executeOption == 35: # findPerfectShortSellsFutures
+            isValid = screener.findPerfectShortSellsFutures(fullData)
+        elif executeOption == 36: # findProbableShortSellsFutures
+            isValid = screener.findProbableShortSellsFutures(fullData)
+        elif executeOption == 37: # findShortSellCandidatesForVolumeSMA
+            isValid = screener.findShortSellCandidatesForVolumeSMA(fullData)
+        elif executeOption == 38: # findIntradayShortSellWithPSARVolumeSMA
+            isValid = screener.findIntradayShortSellWithPSARVolumeSMA(fullData,intraday_data)
+
         return isValid        
                     
     def performBasicVolumeChecks(self, executeOption, volumeRatio, screeningDictionary, saveDictionary, processedData, configManager, screener):

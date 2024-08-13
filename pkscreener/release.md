@@ -2,11 +2,9 @@
 
 ## What's New?
 1. [v0.45.20240813.497] release
-* Bullish anchored VWAP implemented under X > 12 > 34. Added these along with VCP in pre-defined piped scanners as well under option 22/23.
-* Potential profitable setups (Try menu option 33. X > 12 > 33) with condtions such that 200 MA is rising for at least 3 months, 50 MA is above 200MA, Current price is above 20Osma and preferably above 50 to 100, Current price is at least above 100 % from 52week low, the stock should have made a 52 week high at least once every 4 to 6 month.
-* Super confluence option modified to be configurable. In the pkscreener.ini filoe, you can configure which EMAs you would like to have super-confluence tested with. For example, by default it is 8,21,55 but you can change superconfluenceemaperiods to 10,20,55 as well. Similarly, change superconfluencemaxreviewdays to suitable number of days within which you would like the tool to review for super-confluence. By default it is set to 3 days. (8/10 EMA >= 21/20 EMA >= 55 EMA >= 200 SMA within 0-2%). Try X > 12 > 7 > 3 > Option 4.
-* Intraday Breakout setup at Day Open (open==low or high with open/close >< previous day high/low price) : Try the X > 12 > 32 option with Buy, Sell or All options.
-* Sectoral Indices integrated. Try X > S. Then go on and select whichever scanner menu you would like to select.
+* Short sell analysis options added : Try out X > 14 > 35 or X > 14 > 36 or X > 12 > 37 or X > 12 > 38.
+* Fixed multiple bugs.
+* Added option under X > 12 > 7 > 9 > 7 to filter out only BullCross-VWAP stocks. 
 
 ## Older Releases
 * [https://github.com/pkjmesra/PKScreener/releases] : Discarded to save on storage costs!

@@ -1252,6 +1252,36 @@ class ScreeningStatistics:
                     break
         return hasIntradaySetup
 
+    def findIntradayShortSellWithPSARVolumeSMA(self, df,df_intraday):
+        if df is None or len(df) == 0 or df_intraday is None or len(df_intraday) == 0:
+            return False
+        data = df.copy()
+        data_int = df_intraday.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        data = data[::-1]  # Reverse the dataframe so that its the oldest date first
+        data_int = pd.DataFrame(data_int)['Close'].resample('30T', offset='15min').ohlc()
+        # data_int = data_int[::-1]  # Reverse the dataframe so that its the oldest date first
+        if len(data_int) < 5: # we need TMA for period 5
+            return False
+        data.loc[:,'PSAR'] = pktalib.psar(data["High"],data["Low"],acceleration=0.08)
+        data_int.loc[:,'TMA5'] = pktalib.TriMA(data_int["close"],length=5)
+        recent = data.tail(4)
+        recent = recent[::-1]
+        recent_i = data_int[::-1]
+        recent_i = recent_i.head(2)
+        # recent_i = recent_i[::-1]
+        if len(recent) < 4 or len(recent_i) < 2:
+            return False
+        # daily PSAR crossed above recent 30m TMA
+        cond1 = recent["PSAR"].iloc[0] >= recent_i["TMA5"].iloc[0] and \
+                recent["PSAR"].iloc[1] <= recent_i["TMA5"].iloc[1]
+        # Daily volume > 1400k
+        cond2 = cond1 and (recent["Volume"].iloc[0] > 1400000)
+        # Daily close above 50
+        cond4 = cond2 and recent["Close"].iloc[0] > 50
+        return cond4
+
     def findMACDCrossover(self, df, afterTimestamp=None, nthCrossover=1, upDirection=True, minRSI=60):
         if df is None or len(df) == 0:
             return False
@@ -1325,6 +1355,31 @@ class ScreeningStatistics:
         cond6 = cond5 and (recent["SMA50"].iloc[0] > recent["SMA200"].iloc[0])
         return cond6
 
+    def findPerfectShortSellsFutures(self, df):
+        if df is None or len(df) == 0:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        data = data[::-1]  # Reverse the dataframe so that its the oldest date first
+        data.loc[:,'BBands-U'], data.loc[:,'BBands-M'], data.loc[:,'BBands-L'] = pktalib.BBANDS(data["Close"], 20)
+        recent = data.tail(4)
+        recent = recent[::-1]
+        if len(recent) < 4:
+            return False
+        # 1 day ago high > 2 days ago high
+        cond1 = recent["High"].iloc[1] > recent["High"].iloc[2]
+        # 1 day ago close < 2 days ago high
+        cond2 = cond1 and (recent["Close"].iloc[1] < recent["High"].iloc[2])
+        # 1 day ago volume > 3 days ago volume
+        cond3 = cond2 and (recent["Volume"].iloc[1] > recent["Volume"].iloc[3])
+        # daily high < 1 day ago high
+        cond4 = cond3 and (recent["High"].iloc[0] < recent["High"].iloc[1])
+        # daily close crossed below daily lower bollinger band(20,2)
+        cond5 = cond4 and (recent["Close"].iloc[0] <= recent["BBands-L"].iloc[0] and \
+                           recent["Close"].iloc[1] >= recent["BBands-L"].iloc[1])
+        return cond5
+    
     # Find potential breakout stocks
     # This scanner filters stocks whose current close price + 5% is higher
     # than the highest High price in past 200 candles and the maximum high
@@ -1378,6 +1433,27 @@ class ScreeningStatistics:
             return True
         return False
 
+    def findProbableShortSellsFutures(self, df):
+        if df is None or len(df) == 0:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        data = data[::-1]  # Reverse the dataframe so that its the oldest date first
+        recent = data.tail(4)
+        recent = recent[::-1]
+        if len(recent) < 4:
+            return False
+        # 1 day ago high > 2 days ago high
+        cond1 = recent["High"].iloc[1] > recent["High"].iloc[2]
+        # daily close < 1 day ago high
+        cond2 = cond1 and (recent["Close"].iloc[0] < recent["High"].iloc[1])
+        # Daily volume > 3 days ago volume
+        cond3 = cond2 and (recent["Volume"].iloc[0] > recent["Volume"].iloc[3])
+        # daily high < 1 day ago high
+        cond4 = cond3 and (recent["High"].iloc[0] < recent["High"].iloc[1])
+        return cond4
+    
     # Find stocks with reversing PSAR and RSI
     def findPSARReversalWithRSI(self, df, screenDict, saveDict,minRSI=50):
         if df is None or len(df) == 0:
@@ -1507,6 +1583,29 @@ class ScreeningStatistics:
             saveDict['MA-Signal'] = saved[1] + f'RSI-MA-Sell'
             return True if (rsiKey == "RSIi") else (self.findRSICrossingMA(df, screenDict, saveDict,lookFor=lookFor, maLength=maLength, rsiKey="RSIi") or True)
         return False if (rsiKey == "RSIi") else (self.findRSICrossingMA(df, screenDict, saveDict,lookFor=lookFor, maLength=maLength, rsiKey="RSIi"))
+    
+    def findShortSellCandidatesForVolumeSMA(self, df):
+        if df is None or len(df) == 0:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        data = data[::-1]  # Reverse the dataframe so that its the oldest date first
+        data.loc[:,'SMAV10'] = pktalib.SMA(data["Volume"], 10)
+        recent = data.tail(4)
+        recent = recent[::-1]
+        if len(recent) < 4:
+            return False
+        # daily close < 1 day ago close * .97
+        cond1 = recent["Close"].iloc[0] < recent["Close"].iloc[1] * 0.97
+        # Daily volume > 100k
+        cond2 = cond1 and (recent["Volume"].iloc[0] > 100000)
+        # Daily volume * Daily Close > 1000k
+        cond3 = cond2 and (recent["Volume"].iloc[0] * recent["Close"].iloc[0] > 1000000)
+        # Daily close above 8
+        cond4 = cond3 and recent["Close"].iloc[0] > 8
+        cond5 = cond4 and (recent["Volume"].iloc[0] > recent["SMAV10"].iloc[0] * 0.75)
+        return cond5
     
     #@measure_time
     # Find out trend for days to lookback
@@ -3072,9 +3171,9 @@ class ScreeningStatistics:
             data["SMA"].iloc[0],
             data["LMA"].iloc[0],
         )
-        mas = [sma,lma,ema_20,vwap] if maLength==0 else [sma,lma,ema_20]
-        maDevs = [smaDev, lmaDev, emaDev, vwapDev] if maLength==0 else [smaDev, lmaDev, emaDev]
-        maTexts = ["50MA","200MA","20EMA","VWAP"] if maLength==0 else ["50MA","200MA","20EMA"]
+        mas = [sma,lma,ema_20,vwap] #if maLength==0 else [sma,lma,ema_20]
+        maDevs = [smaDev, lmaDev, emaDev, vwapDev] #if maLength==0 else [smaDev, lmaDev, emaDev]
+        maTexts = ["50MA","200MA","20EMA","VWAP"] #if maLength==0 else ["50MA","200MA","20EMA"]
         maReversal = 0
         index = 0
         bullishCandle = self.getCandleType(data)
@@ -3097,16 +3196,19 @@ class ScreeningStatistics:
                     saveDict["MA-Signal"] = saved[1] + f"{maTexts[index]}-Resist"
                     maReversal = -1
                     maSignals.append("6")
+                    
+                saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
                 # For a Bullish Candle
                 if bullishCandle:
                     # Crossing up
-                    if open < ma and close > ma and str(maLength) in ["0","5"]:
-                        screenDict["MA-Signal"] = (
-                            saved[0] + colorText.BOLD + colorText.GREEN + f"BullCross-{maTexts[index]}" + colorText.END
-                        )
-                        saveDict["MA-Signal"] = saved[1] + f"BullCross-{maTexts[index]}"
-                        maReversal = 1
-                        maSignals.append("5")
+                    if open < ma and close > ma:
+                        if (str(maLength) in ["0","5"]) or (str(maLength) in ["7"] and index == maTexts.index("VWAP")):
+                            screenDict["MA-Signal"] = (
+                                saved[0] + colorText.BOLD + colorText.GREEN + f"BullCross-{maTexts[index]}" + colorText.END
+                            )
+                            saveDict["MA-Signal"] = saved[1] + f"BullCross-{maTexts[index]}"
+                            maReversal = 1
+                            maSignals.append(str(maLength))
                 # For a Bearish Candle
                 elif not bullishCandle:
                     # Crossing down
@@ -3120,7 +3222,9 @@ class ScreeningStatistics:
                 index += 1
         returnValue = maReversal
         if maLength != 0:
-            returnValue = str(maLength) in maSignals
+            hasRespectiveMAInList = str(maLength) in maSignals
+            hasVWAP = "BullCross-VWAP" in saveDict["MA-Signal"]
+            returnValue = (hasVWAP and hasRespectiveMAInList) if maLength == 7 else hasRespectiveMAInList
         return returnValue
 
     # Find NRx range for Reversal
