@@ -38,7 +38,7 @@ from pkscreener.classes.MarketStatus import MarketStatus
 
 QUERY_SELECTOR_TIMEOUT = 1000
 
-async def takeScreenshot(page,saveFileName=None):
+async def takeScreenshot(page,saveFileName=None,text=""):
     clip_x = 240
     clip_y = 245
     clip_width = 1010
@@ -55,7 +55,7 @@ async def takeScreenshot(page,saveFileName=None):
     await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
     hoverElement = await page.querySelector(selector='.popover-title')
     await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
-    await page.evaluate('(hoverElement) => hoverElement.innerHTML=hoverElement.innerHTML.replaceAll("Morningstar","").replaceAll("PR INR","Valuation")', hoverElement)
+    await page.evaluate(f'(hoverElement) => hoverElement.innerHTML=hoverElement.innerHTML.replaceAll("Morningstar","").replaceAll("PR INR","{text}")', hoverElement)
     
     # Fix the popover pointer to top right and adjust it to show european market status
     popoverSelector = '.map-popover'
@@ -94,7 +94,7 @@ async def getScreenshotsForGlobalMarketBarometer():
     # date = await page.evaluate('(dateElement) => dateElement.textContent', dateElement)
     # await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
     # Show the india hover tooltip. If you don't do this, the screenshot is only 50% of the map
-    await takeScreenshot(page=page, saveFileName='gmbstat.png')
+    await takeScreenshot(page=page, saveFileName='gmbstat.png',text="Performance")
 
     # Let's find the valuation of the market
     # xpath = '//*[@id="tabs"]/div/mds-button-group/div/slot/div/mds-button[2]/label/input'
@@ -104,7 +104,7 @@ async def getScreenshotsForGlobalMarketBarometer():
     await page.evaluate('(btnValuation) => btnValuation.click()', btnValuation)
     await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
 
-    await takeScreenshot(page=page, saveFileName='gmbvaluation.png')
+    await takeScreenshot(page=page, saveFileName='gmbvaluation.png',text="Valuation")
     await browser.close()
 
 # Gets the valuation of the India Stock Market from the pop-over
