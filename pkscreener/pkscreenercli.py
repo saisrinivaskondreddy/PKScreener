@@ -299,33 +299,37 @@ if __name__ == "__main__":
 
 
 def exitGracefully():
-    from PKDevTools.classes import Archiver
-    from pkscreener.globals import resetConfigToDefault
-    filePath = None
     try:
-        filePath = os.path.join(Archiver.get_user_outputs_dir(), "monitor_outputs")
-    except:
-        pass
-    if filePath is None:
-        return
-    index = 0
-    while index < configManager.maxDashboardWidgetsPerRow*configManager.maxNumResultRowsInMonitor:
+        from PKDevTools.classes import Archiver
+        from pkscreener.globals import resetConfigToDefault
+        filePath = None
         try:
-            os.remove(f"{filePath}_{index}.txt")
+            filePath = os.path.join(Archiver.get_user_outputs_dir(), "monitor_outputs")
         except:
             pass
-        index += 1
+        if filePath is None:
+            return
+        index = 0
+        while index < configManager.maxDashboardWidgetsPerRow*configManager.maxNumResultRowsInMonitor:
+            try:
+                os.remove(f"{filePath}_{index}.txt")
+            except:
+                pass
+            index += 1
 
-    argsv = argParser.parse_known_args()
-    args = argsv[0]
-    if args is not None and args.options is not None and not args.options.upper().startswith("T"):
-        resetConfigToDefault()
-        
-    if "PKDevTools_Default_Log_Level" in os.environ.keys():
-        if args is None or (args is not None and args.options is not None and "|" not in args.options):
-            del os.environ['PKDevTools_Default_Log_Level']
-    configManager.logsEnabled = False
-    configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
+        argsv = argParser.parse_known_args()
+        args = argsv[0]
+        if args is not None and args.options is not None and not args.options.upper().startswith("T"):
+            resetConfigToDefault()
+            
+        if "PKDevTools_Default_Log_Level" in os.environ.keys():
+            if args is None or (args is not None and args.options is not None and "|" not in args.options):
+                del os.environ['PKDevTools_Default_Log_Level']
+        configManager.logsEnabled = False
+        configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
+    except RuntimeError:
+        OutputControls().printOutput(f"{colorText.WARN}If you're running from within docker, please run like this:{colorText.END}\n{colorText.FAIL}docker run -it pkjmesra/pkscreener:latest\n{colorText.END}")
+        pass
 
 def logFilePath():
     try:
@@ -753,7 +757,11 @@ def pkscreenercli():
         if args.log or configManager.logsEnabled:
             setupLogger(shouldLog=True, trace=args.testbuild)
             if not args.prodbuild and args.answerdefault is None:
-                input("Press <Enter> to continue...")
+                try:
+                    input("Press <Enter> to continue...")
+                except EOFError:
+                    OutputControls().printOutput(f"{colorText.WARN}If you're running from within docker, please run like this:{colorText.END}\n{colorText.FAIL}docker run -it pkjmesra/pkscreener:latest\n{colorText.END}")
+                    pass
         else:
             if "PKDevTools_Default_Log_Level" in os.environ.keys():
                 del os.environ['PKDevTools_Default_Log_Level']
