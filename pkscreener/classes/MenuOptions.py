@@ -35,7 +35,7 @@ configManager = ConfigManager.tools()
 MENU_SEPARATOR = ""
 LINE_SEPARATOR = "\n"
 MAX_SUPPORTED_MENU_OPTION = 39
-MAX_MENU_OPTION = 42
+MAX_MENU_OPTION = 50
 
 level0MenuDict = {
     "X": "Scanners",
@@ -275,7 +275,7 @@ level2_X_MenuDict = {
     "37": "Short Sell Candidates (Volume SMA)",
     "38": "Intraday Short Sell (PSAR / Volume SMA)",
     "39": "IPO-Lifetime First day bullish break",
-    "42": "Show Last Screened Results",
+    "50": "Show Last Screened Results",
     "M": "Back to the Top/Main menu",
     "Z": "Exit (Ctrl + C)",
 }
@@ -1079,7 +1079,7 @@ class menus:
     ):
         menuText = self.fromDictionary(
             level2_X_MenuDict,
-            renderExceptionKeys=["0", "42", "M"],
+            renderExceptionKeys=["0", str(MAX_MENU_OPTION), "M"],
             renderStyle=renderStyle
             if renderStyle is not None
             else MenuRenderStyle.TWO_PER_ROW,
