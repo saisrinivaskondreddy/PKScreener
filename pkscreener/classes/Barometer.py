@@ -32,8 +32,43 @@ try:
 except:
     pass
 from PKDevTools.classes import Archiver
+from PKDevTools.classes.log import default_logger
 from pkscreener.classes import Utility
 from pkscreener.classes.MarketStatus import MarketStatus
+
+QUERY_SELECTOR_TIMEOUT = 1000
+
+async def takeScreenshot(page,saveFileName=None):
+    clip_x = 240
+    clip_y = 245
+    clip_width = 1010
+    clip_height = 650
+    folderPath = Archiver.get_user_outputs_dir()
+    indiaElement = await page.querySelector(selector='#India')
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+    indiaPolygon = await page.evaluate('(indiaElement) => indiaElement.children[0]', indiaElement)
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+    gSelector = 'g[id="India"]'
+    dismissSelector = '.date-label'
+    await page.click(gSelector)
+    # await page.evaluate('(gSelector) => gSelector.click()', gSelector)
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+    hoverElement = await page.querySelector(selector='.popover-title')
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+    await page.evaluate('(hoverElement) => hoverElement.innerHTML=hoverElement.innerHTML.replaceAll("Morningstar","").replaceAll("PR INR","Valuation")', hoverElement)
+    
+    # Fix the popover pointer to top right and adjust it to show european market status
+    popoverSelector = '.map-popover'
+    hoverElement = await page.querySelector(selector=popoverSelector)
+    await page.evaluate('(hoverElement) => hoverElement.classList.value="map-popover details top-right"', hoverElement)
+    await page.evaluate('(hoverElement) => hoverElement.style.top="270.5px"', hoverElement)
+    await page.evaluate('(hoverElement) => hoverElement.style.left="425px"', hoverElement)
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+
+    # Take the screenshot
+    await page.screenshot({'path': os.path.join(folderPath,saveFileName), 'clip': {"x":clip_x,"y":clip_y,"width":clip_width,"height":clip_height}})
+    await page.click(dismissSelector)
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
 
 # Get the Global Market Barometer for global and Indian stock markets.
 # This captures the screenshot of the India market and its growth 
@@ -41,32 +76,35 @@ from pkscreener.classes.MarketStatus import MarketStatus
 # behaviour  of the pop-ups.
 async def getScreenshotsForGlobalMarketBarometer():
     # https://scrapeops.io/python-web-scraping-playbook/python-pyppeteer/#how-to-click-on-buttons-with-pyppeteer
-    folderPath = Archiver.get_user_outputs_dir()
-    browser = await launch()
+    browser = await launch({
+            "headless": False,
+            "args": [
+                '--start-maximized',
+                '--window-size=1920,1080',
+            ],
+            "defaultViewport": None,
+        }); 
     page = await browser.newPage()
-    await page.goto('https://www.morningstar.com/markets/global-market-view',timeout=10000, waitUntil=['load','domcontentloaded','networkidle0'])
-    # Get the latest date for which this GMB is being loaded
-    dateElement = await page.querySelector(selector='.date-label')
-    date = await page.evaluate('(dateElement) => dateElement.textContent', dateElement)
-    await page.waitFor(selectorOrFunctionOrTimeout=2000)
-    # Show the india hover tooltip. If you don't do this, the screenshot if only 50% of the map
-    await page.hover(selector='.country-India')
-    hoverElement = await page.querySelector(selector='.mbc-chart-tooltip-container')
-    await page.evaluate('(hoverElement) => hoverElement.innerHTML=hoverElement.innerHTML.replaceAll("Morningstar","").replaceAll("GR INR","Performance")', hoverElement)
+    # # Must use this when headless = True above. Not needed when headless = False
+    # await page._client.send('Emulation.clearDeviceMetricsOverride')
 
-    # Hide the india tooltip. This will force the map to appear properly for screenshot
-    # await page.hover(selector='.date-label')
-    # Take the screenshot
-    await page.screenshot({'path': os.path.join(folderPath,'gmbstat.png'), 'clip': {"x":50,"y":440,"width":710,"height":460}})
+    await page.goto('https://www.morningstar.ca/ca/Markets/global-market-barometer.aspx',timeout=30*QUERY_SELECTOR_TIMEOUT, waitUntil=['load','domcontentloaded','networkidle0'])
+    # Get the latest date for which this GMB is being loaded
+    # dateElement = await page.querySelector(selector='.date-label')
+    # date = await page.evaluate('(dateElement) => dateElement.textContent', dateElement)
+    # await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+    # Show the india hover tooltip. If you don't do this, the screenshot is only 50% of the map
+    await takeScreenshot(page=page, saveFileName='gmbstat.png')
 
     # Let's find the valuation of the market
-    btnValuation = await page.querySelector(selector='button#valuation')
+    # xpath = '//*[@id="tabs"]/div/mds-button-group/div/slot/div/mds-button[2]/label/input'
+    selector = 'input[value="Valuation"]'
+    btnValuation = await page.querySelector(selector=selector)
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
     await page.evaluate('(btnValuation) => btnValuation.click()', btnValuation)
-    await page.waitForSelector(selector='.country-India')
-    await page.waitFor(selectorOrFunctionOrTimeout=2000)
-    await page.hover(selector='.country-India')
-    await page.evaluate('(hoverElement) => hoverElement.innerHTML=hoverElement.innerHTML.replaceAll("Morningstar","").replaceAll("GR INR","Valuation")', hoverElement)
-    await page.screenshot({'path': os.path.join(folderPath,'gmbvaluation.png'), 'clip': {"x":45,"y":420,"width":710,"height":450}})
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+
+    await takeScreenshot(page=page, saveFileName='gmbvaluation.png')
     await browser.close()
 
 # Gets the valuation of the India Stock Market from the pop-over
@@ -76,7 +114,8 @@ async def getScreenshotsForGlobalMarketBarometer():
 def getGlobalMarketBarometerValuation():
     try:
         asyncio.get_event_loop().run_until_complete(getScreenshotsForGlobalMarketBarometer())
-    except:
+    except Exception as e:
+        default_logger().debug(e, exc_info=True)
         pass
     folderPath = Archiver.get_user_outputs_dir()
     gmbPath = None
@@ -109,4 +148,3 @@ def getGlobalMarketBarometerValuation():
         # print(e)
         pass
     return gmbPath
-
