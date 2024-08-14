@@ -238,11 +238,12 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
             menuText,
             reply_markup=reply_markup,
         )
-    context.bot.send_message(
-        chat_id=int(f"-{Channel_Id}"),
-        text=f"Name: {user.first_name}, Username:@{user.username} with ID: {str(user.id)} started using the bot!\n{chosenBotMenuOption}",
-        parse_mode="HTML",
-    )
+    if Channel_Id is not None and len(str(Channel_Id)) > 0:
+        context.bot.send_message(
+            chat_id=int(f"-{Channel_Id}"),
+            text=f"Name: {user.first_name}, Username:@{user.username} with ID: {str(user.id)} started using the bot!\n{chosenBotMenuOption}",
+            parse_mode="HTML",
+        )
     # Tell ConversationHandler that we're in state `FIRST` now
     return START_ROUTES
 
@@ -591,7 +592,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
             update=update,
         )
     try:
-        if optionChoices != "":
+        if optionChoices != "" and Channel_Id is not None and len(str(Channel_Id)) > 0:
             context.bot.send_message(
                 chat_id=int(f"-{Channel_Id}"),
                 text=f"Name: <b>{query.from_user.first_name}</b>, Username:@{query.from_user.username} with ID: <b>@{str(query.from_user.id)}</b> submitted scan request <b>{optionChoices}</b> to the bot!",
@@ -796,13 +797,13 @@ def error_handler(update: object, context: CallbackContext) -> None:
 
     try:
         # Finally, send the message
-        if "telegram.error.Conflict" not in message:
+        if "telegram.error.Conflict" not in message and Channel_Id is not None and len(str(Channel_Id)) > 0:
             context.bot.send_message(
                 chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
             )
     except Exception:# pragma: no cover
         try:
-            if "telegram.error.Conflict" not in tb_string:
+            if "telegram.error.Conflict" not in tb_string and Channel_Id is not None and len(str(Channel_Id)) > 0:
                 context.bot.send_message(
                     chat_id=int(f"-{Channel_Id}"),
                     text=tb_string,
@@ -1136,9 +1137,10 @@ def sendRequestSubmitted(optionChoices, update, context):
 def shareUpdateWithChannel(update, context, optionChoices=""):
     query = update.message or update.callback_query
     message = f"Name: <b>{query.from_user.first_name}</b>, Username:@{query.from_user.username} with ID: <b>@{str(query.from_user.id)}</b> began using ({optionChoices}) the bot!"
-    context.bot.send_message(
-        chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
-    )
+    if Channel_Id is not None and len(str(Channel_Id)) > 0:
+        context.bot.send_message(
+            chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
+        )
 
 
 def help_command(update: Update, context: CallbackContext) -> None:
@@ -1166,9 +1168,10 @@ def help_command(update: Update, context: CallbackContext) -> None:
         )  #  \n\nThis bot restarts every hour starting at 5:30am IST until 10:30pm IST to keep it running on free servers. If it does not respond, please try again in a minutes to avoid the restart duration!
         query = update.message
         message = f"Name: <b>{query.from_user.first_name}</b>, Username:@{query.from_user.username} with ID: <b>@{str(query.from_user.id)}</b> began using the bot!"
-        context.bot.send_message(
-            chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
-        )
+        if Channel_Id is not None and len(str(Channel_Id)) > 0:
+            context.bot.send_message(
+                chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
+            )
 
 
 def _shouldAvoidResponse(update):

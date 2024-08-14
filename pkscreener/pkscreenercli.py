@@ -408,7 +408,7 @@ def runApplication():
     if args.user is None:
         from PKDevTools.classes.Telegram import get_secrets
         Channel_Id, _, _, _ = get_secrets()
-        if Channel_Id is not None:
+        if Channel_Id is not None and len(str(Channel_Id)) > 0:
             args.user = int(f"-{Channel_Id}")
     if args.triggertimestamp is None:
         args.triggertimestamp = int(PKDateUtilities.currentDateTimestamp())
@@ -535,15 +535,16 @@ def runApplication():
                 OutputControls().printOutput(mark_down)
                 from PKDevTools.classes.Telegram import get_secrets
                 Channel_Id, _, _, _ = get_secrets()
-                sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
-                                    user=int(f"-{Channel_Id}"),
-                                    tabulated_results=mark_down,
-                                    markdown_results=mark_down,
-                                    caption="IntradayAnalysis - Morning alert vs Market Close",
-                                    pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
-                                    pngExtension= ".png",
-                                    forceSend=True
-                                    )
+                if Channel_Id is not None and len(str(Channel_Id)) > 0:
+                    sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
+                                        user=int(f"-{Channel_Id}"),
+                                        tabulated_results=mark_down,
+                                        markdown_results=mark_down,
+                                        caption="IntradayAnalysis - Morning alert vs Market Close",
+                                        pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
+                                        pngExtension= ".png",
+                                        forceSend=True
+                                        )
     else:
         if args.barometer:
             sendGlobalMarketBarometer(userArgs=args)
