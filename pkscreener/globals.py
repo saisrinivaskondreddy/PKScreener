@@ -3105,7 +3105,7 @@ def sendMessageToTelegramChannel(
                 pass
     if user is not None:
         channel_userID="-1001785195297"
-        if user != channel_userID:
+        if user != channel_userID and not userPassedArgs.monitor:
             # Send an update to dev channel
             send_message(
                 f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options}]",
