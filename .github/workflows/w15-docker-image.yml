@@ -51,6 +51,10 @@ on:
         required: true
         type: string
         default: 'main'
+      version:
+        required: false
+        type: string
+        default: 'x.y.z'
       buildBase:
         description: 'Build Docker base image before building the main app image'
         required: false
