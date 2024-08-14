@@ -566,7 +566,7 @@ class StockScreener:
                         or (executeOption == 9 and hasMinVolumeRatio)
                         or (executeOption == 10 and isPriceRisingByAtLeast2Percent)
                         or (executeOption == 11 and isShortTermBullish)
-                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38] and isValidityCheckMet)
+                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39,40,41] and isValidityCheckMet)
                         or (executeOption == 21 and (mfiStake > 0 and reversalOption in [3,5]))
                         or (executeOption == 21 and (mfiStake < 0 and reversalOption in [6,7]))
                         or (executeOption == 21 and (fairValueDiff > 0 and reversalOption in [8]))
@@ -711,7 +711,7 @@ class StockScreener:
 
     def performValidityCheckForExecuteOptions(self,executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,buySellAll=3,intraday_data=None):
         isValid = True
-        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38]:
+        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39,40,41]:
             return True
         if executeOption == 11:
             isValid = screener.validateShortTermBullish(
@@ -769,6 +769,8 @@ class StockScreener:
             isValid = screener.findShortSellCandidatesForVolumeSMA(fullData)
         elif executeOption == 38: # findIntradayShortSellWithPSARVolumeSMA
             isValid = screener.findIntradayShortSellWithPSARVolumeSMA(fullData,intraday_data)
+        elif executeOption == 39: # findIPOLifetimeFirstDayBullishBreak
+            isValid = screener.findIPOLifetimeFirstDayBullishBreak(fullData)
 
         return isValid        
                     
@@ -947,8 +949,10 @@ class StockScreener:
             volumeRatio = configManager.volumeRatio
             # Data download adjustment for Newly Listed only feature
         if newlyListedOnly:
-            if int(configManager.period[:-1]) > 250:
-                period = "250d"
+            if configManager.period.endswith("y") and int(configManager.period[:-1]) >= 1:
+                period = "220d"
+            elif configManager.period.endswith("d") and int(configManager.period[:-1]) >= 250:
+                period = "220d"
             else:
                 period = configManager.period
         return volumeRatio,period

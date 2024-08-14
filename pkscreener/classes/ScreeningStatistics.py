@@ -1282,6 +1282,16 @@ class ScreeningStatistics:
         cond4 = cond2 and recent["Close"].iloc[0] > 50
         return cond4
 
+    def findIPOLifetimeFirstDayBullishBreak(self, df):
+        if df is None or len(df) == 0 or len(df) >= 220:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        data.dropna(axis=0, how="all", inplace=True) # Maybe there was no trade done at these times?
+        data = data[::-1]  # Reverse the dataframe so that its the oldest date first
+        return data["High"].iloc[0] >= data["High"].max()
+
     def findMACDCrossover(self, df, afterTimestamp=None, nthCrossover=1, upDirection=True, minRSI=60):
         if df is None or len(df) == 0:
             return False
@@ -3275,9 +3285,11 @@ class ScreeningStatistics:
 
     # Find if stock is newly listed
     def validateNewlyListed(self, df, daysToLookback):
-        if df is None or len(df) == 0:
+        if df is None or len(df) == 0 or len(df) > 220:
             return False
         data = df.copy()
+        if str(daysToLookback).endswith("y"):
+            daysToLookback = '220d'
         daysToLookback = int(daysToLookback[:-1])
         recent = data.head(1)
         if len(recent) < 1:

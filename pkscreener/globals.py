@@ -570,6 +570,8 @@ def initPostLevel0Execution(
             if indexOption < 0 or indexOption > 15:
                 raise ValueError
             elif indexOption == 13:
+                configManager.period = "2y"
+                configManager.getConfig(ConfigManager.parser)
                 newlyListedOnly = True
                 indexOption = 12
         if indexOption == 15:

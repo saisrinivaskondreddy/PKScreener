@@ -3,8 +3,9 @@
 ## What's New?
 1. [v0.45.20240814.501] release
 * Short sell analysis options added : Try out X > 14 > 35 or X > 14 > 36 or X > 12 > 37 or X > 12 > 38.
+* Added IPO-Lifetime First day bullish break. Try X > 13 > 39.
+* Added several new sectoral indices. Try X > S >
 * Fixed multiple bugs.
-* Added option under X > 12 > 7 > 9 > 7 to filter out only BullCross-VWAP stocks.
 
 ## Older Releases
 * [https://github.com/pkjmesra/PKScreener/releases] : Discarded to save on storage costs!
