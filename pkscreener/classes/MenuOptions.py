@@ -110,7 +110,7 @@ level1_P_MenuDict = {
     "3": "Run Piped Scans Saved So Far",
     "M": "Back to the Top/Main menu",
 }
-PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25"]
+PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27"]
 PREDEFINED_SCAN_MENU_TEXTS = [
     "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",  # 1
     "Volume Scanners | High Momentum | ATR Cross",                          # 2
@@ -137,6 +137,8 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "VCP (Mark Minervini) | Chart Patterns | MA Support | Bullish AVWAP ",  # 23
     "BullCross-VWAP | Volume Scanners",                                     # 24
     "BullCross-VWAP | ATR Cross | ATR Trailing Stop                     ",  # 25
+    "Super-Confluence | ATR Trailing Stop                               ",  # 26
+    "BullCross-VWAP | Super-Confluence                                  ",  # 27
 ]
 level2_P_MenuDict = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:
@@ -168,6 +170,10 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:7:8:>|X:12:7:9:1:1:>|X:12:34:'",     # 23
     "--systemlaunched -a y -e -o 'X:12:7:9:7:>|X:0:9:2.5:'",                # 24
     "--systemlaunched -a y -e -o 'X:12:7:9:7:>|X:0:31:>|X:0:30:1:'",        # 25
+    "--systemlaunched -a y -e -o 'X:12:7:3:0.008:4:>|X:0:30:1:'",           # 26
+    # Running super conf at the beginning will be faster because there will be less number of stocks.
+    # Running it at the end is essential because we want to see the dates of super-conf
+    "--systemlaunched -a y -e -o 'X:12:7:3:0.008:4:>|X:12:7:9:7:>|X:0:7:3:0.008:4:'", # 27
 ]
 PREDEFINED_PIPED_MENU_OPTIONS = []
 for option in PREDEFINED_SCAN_MENU_VALUES:
@@ -328,7 +334,7 @@ level4_X_ChartPattern_Confluence_MenuDict = {
     "1": "Confluence up / GoldenCrossOver / DMA50 / DMA200",
     "2": "Confluence Down / DeadCrossOver",
     "3": "Any/All (Confluence up/down/Crossovers)",
-    "4": "8,21,55-EMA / 200-SMA Super-Confluence",
+    "4": "8,21,55-EMA / 200-SMA Super-Confluence (BTST-Buy at close, Sell early next day)",
     "0": "Cancel",
 }
 

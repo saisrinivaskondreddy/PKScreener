@@ -2,6 +2,7 @@
 
 ## What's New?
 1. [v0.45.20240814.507] release
+* Improved super-confluence. Added it under pre-defined scans as well. Try out P_1_26 and P_1_27.
 * Short sell analysis options added : Try out X > 14 > 35 or X > 14 > 36 or X > 12 > 37 or X > 12 > 38.
 * Added IPO-Lifetime First day bullish break. Try X > 13 > 39.
 * Added several new sectoral indices. Try X > S >

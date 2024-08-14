@@ -1166,17 +1166,18 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if maLength == 0 and respChartPattern in [1, 2, 3, 6, 9]:
                 maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
             if maLength == 4 and respChartPattern == 3: # Super-confluence setup
-                configManager.superConfluenceMaxReviewDays = input(
-                    f"[+] Max number of review days for super-confluence-checks. (number)(Optimal = 3-7, Current: {colorText.FAIL}{configManager.superConfluenceMaxReviewDays}{colorText.END}): "
-                ) or configManager.superConfluenceMaxReviewDays
-                configManager.superConfluenceEMAPeriods = input(
-                    f"[+] Comma separated EMA periods for super-confluence-crossovers in the same order. (numbers)(Optimal = 8,21,55, Current: {colorText.FAIL}{configManager.superConfluenceEMAPeriods}{colorText.END}): "
-                ) or configManager.superConfluenceEMAPeriods
-                enable200SMA = input(
-                    f"[+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if configManager.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
-                ) or ('y' if configManager.superConfluenceEnforce200SMA else 'n')
-                configManager.superConfluenceEnforce200SMA = False if "y" not in str(enable200SMA).lower() else True
-                configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
+                if len(options) <= 5:
+                    configManager.superConfluenceMaxReviewDays = input(
+                        f"[+] Max number of review days for super-confluence-checks. (number)(Optimal = 3-7, Current: {colorText.FAIL}{configManager.superConfluenceMaxReviewDays}{colorText.END}): "
+                    ) or configManager.superConfluenceMaxReviewDays
+                    configManager.superConfluenceEMAPeriods = input(
+                        f"[+] Comma separated EMA periods for super-confluence-crossovers in the same order. (numbers)(Optimal = 8,21,55, Current: {colorText.FAIL}{configManager.superConfluenceEMAPeriods}{colorText.END}): "
+                    ) or configManager.superConfluenceEMAPeriods
+                    enable200SMA = input(
+                        f"[+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if configManager.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
+                    ) or ('y' if configManager.superConfluenceEnforce200SMA else 'n')
+                    configManager.superConfluenceEnforce200SMA = False if "y" not in str(enable200SMA).lower() else True
+                    configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
         if (
             respChartPattern is None
             or insideBarToLookback is None
@@ -3040,6 +3041,9 @@ def sendMessageToTelegramChannel(
     message=None, photo_filePath=None, document_filePath=None, caption=None, user=None, mediagroup=False
 ):
     global userPassedArgs, test_messages_queue, media_group_dict
+    if ("RUNNER" not in os.environ.keys() and not userPassedArgs.log) or userPassedArgs.telegram:
+        return
+    
     if user is None and userPassedArgs is not None and userPassedArgs.user is not None:
         user = userPassedArgs.user
     if not mediagroup:
@@ -3108,7 +3112,7 @@ def sendMessageToTelegramChannel(
         if user != channel_userID and not userPassedArgs.monitor:
             # Send an update to dev channel
             send_message(
-                f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options}]",
+                f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options.replace(':D','')}]",
                 userID="-1001785195297",
             )
 
