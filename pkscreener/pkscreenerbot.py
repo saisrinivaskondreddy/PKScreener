@@ -145,7 +145,7 @@ SCANNER_SUBMENUS_CHILDLEVEL_SUPPORT = {"6":[ "7","10"], "7":[ "3","6","9"]}
 INDEX_COMMANDS_SKIP_MENUS_SCANNER = ["W", "E", "M", "Z", "S"]
 INDEX_COMMANDS_SKIP_MENUS_BACKTEST = ["W", "E", "M", "Z", "S", "N", "0", "15"]
 PIPED_SCAN_SKIP_COMMAND_MENUS =["2", "3", "M", "0"]
-UNSUPPORTED_COMMAND_MENUS =["22","42","M","Z","0"]
+UNSUPPORTED_COMMAND_MENUS =["22","42","M","Z","0",str(MAX_MENU_OPTION)]
 SUPPORTED_COMMAND_MENUS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"]
 
 def initializeIntradayTimer():
@@ -164,6 +164,12 @@ def initializeIntradayTimer():
     except:
         launchIntradayMonitor()
         pass
+
+def sanitiseTexts(text):
+    MAX_MSG_LENGTH = 4096
+    if len(text) > MAX_MSG_LENGTH:
+        return text[:MAX_MSG_LENGTH]
+    return text
 
 def start(update: Update, context: CallbackContext, updatedResults=None, monitorIndex=0,chosenBotMenuOption="") -> str:
     """Send message on `/start`."""
@@ -236,7 +242,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
         )
     elif update.message is not None:
         update.message.reply_text(
-            menuText,
+            sanitiseTexts(menuText),
             reply_markup=reply_markup,
         )
     if Channel_Id is not None and len(str(Channel_Id)) > 0:
@@ -668,7 +674,7 @@ def launchScreener(options, user, context, optionChoices, update):
             responseText = f"{responseText}\n\nStock-wise: https://pkjmesra.github.io/PKScreener/Backtest-Reports/PKScreener_{optionChoices}_backtest_result_StockSorted.html"
             responseText = f"{responseText}\n\nOther Reports: https://pkjmesra.github.io/PKScreener/BacktestReports.html"
             if update is not None and update.message is not None:
-                update.message.reply_text(responseText)
+                update.message.reply_text(sanitiseTexts(responseText))
             else:
                 responseText = f"{responseText}\n\nClick /start if you want to restart the session."
                 update.callback_query.edit_message_text(
@@ -879,7 +885,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
             cmdText = f"{cmdText}\n\nFor option 0 <Screen stocks by the stock name>, please type in the command in the following format\n/X_0 SBIN\n or \n/X_0_0 SBIN\nand hit send where SBIN is the NSE stock code.For multiple stocks, you can type in \n/X_0 SBIN,ICICIBANK,OtherStocks\nYou can put in any number of stocks separated by space or comma(,)."
         """Send a message when the command /help is issued."""
         cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
-        update.message.reply_text(f"Choose an option:\n{cmdText}")
+        update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
         return START_ROUTES
 
     if update.message is None:
@@ -912,7 +918,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                 cmdText = "For option 0 <Screen stocks by the stock name>, please type in the command in the following format\n/X_0 SBIN or /X_0_0 SBIN and hit send where SBIN is the NSE stock code.For multiple stocks, you can type in /X_0 SBIN,ICICIBANK,OtherStocks . You can put in any number of stocks separated by space or comma(,)."
             """Send a message when the command /help is issued."""
             cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
-            update.message.reply_text(f"Choose an option:\n{cmdText}")
+            update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
             return START_ROUTES
 
     if "p_" in cmd:
@@ -945,7 +951,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                     f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
                 )
             cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
-            update.message.reply_text(f"Choose an option:\n{cmdText}")
+            update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
             return START_ROUTES
         elif len(selection) == 3:
             options = ":".join(selection)
@@ -998,7 +1004,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                 cmdText = "For option 0 <Screen stocks by the stock name>, please type in the command in the following format\n/X_0 SBIN or /X_0_0 SBIN and hit send where SBIN is the NSE stock code.For multiple stocks, you can type in /X_0 SBIN,ICICIBANK,OtherStocks. You can put in any number of stocks separated by space or comma(,)."
                 """Send a message when the command /help is issued."""
                 cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
-                update.message.reply_text(f"Choose an option:\n{cmdText}")
+                update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
                 return START_ROUTES
             cmds = m2.renderForMenu(
                 selectedMenu=selectedMenu,
@@ -1012,7 +1018,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                     f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
                 )
             cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
-            update.message.reply_text(f"Choose an option:\n{cmdText}")
+            update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
             return START_ROUTES
         elif len(selection) == 3:
             m0.renderForMenu(
@@ -1051,7 +1057,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                 for cmd in cmds:
                     cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
                 cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
-                update.message.reply_text(f"Choose an option:\n{cmdText}")
+                update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
                 return START_ROUTES
             else:
                 if selection[2] == "4":  # Last N days
@@ -1110,7 +1116,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                         for cmd in cmds:
                             cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
                         cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
-                        update.message.reply_text(f"Choose an option:\n{cmdText}")
+                        update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
                         return START_ROUTES
 
             options = ":".join(selection)
@@ -1138,13 +1144,13 @@ def command_handler(update: Update, context: CallbackContext) -> None:
         # )
         # sendRequestSubmitted(cmd.upper(), update=update, context=context)
         return START_ROUTES
-    update.message.reply_text(f"{cmd.upper()} : Not implemented yet!")
+    update.message.reply_text(sanitiseTexts(f"{cmd.upper()} : Not implemented yet!"))
     help_command(update=update, context=context)
 
 
 def sendRequestSubmitted(optionChoices, update, context):
     menuText = f"Thank you for choosing {optionChoices}. You will receive the notification/results in about 1-2 minutes! \n\nConsider donating to help keep this project going:\nUPI: 8007162973@APL \nor\nhttps://github.com/sponsors/pkjmesra?frequency=one-time&sponsor=pkjmesra"
-    update.message.reply_text(menuText)
+    update.message.reply_text(sanitiseTexts(menuText))
     help_command(update=update, context=context)
     shareUpdateWithChannel(
         update=update, context=context, optionChoices=optionChoices
@@ -1181,7 +1187,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
     if update is not None and update.message is not None:
         update.message.reply_text(
-            f"You can begin by typing in /start (Recommended) and hit send!\n\nOR\n\nChoose an option:\n{cmdText}\n\nWe recommend you start by clicking on this /start"
+            sanitiseTexts(f"You can begin by typing in /start (Recommended) and hit send!\n\nOR\n\nChoose an option:\n{cmdText}\n\nWe recommend you start by clicking on this /start")
         )  #  \n\nThis bot restarts every hour starting at 5:30am IST until 10:30pm IST to keep it running on free servers. If it does not respond, please try again in a minutes to avoid the restart duration!
         query = update.message
         message = f"Name: <b>{query.from_user.first_name}</b>, Username:@{query.from_user.username} with ID: <b>@{str(query.from_user.id)}</b> began using the bot!"
