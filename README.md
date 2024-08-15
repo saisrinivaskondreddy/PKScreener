@@ -1,6 +1,6 @@
 ![Title](https://raw.githubusercontent.com/pkjmesra/PKScreener/main/screenshots/logos/Logo8.png)
 
-# PKScreener
+# PKScreener (# 1 Stock screener/scanner for NSE India)
 | [![MADE-IN-INDIA][MADE-IN-INDIA-badge]][MADE-IN-INDIA] | [![GitHub release (latest by date)][GitHub release (latest by date)-badge]][GitHub release (latest by date)] | [![Downloads][Downloads-badge]][Downloads] | ![latest download][Latest-Downloads-badge]  | [![Docker Pulls][Docker Pulls-badge]][Docker Status] |
 | :-------------: | :-----------------: | :-----------------: | :-----------------: | :-----------------: |
 | Platforms | [![Windows][Windows-badge]][Windows] | [![Linux][Linux-badge]][Linux] | [![Mac OS][Mac OS-badge]][Mac OS] | [![Docker Status][Docker Status-badge]][Docker Status] |
