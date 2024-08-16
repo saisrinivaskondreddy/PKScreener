@@ -1672,7 +1672,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             import traceback
                             traceback.print_exc()
                         pass
-        if (menuOption in ["X","C"] and userPassedArgs.monitor is None) or "|" not in userPassedArgs.options:
+        if (menuOption in ["X","C"] and userPassedArgs.monitor is None) or ("|" not in userPassedArgs.options and menuOption not in ["B"]):
             finishScreening(
                 downloadOnly,
                 testing,
@@ -1800,7 +1800,8 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                     defaultAnswer=defaultAnswer,
                     forceLoad=(menuOption in ["X", "B", "G", "S"]),
                     stockCodes = listStockCodes,
-                    exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS"
+                    exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
+                    userDownloadOption = menuOption
             )
     if menuOption not in ["C"] and (userPassedArgs.monitor is not None or "|" in userPassedArgs.options) :#not configManager.isIntradayConfig() and configManager.calculatersiintraday:
         candleDuration = (userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else "1m")
@@ -1814,7 +1815,8 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                         forceLoad=(menuOption in ["X", "B", "G", "S"]),
                         stockCodes = listStockCodes,
                         isIntraday=True,
-                        exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS"
+                        exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
+                        userDownloadOption = menuOption
                 )
         resetConfigToDefault()
     loadedStockData = True
@@ -3019,7 +3021,6 @@ def saveNotifyResultsFile(
         )
         if defaultAnswer is None:
             input("Press <Enter> to continue...")
-    return filename
 
 def sendGlobalMarketBarometer(userArgs=None):
     from pkscreener.classes import Barometer
@@ -3123,7 +3124,7 @@ def sendTestStatus(screenResults, label, user=None):
     )
 
 
-def showBacktestResults(backtest_df, sortKey="Stock", optionalName="backtest_result"):
+def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName="backtest_result"):
     global menuChoiceHierarchy, selectedChoice, userPassedArgs, elapsed_time
     pd.set_option("display.max_rows", 800)
     # pd.set_option("display.max_columns", 20)
@@ -3147,13 +3148,24 @@ def showBacktestResults(backtest_df, sortKey="Stock", optionalName="backtest_res
             summaryText = f"{summaryText}\nOverall Summary of (correctness of) Strategy Prediction Positive outcomes:"
     tabulated_text = ""
     if backtest_df is not None and len(backtest_df) > 0:
-        tabulated_text = colorText.miniTabulator().tabulate(
-            backtest_df,
-            headers="keys",
-            tablefmt=colorText.No_Pad_GridFormat,
-            showindex=False,
-            maxcolwidths=Utility.tools.getMaxColumnWidths(backtest_df)
-        ).encode("utf-8").decode(STD_ENCODING)
+        try:
+            tabulated_text = colorText.miniTabulator().tabulate(
+                backtest_df,
+                headers="keys",
+                tablefmt=colorText.No_Pad_GridFormat,
+                showindex=False,
+                maxcolwidths=Utility.tools.getMaxColumnWidths(backtest_df)
+            ).encode("utf-8").decode(STD_ENCODING)
+        except ValueError:
+            # Maybe we were not able to fit the column width. Let's get rid of the column width restriction
+            tabulated_text = colorText.miniTabulator().tabulate(
+                backtest_df,
+                headers="keys",
+                tablefmt=colorText.No_Pad_GridFormat,
+                showindex=False,
+                # maxcolwidths=Utility.tools.getMaxColumnWidths(backtest_df)
+            ).encode("utf-8").decode(STD_ENCODING)
+            pass
     OutputControls().printOutput(colorText.FAIL + summaryText + colorText.END + "\n")
     OutputControls().printOutput(tabulated_text + "\n")
     choices, filename = getBacktestReportFilename(sortKey, optionalName)

@@ -899,7 +899,8 @@ class tools:
         stockCodes=[],
         exchangeSuffix=".NS",
         isIntraday = False,
-        forceRedownload=False
+        forceRedownload=False,
+        userDownloadOption=None
     ):
         isIntraday = isIntraday or configManager.isIntradayConfig()
         exists, cache_file = tools.afterMarketStockDataExists(
@@ -909,6 +910,8 @@ class tools:
         leftOutStocks = None
         recentDownloadFromOriginAttempted = False
         isTrading = PKDateUtilities.isTradingTime() and (PKDateUtilities.wasTradedOn() or not PKDateUtilities.isTodayHoliday()[0])
+        if userDownloadOption is not None and "B" in userDownloadOption: # Backtests
+            isTrading = False
         # stockCodes is not None mandates that we start our work based on the downloaded data from yesterday
         if (stockCodes is not None and len(stockCodes) > 0) and (isTrading or downloadOnly):
             recentDownloadFromOriginAttempted = True

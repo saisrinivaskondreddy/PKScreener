@@ -93,6 +93,7 @@ class StockScreener:
         printCounter = userArgs.log if (userArgs is not None and userArgs.log is not None) else False
         userArgsLog = printCounter
         start_time = time.time()
+        self.isTradingTime = False if menuOption in "B" else self.isTradingTime
         try:
             with hostRef.processingCounter.get_lock():
                 hostRef.processingCounter.value += 1
