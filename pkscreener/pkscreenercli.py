@@ -84,10 +84,9 @@ def decorator(func):
 
 # print = decorator(print) # current file
 def disableSysOut(input=True, disable=True):
-    global printenabled
+    global printenabled,originalStdOut, original__stdout
     printenabled = not disable
     if disable:
-        global originalStdOut, original__stdout
         if originalStdOut is None:
             builtins.print = decorator(builtins.print)  # all files
             if input:
@@ -98,13 +97,14 @@ def disableSysOut(input=True, disable=True):
         sys.__stdout__ = open(os.devnull, "w")
     else:
         try:
-            sys.stdout.close()
-            sys.__stdout__.close()
+            if originalStdOut is not None and original__stdout is not None:
+                sys.stdout.close()
+                sys.__stdout__.close()
         except Exception as e:# pragma: no cover
             default_logger().debug(e, exc_info=True)
             pass
-        sys.stdout = originalStdOut
-        sys.__stdout__ = original__stdout
+        sys.stdout = originalStdOut if originalStdOut is not None else sys.stdout
+        sys.__stdout__ = original__stdout if original__stdout is not None else sys.__stdout__
 
 # Argument Parsing for test purpose
 argParser = argparse.ArgumentParser()
