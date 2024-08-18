@@ -3028,6 +3028,8 @@ def sendGlobalMarketBarometer(userArgs=None):
     gmbPath = Barometer.getGlobalMarketBarometerValuation()
     try:
         if gmbPath is not None:
+            gmbFileSize = os.stat(gmbPath).st_size if os.path.exists(gmbPath) else 0
+            OutputControls().printOutput(f"Barometer report created with size {gmbFileSize} @ {gmbPath}")
             sendMessageToTelegramChannel(
                 message=None,
                 photo_filePath=gmbPath,
@@ -3035,14 +3037,15 @@ def sendGlobalMarketBarometer(userArgs=None):
                 user=(userArgs.user if userArgs is not None else None),
             )
             os.remove(gmbPath)
-    except:
+    except Exception as e:
+        default_logger().debug(e,exc_info=True)
         pass
 
 def sendMessageToTelegramChannel(
     message=None, photo_filePath=None, document_filePath=None, caption=None, user=None, mediagroup=False
 ):
     global userPassedArgs, test_messages_queue, media_group_dict
-    if ("RUNNER" not in os.environ.keys() and not userPassedArgs.log) or (userPassedArgs is not None and userPassedArgs.telegram):
+    if ("RUNNER" not in os.environ.keys() and (userPassedArgs is not None and not userPassedArgs.log)) or (userPassedArgs is not None and userPassedArgs.telegram):
         return
     
     if user is None and userPassedArgs is not None and userPassedArgs.user is not None:
