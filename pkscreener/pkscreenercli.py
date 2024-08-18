@@ -276,25 +276,33 @@ argParser.add_argument(
     help="Piped Menus",
     required=False,
 )
-if __name__ == "__main__":
-    def get_debug_args():
+
+def get_debug_args():
+    global args
+    try:
+        if args is not None:
+            # make sure that args are mutable
+            args = list(args)
+        return args
+    except NameError as e:
+        return None
+    except TypeError as e: # NameSpace object is not iterable
+        return args
+    except Exception as e:
         return None
         # return " -a Y -e -l -o X:12:30:D:D:D:D:D".split(" ")
 
-    args = get_debug_args()
-    argsv = argParser.parse_known_args(args=args)
-    # argsv = argParser.parse_known_args()
-    args = argsv[0]
-    # if sys.argv[0].endswith(".py"):
-    #     args.monitor = 'X'
-    #     args.answerdefault = 'Y'
-    results = None
-    resultStocks = None
-    plainResults = None
-    start_time = None
-    dbTimestamp = None
-    elapsed_time = None
-    configManager = ConfigManager.tools()
+args = get_debug_args()
+argsv = argParser.parse_known_args(args=args)
+# argsv = argParser.parse_known_args()
+args = argsv[0]
+results = None
+resultStocks = None
+plainResults = None
+start_time = None
+dbTimestamp = None
+elapsed_time = None
+configManager = ConfigManager.tools()
 
 
 def exitGracefully():
@@ -336,8 +344,9 @@ def logFilePath():
 
         filePath = os.path.join(Archiver.get_user_outputs_dir(), "pkscreener-logs.txt")
         f = open(filePath, "w")
-        f.write("Logger file for pkscreener!")
-        f.close()
+        if f is not None:
+            f.write("Logger file for pkscreener!")
+            f.close()
     except Exception:# pragma: no cover
         filePath = os.path.join(tempfile.gettempdir(), "pkscreener-logs.txt")
     return filePath
@@ -402,12 +411,13 @@ def runApplication():
         savedPipedArgs = args.pipedmenus if args is not None and args.pipedmenus is not None else None
     except:
         pass
-    global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time
+    global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time,argParser
     from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     args = get_debug_args()
-    argsv = argParser.parse_known_args(args=args)
-    # argsv = argParser.parse_known_args()
-    args = argsv[0]
+    if not isinstance(args,argparse.Namespace):
+        argsv = argParser.parse_known_args(args=args)
+        # argsv = argParser.parse_known_args()
+        args = argsv[0]
     if args.user is None:
         from PKDevTools.classes.Telegram import get_secrets
         Channel_Id, _, _, _ = get_secrets()

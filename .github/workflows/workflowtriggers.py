@@ -759,7 +759,7 @@ def triggerBacktestWorkflowActions(launchLocal=False):
     # backtestKeys = sorted(list(backtestKeys),reverse=True)
     for key in backtestKeys:
         scanOptions = objectDictionary[key]["td3"]
-        options = f'{scanOptions.replace("_",":").replace("B:","")}:D:D:D'.replace("::",":")
+        options = f'{scanOptions.replace("_",":").replace("B:","").replace("X:","")}:D:D:D'.replace("::",":")
         if not shouldRunBacktests(scanOptions,existing_df):
             continue
         if launchLocal:
