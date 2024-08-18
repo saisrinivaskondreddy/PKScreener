@@ -492,11 +492,13 @@ def run_workflow(workflow_name, postdata, option=""):
     owner = os.popen('git ls-remote --get-url origin | cut -d/ -f4').read().replace("\n","")
     repo = os.popen('git ls-remote --get-url origin | cut -d/ -f5').read().replace(".git","").replace("\n","")
     ghp_token = ""
-    # from PKDevTools.classes.Telegram import get_secrets
-    # _, _, _, ghp_token = get_secrets()
     
     if "GITHUB_TOKEN" in os.environ.keys():
         ghp_token = os.environ["GITHUB_TOKEN"]
+    else:
+        from PKDevTools.classes.Telegram import get_secrets
+        _, _, _, ghp_token = get_secrets()
+        
     url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_name}/dispatches"
 
     headers = {
@@ -762,7 +764,7 @@ def triggerBacktestWorkflowActions(launchLocal=False):
             continue
         if launchLocal:
             from pkscreener import pkscreenercli
-            from pkscreener.pkscreenercli import argParser as agp
+            agp = argparse.ArgumentParser()
 
             options = "B:30:{0}".format(options)
             ag = agp.parse_known_args(args=["-e", "-a", "Y", "-o", options, "-v"])[0]
