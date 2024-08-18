@@ -1685,17 +1685,18 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 user,
             )
 
-        if menuOption == "B" and backtest_df is not None and len(backtest_df) > 0:
-            Utility.tools.clearScreen()
-            # Let's do the portfolio calculation first
-            df_xray = prepareGroupedXRay(backtestPeriod, backtest_df)
-            summary_df, sorting, sortKeys = FinishBacktestDataCleanup(backtest_df, df_xray)
-            while sorting:
-                sorting = showSortedBacktestData(backtest_df, summary_df, sortKeys)
-            if defaultAnswer is None:
-                input("Press <Enter> to continue...")
-        elif menuOption == "B":
-            OutputControls().printOutput("Finished backtesting with no results to show!")
+        if menuOption == "B":
+            if backtest_df is not None and len(backtest_df) > 0:
+                Utility.tools.clearScreen()
+                # Let's do the portfolio calculation first
+                df_xray = prepareGroupedXRay(backtestPeriod, backtest_df)
+                summary_df, sorting, sortKeys = FinishBacktestDataCleanup(backtest_df, df_xray)
+                while sorting:
+                    sorting = showSortedBacktestData(backtest_df, summary_df, sortKeys)
+                if defaultAnswer is None:
+                    input("Press <Enter> to continue...")
+            else:
+                OutputControls().printOutput("Finished backtesting with no results to show!")
         elif menuOption == "G":
             if defaultAnswer is None:
                 input("Press <Enter> to continue...")
@@ -1842,7 +1843,8 @@ def getLatestTradeDateTime(stockDictPrimary):
     return lastTradeDate, lastTradeTime
 
 def FinishBacktestDataCleanup(backtest_df, df_xray):
-    showBacktestResults(df_xray, sortKey="Date", optionalName="Insights")
+    if df_xray is not None and len(df_xray) > 10:
+        showBacktestResults(df_xray, sortKey="Date", optionalName="Insights")
     summary_df = backtestSummary(backtest_df)
     backtest_df.loc[:, "Date"] = backtest_df.loc[:, "Date"].apply(
                 lambda x: x.replace("-", "/")
@@ -1948,31 +1950,34 @@ def prepareGroupedXRay(backtestPeriod, backtest_df):
                       long_running_fn_args=func_args)
         task.total = len(df_grouped)
         tasksList.append(task)
-    if 'RUNNER' not in os.environ.keys():
-        # if configManager.enablePortfolioCalculations:
-        # On Github CI, we may run out of memory because of saving results in
-        # shared multiprocessing dict.
-        PKScheduler.scheduleTasks(tasksList,f"Portfolio X-Ray for ({len(df_grouped)})", showProgressBars=False,timeout=600)
-    else:
-        # On Github CI, let's run synchronously.
+    try:
+        if 'RUNNER' not in os.environ.keys():
+            # if configManager.enablePortfolioCalculations:
+            # On Github CI, we may run out of memory because of saving results in
+            # shared multiprocessing dict.
+            PKScheduler.scheduleTasks(tasksList,f"Portfolio X-Ray for ({len(df_grouped)})", showProgressBars=False,timeout=600)
+        else:
+            # On Github CI, let's run synchronously.
+            for task in tasksList:
+                task.long_running_fn(*(task,))
         for task in tasksList:
-            task.long_running_fn(*(task,))
-    for task in tasksList:
-        p_df = task.result
-        if p_df is not None:
-            if df_xray is not None:
-                df_xray = pd.concat([df_xray, p_df.copy()], axis=0)
-            else:
-                df_xray = p_df.copy()
+            p_df = task.result
+            if p_df is not None:
+                if df_xray is not None:
+                    df_xray = pd.concat([df_xray, p_df.copy()], axis=0)
+                else:
+                    df_xray = p_df.copy()
             # Let's drop the columns no longer required for backtest report
 
-    removedUnusedColumns(None, backtest_df, ["Consol.", "Breakout", "RSI", "Pattern", "CCI"], userArgs=userPassedArgs)
-    df_xray = df_xray.replace(np.nan, "", regex=True)
-    df_xray = PortfolioXRay.xRaySummary(df_xray)
-    df_xray.loc[:, "Date"] = df_xray.loc[:, "Date"].apply(
-                lambda x: x.replace("-", "/")
-            )
-    
+        removedUnusedColumns(None, backtest_df, ["Consol.", "Breakout", "RSI", "Pattern", "CCI"], userArgs=userPassedArgs)
+        df_xray = df_xray.replace(np.nan, "", regex=True)
+        df_xray = PortfolioXRay.xRaySummary(df_xray)
+        df_xray.loc[:, "Date"] = df_xray.loc[:, "Date"].apply(
+                    lambda x: x.replace("-", "/")
+                )
+    except Exception as e:
+        default_logger().debug(e,exc_info=True)
+        pass
     return df_xray
 
 def showSortedBacktestData(backtest_df, summary_df, sortKeys):
@@ -2457,7 +2462,10 @@ def printNotifySaveScreenedResults(
             message=f"No scan results found for {menuChoiceHierarchy}", user=user
         )
     if not testing:
-        Utility.tools.setLastScreenedResults(screenResults, saveResults, f"{PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)}_{recordDate if recordDate is not None else ''}")
+        runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+        if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+            runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1].strip()
+        Utility.tools.setLastScreenedResults(screenResults, saveResults, f"{runOptionName}_{recordDate if recordDate is not None else ''}")
 
 def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user):
     kite_file_path = os.path.join(Archiver.get_user_outputs_dir(), f"{runOptionName}_Kite_Basket.html")
@@ -3131,7 +3139,8 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
     global menuChoiceHierarchy, selectedChoice, userPassedArgs, elapsed_time
     pd.set_option("display.max_rows", 800)
     # pd.set_option("display.max_columns", 20)
-    if backtest_df is None or backtest_df.empty or len(backtest_df) < 1:
+    if backtest_df is None or backtest_df.empty or len(backtest_df) < 10:
+        OutputControls().printOutput("Empty backtest dataframe encountered! Cannot generate the backtest report")
         return
     backtest_df.drop_duplicates(inplace=True)
     summaryText = f"Auto-generated in {round(elapsed_time,2)} sec. as of {PKDateUtilities.currentDateTime().strftime('%d-%m-%y %H:%M:%S IST')}\n{menuChoiceHierarchy.replace('Backtests','Growth of 10K' if optionalName=='Insights' else 'Backtests')}"
@@ -3160,6 +3169,7 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
                 maxcolwidths=Utility.tools.getMaxColumnWidths(backtest_df)
             ).encode("utf-8").decode(STD_ENCODING)
         except ValueError:
+            OutputControls().printOutput("ValueError! Going ahead without any column width restrictions!")
             # Maybe we were not able to fit the column width. Let's get rid of the column width restriction
             tabulated_text = colorText.miniTabulator().tabulate(
                 backtest_df,
