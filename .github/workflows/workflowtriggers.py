@@ -767,7 +767,7 @@ def triggerBacktestWorkflowActions(launchLocal=False):
             from pkscreener.pkscreenercli import argParser as agp
 
             options = "B:30:{0}".format(options)
-            ag = agp.parse_known_args(args=["-e", "-a", "Y", "-o", options])[0]
+            ag = agp.parse_known_args(args=["-e", "-a", "Y", "-o", options, "-v"])[0]
             pkscreenercli.args = ag
             pkscreenercli.pkscreenercli()
             # sys.stdout = originalStdOut
