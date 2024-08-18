@@ -180,7 +180,7 @@ jobs:
         RUNNER : "GitHub_Actions"
         BACKTEST_NAME: ${{ inputs.name }}
       run: |
-        pkscreenercli.exe -a Y -e -p -o B:30:${{ inputs.params }} -u ${{ inputs.user }}
+        pkscreenercli.exe -a Y -e -v -o B:30:${{ inputs.params }} -u ${{ inputs.user }}
         copy /Y results\* Backtest-Reports
 
     - name: Run backtest on Linux
@@ -192,7 +192,7 @@ jobs:
         RUNNER : "GitHub_Actions"
         BACKTEST_NAME: ${{ inputs.name }}
       run: |
-        /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin -a Y -e -p -o B:30:${{ inputs.params }} -u ${{ inputs.user }}
+        /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin -a Y -e -v -o B:30:${{ inputs.params }} -u ${{ inputs.user }}
         ls -l results
         cp results/*.html Backtest-Reports
         # python3 pkscreener/pkscreenercli.py -a Y -e -p -o B:30:${{ inputs.params }} -u ${{ inputs.user }}
