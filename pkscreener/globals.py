@@ -1129,10 +1129,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         if str(options[5]).isnumeric():
                             maLength = int(options[5])
                         elif str(options[5]).upper() == "D":
-                            maLength = 1 # Conf. up
-                elif defaultAnswer == "Y" and user is not None:
-                    # bot mode
-                    maLength = 4 if respChartPattern in [3] else 0
+                            maLength = 4 # Super Conf. up
+                if defaultAnswer == "Y" and user is not None:
+                    if maLength == 0:
+                        # bot mode
+                        maLength = 4 if respChartPattern in [3] else 0
                     insideBarToLookback = 7 if respChartPattern in [1, 2] else (0.008 if (maLength == 4 and respChartPattern ==3) else 0.02)
                 else:
                     (

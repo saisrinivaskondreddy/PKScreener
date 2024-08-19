@@ -188,6 +188,12 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
     user = updateCarrier.from_user
     logger.info("User %s started the conversation.", user.first_name)
     if not bot_available:
+        # Sometimes, either the payment does not go through or 
+        # it takes time to process the last month's payment if
+        # done in the past 24 hours while the last date was today.
+        # If that happens, we won't be able to run bots or scanners
+        # without incurring heavy charges. Let's run in the 
+        # unavailable mode instead until this gets fixed.
         updatedResults = "Apologies! The @nse_pkscreener_bot is NOT available for the time being! We are working with our host GitHub and other data source providers to sort out pending invoices and restore the services soon! Thanks for your patience and support! 🙏"
     # Build InlineKeyboard where each button has a displayed text
     # and a string as callback_data
@@ -355,12 +361,20 @@ def XScanners(update: Update, context: CallbackContext) -> str:
         return START_ROUTES
     data = query.data.upper().replace("CX", "X").replace("CB", "B").replace("CG", "G").replace("CMI", "MI")
     if data[0:2] not in TOP_LEVEL_SCANNER_MENUS:
+        # Someone is trying to send commands we do not support
         return start(update, context)
     global bot_available
     if not bot_available:
+        # Bot is running but is running in unavailable mode.
+        # Sometimes, either the payment does not go through or 
+        # it takes time to process the last month's payment if
+        # done in the past 24 hours while the last date was today.
+        # If that happens, we won't be able to run bots or scanners
+        # without incurring heavy charges. Let's run in the 
+        # unavailable mode instead until this gets fixed.
         start(update, context)
         return START_ROUTES
-    if data.startswith("MI"):
+    if data.startswith("MI"): # Intraday monitor
         monitorIndex = int(data.split("_")[1])
         result_outputs, filePath = launchIntradayMonitor()
         filePath = f"{filePath}_{monitorIndex}.txt"
