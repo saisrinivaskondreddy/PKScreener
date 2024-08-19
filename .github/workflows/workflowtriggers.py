@@ -452,7 +452,7 @@ def generateBacktestReportMainPage():
         oneline_summary_file = (
             f"PKScreener_{td3}{'_i' if args.intraday else ''}_OneLine_Summary.html"
         )
-        oneline_summary = "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>"
+        oneline_summary = f"<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class='w'>{PKDateUtilities.currentDateTime().strftime('%Y/%m/%d')}</td><td class='w'>-1</td>"
         if os.path.isfile(f"Backtest-Reports/{oneline_summary_file}"):
             try:
                 with open(f"Backtest-Reports/{oneline_summary_file}", "r") as sf:
