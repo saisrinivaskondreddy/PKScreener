@@ -554,6 +554,7 @@ class tools:
         draw.text((startColValue, rowPixelRunValue), artText+ f" | {tools.removeAllColorStyles(marketStatus())}", font=artfont, fill=artColor)
         rowPixelRunValue += artfont_arttext_height + 1
         # Report title
+        # reportTitle = tools.wrapFitLegendText(table,backtestSummary, reportTitle)
         draw.text((startColValue, rowPixelRunValue), reportTitle, font=stdfont, fill=menuColor)
         rowPixelRunValue += stdFont_oneLinelabel_height + 1
         counter = -1

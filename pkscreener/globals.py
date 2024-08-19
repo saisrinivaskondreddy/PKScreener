@@ -690,11 +690,11 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
         elif executeOption == 7:
             if reversalOption in [3]:
                 if "SuperConfSort" in saveResults.columns:
-                    sortKey = ["MA-Signal", "SuperConfSort"]
-                    ascending = [True, True]
+                    sortKey = ["SuperConfSort"]
+                    ascending = [False]
                 else:
-                    sortKey = ["Volume","MA-Signal"]
-                    ascending = [False, False]
+                    sortKey = ["Volume"]
+                    ascending = [False]
         elif executeOption == 23:
             sortKey = ["bbands_ulr_ratio_max5"] if "bbands_ulr_ratio_max5" in screenResults.columns else ["Volume"]
             ascending = [False]
