@@ -219,11 +219,14 @@ jobs:
         git add Backtest-Reports/PKScreener_${{ inputs.name }}_OneLine_Summary.html --force
         git add Backtest-Reports/PKScreener_${{ inputs.name }}_Insights_DateSorted.html --force
         git commit -m "GitHub-Action-Workflow-Backtest-Reports-(${{ inputs.name }})"
+        git pull
+        git push -v -u origin +gh-pages
     
     - name: Push main landing page
       continue-on-error: true
       shell: bash
       run: |
+        pip3 install .
         git pull
         python3 .github/workflows/workflowtriggers.py -r ${{ inputs.intraday }} -s0 "S,T,E,U,Z,H,Y,X,G,C,M,D,I,L,P" -s1 "W,N,E,M,Z,S,0,2,3,4,6,7,9,10,13,15" -s2 "0,21,22,29,42,50,M,Z" -s3 "0" -s4 "0"
         git add BacktestReports.html --force
