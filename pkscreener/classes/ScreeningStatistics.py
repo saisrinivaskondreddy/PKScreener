@@ -90,6 +90,23 @@ class ScreeningStatistics:
         self.default_logger = default_logger
         self.shouldLog = shouldLog
 
+    def calc_relative_strength(self,df:pd.DataFrame):
+        if df is None or len(df) <= 1:
+            return -1
+        
+        with pd.option_context('mode.chained_assignment', None):
+            df.sort_index(inplace=True)
+            ## relative gain and losses
+            df['close_shift'] = df['Adj Close'].shift(1)
+            ## Gains (true) and Losses (False)
+            df['gains'] = df.apply(lambda x: x['Adj Close'] if x['Adj Close'] >= x['close_shift'] else 0, axis=1)
+            df['loss'] = df.apply(lambda x: x['Adj Close'] if x['Adj Close'] <= x['close_shift'] else 0, axis=1)
+
+        avg_gain = df['gains'].mean()
+        avg_losses = df['loss'].mean()
+
+        return avg_gain / avg_losses
+
     #Calculating signals
     def computeBuySellSignals(self,df,ema_period=200,retry=True):
         try:
@@ -1594,6 +1611,14 @@ class ScreeningStatistics:
             return True if (rsiKey == "RSIi") else (self.findRSICrossingMA(df, screenDict, saveDict,lookFor=lookFor, maLength=maLength, rsiKey="RSIi") or True)
         return False if (rsiKey == "RSIi") else (self.findRSICrossingMA(df, screenDict, saveDict,lookFor=lookFor, maLength=maLength, rsiKey="RSIi"))
     
+    def findRSRating(self, stock_rs_value=-1, index_rs_value=-1,df=None,screenDict={}, saveDict={}):
+        if stock_rs_value <= 0:
+            stock_rs_value = self.calc_relative_strength(df=df)
+        rs_rating = round(100 * ( stock_rs_value / index_rs_value ),2)
+        screenDict[f"RS_Rating{self.configManager.baseIndex}"] = rs_rating
+        saveDict[f"RS_Rating{self.configManager.baseIndex}"] = rs_rating
+        return rs_rating
+        
     def findShortSellCandidatesForVolumeSMA(self, df):
         if df is None or len(df) == 0:
             return False
@@ -3473,6 +3498,8 @@ class ScreeningStatistics:
                         + colorText.END
                     )
                     saveDict["Pattern"] = saved[1] + f"VCP (BO: {highestTop})"
+                    # Find RS Rating and add to the list
+
                     return True
         except Exception as e:  # pragma: no cover
             self.default_logger.debug(e, exc_info=True)

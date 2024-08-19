@@ -68,6 +68,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.longTimeout = 4
         self.maxNetworkRetryCount = 10
         self.maxdisplayresults = 100
+        self.baseIndex = "^NSEI"
         self.backtestPeriod = 120
         self.marketOpen = "09:15"
         self.marketClose = "15:30"
@@ -170,6 +171,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "atrtrailingstopsensitivity", str(self.atrTrailingStopSensitivity))
             parser.set("config", "backtestPeriod", str(self.backtestPeriod))
             parser.set("config", "backtestPeriodFactor", str(self.backtestPeriodFactor))
+            parser.set("config", "baseIndex", str(self.baseIndex))
             parser.set("config", "cacheStockData", "y" if self.cacheEnabled else "n")
             parser.set("config", "calculatersiintraday", "y" if self.calculatersiintraday else "n")
             parser.set("config", "daysToLookback", str(self.daysToLookback))
@@ -403,6 +405,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "atrtrailingstopsensitivity", str(self.atrTrailingStopSensitivity))
                 parser.set("config", "backtestPeriod", str(self.backtestPeriod))
                 parser.set("config", "backtestPeriodFactor", str(self.backtestPeriodFactor))
+                parser.set("config", "baseIndex", str(self.baseIndex))
                 parser.set("config", "cacheStockData", str(self.cacheStockData))
                 parser.set("config", "calculatersiintraday", str(self.calculatersiintraday))
                 parser.set("config", "daysToLookback", str(self.daysToLookback))
@@ -585,6 +588,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.vcpVolumeContractionRatio = float(parser.get("config", "vcpVolumeContractionRatio"))
                 self.soundAlertForMonitorOptions = str(parser.get("config", "soundAlertForMonitorOptions"))
                 self.superConfluenceEMAPeriods = str(parser.get("config", "superConfluenceEMAPeriods"))
+                self.baseIndex = str(parser.get("config", "baseIndex"))
                 self.superConfluenceEnforce200SMA = (
                     False
                     if "y" not in str(parser.get("config", "superConfluenceEnforce200SMA")).lower()

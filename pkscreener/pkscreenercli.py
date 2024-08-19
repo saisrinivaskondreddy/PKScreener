@@ -418,6 +418,9 @@ def runApplication():
         argsv = argParser.parse_known_args(args=args)
         # argsv = argParser.parse_known_args()
         args = argsv[0]
+    if args is not None and not args.exit:
+        argsv = argParser.parse_known_args()
+        args = argsv[0]
     if args.user is None:
         from PKDevTools.classes.Telegram import get_secrets
         Channel_Id, _, _, _ = get_secrets()

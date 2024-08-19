@@ -388,6 +388,8 @@ class StockScreener:
                         )
                         if not isVCP:
                             return returnLegibleData(f"isVCP:{isVCP}")
+                        elif hostRef.rs_strange_index > 0:
+                            screener.findRSRating(index_rs_value=hostRef.rs_strange_index,df=fullData,screenDict=screeningDictionary, saveDict=saveDictionary)
                     elif respChartPattern == 5:
                         if Imports["scipy"]:
                             isBuyingTrendline = screener.findTrendlines(
@@ -410,6 +412,8 @@ class StockScreener:
                         )
                         if not isMinerviniVCP:
                             return returnLegibleData(f"isMinerviniVCP:{isMinerviniVCP}")
+                        elif hostRef.rs_strange_index > 0:
+                            screener.findRSRating(index_rs_value=hostRef.rs_strange_index,df=fullData[::-1],screenDict=screeningDictionary, saveDict=saveDictionary)
                     elif respChartPattern == 9:
                         hasMASignalFilter = screener.validateMovingAverages(
                             fullData, screeningDictionary, saveDictionary,maRange=1.25,maLength=maLength
