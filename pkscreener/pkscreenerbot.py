@@ -690,7 +690,7 @@ def launchScreener(options, user, context, optionChoices, update):
             while optionChoices.endswith("_"):
                 optionChoices = optionChoices[:-1]
             run_workflow(
-                optionChoices, str(user.id), str(options.upper()), workflowType="X"
+                optionChoices, str(user.id), str(options.upper().replace(":7:3:4",":7:3:0.008:4")), workflowType="X"
             )
         elif str(optionChoices.upper()).startswith("G"):
             optionChoices = optionChoices.replace(" ", "").replace(">", "_")
