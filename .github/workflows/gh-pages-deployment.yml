@@ -67,13 +67,13 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          rm -rf pkscreener
           rm -rf results
           rm -rf screenshots
           rm -rf .github
           rm -rf docs
           rm -rf patterns
           rm -rf test
+          rm -rf pkscreener/classes/*.py
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v2
