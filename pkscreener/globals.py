@@ -1130,7 +1130,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             maLength = int(options[5])
                         elif str(options[5]).upper() == "D":
                             maLength = 4 # Super Conf. up
-                if defaultAnswer == "Y" and user is not None:
+                elif defaultAnswer == "Y" and user is not None:
                     if maLength == 0:
                         # bot mode
                         maLength = 4 if respChartPattern in [3] else 0
@@ -1142,6 +1142,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     ) = Utility.tools.promptChartPatterns(selectedMenu)
                 if maLength == 0:
                     maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
+                if respChartPattern == 3 and maLength == 4: # Super conf.
+                    if insideBarToLookback >= 1:
+                        insideBarToLookback = 0.008 # Set it to default .8%
             elif respChartPattern in [0, 4, 5, 6, 7, 8, 9]:
                 insideBarToLookback = 0
                 if respChartPattern == 6 or respChartPattern == 9:
@@ -3122,7 +3125,7 @@ def sendMessageToTelegramChannel(
                 pass
     if user is not None:
         channel_userID="-1001785195297"
-        if user != channel_userID and not userPassedArgs.monitor:
+        if user != channel_userID and userPassedArgs is not None and not userPassedArgs.monitor:
             # Send an update to dev channel
             send_message(
                 f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options.replace(':D','')}]",
