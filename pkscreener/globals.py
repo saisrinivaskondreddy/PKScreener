@@ -1791,6 +1791,7 @@ def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOp
                 analysis_df.loc[0,"Stock"] = "BASKET"
                 analysis_df.loc[0,"Pattern"] = runOptionName if runOptionName is not None else ""
             optionalFinalOutcome_df = pd.concat([optionalFinalOutcome_df, analysis_df], axis=0)
+        showBacktestResults(analysis_df,optionalName="Intraday_Backtest_Result",choices=runOptionName)
     if firstScanKey.startswith("X:12:"):
         analysis_dict[firstScanKey] = {"S1": screenResults, "S2": saveResults}
     return optionalFinalOutcome_df, saveResults
@@ -3139,11 +3140,11 @@ def sendTestStatus(screenResults, label, user=None):
     )
 
 
-def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName="backtest_result"):
+def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName="backtest_result",choices=None):
     global menuChoiceHierarchy, selectedChoice, userPassedArgs, elapsed_time
     pd.set_option("display.max_rows", 800)
     # pd.set_option("display.max_columns", 20)
-    if backtest_df is None or backtest_df.empty or len(backtest_df) < 10:
+    if backtest_df is None or backtest_df.empty or len(backtest_df) < 1:
         OutputControls().printOutput("Empty backtest dataframe encountered! Cannot generate the backtest report")
         return
     backtest_df.drop_duplicates(inplace=True)
@@ -3185,7 +3186,7 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
             pass
     OutputControls().printOutput(colorText.FAIL + summaryText + colorText.END + "\n")
     OutputControls().printOutput(tabulated_text + "\n")
-    choices, filename = getBacktestReportFilename(sortKey, optionalName)
+    choices, filename = getBacktestReportFilename(sortKey, optionalName,choices=choices)
     headerDict = {0: "<th></th>"}
     index = 1
     for col in backtest_df.columns:
@@ -3237,9 +3238,10 @@ def scanOutputDirectory(backtest=False):
         os.makedirs(os.path.dirname(os.path.join(os.getcwd(),f"{dirName}{os.sep}")), exist_ok=True)
     return outputFolder
 
-def getBacktestReportFilename(sortKey="Stock", optionalName="backtest_result"):
+def getBacktestReportFilename(sortKey="Stock", optionalName="backtest_result",choices=None):
     global userPassedArgs,selectedChoice
-    choices = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+    if choices is None:
+        choices = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
     filename = f"PKScreener_{choices}_{optionalName}_{sortKey if sortKey is not None else 'Default'}Sorted.html"
     return choices, filename
 

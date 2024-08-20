@@ -403,7 +403,7 @@ def warnAboutDependencies():
             input("Press any key to try anyway...")
     
 def runApplication():
-    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions
+    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions,showBacktestResults
     # From a previous call to main with args, it may have been mutated.
     # Let's stock to the original args passed by user
     try:
@@ -473,10 +473,11 @@ def runApplication():
         analysis_index = 1
         for runOption in runOptions:
             try:
-                runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:').replace('D:','D:')}'"
+                runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:').replace('D:','')}'"
                 indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
                 runOptionName = f"{'[+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
-            except:
+            except Exception as e:
+                default_logger().debug(e,exc_info=True)
                 runOptionName = ""
                 pass
             args.progressstatus = f"{runOptionName} => Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
@@ -548,6 +549,7 @@ def runApplication():
                                     tablefmt=colorText.No_Pad_GridFormat,
                                     showindex = False
                                 ).encode("utf-8").decode(Utility.STD_ENCODING)
+                showBacktestResults(final_df,optionalName="Intraday_Backtest_Result_Summary",choices="Summary")
                 OutputControls().printOutput(mark_down)
                 from PKDevTools.classes.Telegram import get_secrets
                 Channel_Id, _, _, _ = get_secrets()
