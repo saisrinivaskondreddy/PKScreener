@@ -59,6 +59,7 @@ from telegram import __version__ as TG_VER
 start_time = datetime.now()
 MINUTES_2_IN_SECONDS = 120
 OWNER_USER = "Itsonlypk"
+APOLOGY_TEXT = "Apologies! The @nse_pkscreener_bot is NOT available for the time being! We are working with our host GitHub and other data source providers to sort out pending invoices and restore the services soon! Thanks for your patience and support! 🙏"
 
 from PKDevTools.classes.Telegram import get_secrets
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
@@ -194,7 +195,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
         # If that happens, we won't be able to run bots or scanners
         # without incurring heavy charges. Let's run in the 
         # unavailable mode instead until this gets fixed.
-        updatedResults = "Apologies! The @nse_pkscreener_bot is NOT available for the time being! We are working with our host GitHub and other data source providers to sort out pending invoices and restore the services soon! Thanks for your patience and support! 🙏"
+        updatedResults = APOLOGY_TEXT
     # Build InlineKeyboard where each button has a displayed text
     # and a string as callback_data
     # The keyboard is a list of button rows, where each row is in turn
@@ -451,6 +452,13 @@ def Level2(update: Update, context: CallbackContext) -> str:
         return START_ROUTES
     global bot_available
     if not bot_available:
+        # Bot is running but is running in unavailable mode.
+        # Sometimes, either the payment does not go through or 
+        # it takes time to process the last month's payment if
+        # done in the past 24 hours while the last date was today.
+        # If that happens, we won't be able to run bots or scanners
+        # without incurring heavy charges. Let's run in the 
+        # unavailable mode instead until this gets fixed.
         start(update, context)
         return START_ROUTES
     if selection[len(selection)-1].upper() == "H":
@@ -853,6 +861,10 @@ def error_handler(update: object, context: CallbackContext) -> None:
 def command_handler(update: Update, context: CallbackContext) -> None:
     if _shouldAvoidResponse(update):
         return
+    global bot_available
+    if not bot_available:
+        start(update, context)
+        return START_ROUTES
     msg = update.effective_message
     m = re.match("\s*/([0-9a-zA-Z_-]+)\s*(.*)", msg.text)
     cmd = m.group(1).lower()
