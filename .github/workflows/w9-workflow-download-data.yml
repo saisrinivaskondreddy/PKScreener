@@ -251,11 +251,9 @@ jobs:
       continue-on-error: true
       run: |
         pip3 install --upgrade pip
-        pip3 install pandas
-        pip3 install pytz
-        pip3 install PKDevTools
-        pip3 install PKNSETools
-        
+        pip3 install -r requirements.txt
+        pip3 install .
+
     - name: Trigger miscellaneous tasks that are download-data dependent
       if: ${{ inputs.skipDownload == '' }}
       shell: bash
