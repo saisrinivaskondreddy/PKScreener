@@ -492,13 +492,11 @@ def run_workflow(workflow_name, postdata, option=""):
     owner = os.popen('git ls-remote --get-url origin | cut -d/ -f4').read().replace("\n","")
     repo = os.popen('git ls-remote --get-url origin | cut -d/ -f5').read().replace(".git","").replace("\n","")
     ghp_token = ""
+    # from PKDevTools.classes.Telegram import get_secrets
+    # _, _, _, ghp_token = get_secrets()
     
     if "GITHUB_TOKEN" in os.environ.keys():
         ghp_token = os.environ["GITHUB_TOKEN"]
-    else:
-        from PKDevTools.classes.Telegram import get_secrets
-        _, _, _, ghp_token = get_secrets()
-        
     url = f"https://api.github.com/repos/{owner}/{repo}/actions/workflows/{workflow_name}/dispatches"
 
     headers = {
@@ -577,16 +575,16 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
             else:
                 break
     
-    runIntradayAnalysisScans(branch=branch)
+    runIntradayAnalysisScans(branch="main")
 
-def runIntradayAnalysisScans(branch="main"):
+def runIntradayAnalysisScans(branch="gh-pages"):
     # Trigger the intraday analysis only in the 2nd half after it gets trigerred anytime after 3 PM IST
     if PKDateUtilities.currentDateTime() >= PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute-30):
         while (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour+1,minute=MarketHours().closeMinute-15)):
             print(f"Waiting for {(MarketHours().closeHour+1):02}:{(MarketHours().closeMinute):02} PM IST...")
             sleep(300) # Wait for 4:15 PM IST because the download data will take time and we need the downloaded data
             # to be uploaded to actions-data-download folder on github before the intraday analysis can be run.
-        triggerRemoteScanAlertWorkflow("C:12: --runintradayanalysis -u -1001785195297", branch)
+        triggerRemoteScanAlertWorkflow("X:12: --runintradayanalysis -u -1001785195297", branch)
 
 def triggerRemoteScanAlertWorkflow(scanOptions, branch):
     cmd_options = scanOptions.replace("_",":")
@@ -603,7 +601,7 @@ def triggerRemoteScanAlertWorkflow(scanOptions, branch):
                     + f"{args.user}"
                     + '","params":"'
                     + f'-a Y -e -p -o {cmd_options}'
-                    + f'","ref":"main","alertTrigger":"'
+                    + f'","ref":"{branch}","alertTrigger":"'
                     + f"{alertTrigger}"
                     + '"}}'
                 )
@@ -615,7 +613,7 @@ def triggerRemoteScanAlertWorkflow(scanOptions, branch):
                     + f"{args.user}"
                     + '","params":"'
                     + f'-a Y -e -p -u {args.user} -o {cmd_options}'
-                    + '","ref":"main","alertTrigger":"'
+                    + f'","ref":"{branch}","alertTrigger":"'
                     + f"{alertTrigger}"
                     + '"}}'
                 )
