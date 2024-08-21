@@ -1777,6 +1777,7 @@ def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOp
     if analysis_df is not None and 'index' in analysis_df.columns:
         analysis_df.drop('index', axis=1, inplace=True, errors="ignore")            
     if firstScanKey.startswith("C:"):
+        analysis_df["Stock"] = saveResults.index.values
         if analysis_df is not None and "LTP@Alert" in analysis_df.columns:
             if optionalFinalOutcome_df is None:
                 optionalFinalOutcome_df = analysis_df

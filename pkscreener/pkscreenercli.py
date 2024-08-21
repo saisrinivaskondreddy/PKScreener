@@ -478,7 +478,7 @@ def runApplication():
                 runOptionName = f"{'[+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
             except Exception as e:
                 default_logger().debug(e,exc_info=True)
-                runOptionName = f"[+] {runOption.replace(':','_').replace('D:','')}"
+                runOptionName = f"[+] {runOption.replace('D:','').replace(':D','').replace(':','_').replace('_D','').replace('C_','X_')}"
                 pass
             args.progressstatus = f"{runOptionName} => Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
             analysisOptions = runOption.split("|")
@@ -503,8 +503,8 @@ def runApplication():
                     optionalFinalOutcome_df = results
                 if optionalFinalOutcome_df is not None and "EoDDiff" not in optionalFinalOutcome_df.columns:
                     # Somehow the file must have been corrupted. Let's re-download
-                    configManager.deleteFileWithPattern(pattern="stock_data_*.pkl")
-                    configManager.deleteFileWithPattern(pattern="intraday_stock_data_*.pkl")
+                    configManager.deleteFileWithPattern(pattern="*stock_data_*.pkl")
+                    configManager.deleteFileWithPattern(pattern="*intraday_stock_data_*.pkl")
                 if isInterrupted():
                     break
             except Exception as e:
