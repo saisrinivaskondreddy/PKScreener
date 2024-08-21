@@ -234,7 +234,7 @@ class StockScreener:
             suppressError = (logLevel==logging.NOTSET)
             suppressOut = (not (printCounter or testbuild))
             with SuppressOutput(suppress_stderr=suppressError, suppress_stdout=suppressOut):
-                self.updateStock(stock, screeningDictionary, saveDictionary, executeOption, exchangeName)
+                self.updateStock(stock, screeningDictionary, saveDictionary, executeOption, exchangeName,userArgs)
                 
                 self.performBasicLTPChecks(executeOption, screeningDictionary, saveDictionary, fullData, configManager, screener, exchangeName)
                 hasMinVolumeRatio = self.performBasicVolumeChecks(executeOption, volumeRatio, screeningDictionary, saveDictionary, processedData, configManager, screener)
@@ -808,14 +808,13 @@ class StockScreener:
         if configManager.stageTwo and not verifyStageTwo and executeOption > 0:
             raise ScreeningStatistics.NotAStageTwoStock
 
-    def updateStock(self, stock, screeningDictionary, saveDictionary, executeOption=0,exchangeName='INDIA'):
+    def updateStock(self, stock, screeningDictionary, saveDictionary, executeOption=0,exchangeName='INDIA',userArgs=None):
+        doNotAnchorText = (userArgs is not None and userArgs.runintradayanalysis) or executeOption == 26
         screeningDictionary["Stock"] = (
                     colorText.WHITE
-                    + (
-                        f"\x1B]8;;https://in.tradingview.com/chart?symbol={'NSE' if exchangeName=='INDIA' else 'NASDAQ'}%3A{stock}\x1B\\{stock}\x1B]8;;\x1B\\"
-                    )
+                    + (f"\x1B]8;;https://in.tradingview.com/chart?symbol={'NSE' if exchangeName=='INDIA' else 'NASDAQ'}%3A{stock}\x1B\\{stock}\x1B]8;;\x1B\\")
                     + colorText.END
-                ) if executeOption != 26 else stock
+                ) if not doNotAnchorText else stock
         saveDictionary["Stock"] = stock
 
     def getCleanedDataForDuration(self, backtestDuration, portfolio, screeningDictionary, saveDictionary, configManager, screener, data):

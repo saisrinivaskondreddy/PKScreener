@@ -2397,7 +2397,8 @@ def printNotifySaveScreenedResults(
                         maxcolwidths=[None,None,4,3]
                     ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("Hgh  |","Hgh|").replace("EoD  |","EoD|").replace("x  ","x")
                     caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
-                    finalCaption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text}{pipedTitle}" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
+                    suggestion_text = "Please try @nse_pkscreener_bot for many more scan options and results!"
+                    finalCaption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text}\n{suggestion_text}\n{pipedTitle}" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
                 if not testing: # and not userPassedArgs.runintradayanalysis:
                     kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
                     sendQuickScanResult(
@@ -3241,9 +3242,9 @@ def scanOutputDirectory(backtest=False):
 def getBacktestReportFilename(sortKey="Stock", optionalName="backtest_result",choices=None):
     global userPassedArgs,selectedChoice
     if choices is None:
-        choices = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-    filename = f"PKScreener_{choices}_{optionalName}_{sortKey if sortKey is not None else 'Default'}Sorted.html"
-    return choices, filename
+        choices = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice).strip()
+    filename = f"PKScreener_{choices.strip()}_{optionalName.strip()}_{sortKey.strip() if sortKey is not None else 'Default'}Sorted.html"
+    return choices.strip(), filename.strip()
 
 def showOptionErrorMessage():
     OutputControls().printOutput(
