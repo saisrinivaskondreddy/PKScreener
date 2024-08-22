@@ -467,7 +467,7 @@ def runApplication():
             runOptions = [args.options]
         else:
             runOptions = PREDEFINED_PIPED_MENU_OPTIONS
-            otherMenus =  menus.allMenus(topLevel="C", index=12)
+            # otherMenus =  menus.allMenus(topLevel="C", index=12)
             if len(otherMenus) > 0:
                 runOptions.extend(otherMenus)
         import pandas as pd
@@ -764,6 +764,13 @@ def pkscreenercli():
     try:
         OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis)).printOutput("",end="\r")
         configManager.getConfig(ConfigManager.parser)
+        try:
+            # Reset logging. If the user indeed passed the --log flag, it will be enabled later anyways
+            del os.environ['PKDevTools_Default_Log_Level']
+            configManager.logsEnabled = False
+            configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
+        except:
+            pass
         import atexit
         atexit.register(exitGracefully)
         # Set the trigger timestamp
