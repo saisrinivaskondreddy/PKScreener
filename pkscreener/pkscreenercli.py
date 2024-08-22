@@ -276,6 +276,11 @@ argParser.add_argument(
     help="Piped Menus",
     required=False,
 )
+argParser.add_argument(
+    "--usertag",
+    help="User defined tag value(s)",
+    required=False,
+)
 
 def get_debug_args():
     global args
@@ -412,7 +417,7 @@ def runApplication():
     except:
         pass
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time,argParser
-    from pkscreener.classes.MenuOptions import menus, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
+    from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     args = get_debug_args()
     if not isinstance(args,argparse.Namespace):
         argsv = argParser.parse_known_args(args=args)
@@ -447,6 +452,7 @@ def runApplication():
                 indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
                 choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
                 args.progressstatus = f"[+] {choices} => Running {choices}"
+                args.usertag = PREDEFINED_SCAN_MENU_TEXTS[indexNum]
         except:
             choices = ""
             pass
@@ -513,7 +519,7 @@ def runApplication():
                     traceback.print_exc()
             resetUserMenuChoiceOptions()
             analysis_index += 1
-            saveSendFinalOutcomeDataframe(optionalFinalOutcome_df)
+            # saveSendFinalOutcomeDataframe(optionalFinalOutcome_df)
 
         configManager.maxdisplayresults = maxdisplayresults
         configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)

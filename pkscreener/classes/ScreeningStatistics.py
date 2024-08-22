@@ -1618,7 +1618,15 @@ class ScreeningStatistics:
         screenDict[f"RS_Rating{self.configManager.baseIndex}"] = rs_rating
         saveDict[f"RS_Rating{self.configManager.baseIndex}"] = rs_rating
         return rs_rating
-        
+    
+    # Relative volatality measure
+    def findRVM(self, df=None,screenDict={}, saveDict={}):
+        # RVM over the lookback period of 15 periods
+        rvm = pktalib.RVM(df["High"],df["Low"],df["Close"],15)
+        screenDict["RVM(15)"] = rvm
+        saveDict["RVM(15)"] = rvm
+        return rvm
+
     def findShortSellCandidatesForVolumeSMA(self, df):
         if df is None or len(df) == 0:
             return False
