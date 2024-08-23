@@ -270,7 +270,7 @@ jobs:
       env:
         RUNNER : "LOCAL_RUN_SCANNER"
       run: |
-        python3 .github/workflows/workflowtriggers.py -f --cleanuphistoricalscans --scanDaysInPast 251 -s0 S,T,E,U,Z,H,Y,B,G,C,M,D,I,L,P -s1 W,N,E,M,Z,S,0,2,3,4,6,7,9,10,13,14,15 -s2 0,22,29,42,50,M,Z -s3 0 -s4 0 --branchname actions-data-download
+        python3 .github/workflows/workflowtriggers.py -f --cleanuphistoricalscans --scanDaysInPast 450 -s0 S,T,E,U,Z,H,Y,G,M,D,I,L -s1 "" -s2 "" -s3 "" -s4 "" --branchname actions-data-download
 
     - name: Setup Python environment for triggers on Ubuntu
       shell: bash

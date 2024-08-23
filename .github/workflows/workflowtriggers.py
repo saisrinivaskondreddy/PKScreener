@@ -511,7 +511,7 @@ def run_workflow(workflow_name, postdata, option=""):
         print(f"{datetime.datetime.now(pytz.timezone('Asia/Kolkata'))}: [{resp.status_code}] Something went wrong while triggering {workflow_name}")
     return resp
 
-def cleanuphistoricalscans(scanDaysInPast=270):
+def cleanuphistoricalscans(scanDaysInPast=450):
     removedFileCount = 0
     options = "X:"
     for key in objectDictionary.keys():
@@ -528,6 +528,8 @@ def cleanuphistoricalscans(scanDaysInPast=270):
                 os.remove(fileName)
                 Committer.execOSCommand(f"git rm {fileName}")
                 removedFileCount += 1
+            if removedFileCount > 50:
+                tryCommitOutcomes(options, pathSpec=None, delete=True)
             daysInPast -=1
     if removedFileCount > 0:
         tryCommitOutcomes(options, pathSpec=None, delete=True)
@@ -665,7 +667,7 @@ def triggerHistoricalScanWorkflowActions(scanDaysInPast=0):
         '{"ref":"'
         + branch
         + '","inputs":{"installtalib":"N","skipDownload":"Y","scanOptions":"'
-        + '--scanDaysInPast 251 -s0 S,T,E,U,Z,H,Y,B,G,C,M,D,I,L,P -s1 W,N,E,M,Z,S,0,2,3,4,6,7,9,10,13,15 -s2 0,22,29,42,50,M,Z -s3 0 -s4 0 --branchname actions-data-download","name":"X_Cleanup"'
+        + '--scanDaysInPast 450 -s0 S,T,E,U,Z,H,Y,G,M,D,I,L -s1 "" -s2 "" -s3 "" -s4 "" --branchname actions-data-download","name":"X_Cleanup"'
         + (',"cleanuphistoricalscans":"Y"}')
         + '}'
         )
@@ -890,7 +892,7 @@ if __name__ == '__main__':
             else:
                 triggerScanWorkflowActions(args.local, scanDaysInPast=daysInPast)
     if args.cleanuphistoricalscans:
-        daysInPast = 270
+        daysInPast = 450
         if args.scanDaysInPast is not None:
             daysInPast = int(args.scanDaysInPast)
         cleanuphistoricalscans(daysInPast)
