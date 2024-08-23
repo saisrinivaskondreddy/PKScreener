@@ -75,6 +75,18 @@ jobs:
       with:
         ref: actions-data-download
 
+    - name: Take pull from main
+      shell: bash
+      run: |
+        git config user.name github-actions >/dev/null 2>&1
+        git config user.email github-actions@github.com >/dev/null 2>&1
+        git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*' >/dev/null 2>&1
+        git remote update >/dev/null 2>&1
+        git fetch >/dev/null 2>&1
+        git config pull.rebase false >/dev/null 2>&1
+        git pull origin main
+        git push -v -u origin +actions-data-download >/dev/null 2>&1
+
     - name: Set up Python 
       uses: actions/setup-python@v5
       with:
