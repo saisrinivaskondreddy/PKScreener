@@ -120,6 +120,7 @@ m0 = menus()
 m1 = menus()
 m2 = menus()
 m3 = menus()
+m4 = menus()
 maLength = None
 nValueForMenu = 0
 menuChoiceHierarchy = ""
@@ -500,7 +501,7 @@ def initExecution(menuOption=None):
                 OutputControls().printOutput(colorText.FAIL + "\n    [+] Logs will be written to:"+colorText.END)
                 OutputControls().printOutput(colorText.GREEN + f"    [+] {log_file_path}"+colorText.END)
                 OutputControls().printOutput(colorText.FAIL + "    [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at https://github.com/pkjmesra/PKScreener/issues .\n" + colorText.END)
-            menuOption = input(colorText.BOLD + colorText.FAIL + f"{pastDate}[+] Select option: ")
+            menuOption = input(colorText.BOLD + colorText.FAIL + f"{pastDate}[+] Select option: ") or "P"
             OutputControls().printOutput(colorText.END, end="")
         if menuOption == "" or menuOption is None:
             menuOption = "X"
@@ -1087,7 +1088,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 + "\n[+] Error: Invalid values for RSI! Values should be in range of 0 to 100. Please try again!"
                 + colorText.END
             )
-            input("PRess <Enter> to continue...")
+            input("Press <Enter> to continue...")
             return None, None
     if executeOption == 6:
         selectedMenu = m2.find(str(executeOption))
@@ -1365,6 +1366,18 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         if userPassedArgs.options is None:
             configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price (Optimal:1, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
             configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
+    if executeOption == 40:
+        Utility.tools.clearScreen()
+        selectedMenu = m2.find(str(executeOption))
+        m3.renderForMenu(selectedMenu=selectedMenu)
+        smaEMA = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
+        selectedMenu = m3.find(str(smaEMA))
+        Utility.tools.clearScreen()
+        m4.renderForMenu(selectedMenu=selectedMenu)
+        smaDirection = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
+        Utility.tools.clearScreen()
+        smas = input(colorText.BOLD + colorText.FAIL + "[+] Price should cross which of these comma separated EMA/SMA(s): (e.g. 200 or 8,9,21,255) [Default: 200]:") or "200"
+        maLength = smas.split(",")
     if executeOption == 42:
         Utility.tools.getLastScreenedResults(defaultAnswer)
         return None, None
@@ -3046,13 +3059,16 @@ def sendGlobalMarketBarometer(userArgs=None):
     gmbPath = Barometer.getGlobalMarketBarometerValuation()
     try:
         if gmbPath is not None:
+            from PKDevTools.classes.Telegram import get_secrets
+            Channel_Id, _, _, _ = get_secrets()
+            user = userArgs.user if userArgs is not None else (Channel_Id if Channel_Id is not None and len(Channel_Id) > 0 else None)
             gmbFileSize = os.stat(gmbPath).st_size if os.path.exists(gmbPath) else 0
             OutputControls().printOutput(f"Barometer report created with size {gmbFileSize} @ {gmbPath}")
             sendMessageToTelegramChannel(
                 message=None,
                 photo_filePath=gmbPath,
                 caption=caption,
-                user=(userArgs.user if userArgs is not None else None),
+                user=user,
             )
             os.remove(gmbPath)
     except Exception as e:

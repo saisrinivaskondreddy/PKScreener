@@ -2524,6 +2524,34 @@ class ScreeningStatistics:
         screenDict["CCI"] = colorText.BOLD + colorText.FAIL + str(cci) + colorText.END
         return False
 
+    def validatePriceActionCrosses(self, full_df, screenDict, saveDict,mas=[], isEMA=False, maDirectionFromBelow=True):
+        if full_df is None or len(full_df) == 0:
+            return False
+        data = full_df.copy()
+        reversedData = data[::-1]  # Reverse the dataframe so that it's oldest data first
+        hasAtleastOneMACross = False
+        for ma in mas:
+            hasCrossed = self.findPriceActionCross(df=reversedData,ma=ma,daysToConsider=1,baseMAOrPrice=reversedData.tail(2),isEMA=isEMA,maDirectionFromBelow=maDirectionFromBelow)
+            if hasCrossed:
+                if not hasAtleastOneMACross:
+                    hasAtleastOneMACross = True
+                saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
+                maText = f"{ma}-{'EMA' if isEMA else 'SMA'}-Cross-{'FromBelow' if maDirectionFromBelow else 'FromAbove'}"
+                saveDict["MA-Signal"] = saved[1] + maText
+                screenDict["MA-Signal"] = saved[0] + f"{colorText.GREEN}{maText}{colorText.END}"
+        return hasAtleastOneMACross
+    
+    def findPriceActionCross(self, df, ma, daysToConsider=1, baseMAOrPrice=None, isEMA=False,maDirectionFromBelow=True):
+        ma_val = pktalib.EMA(df["Close"],int(ma)) if isEMA else pktalib.SMA(df["Close"],int(ma))
+        ma = ma_val.tail(daysToConsider).head(1).iloc[0]
+        ma_prev = ma_val.tail(daysToConsider+1).head(1).iloc[0]
+        base = baseMAOrPrice.tail(daysToConsider).head(1).iloc[0]
+        base_prev = ma_val.tail(daysToConsider+1).head(1).iloc[0]
+        if maDirectionFromBelow:
+            return (ma >= ma_prev and ma >= base and ma_prev <= base_prev)
+        else:
+            return (ma <= ma_prev and ma <= base and ma_prev >= base_prev)
+
     # Find Conflucence
     def validateConfluence(self, stock, df, full_df, screenDict, saveDict, percentage=0.1,confFilter=3):
         if df is None or len(df) == 0:
@@ -2564,14 +2592,16 @@ class ScreeningStatistics:
                 if len(emas) >= 3:
                     ema_55 = pktalib.EMA(reversedData["Close"],int(emas[2])).tail(recentCurrentDay).head(1).iloc[0]
                     ema_55_prev = pktalib.EMA(reversedData["Close"],int(emas[2])).tail(recentCurrentDay+1).head(1).iloc[0]
-                sma_200 = pktalib.SMA(reversedData["Close"],200).tail(recentCurrentDay).head(1).iloc[0]
-                ema9 = pktalib.EMA(reversedData["Close"],9).tail(recentCurrentDay).head(1).iloc[0]
-                # smaRange = sma_200 * percentage
+                
                 ema8CrossedEMA21 = (ema_8 >= ema_21 and ema_8_prev <= ema_21_prev) or ema8CrossedEMA21
                 ema8CrossedEMA55 = (ema_8 >= ema_55 and ema_8_prev <= ema_55_prev) or ema8CrossedEMA55
                 ema21CrossedEMA55 = (ema_21 >= ema_55 and ema_21_prev <= ema_55_prev) or ema21CrossedEMA55
+                
+                sma_200 = pktalib.SMA(reversedData["Close"],200).tail(recentCurrentDay).head(1).iloc[0]
+                # ema9 = pktalib.EMA(reversedData["Close"],9).tail(recentCurrentDay).head(1).iloc[0]
+                # smaRange = sma_200 * percentage
                 superConfluenceEnforce200SMA = self.configManager.superConfluenceEnforce200SMA
-                ema_min = min(ema_8, ema_21, ema_55)
+                # ema_min = min(ema_8, ema_21, ema_55)
                 ema55_percentage = abs(ema_55 - sma_200) / ema_55
                 emasCrossedSMA200 = ((ema55_percentage <= percentage)) or emasCrossedSMA200 # (sma_200 <= ema_min and sma_200 <= ema_55)
                 if not superConfluenceEnforce200SMA:

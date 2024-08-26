@@ -34,8 +34,6 @@ from pkscreener.classes import VERSION
 configManager = ConfigManager.tools()
 MENU_SEPARATOR = ""
 LINE_SEPARATOR = "\n"
-MAX_SUPPORTED_MENU_OPTION = 39
-MAX_MENU_OPTION = 50
 
 level0MenuDict = {
     "X": "Scanners",
@@ -282,10 +280,14 @@ level2_X_MenuDict = {
     "37": "Short Sell Candidates (Volume SMA)       ",
     "38": "Intraday Short Sell (PSAR / Volume SMA)  ",
     "39": "IPO-Lifetime First day bullish break     ",
+    "40": "Price Action                             ",
     "50": "Show Last Screened Results               ",
     "M": "Back to the Top/Main menu                 ",
     "Z": "Exit (Ctrl + C)                           ",
 }
+MAX_SUPPORTED_MENU_OPTION = 40
+MAX_MENU_OPTION = 50
+
 level3_X_Reversal_MenuDict = {
     "1": "Buy Signals (Bullish Reversal)",
     "2": "Sell Signals (Bearish Reversal)",
@@ -369,6 +371,20 @@ Pin_MenuDict = {
     "1": "Pin this scan category or piped scan {0}",
     "2": "Pin these {0} stocks in the scan results (Just keep tracking only these {0} stocks)",
     "M": "Back to the Top/Main menu",
+}
+
+PRICE_CROSS_SMA_EMA_TYPE_MENUDICT = {
+    "1": "SMA",
+    "2": "EMA",
+    "3": "Any",
+    "0": "Cancel"
+}
+
+PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT = {
+    "1": "Crosses From Above",
+    "2": "Crosses From Below",
+    "3": "Any",
+    "0": "Cancel"
 }
 
 class MenuRenderStyle(Enum):
@@ -568,9 +584,8 @@ class menus:
     def renderForMenu(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
         if selectedMenu is None and self.level == 0:
             # Top level Application Main menu
-            return self.renderLevel0Menus(
-                skip=skip, asList=asList, renderStyle=renderStyle, parent=selectedMenu
-            )
+            return self.renderMenuFromDictionary(dict=level0MenuDict,exceptionKeys=["X", "T", "E", "U", "Z", "L", "D"],coloredValues=(["P"] if not asList else []),
+                                                 defaultMenu="P",skip=skip, asList=asList, renderStyle=renderStyle, parent=selectedMenu,checkUpdate=True)
         elif selectedMenu is not None:
             if selectedMenu.menuKey == "S" and selectedMenu.level == 0:
                     return self.renderLevel1_S_Menus(
@@ -680,6 +695,8 @@ class menus:
                         renderStyle=renderStyle,
                         parent=selectedMenu,
                     )
+                elif selectedMenu.menuKey in ["40"]:
+                    return self.renderMenuFromDictionary(dict=PRICE_CROSS_SMA_EMA_TYPE_MENUDICT,exceptionKeys=["0"],coloredValues=["2"],defaultMenu="2", parent=selectedMenu)
             elif selectedMenu.level == 3:
                 self.level = 4
                 # next levelsub-menu of the selected sub-menu
@@ -711,7 +728,9 @@ class menus:
                         renderStyle=renderStyle,
                         parent=selectedMenu,
                     )
-                
+                if selectedMenu.parent.menuKey == "40" and selectedMenu.menuKey in PRICE_CROSS_SMA_EMA_TYPE_MENUDICT.keys():
+                    return self.renderMenuFromDictionary(dict=PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT,exceptionKeys=["0"],coloredValues=["2"],defaultMenu="2", parent=selectedMenu)
+
 
     def find(self, key=None):
         if key is not None:
@@ -722,6 +741,45 @@ class menus:
                 return None
         return None
 
+    def renderMenuFromDictionary(self, dict={},exceptionKeys=[],coloredValues=[], optionText="[+] Select a menu option:", defaultMenu="0", asList=False, renderStyle=None, parent=None, skip=None, substitutes=[],checkUpdate=False):
+        menuText = self.fromDictionary(
+            dict,
+            renderExceptionKeys=exceptionKeys,
+            renderStyle=renderStyle
+            if renderStyle is not None
+            else MenuRenderStyle.STANDALONE,
+            skip=skip,
+            parent=parent,
+            substitutes = substitutes
+        ).render(asList=asList,coloredValues=coloredValues)
+        if asList:
+            return menuText
+        else:
+            if OutputControls().enableMultipleLineOutput:
+                OutputControls().printOutput(
+                    colorText.BOLD
+                    + colorText.WARN
+                    + optionText
+                    + colorText.END
+                )
+                OutputControls().printOutput(
+                    colorText.BOLD
+                    + menuText
+                    + """
+
+    Enter your choice > (default is """
+                    + colorText.WARN
+                    + (self.find(defaultMenu) or menu().create('?','?')).keyTextLabel().strip()
+                    + ") "
+                    "" + colorText.END
+                )
+                if checkUpdate:
+                    try:
+                        OTAUpdater.checkForUpdate(VERSION, skipDownload=True)
+                    except:
+                        pass
+            return menuText
+        
     def renderPinSubmenus(self, asList=False, renderStyle=None, parent=None, skip=None, substitutes=[]):
         menuText = self.fromDictionary(
             Pin_MenuDict,
@@ -754,43 +812,6 @@ class menus:
                     + ") "
                     "" + colorText.END
                 )
-            return menuText
-        
-    def renderLevel0Menus(self, asList=False, renderStyle=None, parent=None, skip=None):
-        menuText = self.fromDictionary(
-            level0MenuDict,
-            renderExceptionKeys=["P", "T", "E", "U", "Z", "L", "D"],
-            renderStyle=renderStyle
-            if renderStyle is not None
-            else MenuRenderStyle.STANDALONE,
-            skip=skip,
-            parent=parent,
-        ).render(asList=asList,coloredValues=["X"] if not asList else [])
-        if asList:
-            return menuText
-        else:
-            if OutputControls().enableMultipleLineOutput:
-                OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
-                    + "[+] Select a menu option:"
-                    + colorText.END
-                )
-                OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
-                    + """
-
-    Enter your choice > (default is """
-                    + colorText.WARN
-                    + (self.find("X") or menu().create('?','?')).keyTextLabel().strip()
-                    + ") "
-                    "" + colorText.END
-                )
-                try:
-                    OTAUpdater.checkForUpdate(VERSION, skipDownload=True)
-                except:
-                    pass
             return menuText
 
     def renderLevel1_S_Menus(

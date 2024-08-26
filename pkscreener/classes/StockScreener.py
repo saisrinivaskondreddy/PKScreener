@@ -267,6 +267,7 @@ class StockScreener:
                 isLowestVolume = False
                 hasBbandsSqz = False
                 hasMASignalFilter = False
+                priceCrossed = False
 
                 isValidityCheckMet = self.performValidityCheckForExecuteOptions(executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,maLength,intraday_data)
                 if not isValidityCheckMet:
@@ -485,7 +486,7 @@ class StockScreener:
                     if not isValidCci:
                         return returnLegibleData(f"isValidCci:{isValidCci}")
 
-                if not (isConfluence or isShortTermBullish or hasMASignalFilter):
+                if not (isConfluence or isShortTermBullish or hasMASignalFilter or priceCrossed):
                     isMaReversal = screener.validateMovingAverages(
                         processedData, screeningDictionary, saveDictionary, maRange=1.25
                     )
@@ -510,6 +511,13 @@ class StockScreener:
                             )
                     if isInsideBar ==0:
                         return returnLegibleData(f"isInsideBar:{isInsideBar}")
+                if executeOption == 40:
+                    priceCrossed = screener.validatePriceActionCrosses(full_df=fullData,
+                                                                  screenDict=screeningDictionary,
+                                                                  saveDict=saveDictionary,
+                                                                  mas=maLength,
+                                                                  isEMA=True,
+                                                                  maDirectionFromBelow=False)
 
                 if not (isLorentzian or (isInsideBar !=0) or isBuyingTrendline or isIpoBase or isNR or isVCP or isVSA or isMinerviniVCP):
                     isMomentum = screener.validateMomentum(
@@ -582,6 +590,7 @@ class StockScreener:
                         or (executeOption == 21 and (fairValueDiff < 0 and reversalOption in [9]))
                         or (executeOption == 26)
                         or (executeOption == 29) and bidGreaterThanAsk
+                        or (executeOption == 40) and priceCrossed
                     ):
                         isNotMonitoringDashboard = userArgs.monitor is None or (userArgs.monitor is not None and "~" not in userArgs.monitor)
                         # Now screen for common ones to improve performance
@@ -725,7 +734,7 @@ class StockScreener:
 
     def performValidityCheckForExecuteOptions(self,executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,buySellAll=3,intraday_data=None):
         isValid = True
-        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39,40,41]:
+        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39]:
             return True
         if executeOption == 11:
             isValid = screener.validateShortTermBullish(
