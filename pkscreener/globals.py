@@ -434,10 +434,21 @@ def handleSecondaryMenuChoices(
                     configManager.setConfig(ConfigManager.parser, default=False, showFileCreatedText=True)
                 return
             elif periodOption.upper() in ["B"]:
+                lastTradingDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(n=(22 if configManager.period == '1y' else 15))
                 backtestDaysAgo = input(
-                    colorText.BOLD + colorText.FAIL + "[+] Enter no. of days/candles in the past as starting candle for which you'd like to run the scans (e.g. 10 for 10 candles ago or 0 for today):"
+                     f"{colorText.BOLD}{colorText.FAIL}[+] Enter no. of days/candles in the past as starting candle for which you'd like to run the scans\n[+] You can also enter a past date in {colorText.END}{colorText.GREEN}YYYY-MM-DD{colorText.END}{colorText.FAIL} format\n[+] (e.g. {colorText.GREEN}10{colorText.END} for 10 candles ago or {colorText.GREEN}0{colorText.END} for today or {colorText.GREEN}{lastTradingDate}{colorText.END}):"
                 ) or ('22' if configManager.period == '1y' else '15')
                 OutputControls().printOutput(colorText.END, end="")
+                if len(str(backtestDaysAgo)) >= 3 and "-" in str(backtestDaysAgo):
+                    # User entered a date
+                    try:
+                        backtestDaysAgo = abs(PKDateUtilities.trading_days_between(d1=PKDateUtilities.dateFromYmdString(str(backtestDaysAgo)),d2=PKDateUtilities.currentDateTime()))
+                    except Exception as e:
+                        default_logger().debug(e,exc_info=True)
+                        OutputControls().printOutput(f"An error occured! Going ahead with default inputs.")
+                        backtestDaysAgo = ('22' if configManager.period == '1y' else '15')
+                        sleep(3)
+                        pass
                 launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
                 requestingUser = f" -u {userPassedArgs.user}" if userPassedArgs.user is not None else ""
                 enableLog = f" -l" if userPassedArgs.log else ""
@@ -2323,7 +2334,7 @@ def printNotifySaveScreenedResults(
         ).encode("utf-8").decode(STD_ENCODING)
         copyScreenResults = screenResults.copy()
         hiddenColumns = configManager.alwaysHiddenDisplayColumns.split(",")
-        if userPassedArgs.runintradayanalysis:
+        if userPassedArgs.runintradayanalysis or ("VCP" in menuChoiceHierarchy):
             hiddenColumns.remove("Pattern")
         if executeOption in [33]:
             hiddenColumns.remove("52Wk-L")
@@ -2434,8 +2445,8 @@ def printNotifySaveScreenedResults(
                         maxcolwidths=[None,None,4,3]
                     ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("Hgh  |","Hgh|").replace("EoD  |","EoD|").replace("x  ","x")
                     caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
-                    suggestion_text = "Please try @nse_pkscreener_bot for many more scan options and results!\nLegal Disclaimer: https://pkjmesra.github.io/PKScreener/Disclaimer.txt\n"
-                    finalCaption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text}\n{suggestion_text}\n{pipedTitle}" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
+                    suggestion_text = "Please try @nse_pkscreener_bot for many more scan options and results! <i><b><u>Legal Disclaimer</u></b>:https://pkjmesra.github.io/PKScreener/Disclaimer.txt</i>"
+                    finalCaption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text} {suggestion_text}"
                 if not testing: # and not userPassedArgs.runintradayanalysis:
                     kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
                     sendQuickScanResult(
@@ -3147,7 +3158,7 @@ def sendMessageToTelegramChannel(
                 media_group_dict["ATTACHMENTS"] = []
             for attachment in attachments:
                 file_paths.append(attachment["FILEPATH"])
-                file_captions.append(attachment["CAPTION"].replace('&','n'))
+                file_captions.append(attachment["CAPTION"].replace('&','n')[:1024])
             if len(file_paths) > 0 and not userPassedArgs.monitor:
                 resp = send_media_group(user=userPassedArgs.user,
                                                 png_paths=[],
@@ -3156,7 +3167,7 @@ def sendMessageToTelegramChannel(
                                                 file_captions=file_captions)
                 default_logger().debug(resp.text, exc_info=True)
             caption = f"{str(len(file_captions))} files sent!"
-            message = media_group_dict["CAPTION"].replace('&','n').replace("<","*") if "CAPTION" in media_group_dict.keys() else "-"
+            message = media_group_dict["CAPTION"].replace('&','n').replace("<","*")[:1024] if "CAPTION" in media_group_dict.keys() else "-"
         for f in file_paths:
             try:
                 if "RUNNER" in os.environ.keys():

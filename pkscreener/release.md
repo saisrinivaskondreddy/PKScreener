@@ -2,6 +2,7 @@
 
 ## What's New?
 1. [v0.45.20240827.522] release
+* Enabling entering specific date in YYYY-MM-DD format for quick backtests using T > B menu.
 * Price action option added for filtering out stocks where price has crossed given SMA/EMA from above/below. Try X > 12 > 40
 * Improved super-confluence. Added it under pre-defined scans as well. Try out P_1_26 and P_1_27.
 * Short sell analysis options added : Try out X > 14 > 35 or X > 14 > 36 or X > 12 > 37 or X > 12 > 38.

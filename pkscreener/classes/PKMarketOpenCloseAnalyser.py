@@ -128,7 +128,7 @@ class PKMarketOpenCloseAnalyser:
                 if copyFileSize >= 1024*1024*40:
                     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
                     return True, cache_file
-            Utility.tools.loadStockData({},PKMarketOpenCloseAnalyser.configManager,False,'Y',False,False,[],isIntraday=True)
+            Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=[],isIntraday=True)
             exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=True)
             if not exists:
                 OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()}/ !")
@@ -168,7 +168,7 @@ class PKMarketOpenCloseAnalyser:
                 if copyFileSize >= 1024*1024*40:
                     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
                     return True, cache_file
-            Utility.tools.loadStockData({},PKMarketOpenCloseAnalyser.configManager,False,'Y',False,False,[],isIntraday=False,forceRedownload=True)
+            Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=[],isIntraday=False,forceRedownload=True)
             exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=False)
             if not exists:
                 OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()}/ !")
