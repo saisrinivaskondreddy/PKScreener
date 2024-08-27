@@ -376,14 +376,12 @@ Pin_MenuDict = {
 PRICE_CROSS_SMA_EMA_TYPE_MENUDICT = {
     "1": "SMA",
     "2": "EMA",
-    "3": "Any",
     "0": "Cancel"
 }
 
 PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT = {
     "1": "Crosses From Above",
     "2": "Crosses From Below",
-    "3": "Any",
     "0": "Cancel"
 }
 

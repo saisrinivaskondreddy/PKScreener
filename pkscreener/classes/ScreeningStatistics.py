@@ -2531,7 +2531,9 @@ class ScreeningStatistics:
         reversedData = data[::-1]  # Reverse the dataframe so that it's oldest data first
         hasAtleastOneMACross = False
         for ma in mas:
-            hasCrossed = self.findPriceActionCross(df=reversedData,ma=ma,daysToConsider=1,baseMAOrPrice=reversedData.tail(2),isEMA=isEMA,maDirectionFromBelow=maDirectionFromBelow)
+            if len(reversedData) <= int(ma):
+                continue
+            hasCrossed = self.findPriceActionCross(df=reversedData,ma=ma,daysToConsider=1,baseMAOrPrice=reversedData["Close"].tail(2),isEMA=isEMA,maDirectionFromBelow=maDirectionFromBelow)
             if hasCrossed:
                 if not hasAtleastOneMACross:
                     hasAtleastOneMACross = True
@@ -2547,10 +2549,10 @@ class ScreeningStatistics:
         ma_prev = ma_val.tail(daysToConsider+1).head(1).iloc[0]
         base = baseMAOrPrice.tail(daysToConsider).head(1).iloc[0]
         base_prev = ma_val.tail(daysToConsider+1).head(1).iloc[0]
-        if maDirectionFromBelow:
-            return (ma >= ma_prev and ma >= base and ma_prev <= base_prev)
-        else:
+        if maDirectionFromBelow: # base crosses ma line from below
             return (ma <= ma_prev and ma <= base and ma_prev >= base_prev)
+        else: # base crosses ma line from above
+            return (ma >= ma_prev and ma >= base and ma_prev <= base_prev)
 
     # Find Conflucence
     def validateConfluence(self, stock, df, full_df, screenDict, saveDict, percentage=0.1,confFilter=3):

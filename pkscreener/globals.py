@@ -1370,14 +1370,34 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         Utility.tools.clearScreen()
         selectedMenu = m2.find(str(executeOption))
         m3.renderForMenu(selectedMenu=selectedMenu)
-        smaEMA = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
+        if userPassedArgs.options is not None:
+            options = userPassedArgs.options.split(":")
+        if len(options) >=4:
+            smaEMA = options[3]
+            smaEMA = "2" if smaEMA == "D" else smaEMA
+        else:
+            smaEMA = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
+        if smaEMA == "0":
+            return None, None
+        respChartPattern = (smaEMA == "2")
         selectedMenu = m3.find(str(smaEMA))
         Utility.tools.clearScreen()
         m4.renderForMenu(selectedMenu=selectedMenu)
-        smaDirection = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
+        if len(options) >=5:
+            smaDirection = options[4]
+            smaDirection = "2" if smaDirection == "D" else smaDirection
+        else:
+            smaDirection = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
+        if smaDirection == "0":
+            return None, None
+        reversalOption = (smaDirection == "2")
         Utility.tools.clearScreen()
-        smas = input(colorText.BOLD + colorText.FAIL + "[+] Price should cross which of these comma separated EMA/SMA(s): (e.g. 200 or 8,9,21,255) [Default: 200]:") or "200"
-        maLength = smas.split(",")
+        if len(options) >= 6:
+            smas = options[5]
+            smas = "200" if smas == "D" else smas
+        else:
+            smas = input(colorText.BOLD + colorText.FAIL + "[+] Price should cross which of these comma separated EMA/SMA(s): (e.g. 200 or 8,9,21,55,200) [Default: 200]:") or "200"
+        insideBarToLookback = smas.split(",")
     if executeOption == 42:
         Utility.tools.getLastScreenedResults(defaultAnswer)
         return None, None
@@ -2414,7 +2434,7 @@ def printNotifySaveScreenedResults(
                         maxcolwidths=[None,None,4,3]
                     ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("Hgh  |","Hgh|").replace("EoD  |","EoD|").replace("x  ","x")
                     caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
-                    suggestion_text = "Please try @nse_pkscreener_bot for many more scan options and results!\nLegal Disclaimer: https://github.com/pkjmesra/PKScreener/Disclaimer.txt\n"
+                    suggestion_text = "Please try @nse_pkscreener_bot for many more scan options and results!\nLegal Disclaimer: https://pkjmesra.github.io/PKScreener/Disclaimer.txt\n"
                     finalCaption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text}\n{suggestion_text}\n{pipedTitle}" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
                 if not testing: # and not userPassedArgs.runintradayanalysis:
                     kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
