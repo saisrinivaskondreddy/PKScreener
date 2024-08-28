@@ -1892,22 +1892,6 @@ class ScreeningStatistics:
         screenDict["MFI"] = mf_inst_ownershipChange
         return isUptrend, mf_inst_ownershipChange, fairValueDiff
 
-    def getMorningClose(self,df):
-        close = df["Close"][-1]
-        index = len(df)
-        while close is np.nan and index >= 0:
-            close = df["Close"][index - 1]
-            index -= 1
-        return close
-
-    def getMorningOpen(self,df):
-        open = df["Open"][0]
-        index = 0
-        while open is np.nan and index < len(df):
-            open = df["Open"][index + 1]
-            index += 1
-        return open
-
     def getCandleBodyHeight(self, dailyData):
         bodyHeight = dailyData["Close"].iloc[0] - dailyData["Open"].iloc[0]
         return bodyHeight
@@ -2008,7 +1992,23 @@ class ScreeningStatistics:
                         latest_instdate = instdate
                     break
         return netChangeMF,netChangeInst,latest_mfdate,latest_instdate
-    
+
+    def getMorningClose(self,df):
+        close = df["Close"][-1]
+        index = len(df)
+        while close is np.nan and index >= 0:
+            close = df["Close"][index - 1]
+            index -= 1
+        return close
+
+    def getMorningOpen(self,df):
+        open = df["Open"][0]
+        index = 0
+        while open is np.nan and index < len(df):
+            open = df["Open"][index + 1]
+            index += 1
+        return open
+
     def getMutualFundStatus(self, stock,onlyMF=False, hostData=None, force=False,exchangeName="INDIA"):
         if hostData is None or len(hostData) < 1:
             hostData = pd.DataFrame()
@@ -2169,6 +2169,20 @@ class ScreeningStatistics:
         )
 
         return pred, predictionText.replace(out, outText), strengthText
+
+    def getTopsAndBottoms(self, df, window=3, numTopsBottoms=6):
+        if df is None or len(df) == 0:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        data.reset_index(inplace=True)
+        data.rename(columns={"index": "Date"}, inplace=True)
+        data["tops"] = (data["High"].iloc[list(pktalib.argrelextrema(np.array(data["High"]), np.greater_equal, order=window)[0])].head(numTopsBottoms))
+        data["bots"] = (data["Low"].iloc[list(pktalib.argrelextrema(np.array(data["Low"]), np.less_equal, order=window)[0])].head(numTopsBottoms))
+        tops = data[data.tops > 0]
+        bots = data[data.bots > 0]
+        return tops, bots
 
     def monitorFiveEma(self, fetcher, result_df, last_signal, risk_reward=3):
         col_names = ["High", "Low", "Close", "5EMA"]
@@ -2759,6 +2773,33 @@ class ScreeningStatistics:
             )
         saveDict["Consol."] = f'Range:{str(round((abs((hc-lc)/hc)*100),1))+"%"}'
         return round((abs((hc - lc) / hc) * 100), 1)
+
+    def validateConsolidationTightening(self, df,legsToCheck=2):
+        if df is None or len(df) == 0:
+            return False
+        data = df.copy()
+        # window =3 because we need at least 3 candles to get the next top or bottom
+        tops, bots = self.getTopsAndBottoms(df=data,window=3,numTopsBottoms=3*legsToCheck)
+        bots = bots.tail(3*legsToCheck-1)
+        consolidationPercentages = []
+        halfLegs = 1
+        keepHigh = True
+        high = tops["High"].iloc[halfLegs-1]
+        low = bots["Low"].iloc[halfLegs-1]
+        while halfLegs <= 2*legsToCheck:
+            if keepHigh:
+                low = bots["Low"].iloc[halfLegs-1]
+            else:
+                high = tops["High"].iloc[halfLegs-1]
+            halfLegConsolidation = round((high-low)*100/(low if keepHigh else high),1)
+            keepHigh = not keepHigh
+            consolidationPercentages.append(halfLegConsolidation)
+            # Check for consolidation/tightening.
+            # Every next leg should be tighter than the previous one
+            if halfLegConsolidation > consolidationPercentages[halfLegs-1]:
+                return False, consolidationPercentages
+            halfLegs += 1
+        return True, consolidationPercentages
 
     # validate if the stock has been having higher highs, higher lows
     # and higher close with latest close > supertrend and 8-EMA.
@@ -3523,17 +3564,18 @@ class ScreeningStatistics:
                     and ltp > lowPoints[0]
                 ):
                     saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
-                    screenDict["Pattern"] = (
-                        saved[0] 
-                        + colorText.BOLD
-                        + colorText.GREEN
-                        + f"VCP (BO: {highestTop})"
-                        + colorText.END
-                    )
-                    saveDict["Pattern"] = saved[1] + f"VCP (BO: {highestTop})"
-                    # Find RS Rating and add to the list
-
-                    return True
+                    isTightening, consolidations = self.validateConsolidationTightening(df=df.copy(),legsToCheck=int(self.configManager.vcpLegsToCheckForConsolidation))
+                    if isTightening:
+                        screenDict["Pattern"] = (
+                            saved[0] 
+                            + colorText.BOLD
+                            + colorText.GREEN
+                            + f"VCP (BO: {highestTop}, Cons.:{'%,'.join([str(x) for x in consolidations])})"
+                            + colorText.END
+                        )
+                        saveDict["Pattern"] = saved[1] + f"VCP (BO: {highestTop}, Cons.:{'%,'.join([str(x) for x in consolidations])})"
+                        return True
+                    return False
         except Exception as e:  # pragma: no cover
             self.default_logger.debug(e, exc_info=True)
         return False

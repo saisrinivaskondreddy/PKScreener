@@ -1187,6 +1187,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 configManager.vcpRangePercentageFromTop = input(
                     f"[+] Range percentage from the highest high(top) for VCP.\n[+] Press <Enter> for using default value. (number)(Optimal = 20, Current: {colorText.FAIL}{configManager.vcpRangePercentageFromTop}{colorText.END}): "
                 ) or configManager.vcpRangePercentageFromTop
+                configManager.vcpLegsToCheckForConsolidation = input(
+                    f"[+] Number of consolidation legs to check for VCP. (number)(Optimal = 2, Current: {colorText.FAIL}{configManager.vcpLegsToCheckForConsolidation}{colorText.END}): "
+                ) or configManager.vcpLegsToCheckForConsolidation
                 configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
             if maLength == 0 and respChartPattern in [1, 2, 3, 6, 9]:
                 maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
