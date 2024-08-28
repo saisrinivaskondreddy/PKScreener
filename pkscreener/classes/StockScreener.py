@@ -823,7 +823,7 @@ class StockScreener:
                 )
         if not isLtpValid:
             raise ScreeningStatistics.LTPNotInConfiguredRange
-        if configManager.stageTwo and not verifyStageTwo and executeOption > 0:
+        if configManager.stageTwo and not verifyStageTwo and (executeOption > 0 and executeOption not in [29]):
             raise ScreeningStatistics.NotAStageTwoStock
 
     def updateStock(self, stock, screeningDictionary, saveDictionary, executeOption=0,exchangeName='INDIA',userArgs=None):

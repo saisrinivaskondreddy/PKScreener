@@ -1448,6 +1448,18 @@ class ScreeningStatistics:
             return True
         return False
 
+    def findPriceActionCross(self, df, ma, daysToConsider=1, baseMAOrPrice=None, isEMA=False,maDirectionFromBelow=True):
+        ma_val = pktalib.EMA(df["Close"],int(ma)) if isEMA else pktalib.SMA(df["Close"],int(ma))
+        ma = ma_val.tail(daysToConsider).head(1).iloc[0]
+        ma_prev = ma_val.tail(daysToConsider+1).head(1).iloc[0]
+        base = baseMAOrPrice.tail(daysToConsider).head(1).iloc[0]
+        base_prev = baseMAOrPrice.tail(daysToConsider+1).head(1).iloc[0]
+        percentageDiff = round(100*(base-ma)/ma,1)
+        if maDirectionFromBelow: # base crosses ma line from below
+            return (ma <= base and ma_prev >= base_prev), percentageDiff
+        else: # base crosses ma line from above
+            return (ma >= base and ma_prev <= base_prev), percentageDiff
+        
     def findProbableShortSellsFutures(self, df):
         if df is None or len(df) == 0:
             return False
@@ -2512,36 +2524,6 @@ class ScreeningStatistics:
         screenDict["CCI"] = colorText.BOLD + colorText.FAIL + str(cci) + colorText.END
         return False
 
-    def validatePriceActionCrosses(self, full_df, screenDict, saveDict,mas=[], isEMA=False, maDirectionFromBelow=True):
-        if full_df is None or len(full_df) == 0:
-            return False
-        data = full_df.copy()
-        reversedData = data[::-1]  # Reverse the dataframe so that it's oldest data first
-        hasAtleastOneMACross = False
-        for ma in mas:
-            if len(reversedData) <= int(ma):
-                continue
-            hasCrossed = self.findPriceActionCross(df=reversedData,ma=ma,daysToConsider=1,baseMAOrPrice=reversedData["Close"].tail(2),isEMA=isEMA,maDirectionFromBelow=maDirectionFromBelow)
-            if hasCrossed:
-                if not hasAtleastOneMACross:
-                    hasAtleastOneMACross = True
-                saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
-                maText = f"{ma}-{'EMA' if isEMA else 'SMA'}-Cross-{'FromBelow' if maDirectionFromBelow else 'FromAbove'}"
-                saveDict["MA-Signal"] = saved[1] + maText
-                screenDict["MA-Signal"] = saved[0] + f"{colorText.GREEN}{maText}{colorText.END}"
-        return hasAtleastOneMACross
-    
-    def findPriceActionCross(self, df, ma, daysToConsider=1, baseMAOrPrice=None, isEMA=False,maDirectionFromBelow=True):
-        ma_val = pktalib.EMA(df["Close"],int(ma)) if isEMA else pktalib.SMA(df["Close"],int(ma))
-        ma = ma_val.tail(daysToConsider).head(1).iloc[0]
-        ma_prev = ma_val.tail(daysToConsider+1).head(1).iloc[0]
-        base = baseMAOrPrice.tail(daysToConsider).head(1).iloc[0]
-        base_prev = baseMAOrPrice.tail(daysToConsider+1).head(1).iloc[0]
-        if maDirectionFromBelow: # base crosses ma line from below
-            return (ma <= base and ma_prev >= base_prev)
-        else: # base crosses ma line from above
-            return (ma >= base and ma_prev <= base_prev)
-
     # Find Conflucence
     def validateConfluence(self, stock, df, full_df, screenDict, saveDict, percentage=0.1,confFilter=3):
         if df is None or len(df) == 0:
@@ -3187,7 +3169,7 @@ class ScreeningStatistics:
 
     #@measure_time
     # Validate Moving averages and look for buy/sell signals
-    def validateMovingAverages(self, df, screenDict, saveDict, maRange=2.5,maLength=0):
+    def validateMovingAverages(self, df, screenDict, saveDict, maRange=2.5,maLength=0,filters={}):
         data = df.copy()
         data = data.fillna(0)
         data = data.replace([np.inf, -np.inf], 0)
@@ -3354,6 +3336,25 @@ class ScreeningStatistics:
             return True
         return False
 
+    def validatePriceActionCrosses(self, full_df, screenDict, saveDict,mas=[], isEMA=False, maDirectionFromBelow=True):
+        if full_df is None or len(full_df) == 0:
+            return False
+        data = full_df.copy()
+        reversedData = data[::-1]  # Reverse the dataframe so that it's oldest data first
+        hasAtleastOneMACross = False
+        for ma in mas:
+            if len(reversedData) <= int(ma):
+                continue
+            hasCrossed, percentageDiff = self.findPriceActionCross(df=reversedData,ma=ma,daysToConsider=1,baseMAOrPrice=reversedData["Close"].tail(2),isEMA=isEMA,maDirectionFromBelow=maDirectionFromBelow)
+            if hasCrossed:
+                if not hasAtleastOneMACross:
+                    hasAtleastOneMACross = True
+                saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
+                maText = f"{ma}-{'EMA' if isEMA else 'SMA'}-Cross-{'FromBelow' if maDirectionFromBelow else 'FromAbove'}"
+                saveDict["MA-Signal"] = saved[1] + maText + f"({percentageDiff}%)"
+                screenDict["MA-Signal"] = saved[0] + f"{colorText.GREEN}{maText}{colorText.END}{colorText.FAIL if abs(percentageDiff) > 1 else colorText.WARN}({percentageDiff}%){colorText.END}"
+        return hasAtleastOneMACross
+    
     # Validate if the stock prices are at least rising by 2% for the last 3 sessions
     def validatePriceRisingByAtLeast2Percent(self, df, screenDict, saveDict):
         if df is None or len(df) == 0:
@@ -3516,6 +3517,7 @@ class ScreeningStatistics:
                     lowPointsOrg == lowPointsSorted
                     and ltp < highestTop
                     and ltp > lowPoints[0]
+                    and ltp >= (highestTop-highestTop * float(self.configManager.vcpRangePercentageFromTop)/100)
                 ):
                     saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
                     screenDict["Pattern"] = (

@@ -84,6 +84,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.atrTrailingStopSensitivity = 1
         self.atrTrailingStopPeriod = 10
         self.atrTrailingStopEMAPeriod = 200
+        self.vcpRangePercentageFromTop = 10
         # This determines how many days apart the backtest calculations are run.
         # For example, for weekly backtest calculations, set this to 5 (5 days = 1 week)
         # For fortnightly, set this to 10 and so on (10 trading sessions = 2 weeks)
@@ -208,6 +209,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
             parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
             parser.set("config", "useEMA", "y" if self.useEMA else "n")
+            parser.set("config", "vcpRangePercentageFromTop", str(self.vcpRangePercentageFromTop))
             parser.set("config", "vcpVolumeContractionRatio", str(self.vcpVolumeContractionRatio))
 
             parser.set("filters", "consolidationPercentage", str(self.consolidationPercentage))
@@ -377,6 +379,9 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.atrTrailingStopEMAPeriod = input(
                     f"[+] ATR Trailing Stop EMA Period. (number)(Optimal = 1 to 200, Current: {colorText.FAIL}{self.atrTrailingStopEMAPeriod}{colorText.END}): "
                 ) or self.atrTrailingStopEMAPeriod
+                self.vcpRangePercentageFromTop = input(
+                    f"[+] Range percentage from the highest high(top) for VCP. (number)(Optimal = 10, Current: {colorText.FAIL}{self.vcpRangePercentageFromTop}{colorText.END}): "
+                ) or self.vcpRangePercentageFromTop
                 self.vcpVolumeContractionRatio = input(
                     f"[+] Ratio of volume of recent largest to pullback candles for VCP. (number)(Optimal = 0.4, Current: {colorText.FAIL}{self.vcpVolumeContractionRatio}{colorText.END}): "
                 ) or self.vcpVolumeContractionRatio
@@ -451,6 +456,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
                 parser.set("config", "useEMA", str(self.useEmaPrompt))
                 parser.set("config", "vcpVolumeContractionRatio", str(self.vcpVolumeContractionRatio))
+                parser.set("config", "vcpRangePercentageFromTop", str(self.vcpRangePercentageFromTop))
 
                 parser.set("filters", "consolidationPercentage", str(self.consolidationPercentage))
                 parser.set("filters", "maxPrice", str(self.maxLTP))
@@ -586,6 +592,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.maxDashboardWidgetsPerRow = int(parser.get("config", "maxDashboardWidgetsPerRow"))
                 self.maxNumResultRowsInMonitor = int(parser.get("config", "maxNumResultRowsInMonitor"))
                 self.vcpVolumeContractionRatio = float(parser.get("config", "vcpVolumeContractionRatio"))
+                self.vcpRangePercentageFromTop = float(parser.get("config", "vcpRangePercentageFromTop"))
                 self.soundAlertForMonitorOptions = str(parser.get("config", "soundAlertForMonitorOptions"))
                 self.superConfluenceEMAPeriods = str(parser.get("config", "superConfluenceEMAPeriods"))
                 self.baseIndex = str(parser.get("config", "baseIndex"))

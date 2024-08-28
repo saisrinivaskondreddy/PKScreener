@@ -147,6 +147,7 @@ mp_manager = None
 analysis_dict = {}
 download_trials = 0
 media_group_dict = {}
+DEV_CHANNEL_ID="-1001785195297"
 
 def startMarketMonitor(mp_dict,keyboardevent):
     from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
@@ -1390,6 +1391,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             smaEMA = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
         if smaEMA == "0":
             return None, None
+        selectedChoice["3"] = str(smaEMA)
         respChartPattern = (smaEMA == "2")
         selectedMenu = m3.find(str(smaEMA))
         Utility.tools.clearScreen()
@@ -1401,6 +1403,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             smaDirection = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "2"
         if smaDirection == "0":
             return None, None
+        selectedChoice["4"] = str(smaDirection)
         reversalOption = (smaDirection == "2")
         Utility.tools.clearScreen()
         if len(options) >= 6:
@@ -1409,6 +1412,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             smas = input(colorText.BOLD + colorText.FAIL + "[+] Price should cross which of these comma separated EMA/SMA(s): (e.g. 200 or 8,9,21,55,200) [Default: 200]:") or "200"
         insideBarToLookback = smas.split(",")
+        selectedChoice["5"] = str(smas)
+        
     if executeOption == 42:
         Utility.tools.getLastScreenedResults(defaultAnswer)
         return None, None
@@ -1770,7 +1775,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 OutputControls().printOutput(f"{colorText.GREEN} => Done in {round(time.time()-begin,2)}s{colorText.END}")
     except:
         pass
-    if "RUNNER" not in os.environ.keys() and not testing and (userPassedArgs is None or (userPassedArgs is not None and userPassedArgs.user is None and (userPassedArgs.answerdefault is None or userPassedArgs.systemlaunched))):
+    if "RUNNER" not in os.environ.keys() and not testing and (userPassedArgs is None or (userPassedArgs is not None and (userPassedArgs.user is None or str(userPassedArgs.user) == DEV_CHANNEL_ID) and (userPassedArgs.answerdefault is None or userPassedArgs.systemlaunched))):
         prevOutput_results = saveResults.index if (saveResults is not None and not saveResults.empty) else []
         isNotPiped = (("|" not in userPassedArgs.options) if (userPassedArgs is not None and userPassedArgs.options is not None) else True)
         hasFoundStocks = len(prevOutput_results) > 0 and isNotPiped
@@ -3019,9 +3024,9 @@ def saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, l
                     log_file_path = os.path.join(Archiver.get_user_outputs_dir(), "pkscreener-logs.txt")
                     message=f"{cache_file} has size: {cacheFileSize}! Something is wrong!"
                     if os.path.exists(log_file_path):
-                        sendMessageToTelegramChannel(caption=message,document_filePath=log_file_path, user="-1001785195297")
+                        sendMessageToTelegramChannel(caption=message,document_filePath=log_file_path, user=DEV_CHANNEL_ID)
                     else:
-                        sendMessageToTelegramChannel(message=message,user="-1001785195297")
+                        sendMessageToTelegramChannel(message=message,user=DEV_CHANNEL_ID)
                 except:
                     pass
                 # Let's try again with logging
@@ -3177,12 +3182,11 @@ def sendMessageToTelegramChannel(
             except:
                 pass
     if user is not None:
-        channel_userID="-1001785195297"
-        if user != channel_userID and userPassedArgs is not None and not userPassedArgs.monitor:
+        if user != DEV_CHANNEL_ID and userPassedArgs is not None and not userPassedArgs.monitor:
             # Send an update to dev channel
             send_message(
                 f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options.replace(':D','')}]",
-                userID="-1001785195297",
+                userID=DEV_CHANNEL_ID,
             )
 
 def sendTestStatus(screenResults, label, user=None):
