@@ -1183,6 +1183,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             respChartPattern, insideBarToLookback = Utility.tools.promptChartPatterns(
                 selectedMenu
             )
+            if respChartPattern in [4]:
+                configManager.vcpRangePercentageFromTop = input(
+                    f"[+] Range percentage from the highest high(top) for VCP.\n[+] Press <Enter> for using default value. (number)(Optimal = 20, Current: {colorText.FAIL}{configManager.vcpRangePercentageFromTop}{colorText.END}): "
+                ) or configManager.vcpRangePercentageFromTop
+                configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
             if maLength == 0 and respChartPattern in [1, 2, 3, 6, 9]:
                 maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
             if maLength == 4 and respChartPattern == 3: # Super-confluence setup

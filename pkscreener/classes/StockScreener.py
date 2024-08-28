@@ -385,7 +385,7 @@ class StockScreener:
                             return returnLegibleData(f"isConfluence:{isConfluence}")
                     elif respChartPattern == 4:
                         isVCP = screener.validateVCP(
-                            fullData, screeningDictionary, saveDictionary
+                            fullData, screeningDictionary, saveDictionary,stockName=stock
                         )
                         if not isVCP:
                             return returnLegibleData(f"isVCP:{isVCP}")

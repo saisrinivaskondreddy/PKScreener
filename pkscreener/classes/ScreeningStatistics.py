@@ -3494,6 +3494,10 @@ class ScreeningStatistics:
             tops = data[data.tops > 0]
             # bots = data[data.bots > 0]
             highestTop = round(tops.describe()["High"]["max"], 1)
+            allTimeHigh = max(data["High"])
+            withinATHRange = data["Close"].iloc[0] >= (allTimeHigh-allTimeHigh * float(self.configManager.vcpRangePercentageFromTop)/100)
+            if not withinATHRange: # Last close is not within all time high range
+                return False
             filteredTops = tops[
                 tops.tops > (highestTop - (highestTop * percentageFromTop))
             ]
@@ -3517,7 +3521,6 @@ class ScreeningStatistics:
                     lowPointsOrg == lowPointsSorted
                     and ltp < highestTop
                     and ltp > lowPoints[0]
-                    and ltp >= (highestTop-highestTop * float(self.configManager.vcpRangePercentageFromTop)/100)
                 ):
                     saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
                     screenDict["Pattern"] = (
