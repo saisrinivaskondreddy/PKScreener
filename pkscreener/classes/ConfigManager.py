@@ -85,8 +85,8 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.atrTrailingStopPeriod = 10
         self.atrTrailingStopEMAPeriod = 200
         self.vcpRangePercentageFromTop = 60
-        self.vcpLegsToCheckForConsolidation = 1
-        self.enableAdditionalVCPFilters = False
+        self.vcpLegsToCheckForConsolidation = 3
+        self.enableAdditionalVCPFilters = True
         # This determines how many days apart the backtest calculations are run.
         # For example, for weekly backtest calculations, set this to 5 (5 days = 1 week)
         # For fortnightly, set this to 10 and so on (10 trading sessions = 2 weeks)
