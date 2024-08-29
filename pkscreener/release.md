@@ -2,6 +2,8 @@
 
 ## What's New?
 1. [v0.45.20240828.526] release
+* Added the ability to run VCP using additional filters. By default these filters are turned on but you can turn it off when running locally as well. Try X > 12 > 7 > 4
+* Added two more piped scans with VCP/Volume/Price breakouts.
 * Enabling entering specific date in YYYY-MM-DD format for quick backtests using T > B menu.
 * Price action option added for filtering out stocks where price has crossed given SMA/EMA from above/below. Try X > 12 > 40
 * Improved super-confluence. Added it under pre-defined scans as well. Try out P_1_26 and P_1_27.
