@@ -2774,32 +2774,70 @@ class ScreeningStatistics:
         saveDict["Consol."] = f'Range:{str(round((abs((hc-lc)/hc)*100),1))+"%"}'
         return round((abs((hc - lc) / hc) * 100), 1)
 
-    def validateConsolidationTightening(self, df,legsToCheck=2):
+    def validateConsolidationContraction(self, df,legsToCheck=2,stockName=None):
         if df is None or len(df) == 0:
             return False
         data = df.copy()
-        # window =3 because we need at least 3 candles to get the next top or bottom
-        tops, bots = self.getTopsAndBottoms(df=data,window=3,numTopsBottoms=3*legsToCheck)
-        bots = bots.tail(3*legsToCheck-1)
+        # We can use window =3 because we need at least 3 candles to get the next top or bottom
+        # but to better identify the pattern, we'd use window = 5
+        tops, bots = self.getTopsAndBottoms(df=data,window=5,numTopsBottoms=3*(legsToCheck if legsToCheck > 0 else 3))
+        # bots = bots.tail(3*legsToCheck-1)
         consolidationPercentages = []
-        halfLegs = 1
-        keepHigh = True
-        high = tops["High"].iloc[halfLegs-1]
-        low = bots["Low"].iloc[halfLegs-1]
-        while halfLegs <= 2*legsToCheck:
-            if keepHigh:
-                low = bots["Low"].iloc[halfLegs-1]
-            else:
-                high = tops["High"].iloc[halfLegs-1]
-            halfLegConsolidation = round((high-low)*100/(low if keepHigh else high),1)
-            keepHigh = not keepHigh
-            consolidationPercentages.append(halfLegConsolidation)
-            # Check for consolidation/tightening.
-            # Every next leg should be tighter than the previous one
-            if halfLegConsolidation > consolidationPercentages[halfLegs-1]:
-                return False, consolidationPercentages
-            halfLegs += 1
-        return True, consolidationPercentages
+        # dfc.assign(topbots=dfc["tops","bots"].sum(1)).drop("tops","bots", 1)
+        dfc = pd.concat([tops,bots],axis=0)
+        dfc.sort_index(inplace=True)
+        dfc = dfc.assign(topbots=dfc[["tops","bots"]].sum(1))
+        if np.isnan(dfc["tops"].iloc[0]): # For a leg to form, we need two tops and one bottom \_/\_/\_/
+            dfc = dfc.tail(len(dfc)-1)
+        indexLength = len(dfc)
+        toBeDroppedIndices = []
+        index = 0
+        while index < indexLength-1:
+            top = dfc["tops"].iloc[index]
+            top_next = dfc["tops"].iloc[index+1]
+            bot = dfc["bots"].iloc[index]
+            bot_next = dfc["bots"].iloc[index+1]
+            if not np.isnan(top) and not np.isnan(top_next):
+                if top >= top_next:
+                    indexVal = dfc[(dfc.Date == dfc["Date"].iloc[index+1])].index
+                else:
+                    indexVal = dfc[(dfc.Date == dfc["Date"].iloc[index])].index
+                toBeDroppedIndices.append(indexVal)
+            if not np.isnan(bot) and not np.isnan(bot_next):
+                if bot <= bot_next:
+                    indexVal = dfc[(dfc.Date == dfc["Date"].iloc[index+1])].index
+                else:
+                    indexVal = dfc[(dfc.Date == dfc["Date"].iloc[index])].index
+                toBeDroppedIndices.append(indexVal)
+            index += 1
+
+        for indexVal in toBeDroppedIndices:
+            dfc.drop(indexVal,axis=0, inplace=True, errors="ignore")
+        index = 0
+        indexLength = len(dfc)
+        relativeLegsTocheck = (legsToCheck if legsToCheck >= 3 else 3)
+        while index < indexLength-3:
+            top1 = dfc["tops"].iloc[index]
+            top2 = dfc["tops"].iloc[index+2]
+            top = max(top1,top2)
+            bot = dfc["bots"].iloc[index+1]
+            legConsolidation = int(round((top-bot)*100/bot,0))
+            consolidationPercentages.append(legConsolidation)
+            if len(consolidationPercentages) >= relativeLegsTocheck:
+                break
+            index += 2
+        # Check for consolidation/tightening.
+        # Every next leg should be tighter than the previous one
+        consolidationPercentages = list(reversed(consolidationPercentages))
+        if self.configManager.enableAdditionalVCPFilters:
+            if len(consolidationPercentages) >= 2:
+                index = 0
+                while (index+1) < legsToCheck:
+                    if consolidationPercentages[index] < consolidationPercentages[index+1]:
+                        return False, consolidationPercentages[:relativeLegsTocheck]
+                    index += 1
+        # Return the first requested number of legs in the order of leg1, leg2, leg3 etc.
+        return True, consolidationPercentages[:relativeLegsTocheck]
 
     # validate if the stock has been having higher highs, higher lows
     # and higher close with latest close > supertrend and 8-EMA.
@@ -3537,7 +3575,8 @@ class ScreeningStatistics:
             highestTop = round(tops.describe()["High"]["max"], 1)
             allTimeHigh = max(data["High"])
             withinATHRange = data["Close"].iloc[0] >= (allTimeHigh-allTimeHigh * float(self.configManager.vcpRangePercentageFromTop)/100)
-            if not withinATHRange: # Last close is not within all time high range
+            if not withinATHRange and self.configManager.enableAdditionalVCPFilters:
+                # Last close is not within all time high range
                 return False
             filteredTops = tops[
                 tops.tops > (highestTop - (highestTop * percentageFromTop))
@@ -3564,16 +3603,17 @@ class ScreeningStatistics:
                     and ltp > lowPoints[0]
                 ):
                     saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
-                    isTightening, consolidations = self.validateConsolidationTightening(df=df.copy(),legsToCheck=int(self.configManager.vcpLegsToCheckForConsolidation))
+                    isTightening, consolidations = self.validateConsolidationContraction(df=df.copy(),legsToCheck=(int(self.configManager.vcpLegsToCheckForConsolidation) if self.configManager.enableAdditionalVCPFilters else 0),stockName=stockName)
+                    consolidations = [f"{str(x)}%" for x in consolidations]
                     if isTightening:
                         screenDict["Pattern"] = (
                             saved[0] 
                             + colorText.BOLD
                             + colorText.GREEN
-                            + f"VCP (BO: {highestTop}, Cons.:{'%,'.join([str(x) for x in consolidations])})"
+                            + f"VCP (BO: {highestTop}, Cons.:{','.join(consolidations)})"
                             + colorText.END
                         )
-                        saveDict["Pattern"] = saved[1] + f"VCP (BO: {highestTop}, Cons.:{'%,'.join([str(x) for x in consolidations])})"
+                        saveDict["Pattern"] = saved[1] + f"VCP (BO: {highestTop}, Cons.:{','.join(consolidations)})"
                         return True
                     return False
         except Exception as e:  # pragma: no cover

@@ -1184,22 +1184,33 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 selectedMenu
             )
             if respChartPattern in [4]:
-                configManager.vcpRangePercentageFromTop = input(
-                    f"[+] Range percentage from the highest high(top) for VCP.\n[+] Press <Enter> for using default value. (number)(Optimal = 20, Current: {colorText.FAIL}{configManager.vcpRangePercentageFromTop}{colorText.END}): "
-                ) or configManager.vcpRangePercentageFromTop
-                configManager.vcpLegsToCheckForConsolidation = input(
-                    f"[+] Number of consolidation legs to check for VCP. (number)(Optimal = 2, Current: {colorText.FAIL}{configManager.vcpLegsToCheckForConsolidation}{colorText.END}): "
-                ) or configManager.vcpLegsToCheckForConsolidation
+                userInput = str(
+                    input(
+                        f"[+] Enable additional VCP filters like range and consolidation? [Y/N, Current: {colorText.FAIL}{'y' if configManager.enableAdditionalVCPFilters else 'n'}{colorText.END}]: "
+                    ) or ('y' if configManager.enableAdditionalVCPFilters else 'n')
+                ).lower()
+                configManager.enableAdditionalVCPFilters = (
+                    False
+                    if "y" not in str(userInput).lower()
+                    else True
+                )
+                if configManager.enableAdditionalVCPFilters:
+                    configManager.vcpRangePercentageFromTop = input(
+                        f"[+] Range percentage from the highest high(top) for VCP.\n[+] Press <Enter> for using default value. (number)({colorText.GREEN}Optimal = 20 to 60{colorText.END}, Current: {colorText.FAIL}{configManager.vcpRangePercentageFromTop}{colorText.END}): "
+                    ) or configManager.vcpRangePercentageFromTop
+                    configManager.vcpLegsToCheckForConsolidation = input(
+                        f"[+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END}, Current: {colorText.FAIL}{configManager.vcpLegsToCheckForConsolidation}{colorText.END}): "
+                    ) or configManager.vcpLegsToCheckForConsolidation
                 configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
             if maLength == 0 and respChartPattern in [1, 2, 3, 6, 9]:
                 maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
             if maLength == 4 and respChartPattern == 3: # Super-confluence setup
                 if len(options) <= 5:
                     configManager.superConfluenceMaxReviewDays = input(
-                        f"[+] Max number of review days for super-confluence-checks. (number)(Optimal = 3-7, Current: {colorText.FAIL}{configManager.superConfluenceMaxReviewDays}{colorText.END}): "
+                        f"[+] Max number of review days for super-confluence-checks. (number)({colorText.GREEN}Optimal = 3-7{colorText.END}, Current: {colorText.FAIL}{configManager.superConfluenceMaxReviewDays}{colorText.END}): "
                     ) or configManager.superConfluenceMaxReviewDays
                     configManager.superConfluenceEMAPeriods = input(
-                        f"[+] Comma separated EMA periods for super-confluence-crossovers in the same order. (numbers)(Optimal = 8,21,55, Current: {colorText.FAIL}{configManager.superConfluenceEMAPeriods}{colorText.END}): "
+                        f"[+] Comma separated EMA periods for super-confluence-crossovers in the same order. (numbers)({colorText.GREEN}Optimal = 8,21,55{colorText.END}, Current: {colorText.FAIL}{configManager.superConfluenceEMAPeriods}{colorText.END}): "
                     ) or configManager.superConfluenceEMAPeriods
                     enable200SMA = input(
                         f"[+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if configManager.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
@@ -1372,11 +1383,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if executeOption == 30:
         if userPassedArgs.options is None:
             Utility.tools.clearScreen(forceTop=True)
-            atrSensitivity = input(colorText.WARN + f"Enter the ATR Trailing Stop Sensitivity (Multiplier) value (Optimal:1, Current={configManager.atrTrailingStopSensitivity}):") or configManager.atrTrailingStopSensitivity
+            atrSensitivity = input(colorText.WARN + f"Enter the ATR Trailing Stop Sensitivity (Multiplier) value ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.atrTrailingStopSensitivity}):") or configManager.atrTrailingStopSensitivity
             configManager.atrTrailingStopSensitivity = atrSensitivity
-            atrPeriod = input(colorText.WARN + f"Enter the ATR Period value (Optimal:10, Current={configManager.atrTrailingStopPeriod}):") or configManager.atrTrailingStopPeriod
+            atrPeriod = input(colorText.WARN + f"Enter the ATR Period value ({colorText.GREEN}Optimal:10{colorText.END}, Current={configManager.atrTrailingStopPeriod}):") or configManager.atrTrailingStopPeriod
             configManager.atrTrailingStopPeriod = atrPeriod
-            atrEma = input(colorText.WARN + f"Enter the ATR EMA period (Optimal:200, Current={configManager.atrTrailingStopEMAPeriod}):") or configManager.atrTrailingStopEMAPeriod
+            atrEma = input(colorText.WARN + f"Enter the ATR EMA period ({colorText.GREEN}Optimal:200{colorText.END}, Current={configManager.atrTrailingStopEMAPeriod}):") or configManager.atrTrailingStopEMAPeriod
             configManager.atrTrailingStopEMAPeriod = atrEma
             configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
         # Ensure we have the template JSONs from vectorBt
@@ -1384,7 +1395,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         screener.computeBuySellSignals(None)
     if executeOption == 34:
         if userPassedArgs.options is None:
-            configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price (Optimal:1, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
+            configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
             configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
     if executeOption == 40:
         Utility.tools.clearScreen()

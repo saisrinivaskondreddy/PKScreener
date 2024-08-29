@@ -108,8 +108,8 @@ level1_P_MenuDict = {
     "3": "Run Piped Scans Saved So Far",
     "M": "Back to the Top/Main menu",
 }
-PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27"]
-PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27"]
+PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27","28","29"]
+PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27","28","29"]
 PREDEFINED_SCAN_MENU_TEXTS = [
     "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",  # 1
     "Volume Scanners | High Momentum | ATR Cross",                          # 2
@@ -138,6 +138,8 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "BullCross-VWAP | ATR Cross | ATR Trailing Stop                     ",  # 25
     "Super-Confluence | ATR Trailing Stop                               ",  # 26
     "BullCross-VWAP | Super-Confluence                                  ",  # 27
+    "VCP | Volume-Breakout                                              ",  # 28
+    "VCP | Volume-Breakout | Price Breakout                             ",  # 29
 ]
 level2_P_MenuDict = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:
@@ -173,6 +175,8 @@ PREDEFINED_SCAN_MENU_VALUES =[
     # Running super conf at the beginning will be faster because there will be less number of stocks.
     # Running it at the end is essential because we want to see the dates of super-conf
     "--systemlaunched -a y -e -o 'X:12:7:3:0.008:4:>|X:12:7:9:7:>|X:0:7:3:0.008:4:'", # 27
+    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:9:2.5:'",                  # 28
+    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:9:2.5:>|X:0:27:'",         # 29
 ]
 PREDEFINED_PIPED_MENU_OPTIONS = []
 for option in PREDEFINED_SCAN_MENU_VALUES:
