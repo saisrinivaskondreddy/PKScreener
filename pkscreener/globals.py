@@ -88,7 +88,8 @@ from pkscreener.classes.MenuOptions import (
     MAX_MENU_OPTION,
     PIPED_SCANNERS,
     PREDEFINED_SCAN_MENU_KEYS,
-    PREDEFINED_SCAN_MENU_TEXTS
+    PREDEFINED_SCAN_MENU_TEXTS,
+    INDICES_MAP
 )
 from pkscreener.classes.OtaUpdater import OTAUpdater
 from pkscreener.classes.Portfolio import PortfolioCollection
@@ -873,13 +874,57 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             sleep(2)
             os.system(f"{launcher} -a Y -m 'X'")
         elif menuOption in ["D"]:
-            OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to Download daily OHLC data. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -d{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
-            sleep(2)
-            os.system(f"{launcher} -a Y -e -d")
-        elif menuOption in ["I"]:
-            OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to Download intraday OHLC data. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -d -i 1m{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
-            sleep(2)
-            os.system(f"{launcher} -a Y -e -d -i 1m")
+            selectedMenu = m0.find(menuOption)
+            Utility.tools.clearScreen(forceTop=True)
+            m1.renderForMenu(selectedMenu)
+            selDownloadOption = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "D"
+            OutputControls().printOutput(colorText.END, end="")
+            if selDownloadOption.upper() == "D":
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to Download daily OHLC data. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -d{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
+                sleep(2)
+                os.system(f"{launcher} -a Y -e -d")
+            elif selDownloadOption.upper() == "I":
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to Download intraday OHLC data. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -d -i 1m{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
+                sleep(2)
+                os.system(f"{launcher} -a Y -e -d -i 1m")
+            elif selDownloadOption.upper() == "N":
+                selectedMenu = m1.find(selDownloadOption.upper())
+                Utility.tools.clearScreen(forceTop=True)
+                m2.renderForMenu(selectedMenu)
+                selDownloadOption = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "12"
+                OutputControls().printOutput(colorText.END, end="")
+                filePrefix = "Download"
+                if selDownloadOption.upper() in INDICES_MAP.keys():
+                    filePrefix = INDICES_MAP.get(selDownloadOption.upper()).replace(" ","")
+                filename = (
+                    f"PKS_Data_{filePrefix}_"
+                    + PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")
+                    + ".csv"
+                )
+                filePath = os.path.join(Archiver.get_user_outputs_dir(), filename)
+                if selDownloadOption.upper() == "15":
+                    nasdaq = PKNasdaqIndexFetcher(configManager)
+                    _,nasdaq_df = nasdaq.fetchNasdaqIndexConstituents()
+                    try:
+                        nasdaq_df.to_csv(filePath)
+                    except Exception as e:
+                        OutputControls().printOutput(f"{colorText.FAIL}We encountered an error. Please try again!{colorText.END}\n{colorText.WARN}{e}{colorText.END}")
+                        pass
+                    OutputControls().printOutput(f"{colorText.GREEN}{filePrefix} Saved at: {filePath}{colorText.END}")
+                    input(f"{colorText.GREEN}Press any key to continue...{colorText.END}")
+                    return None, None
+                elif selDownloadOption.upper() == "M":
+                    return None, None
+                else:
+                    fileContents = fetcher.fetchFileFromHostServer(filePath=filePath,tickerOption=int(selDownloadOption),fileContents="")
+                    if len(fileContents) > 0:
+                        OutputControls().printOutput(f"{colorText.GREEN}{filePrefix} Saved at: {filePath}{colorText.END}")
+                    else:
+                        OutputControls().printOutput(f"{colorText.FAIL}We encountered an error. Please try again!{colorText.END}")
+                    input(f"{colorText.GREEN}Press any key to continue...{colorText.END}")
+                    return None, None
+            elif selDownloadOption.upper() == "M":
+                return None, None
         elif menuOption in ["L"]:
             OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to collect logs. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -l{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
             sleep(2)
@@ -1225,7 +1270,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         ):
             return None, None
         else:
-            userPassedArgs.maxdisplayresults = max(configManager.maxdisplayresults,2000) if respChartPattern in [3,4,5,8,9] else min(configManager.maxdisplayresults,userPassedArgs.maxdisplayresults)
+            userPassedArgs.maxdisplayresults = max(configManager.maxdisplayresults,2000) if respChartPattern in [3,4,5,8,9] else min(configManager.maxdisplayresults,(userPassedArgs.maxdisplayresults if (userPassedArgs is not None and userPassedArgs.maxdisplayresults is not None) else configManager.maxdisplayresults))
             selectedChoice["3"] = str(respChartPattern)
             selectedChoice["4"] = str(insideBarToLookback) if (respChartPattern in [1, 2, 3] and (userPassedArgs is not None and userPassedArgs.pipedmenus is not None)) else str(maLength)
             selectedChoice["5"] = str(maLength) if (respChartPattern in [1, 2, 3] and (userPassedArgs is not None and userPassedArgs.pipedmenus is not None)) else ""
@@ -1398,7 +1443,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
             configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
     if executeOption == 40:
-        Utility.tools.clearScreen()
+        Utility.tools.clearScreen(forceTop=True)
         selectedMenu = m2.find(str(executeOption))
         m3.renderForMenu(selectedMenu=selectedMenu)
         if userPassedArgs.options is not None:
@@ -1413,7 +1458,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         selectedChoice["3"] = str(smaEMA)
         respChartPattern = (smaEMA == "2")
         selectedMenu = m3.find(str(smaEMA))
-        Utility.tools.clearScreen()
+        Utility.tools.clearScreen(forceTop=True)
         m4.renderForMenu(selectedMenu=selectedMenu)
         if len(options) >=5:
             smaDirection = options[4]
@@ -1424,7 +1469,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             return None, None
         selectedChoice["4"] = str(smaDirection)
         reversalOption = (smaDirection == "2")
-        Utility.tools.clearScreen()
+        Utility.tools.clearScreen(forceTop=True)
         if len(options) >= 6:
             smas = options[5]
             smas = "200" if smas == "D" else smas
@@ -1762,7 +1807,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
 
         if menuOption == "B":
             if backtest_df is not None and len(backtest_df) > 0:
-                Utility.tools.clearScreen()
+                Utility.tools.clearScreen(forceTop=True)
                 # Let's do the portfolio calculation first
                 df_xray = prepareGroupedXRay(backtestPeriod, backtest_df)
                 summary_df, sorting, sortKeys = FinishBacktestDataCleanup(backtest_df, df_xray)
@@ -2112,7 +2157,7 @@ def prepareStocksForScreening(testing, downloadOnly, listStockCodes, indexOption
         elif indexOption == 15:
             OutputControls().printOutput(colorText.BOLD + "[+] Getting Stock Codes From NASDAQ... ", end="")
             nasdaq = PKNasdaqIndexFetcher(configManager)
-            listStockCodes = nasdaq.fetchNasdaqIndexConstituents()
+            listStockCodes,_ = nasdaq.fetchNasdaqIndexConstituents()
             if len(listStockCodes) > 10:
                 OutputControls().printOutput(
                     colorText.GREEN

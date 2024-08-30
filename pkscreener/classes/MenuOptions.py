@@ -44,8 +44,7 @@ level0MenuDict = {
     "C": "Analyse morning vs close outcomes",
     "P": "Piped Scanners",
     "T": "~",
-    "D": "Download Daily OHLC Data for the Past Year",
-    "I": "Download Intraday OHLC Data for the Last Trading Day",
+    "D": "Data Downloads",
     "E": "Edit user configuration",
     "Y": "View your user configuration",
     "U": "Check for software update",
@@ -106,6 +105,13 @@ level1_P_MenuDict = {
     "1": "Predefined Piped Scanners",
     "2": "Define my custom Piped Scanner",
     "3": "Run Piped Scans Saved So Far",
+    "M": "Back to the Top/Main menu",
+}
+LEVEL_1_DATA_DOWNLOADS = {
+    "D": "Download Daily OHLC Data for the Past Year",
+    "I": "Download Intraday OHLC Data for the Last Trading Day",
+    "N": "NSE Equity Symbols",
+    # "S": "NSE Symbols with Sector/Industry Details",
     "M": "Back to the Top/Main menu",
 }
 PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27","28","29"]
@@ -218,6 +224,23 @@ level1_S_MenuDict = {
     "S": "Summary",
     "M": "Back to the Top/Main menu",
     "Z": "Exit (Ctrl + C)",
+}
+INDICES_MAP = {
+    "1": "Nifty 50          ",
+    "2": "Nifty Next 50     ",
+    "3": "Nifty 100         ",
+    "4": "Nifty 200         ",
+    "5": "Nifty 500         ",
+    "6": "Nifty Smallcap 50 ",
+    "7": "Nifty Smallcap 100",
+    "8": "Nifty Smallcap 250",
+    "9": "Nifty Midcap 50   ",
+    "10": "Nifty Midcap 100",
+    "11": "Nifty Midcap 150 ",
+    "12": "Nifty (All Stocks)",
+    "14": "F&O Stocks Only", #Discontinued:  https://nsearchives.nseindia.com/content/circulars/FAOP61157.pdf
+    "15": "NASDAQ",
+    "M": "Back to the Top/Main menu",
 }
 level1_X_MenuDict = {
     "W": "Screen stocks from my own Watchlist",
@@ -612,6 +635,16 @@ class menus:
                         renderStyle=renderStyle,
                         parent=selectedMenu,
                     )
+                elif selectedMenu.menuKey in ["D"]:
+                    return self.renderMenuFromDictionary(dict=LEVEL_1_DATA_DOWNLOADS,
+                                                         exceptionKeys=["M",],
+                                                         coloredValues=(["D"] if not asList else []),
+                                                         defaultMenu="D",
+                                                         skip=skip, 
+                                                         asList=asList, 
+                                                         renderStyle=renderStyle, 
+                                                         parent=selectedMenu,
+                                                         checkUpdate=False)
                 else:
                     # sub-menu of the top level main selected menu
                     return self.renderLevel1_X_Menus(
@@ -622,6 +655,16 @@ class menus:
                     )
             elif selectedMenu.level == 1:
                 self.level = 2
+                if selectedMenu.parent.menuKey in ["D"]:
+                    return self.renderMenuFromDictionary(dict=INDICES_MAP,
+                                                         exceptionKeys=["M","15"],
+                                                         coloredValues=(["12","15"] if not asList else []),
+                                                         defaultMenu="12",
+                                                         skip=skip, 
+                                                         asList=asList, 
+                                                         renderStyle=renderStyle, 
+                                                         parent=selectedMenu,
+                                                         checkUpdate=False)
                 if selectedMenu.parent.menuKey in ["T"]:
                     if selectedMenu.menuKey in ["L"]:
                         return self.level2_T_MenuDict_L(
