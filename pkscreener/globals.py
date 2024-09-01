@@ -459,7 +459,8 @@ def handleSecondaryMenuChoices(
                 OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in quick backtest mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit quick backtest mode.{colorText.END}")
                 sleep(2)
                 os.system(f"{launcher} --systemlaunched -a Y -e --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}")
-                sys.exit(0)
+                Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+                return None, None
         elif userPassedArgs is not None and userPassedArgs.options is not None:
             options = userPassedArgs.options.split(":")
             selectedMenu = m0.find(options[0])
@@ -963,7 +964,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to collect logs. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -l{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
             sleep(2)
             os.system(f"{launcher} -a Y -l")
-        sys.exit(0)
+        Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+        return None, None
     if menuOption in ["P"]:
         predefinedOption = None
         selPredefinedOption = None
@@ -1012,8 +1014,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         + colorText.END
                     )
                 if defaultAnswer is None:
-                    input("Press <Enter> to exit...")
-                sys.exit(0)
+                    input("Press <Enter> to continue...")
+                Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+                return None, None
             else:
                 return None, None
         elif predefinedOption == "2":
@@ -1595,8 +1598,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 + "\n\n[+] Oops! It looks like you don't have an Internet connectivity at the moment!"
                 + colorText.END
             )
-            input("Exiting now...")
-            sys.exit(0)
+            input("Press <Enter> to continue...")
+            Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+            return None, None
         if userPassedArgs.options is None or len(userPassedArgs.options) == 0:
             userPassedArgs.options = ""
             for choice in selectedChoice.keys():
@@ -1873,7 +1877,13 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 OutputControls().printOutput(f"{colorText.GREEN} => Done in {round(time.time()-begin,2)}s{colorText.END}")
     except:
         pass
-    if "RUNNER" not in os.environ.keys() and not testing and (userPassedArgs is None or (userPassedArgs is not None and (userPassedArgs.user is None or str(userPassedArgs.user) == DEV_CHANNEL_ID) and (userPassedArgs.answerdefault is None or userPassedArgs.systemlaunched))):
+    if ("RUNNER" not in os.environ.keys() and 
+        not testing and 
+        (userPassedArgs is None or 
+            (userPassedArgs is not None and 
+                (userPassedArgs.user is None or 
+                    str(userPassedArgs.user) == DEV_CHANNEL_ID) and 
+                (userPassedArgs.answerdefault is None or userPassedArgs.systemlaunched)))):
         prevOutput_results = saveResults.index if (saveResults is not None and not saveResults.empty) else []
         isNotPiped = (("|" not in userPassedArgs.options) if (userPassedArgs is not None and userPassedArgs.options is not None) else True)
         hasFoundStocks = len(prevOutput_results) > 0 and isNotPiped
@@ -2086,8 +2096,9 @@ def addOrRunPipedMenus():
                 + colorText.END
             )
         if defaultAnswer is None:
-            input("Press <Enter> to exit...")
-        sys.exit(0)
+            input("Press <Enter> to continue...")
+        Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+        return None, None
     else:
         userPassedArgs.options = None
         return None, None
