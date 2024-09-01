@@ -111,7 +111,7 @@ LEVEL_1_DATA_DOWNLOADS = {
     "D": "Download Daily OHLC Data for the Past Year",
     "I": "Download Intraday OHLC Data for the Last Trading Day",
     "N": "NSE Equity Symbols",
-    # "S": "NSE Symbols with Sector/Industry Details",
+    "S": "NSE Symbols with Sector/Industry Details",
     "M": "Back to the Top/Main menu",
 }
 PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27","28","29"]

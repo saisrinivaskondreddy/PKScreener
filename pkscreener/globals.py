@@ -923,6 +923,40 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         OutputControls().printOutput(f"{colorText.FAIL}We encountered an error. Please try again!{colorText.END}")
                     input(f"{colorText.GREEN}Press any key to continue...{colorText.END}")
                     return None, None
+            elif selDownloadOption.upper() == "S":
+                selectedMenu = m1.find(selDownloadOption.upper())
+                Utility.tools.clearScreen(forceTop=True)
+                m2.renderForMenu(selectedMenu,skip=["15"])
+                selDownloadOption = input(colorText.BOLD + colorText.FAIL + "[+] Select option: ") or "12"
+                OutputControls().printOutput(colorText.END, end="")
+                filePrefix = "Download"
+                if selDownloadOption.upper() in INDICES_MAP.keys():
+                    filePrefix = INDICES_MAP.get(selDownloadOption.upper()).replace(" ","")
+                filename = (
+                    f"PKS_Data_{filePrefix}_"
+                    + PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")
+                    + ".csv"
+                )
+                filePath = os.path.join(Archiver.get_user_outputs_dir(), filename)
+                if selDownloadOption.upper() == "M":
+                    return None, None
+                else:
+                    indexOption = int(selDownloadOption)
+                    if indexOption > 0 and indexOption <= 14:
+                        shouldSuppress = not OutputControls().enableMultipleLineOutput
+                        with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
+                            listStockCodes = fetcher.fetchStockCodes(indexOption, stockCode=None)
+                        OutputControls().printOutput(f"{colorText.GREEN}Please be patient. It might take a while...{colorText.END}")
+                        from pkscreener.classes.PKDataService import PKDataService
+                        dataSvc = PKDataService()
+                        stockDictList, leftOutStocks = dataSvc.getSymbolsAndSectorInfo(configManager,stockCodes=listStockCodes)
+                        if len(stockDictList) > 0:
+                            sector_df = pd.DataFrame(stockDictList)
+                            sector_df.to_csv(filePath)
+                            OutputControls().printOutput(f"{colorText.GREEN}Sector/Industry info for {filePrefix}, saved at: {filePath}{colorText.END}")
+                        else:
+                            OutputControls().printOutput(f"{colorText.FAIL}We encountered an error. Please try again!{colorText.END}")
+                        input(f"{colorText.GREEN}Press any key to continue...{colorText.END}")
             elif selDownloadOption.upper() == "M":
                 return None, None
         elif menuOption in ["L"]:
