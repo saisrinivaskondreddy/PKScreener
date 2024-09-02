@@ -93,7 +93,8 @@ class PKScheduler():
                 _results = manager.dict()
                 console.control(Control(*((ControlType.CURSOR_UP,1),))) # Cursor up 1 lines f"\x1b[{param}A"
                 # sys.stdout.write("\x1b[2K")  # delete the last line
-                overall_progress_task = progress.add_task(f"[green]{label if label is not None else 'Pending jobs progress:'}", visible=showProgressBars)
+                if showProgressBars:
+                    overall_progress_task = progress.add_task(f"[green]{label if label is not None else 'Pending jobs progress:'}", visible=showProgressBars)
 
                 lock = Lock()
                 taskResultsUpdated = False
@@ -111,13 +112,13 @@ class PKScheduler():
                     # monitor the progress:
                     start_time = time.time()
                     while (((n_finished := sum([future.done() for future in futures])) < len(futures)) and ((time.time() - start_time) < timeout)):
-                        progress.update(
-                            overall_progress_task,
-                            completed=n_finished,
-                            total=len(futures),
-                            visible=n_finished < len(futures)
-                        )
                         if showProgressBars:
+                            progress.update(
+                                overall_progress_task,
+                                completed=n_finished,
+                                total=len(futures),
+                                visible=n_finished < len(futures)
+                            )
                             OutputControls().printOutput(f"{n_finished} of {len(futures)}")
                         # We've reached a state where the caller may not want to wait any further
                         if n_finished*100/len(futures) >= minAcceptableCompletionPercentage:
@@ -129,31 +130,34 @@ class PKScheduler():
                                     task.result = task.resultsDict.get(task_id)
                             latest = update_data["progress"]
                             total = update_data["total"]
-                            # update the progress bar for this task:
-                            progress.update(
-                                task_id,
-                                completed=latest,
-                                total=total,
-                                visible=(latest < total) and showProgressBars,
-                            )
+                            if showProgressBars:
+                                # update the progress bar for this task:
+                                progress.update(
+                                    task_id,
+                                    completed=latest,
+                                    total=total,
+                                    visible=(latest < total) and showProgressBars,
+                                )
                             lock.acquire()
                             progress.refresh()
                             lock.release()
                     # sleep(0.1)
-                    progress.update(
-                            overall_progress_task,
-                            completed=1,
-                            total=1,
-                            visible=False
-                        )
+                    if showProgressBars:
+                        progress.update(
+                                overall_progress_task,
+                                completed=1,
+                                total=1,
+                                visible=False
+                            )
                     for task_id, update_data in _progress.items():
                         # update the progress bar for this task:
-                        progress.update(
-                            task_id,
-                            completed=1,
-                            total=1,
-                            visible=False,
-                        )
+                        if showProgressBars:
+                            progress.update(
+                                task_id,
+                                completed=1,
+                                total=1,
+                                visible=False,
+                            )
                     if not taskResultsUpdated:
                         for task in tasksList:
                             if task.taskId == task_id:

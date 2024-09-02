@@ -1285,8 +1285,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         f"[+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END}, Current: {colorText.FAIL}{configManager.vcpLegsToCheckForConsolidation}{colorText.END}): "
                     ) or configManager.vcpLegsToCheckForConsolidation
                 configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
-            if maLength == 0 and respChartPattern in [1, 2, 3, 6, 9]:
-                maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
+            if maLength == 0:
+                if respChartPattern in [3, 6, 9]:
+                    maLength = Utility.tools.promptChartPatternSubMenu(selectedMenu, respChartPattern)
+                elif respChartPattern in [1, 2]:
+                    maLength = 1
             if maLength == 4 and respChartPattern == 3: # Super-confluence setup
                 if len(options) <= 5:
                     configManager.superConfluenceMaxReviewDays = input(
