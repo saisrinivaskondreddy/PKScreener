@@ -32,9 +32,7 @@ import json
 from PKDevTools.classes.Fetcher import fetcher
 from PKDevTools.classes.Utils import random_user_agent
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
-from PKDevTools.classes.Committer import Committer
 from PKDevTools.classes import Archiver
-from git import Repo
 import git
 
 class PKAnalyticsService():
