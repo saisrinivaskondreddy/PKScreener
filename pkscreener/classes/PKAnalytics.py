@@ -45,8 +45,10 @@ class PKAnalyticsService():
             dateTime = str(PKDateUtilities.currentDateTime())
             metrics["dateTime"] = dateTime
             metrics["userName"] = "DummyUser"
+            if "readme" in metrics.keys():
+                del metrics['readme']
             self.tryCommitAnalytics(userDict=metrics)
-        except:
+        except Exception as e:
             pass
 
     def getUserName(self):
@@ -67,24 +69,21 @@ class PKAnalyticsService():
         return data
     
     def tryCommitAnalytics(self, userDict={}):
-        scanResultFilesPath = os.path.join(Archiver.get_user_outputs_dir(), "users.txt")
-        with open(scanResultFilesPath, "a+") as f:
-            f.write(str(userDict))
-        # repo = Repo(os.path.join(Archiver.get_user_outputs_dir(), "users"))
-        # origin = repo.remote()
-        # cli = origin.repo.git
-        # cli.checkout('origin/master', 'path/to/file')
-        repo_clone_url = "git@github.com:pkjmesra/PKUserAnalytics.git"
-        local_repo = "PKUserAnalytics"
-        test_branch = "main"
-        repo = git.Repo.clone_from(repo_clone_url, local_repo)
-        repo.git.checkout(test_branch)
+        repo_clone_url = "https://github.com/pkjmesra/PKUserAnalytics.git"
+        local_repo = os.path.join(Archiver.get_user_outputs_dir(),"PKUserAnalytics")
+        try:
+            test_branch = "main"
+            repo = git.Repo.clone_from(repo_clone_url, local_repo)
+            repo.git.checkout(test_branch)
+        except Exception as e:
+            repo = git.Repo(local_repo)
+            repo.git.checkout(test_branch)
+            pass
         # write to file in working directory
+        scanResultFilesPath = os.path.join(local_repo, "users.txt")
+        with open(scanResultFilesPath, "a+") as f:
+            f.writelines([str(userDict)])
         repo.index.add([scanResultFilesPath])
-        commit = repo.index.commit("Commit test")
-        Committer.commitTempOutcomes(addPath=scanResultFilesPath,commitMessage="[User-Analytics]")
-
-analytics = PKAnalyticsService()
-analytics.collectMetrics()
-
-
+        commit = repo.index.commit("[User-Analytics]")
+        remote = git.remote.Remote(repo=repo,name="origin")
+        remote.push()
