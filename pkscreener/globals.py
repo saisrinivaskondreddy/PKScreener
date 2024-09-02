@@ -824,6 +824,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     runOptionName = ""
     options = []
     strategyFilter=[]
+    describeUser()
     if keyboardInterruptEventFired:
         return None, None
     
@@ -2102,7 +2103,22 @@ def addOrRunPipedMenus():
     else:
         userPassedArgs.options = None
         return None, None
-    
+
+def describeUser():
+    from pkscreener.classes.PKAnalytics import PKAnalyticsService
+    service = PKAnalyticsService()
+    func_args = None
+    task = PKTask("Usage Analytics",
+                    long_running_fn=service.collectMetrics,
+                    long_running_fn_args=func_args)
+    task.total = 1
+    try:
+        # On Github CI, we may run out of memory because of saving results in
+        # shared multiprocessing dict.
+        PKScheduler.scheduleTasks([task],"Starting up...", showProgressBars=False,submitTaskAsArgs=False,timeout=600)
+    except Exception as e:
+        pass
+
 def prepareGroupedXRay(backtestPeriod, backtest_df):
     df_grouped = backtest_df.groupby("Date")
     userPassedArgs.backtestdaysago = backtestPeriod

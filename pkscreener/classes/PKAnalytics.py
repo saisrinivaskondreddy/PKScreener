@@ -25,48 +25,60 @@
 """
 
 import os
+import base64
 from sys import platform
+import platform
 import getpass
-import re
+import git
 import json
+import io
+
 from PKDevTools.classes.Fetcher import fetcher
 from PKDevTools.classes.Utils import random_user_agent
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
 from PKDevTools.classes import Archiver
-import git
+import git.repo
 
 class PKAnalyticsService():
-    def collectMetrics(self):
+    def collectMetrics(self,user=None):
         try:
             userName = self.getUserName()
             metrics = self.getApproxLocationInfo()
             dateTime = str(PKDateUtilities.currentDateTime())
             metrics["dateTime"] = dateTime
-            metrics["userName"] = "DummyUser"
+            metrics["userName"] = userName
             if "readme" in metrics.keys():
                 del metrics['readme']
-            self.tryCommitAnalytics(userDict=metrics)
+            self.tryCommitAnalytics(userDict=metrics,username=userName)
         except Exception as e:
             pass
 
     def getUserName(self):
-        username = os.getlogin()
-        if username is None or len(username) == 0:
-            username = os.environ.get('username') if platform.startswith("win") else os.environ.get("USER")
+        try:
+            username = os.getlogin()
             if username is None or len(username) == 0:
-                username = os.environ.get('USERPROFILE')
+                username = os.environ.get('username') if platform.startswith("win") else os.environ.get("USER")
                 if username is None or len(username) == 0:
-                    username = os.path.expandvars("%userprofile%") if platform.startswith("win") else getpass.getuser()
+                    username = os.environ.get('USERPROFILE')
+                    if username is None or len(username) == 0:
+                        username = os.path.expandvars("%userprofile%") if platform.startswith("win") else getpass.getuser()
+        except:
+            username = f"Unidentified-{platform.system()}"
+            pass
         return username
 
     def getApproxLocationInfo(self):
-        url = 'http://ipinfo.io/json'
-        f = fetcher()
-        response = f.fetchURL(url=url,timeout=5,headers={'user-agent': f'{random_user_agent()}'})
-        data = json.loads(response.text)
+        try:
+            url = 'http://ipinfo.io/json'
+            f = fetcher()
+            response = f.fetchURL(url=url,timeout=5,headers={'user-agent': f'{random_user_agent()}'})
+            data = json.loads(response.text)
+        except:
+            data = {"locationInfo":f"Unidentified-{platform.system()}"}
+            pass
         return data
     
-    def tryCommitAnalytics(self, userDict={}):
+    def tryCommitAnalytics(self, userDict={},username="Unidentified"):
         repo_clone_url = "https://github.com/pkjmesra/PKUserAnalytics.git"
         local_repo = os.path.join(Archiver.get_user_outputs_dir(),"PKUserAnalytics")
         try:
@@ -77,11 +89,30 @@ class PKAnalyticsService():
             repo = git.Repo(local_repo)
             repo.git.checkout(test_branch)
             pass
+        remote = git.remote.Remote(repo=repo,name="origin")
+        repo.git.reset('--hard','origin/main')
+        remote.pull()
         # write to file in working directory
-        scanResultFilesPath = os.path.join(local_repo, "users.txt")
-        with open(scanResultFilesPath, "a+") as f:
-            f.writelines([str(userDict)])
+        scanResultFilesPath = os.path.join(local_repo, f"users-{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d')}.txt")
+        records = {}
+        existingUserRecords = [userDict]
+        mode = "rb+" if os.path.exists(scanResultFilesPath) else "wb+"
+        with open(scanResultFilesPath, mode) as f:
+            allUsers = f.read()
+            if allUsers is not None and len(allUsers) > 0:
+                allUsers = base64.b64decode(allUsers).decode("utf-8").replace("'","\"")
+                records = json.loads(allUsers)
+                if records is None:
+                    records = {}
+                existingUserRecords = records.get(username)
+                if existingUserRecords is not None:
+                    existingUserRecords.append(userDict)
+                else:
+                    existingUserRecords = [userDict]
+            records[username] = existingUserRecords
+            encoded = base64.b64encode(bytes(str(records).replace("'","\""), "utf-8"))
+            f.writelines(io.BytesIO(encoded))
         repo.index.add([scanResultFilesPath])
-        commit = repo.index.commit("[User-Analytics]")
+        repo.index.commit("[User-Analytics]")
         remote = git.remote.Remote(repo=repo,name="origin")
         remote.push()
