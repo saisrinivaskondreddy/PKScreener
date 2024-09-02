@@ -2448,7 +2448,7 @@ def printNotifySaveScreenedResults(
         ).encode("utf-8").decode(STD_ENCODING)
         copyScreenResults = screenResults.copy()
         hiddenColumns = configManager.alwaysHiddenDisplayColumns.split(",")
-        if userPassedArgs.runintradayanalysis or ("VCP" in menuChoiceHierarchy):
+        if userPassedArgs.runintradayanalysis or ("VCP" in menuChoiceHierarchy) or ("Patterns" in menuChoiceHierarchy):
             hiddenColumns.remove("Pattern")
         if executeOption in [33]:
             hiddenColumns.remove("52Wk-L")
