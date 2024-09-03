@@ -1021,9 +1021,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 enableLog = f" -l" if userPassedArgs.log else ""
                 enableTelegramMode = f" --telegram" if userPassedArgs is not None and userPassedArgs.telegram else ""
                 backtestParam = f" --backtestdaysago {userPassedArgs.backtestdaysago}" if userPassedArgs.backtestdaysago else ""
-                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{colorText.END}")
+                stockListParam = f" --stocklist {userPassedArgs.stocklist}" if userPassedArgs.stocklist else ""
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{colorText.END}")
                 sleep(2)
-                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}")
+                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}")
                 OutputControls().printOutput(
                         colorText.GREEN
                         + f"[+] Finished running all piped scanners!"
@@ -1952,12 +1953,18 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 message = f"\n[+] {colorText.FAIL}Please use {colorText.END}{colorText.GREEN}Left / Right arrow keys{colorText.END} to slide (go back / forward) the {colorText.WARN}time-window by every {configManager.duration}{colorText.END} !"
                 direction = getKeyBoardArrowInput(message=message)
                 if direction is not None:
+                    if userPassedArgs is not None and userPassedArgs.progressstatus is not None:
+                        runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1].strip()
+                        if runOptionName.startswith("P"):
+                            userPassedArgs.options = runOptionName.replace("_",":")
+                    userPassedArgs.stocklist = ','.join(screenResults.index)
                     if direction == "LEFT":
+                        analysis_dict = {}
                         show_saved_diff_results = True
                         if configManager.duration.endswith("m"):
                             userPassedArgs.intraday = configManager.duration
                         if userPassedArgs.backtestdaysago is not None:
-                            userPassedArgs.backtestdaysago += 1
+                            userPassedArgs.backtestdaysago = int(userPassedArgs.backtestdaysago) + 1
                         else:
                             userPassedArgs.backtestdaysago = 1
                         waitMessage = f"\n[+] {colorText.GREEN}Please wait ...Trying to go back by {configManager.duration}{colorText.END} !"
@@ -1965,8 +1972,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         sleep(2)
                         return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
                     elif direction == "RIGHT":
+                        analysis_dict = {}
                         show_saved_diff_results = True
                         if userPassedArgs.backtestdaysago is not None:
+                            userPassedArgs.backtestdaysago = int(userPassedArgs.backtestdaysago)
                             userPassedArgs.backtestdaysago -= 1
                             if userPassedArgs.backtestdaysago < 0:
                                 userPassedArgs.backtestdaysago = 0
@@ -2514,7 +2523,9 @@ def printNotifySaveScreenedResults(
 ):
     global userPassedArgs, elapsed_time, media_group_dict, saved_screen_results
     diff_from_prev_scan = None
+    common_df = None
     criteria_dateTime = None
+    printableColumns = []
     if userPassedArgs.monitor is not None:
         return
     if saved_screen_results is not None and show_saved_diff_results:
@@ -2524,13 +2535,10 @@ def printNotifySaveScreenedResults(
         # get index of unique records
         idx = [x[0] for x in df_gpby.groups.values() if len(x) == 1]
         diff_from_prev_scan = diff_from_prev_scan.reindex(idx)
-        saved_screen_results = screenResults
-        tabulated_diff_from_prev = colorText.miniTabulator().tabulate(
-            diff_from_prev_scan, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
-            maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
-        ).encode("utf-8").decode(STD_ENCODING)
-        OutputControls().printOutput(f"{colorText.WARN}[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}", enableMultipleLineOutput=True)
-
+    if userPassedArgs.stocklist is not None:
+        common_df = screenResults[~screenResults.index.isin(userPassedArgs.stocklist.split(","))]
+        diff_from_prev_scan = screenResults[screenResults.index.isin(userPassedArgs.stocklist.split(","))]
+    
     MAX_ALLOWED = (configManager.maxdisplayresults if userPassedArgs.maxdisplayresults is None else (int(userPassedArgs.maxdisplayresults) if not testing else 1))
     tabulated_backtest_summary = ""
     tabulated_backtest_detail = ""
@@ -2588,9 +2596,20 @@ def printNotifySaveScreenedResults(
                                     copyScreenResults, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
                                     maxcolwidths=Utility.tools.getMaxColumnWidths(copyScreenResults)
                                 ).encode("utf-8").decode(STD_ENCODING)
+            printableColumns = copyScreenResults.columns
         except:
             console_results = tabulated_results
+            printableColumns = screenResults.columns
     OutputControls().printOutput(f"{console_results}\n", enableMultipleLineOutput=True)
+    if diff_from_prev_scan is not None:
+        diff_from_prev_scan = diff_from_prev_scan[printableColumns]
+        saved_screen_results = copyScreenResults
+        tabulated_diff_from_prev = colorText.miniTabulator().tabulate(
+            diff_from_prev_scan, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+            maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
+        ).encode("utf-8").decode(STD_ENCODING)
+        OutputControls().printOutput(f"{colorText.WARN}\n[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}\n\n", enableMultipleLineOutput=True)
+
     _, reportNameInsights = getBacktestReportFilename(
         sortKey="Date", optionalName="Insights"
     )

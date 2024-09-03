@@ -229,6 +229,12 @@ argParser.add_argument(
     required=False,
 )
 argParser.add_argument(
+    "--stocklist",
+    type=str,
+    help="Comma separated list of stocks passed from previous scan results",
+    required=False,
+)
+argParser.add_argument(
     "--systemlaunched",
     action="store_true",
     help="Indicator to show that this is a system launched screener, using os.system",
