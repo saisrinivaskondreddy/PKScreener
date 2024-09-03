@@ -782,13 +782,19 @@ class menus:
                     return self.renderMenuFromDictionary(dict=level3_X_PotentialProfitable_MenuDict,
                                                          exceptionKeys=["0"],
                                                          coloredValues=["2"],
-                                                         defaultMenu="2", 
+                                                         defaultMenu="2",
+                                                         asList=asList,
+                                                         renderStyle=renderStyle,
+                                                         skip=skip,
                                                          parent=selectedMenu)
                 elif selectedMenu.menuKey in ["40"]:
                     return self.renderMenuFromDictionary(dict=PRICE_CROSS_SMA_EMA_TYPE_MENUDICT,
                                                          exceptionKeys=["0"],
                                                          coloredValues=["2"],
-                                                         defaultMenu="2", 
+                                                         defaultMenu="2",
+                                                         asList=asList,
+                                                         renderStyle=renderStyle,
+                                                         skip=skip, 
                                                          parent=selectedMenu)
             elif selectedMenu.level == 3:
                 self.level = 4
