@@ -2531,7 +2531,7 @@ def printNotifySaveScreenedResults(
     if saved_screen_results is not None and show_saved_diff_results:
         diff_from_prev_scan = pd.concat([saved_screen_results, screenResults])
         diff_from_prev_scan = diff_from_prev_scan.reset_index(drop=True)
-        df_gpby = diff_from_prev_scan.groupby(["Stock"])
+        df_gpby = diff_from_prev_scan.groupby([diff_from_prev_scan.columns[0]])
         # get index of unique records
         idx = [x[0] for x in df_gpby.groups.values() if len(x) == 1]
         diff_from_prev_scan = diff_from_prev_scan.reindex(idx)
