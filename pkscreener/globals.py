@@ -152,6 +152,9 @@ analysis_dict = {}
 download_trials = 0
 media_group_dict = {}
 DEV_CHANNEL_ID="-1001785195297"
+criteria_dateTime = None
+saved_screen_results = None
+show_saved_diff_results = False
 
 def startMarketMonitor(mp_dict,keyboardevent):
     from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
@@ -822,9 +825,10 @@ def closeWorkersAndExit():
     
 # @tracelog
 def main(userArgs=None,optionalFinalOutcome_df=None):
-    global analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
+    global show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
     elapsed_time = 0
+    criteria_dateTime = None
     start_time = 0
     testing = False if userArgs is None else (userArgs.testbuild and userArgs.prodbuild)
     testBuild = False if userArgs is None else (userArgs.testbuild and not testing)
@@ -1950,6 +1954,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 direction = getKeyBoardArrowInput(message=message)
                 if direction is not None:
                     if direction == "LEFT":
+                        show_saved_diff_results = True
                         if configManager.duration.endswith("m"):
                             userPassedArgs.intraday = configManager.duration
                         if userPassedArgs.backtestdaysago is not None:
@@ -1961,6 +1966,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         sleep(2)
                         return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
                     elif direction == "RIGHT":
+                        show_saved_diff_results = True
                         if userPassedArgs.backtestdaysago is not None:
                             userPassedArgs.backtestdaysago -= 1
                             if userPassedArgs.backtestdaysago < 0:
@@ -1978,8 +1984,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     else:
                         OutputControls().printOutput(message)
                         sleep(4)
-
-                    return None, None
+            show_saved_diff_results = False
+            return None, None
 
     if userPassedArgs is not None:
         existingTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs.pipedtitle is not None else ""
@@ -2506,9 +2512,24 @@ def updateMenuChoiceHierarchy():
 def printNotifySaveScreenedResults(
     screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None
 ):
-    global userPassedArgs, elapsed_time, media_group_dict
+    global userPassedArgs, elapsed_time, media_group_dict, saved_screen_results
+    diff_from_prev_scan = None
     if userPassedArgs.monitor is not None:
         return
+    if saved_screen_results is not None and show_saved_diff_results:
+        diff_from_prev_scan = pd.concat([saved_screen_results, screenResults])
+        diff_from_prev_scan = diff_from_prev_scan.reset_index(drop=True)
+        df_gpby = diff_from_prev_scan.groupby(["Stock"])
+        # get index of unique records
+        idx = [x[0] for x in df_gpby.groups.values() if len(x) == 1]
+        diff_from_prev_scan = diff_from_prev_scan.reindex(idx)
+        saved_screen_results = screenResults
+        tabulated_diff_from_prev = colorText.miniTabulator().tabulate(
+            diff_from_prev_scan, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+            maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
+        ).encode("utf-8").decode(STD_ENCODING)
+        OutputControls().printOutput(f"{colorText.WARN}[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}", enableMultipleLineOutput=True)
+
     MAX_ALLOWED = (configManager.maxdisplayresults if userPassedArgs.maxdisplayresults is None else (int(userPassedArgs.maxdisplayresults) if not testing else 1))
     tabulated_backtest_summary = ""
     tabulated_backtest_detail = ""
@@ -2560,6 +2581,7 @@ def printNotifySaveScreenedResults(
         for col in screenResults.columns:
             if col in hiddenColumns:
                 copyScreenResults.drop(col, axis=1, inplace=True, errors="ignore")
+        saved_screen_results = screenResults
         try:
             console_results = colorText.miniTabulator().tabulate(
                                     copyScreenResults, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
@@ -2724,6 +2746,7 @@ def printNotifySaveScreenedResults(
             tabulateBacktestResults(saveResults)
             needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
             pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0)
+            pastDate = pastDate if criteria_dateTime is None else criteria_dateTime
             OutputControls().printOutput(
                 colorText.BOLD
                 + colorText.GREEN
@@ -3027,10 +3050,10 @@ def runScanners(
     backtest_df,
     testing=False,
 ):
-    global selectedChoice, userPassedArgs, elapsed_time, start_time,userPassedArgs
+    global selectedChoice, userPassedArgs, elapsed_time, start_time,userPassedArgs,criteria_dateTime
     result = None
     backtest_df = None
-    reviewDate = getReviewDate(userPassedArgs)
+    reviewDate = getReviewDate(userPassedArgs) if criteria_dateTime is None else criteria_dateTime
     max_allowed = getMaxAllowedResultsCount(iterations, testing)
     try:
         originalNumberOfStocks = numStocks
@@ -3135,7 +3158,13 @@ def runScanners(
         PKScanRunner.terminateAllWorkers(userPassedArgs=userPassedArgs,consumers=consumers, tasks_queue=tasks_queue,testing=testing)
         logging.shutdown()
 
-    if result is not None and len(result) >=3 and "Date" not in saveResults.columns:
+    if result is not None and len(result) >=1 and criteria_dateTime is None:
+        if userPassedArgs is not None and userPassedArgs.backtestdaysago is not None:
+            criteria_dateTime = result[2].copy().index[-1-int(userPassedArgs.backtestdaysago)]
+        else:
+            criteria_dateTime = result[2].copy().index[-1]
+        criteria_dateTime = PKDateUtilities.utc_to_ist(criteria_dateTime)
+    if result is not None and len(result) >=1 and "Date" not in saveResults.columns:
         temp_df = result[2].copy()
         temp_df.reset_index(inplace=True)
         temp_df = temp_df.tail(1)
