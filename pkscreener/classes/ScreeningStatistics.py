@@ -2847,15 +2847,20 @@ class ScreeningStatistics:
         # Check for consolidation/tightening.
         # Every next leg should be tighter than the previous one
         consolidationPercentages = list(reversed(consolidationPercentages))
+        devScore = 0
         if self.configManager.enableAdditionalVCPFilters:
             if len(consolidationPercentages) >= 2:
                 index = 0
                 while (index+1) < legsToCheck:
+                    # prev one < new one.
                     if consolidationPercentages[index] < consolidationPercentages[index+1]:
                         return False, consolidationPercentages[:relativeLegsTocheck]
+                    if index < relativeLegsTocheck:
+                        devScore += 2-(consolidationPercentages[index]/consolidationPercentages[index+1])
                     index += 1
+        
         # Return the first requested number of legs in the order of leg1, leg2, leg3 etc.
-        return True, consolidationPercentages[:relativeLegsTocheck]
+        return True, consolidationPercentages[:relativeLegsTocheck], devScore
 
     # validate if the stock has been having higher highs, higher lows
     # and higher close with latest close > supertrend and 8-EMA.
@@ -3621,7 +3626,7 @@ class ScreeningStatistics:
                     and ltp > lowPoints[0]
                 ):
                     saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
-                    isTightening, consolidations = self.validateConsolidationContraction(df=df.copy(),legsToCheck=(int(self.configManager.vcpLegsToCheckForConsolidation) if self.configManager.enableAdditionalVCPFilters else 0),stockName=stockName)
+                    isTightening, consolidations, deviationScore = self.validateConsolidationContraction(df=df.copy(),legsToCheck=(int(self.configManager.vcpLegsToCheckForConsolidation) if self.configManager.enableAdditionalVCPFilters else 0),stockName=stockName)
                     consolidations = [f"{str(x)}%" for x in consolidations]
                     if isTightening:
                         screenDict["Pattern"] = (
@@ -3632,6 +3637,8 @@ class ScreeningStatistics:
                             + colorText.END
                         )
                         saveDict["Pattern"] = saved[1] + f"VCP (BO: {highestTop}, Cons.:{','.join(consolidations)})"
+                        screenDict["deviationScore"] = deviationScore
+                        saveDict["deviationScore"] = deviationScore
                         return True
                     return False
         except Exception as e:  # pragma: no cover

@@ -714,6 +714,13 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
                 else:
                     sortKey = ["Volume"]
                     ascending = [False]
+            elif reversalOption in [4]:
+                if "deviationScore" in saveResults.columns:
+                    sortKey = ["deviationScore"]
+                    ascending = [True]
+                else:
+                    sortKey = ["Volume"]
+                    ascending = [False]
         elif executeOption == 23:
             sortKey = ["bbands_ulr_ratio_max5"] if "bbands_ulr_ratio_max5" in screenResults.columns else ["Volume"]
             ascending = [False]
@@ -742,6 +749,8 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
             columnsToBeDeleted.extend(["Trend","Breakout"])
         if "SuperConfSort" in saveResults.columns:
             columnsToBeDeleted.extend(["SuperConfSort"])
+        if "deviationScore" in saveResults.columns:
+            columnsToBeDeleted.extend(["deviationScore"])
         if userPassedArgs is not None and userPassedArgs.options is not None and userPassedArgs.options.upper().startswith("C"):
             columnsToBeDeleted.append("FairValue")
         if executeOption == 27 and "ATR" in screenResults.columns: # ATR Cross
