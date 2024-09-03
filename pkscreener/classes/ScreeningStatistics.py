@@ -2608,7 +2608,7 @@ class ScreeningStatistics:
                     saveDict["MA-Signal"] = saved[1] + f"SuperGoldenConf(-{dayDate})"
                     screenDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200 (EMA55 %)"] = f"{colorText.GREEN if (ema_8>=ema_21 and ema_8>=ema_55) else (colorText.WARN if (ema_8>=ema_21 or ema_8>=ema_55) else colorText.FAIL)}{round(ema_8,1)}{colorText.END},{colorText.GREEN if ema_21>=ema_55 else colorText.FAIL}{round(ema_21,1)}{colorText.END},{round(ema_55,1)}, {colorText.GREEN if sma_200<= ema_55 and emasCrossedSMA200 else (colorText.WARN if sma_200<= ema_55 else colorText.FAIL)}{round(sma_200,1)} ({round(ema55_percentage*100,1)}%){colorText.END}"
                     saveDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200 (EMA55 %)"] = f"{round(ema_8,1)},{round(ema_21,1)},{round(ema_55,1)}, {round(sma_200,1)} ({round(ema55_percentage*100,1)}%)"
-                    saveDict[f"SuperConfSort"] = int(f"{indexDate.year}{indexDate.month}{indexDate.day}") #0 if ema_8>=ema_21 and ema_8>=ema_55 and ema_21>=ema_55 and sma_200<=ema_55 else (1 if (ema_8>=ema_21 or ema_8>=ema_55) else (2 if sma_200<=ema_55 else 3))
+                    saveDict[f"SuperConfSort"] = int(f"{indexDate.year:04}{indexDate.month:02}{indexDate.day:02}") #0 if ema_8>=ema_21 and ema_8>=ema_55 and ema_21>=ema_55 and sma_200<=ema_55 else (1 if (ema_8>=ema_21 or ema_8>=ema_55) else (2 if sma_200<=ema_55 else 3))
                     screenDict[f"SuperConfSort"] = saveDict[f"SuperConfSort"]
                     return superbConfluence
                 elif ema8CrossedEMA21 and ema8CrossedEMA55 and ema21CrossedEMA55:
@@ -2623,7 +2623,7 @@ class ScreeningStatistics:
                     saveDict["MA-Signal"] = saved[1] + f"SilverCrossConf.({dayDate})"
                     screenDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200 (EMA55 %)"] = f"{colorText.GREEN if (ema_8>=ema_21 and ema_8>=ema_55) else (colorText.WARN if (ema_8>=ema_21 or ema_8>=ema_55) else colorText.FAIL)}{round(ema_8,1)}{colorText.END},{colorText.GREEN if ema_21>=ema_55 else colorText.FAIL}{round(ema_21,1)}{colorText.END},{round(ema_55,1)}, {colorText.GREEN if sma_200<= ema_55 and emasCrossedSMA200 else (colorText.WARN if sma_200<= ema_55 else colorText.FAIL)}{round(sma_200,1)} ({round(ema55_percentage*100,1)}%){colorText.END}"
                     saveDict[f"Latest EMA-{self.configManager.superConfluenceEMAPeriods}, SMA-200 (EMA55 %)"] = f"{round(ema_8,1)},{round(ema_21,1)},{round(ema_55,1)}, {round(sma_200,1)} ({round(ema55_percentage*100,1)}%)"
-                    saveDict[f"SuperConfSort"] = int(f"{indexDate.year}{indexDate.month}{indexDate.day}") #0 if ema_8>=ema_21 and ema_8>=ema_55 and ema_21>=ema_55 and sma_200<=ema_55 else (1 if (ema_8>=ema_21 or ema_8>=ema_55) else (2 if sma_200<=ema_55 else 3))
+                    saveDict[f"SuperConfSort"] = int(f"{indexDate.year:04}{indexDate.month:02}{indexDate.day:02}") #0 if ema_8>=ema_21 and ema_8>=ema_55 and ema_21>=ema_55 and sma_200<=ema_55 else (1 if (ema_8>=ema_21 or ema_8>=ema_55) else (2 if sma_200<=ema_55 else 3))
                     screenDict[f"SuperConfSort"] = saveDict[f"SuperConfSort"]
                     silverCross = True
                 
