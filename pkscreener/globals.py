@@ -828,7 +828,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     global show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
     elapsed_time = 0
-    criteria_dateTime = None
     start_time = 0
     testing = False if userArgs is None else (userArgs.testbuild and userArgs.prodbuild)
     testBuild = False if userArgs is None else (userArgs.testbuild and not testing)
@@ -2048,6 +2047,7 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                     userDownloadOption = menuOption
             )
     if menuOption not in ["C"] and (userPassedArgs.monitor is not None or "|" in userPassedArgs.options) :#not configManager.isIntradayConfig() and configManager.calculatersiintraday:
+        prevDuration = configManager.duration
         candleDuration = (userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else ("1m" if configManager.duration.endswith("d") else configManager.duration))
         configManager.toggleConfig(candleDuration=candleDuration,clearCache=False)
         # We also need to load the intraday data to be able to calculate intraday RSI
@@ -2062,7 +2062,7 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                         exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
                         userDownloadOption = menuOption
                 )
-        resetConfigToDefault()
+        configManager.toggleConfig(candleDuration=prevDuration, clearCache=False)
     loadedStockData = True
     return stockDictPrimary, stockDictSecondary
 
@@ -2514,6 +2514,7 @@ def printNotifySaveScreenedResults(
 ):
     global userPassedArgs, elapsed_time, media_group_dict, saved_screen_results
     diff_from_prev_scan = None
+    criteria_dateTime = None
     if userPassedArgs.monitor is not None:
         return
     if saved_screen_results is not None and show_saved_diff_results:
