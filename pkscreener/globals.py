@@ -77,6 +77,9 @@ from pkscreener.classes.MenuOptions import (
     level2_X_MenuDict,
     level3_X_ChartPattern_MenuDict,
     level3_X_PopularStocks_MenuDict,
+    level3_X_PotentialProfitable_MenuDict,
+    PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT,
+    PRICE_CROSS_SMA_EMA_TYPE_MENUDICT,
     level3_X_Reversal_MenuDict,
     level4_X_Lorenzian_MenuDict,
     level4_X_ChartPattern_Confluence_MenuDict,
@@ -1466,6 +1469,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             return None, None
         else:
             selectedChoice["3"] = str(maLength)
+
     if executeOption == 30:
         if userPassedArgs.options is None:
             Utility.tools.clearScreen(forceTop=True)
@@ -1479,6 +1483,24 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         # Ensure we have the template JSONs from vectorBt
         screener.shouldLog = userPassedArgs.log
         screener.computeBuySellSignals(None)
+
+    if executeOption == 33:
+        selectedMenu = m2.find(str(executeOption))
+        if len(options) >= 4:
+            if str(options[3]).isnumeric():
+                maLength = int(options[3])
+            elif str(options[3]).upper() == "D":
+                maLength = 2
+            else:
+                maLength = 2
+        elif len(options) >= 3:
+            maLength = 2 # By default Bullish PDO/PDC
+        else:
+            maLength = Utility.tools.promptSubMenuOptions(selectedMenu, defaultOption="2")
+        if maLength == 0:
+            return None, None
+        else:
+            selectedChoice["3"] = str(maLength)
     if executeOption == 34:
         if userPassedArgs.options is None:
             configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
@@ -2195,15 +2217,17 @@ def showSortedBacktestData(backtest_df, summary_df, sortKeys):
         sorting = False
     return sorting
 
-def resetConfigToDefault():
+def resetConfigToDefault(force=False):
     global userPassedArgs
-    isIntraday = userPassedArgs is not None and userPassedArgs.intraday is not None
-    if configManager.isIntradayConfig() or isIntraday:
-        configManager.toggleConfig(candleDuration="1d", clearCache=False)
+    # isIntraday = userPassedArgs is not None and userPassedArgs.intraday is not None
+    # if configManager.isIntradayConfig() or isIntraday:
+    #     configManager.toggleConfig(candleDuration="1d", clearCache=False)
     if userPassedArgs is not None and userPassedArgs.monitor is None:
         if "PKDevTools_Default_Log_Level" in os.environ.keys():
             if userPassedArgs is None or (userPassedArgs is not None and userPassedArgs.options is not None and "|" not in userPassedArgs.options):
                 del os.environ['PKDevTools_Default_Log_Level']
+        configManager.logsEnabled = False
+    if force:
         configManager.logsEnabled = False
     configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
 
@@ -2397,6 +2421,21 @@ def updateMenuChoiceHierarchy():
                 menuChoiceHierarchy
                 + f'>{level3_X_PopularStocks_MenuDict[selectedChoice["3"]].strip()}'
             )
+        elif selectedChoice["2"] == "33":
+            menuChoiceHierarchy = (
+                menuChoiceHierarchy
+                + f'>{level3_X_PotentialProfitable_MenuDict[selectedChoice["3"]].strip()}'
+            )
+        elif selectedChoice["2"] == "40":
+            menuChoiceHierarchy = (
+                menuChoiceHierarchy
+                + f'>{PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT[selectedChoice["3"]].strip()}'
+            )
+            menuChoiceHierarchy = (
+                menuChoiceHierarchy
+                + f'>{PRICE_CROSS_SMA_EMA_TYPE_MENUDICT[selectedChoice["4"]].strip()}'
+            )
+            
         intraday = "(Intraday)" if ("Intraday" not in menuChoiceHierarchy and (userPassedArgs is not None and userPassedArgs.intraday) or configManager.isIntradayConfig()) else ""
         menuChoiceHierarchy = f"{menuChoiceHierarchy}{intraday}"
         global nValueForMenu

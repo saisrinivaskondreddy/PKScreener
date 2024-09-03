@@ -1326,15 +1326,18 @@ class ScreeningStatistics:
         crossOver = 0
         
         # Loop until we've found the nth crossover for MACD or we've reached the last point in time
-        while (crossOver < nthCrossover and index >=0):
-            if diff_df["diff"][index-1] < 0: # Signal line has not crossed yet and is below the zero line
-                while((diff_df["diff"][index-1] < 0 and index >=0)): # and diff_df.index <= brokerSqrOfftime): # or diff_df["rsi"][index-1] <= minRSI):
-                    # Loop while Signal line has not crossed yet and is below the zero line and we've not reached the last point
-                    index -= 1
-            else:
-                while((diff_df["diff"][index-1] >= 0 and index >=0)): # and diff_df.index <= brokerSqrOfftime): # or diff_df["rsi"][index-1] <= minRSI):
-                    # Loop until signal line has not crossed yet and is above the zero line
-                    index -= 1
+        while (crossOver < nthCrossover and index > 0):
+            try:
+                if diff_df["diff"][index-1] < 0: # Signal line has not crossed yet and is below the zero line
+                    while((diff_df["diff"][index-1] < 0 and index >=0)): # and diff_df.index <= brokerSqrOfftime): # or diff_df["rsi"][index-1] <= minRSI):
+                        # Loop while Signal line has not crossed yet and is below the zero line and we've not reached the last point
+                        index -= 1
+                else:
+                    while((diff_df["diff"][index-1] >= 0 and index >=0)): # and diff_df.index <= brokerSqrOfftime): # or diff_df["rsi"][index-1] <= minRSI):
+                        # Loop until signal line has not crossed yet and is above the zero line
+                        index -= 1
+            except:
+                continue
             crossOver += 1
         ts = diff_df.tail(len(diff_df)-index +1).head(1).index[-1]
         return ts, data[data.index == ts] #df.head(len(df) -index +1).tail(1)
@@ -2698,13 +2701,28 @@ class ScreeningStatistics:
                 (confFilter == 2 and isDeadCrossOver)
         return False
 
+    def findPotentialProfitableEntriesBullishTodayForPDOPDC(self, df, saveDict, screenDict):
+        if df is None or len(df) == 0:
+            return False
+        data = df.copy()
+        reversedData = data[::-1]  # Reverse the dataframe
+        recentClose = reversedData["Close"].tail(1).head(1).iloc[0]
+        yesterdayClose = reversedData["Close"].tail(2).head(1).iloc[0]
+        recentOpen = reversedData["Open"].tail(1).head(1).iloc[0]
+        yesterdayOpen = reversedData["Open"].tail(2).head(1).iloc[0]
+        recentVol = reversedData["Volume"].tail(1).head(1).iloc[0]
+        # Daily open > 1 day ago open &
+        # Daily Close > 1 day ago close &
+        # Volume > 1000000
+        return recentOpen > yesterdayOpen and recentClose > yesterdayClose and recentVol >= 1000000
+    
     # - 200 MA is rising for at least 3 months.
     # - 50 MA is above 200MA
     # - Current price is above 20Osma and preferably above 50 to 100
     # - Current price is at least above 100 % from 52week low
     # - The stock should have made a 52 week high at least once every 4 to 6 month
-    def findPotentialProfitableEntries(self, df, full_df, saveDict, screenDict):
-        if df is None or len(df) == 0:
+    def findPotentialProfitableEntriesFrequentHighsBullishMAs(self, df, full_df, saveDict, screenDict):
+        if df is None or len(df) == 0 or full_df is None or len(full_df) == 0:
             return False
         data = full_df.copy()
         one_week = 5

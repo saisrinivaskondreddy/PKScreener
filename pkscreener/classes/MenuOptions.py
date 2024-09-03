@@ -114,8 +114,8 @@ LEVEL_1_DATA_DOWNLOADS = {
     "S": "NSE Symbols with Sector/Industry Details",
     "M": "Back to the Top/Main menu",
 }
-PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27","28","29"]
-PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27","28","29"]
+PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27","28","29","30","31"]
+PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27","28","29","30","31"]
 PREDEFINED_SCAN_MENU_TEXTS = [
     "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",  # 1
     "Volume Scanners | High Momentum | ATR Cross",                          # 2
@@ -146,6 +146,8 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "BullCross-VWAP | Super-Confluence                                  ",  # 27
     "VCP | Volume-Breakout                                              ",  # 28
     "VCP | Volume-Breakout | Price Breakout                             ",  # 29
+    "VCP | Super-Confluence                                             ",  # 30
+    "Bullish Today x PDO/PDC | VCP                                      ",  # 31
 ]
 level2_P_MenuDict = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:
@@ -183,6 +185,8 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:7:3:0.008:4:>|X:12:7:9:7:>|X:0:7:3:0.008:4:'", # 27
     "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:9:2.5:'",                  # 28
     "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:9:2.5:>|X:0:27:'",         # 29
+    "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:7:3:0.008:4:'",            # 30
+    "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:7:4:'",                   # 31
 ]
 PREDEFINED_PIPED_MENU_OPTIONS = []
 for option in PREDEFINED_SCAN_MENU_VALUES:
@@ -200,6 +204,7 @@ level1_T_MenuDict = {
     "L": "Long Term",
     "S": "Short Term (Intraday)",
     "B": "Quick Backtest for N-days/candles ago",
+
     "M": "Back to the Top/Main menu",
 }
 # Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
@@ -210,6 +215,7 @@ level2_T_MenuDict_L = {
     "3": "Monthly (1y, 1mo)",
     "4": "Hourly (1y, 1h)",
     "5": "Custom",
+
     "M": "Back to the Top/Main menu",
 }
 level2_T_MenuDict_S = {
@@ -218,10 +224,12 @@ level2_T_MenuDict_S = {
     "3": "15m (1d, 15m)",
     "4": "30m (1d, 30m)",
     "5": "Custom",
+
     "M": "Back to the Top/Main menu",
 }
 level1_S_MenuDict = {
     "S": "Summary",
+
     "M": "Back to the Top/Main menu",
     "Z": "Exit (Ctrl + C)",
 }
@@ -240,6 +248,7 @@ INDICES_MAP = {
     "12": "Nifty (All Stocks)",
     "14": "F&O Stocks Only", #Discontinued:  https://nsearchives.nseindia.com/content/circulars/FAOP61157.pdf
     "15": "NASDAQ",
+
     "M": "Back to the Top/Main menu",
 }
 level1_X_MenuDict = {
@@ -263,6 +272,7 @@ level1_X_MenuDict = {
     "13": "Newly Listed (IPOs in last 1 Year)           ",
     "14": "F&O Stocks Only", #Discontinued:  https://nsearchives.nseindia.com/content/circulars/FAOP61157.pdf
     "15": "NASDAQ",
+
     "M": "Back to the Top/Main menu",
     "Z": "Exit (Ctrl + C)",
 }
@@ -309,6 +319,7 @@ level2_X_MenuDict = {
     "39": "IPO-Lifetime First day bullish break     ",
     "40": "Price Action                             ",
     "50": "Show Last Screened Results               ",
+
     "M": "Back to the Top/Main menu                 ",
     "Z": "Exit (Ctrl + C)                           ",
 }
@@ -326,8 +337,16 @@ level3_X_Reversal_MenuDict = {
     "8": "PSAR and RSI reversal",
     "9": "Rising RSI",
     "10": "RSI MA Reversal",
+
     "0": "Cancel",
 }
+level3_X_PotentialProfitable_MenuDict = {
+    "1": "Frequent highs with bullish MAs",
+    "2": "Bullish Today for Previous Day Open/Close (PDO/PDC) with 1M Volume",
+
+    "0": "Cancel",
+}
+
 level3_X_ChartPattern_MenuDict = {
     "1": "Bullish Inside Bar (Flag) Pattern",
     "2": "Bearish Inside Bar (Flag) Pattern(Sell)",
@@ -338,6 +357,7 @@ level3_X_ChartPattern_MenuDict = {
     "7": "Candle-stick Patterns",
     "8": "VCP (Mark Minervini)",
     "9": "Moving Average Signals",
+
     "0": "Cancel",
 }
 
@@ -349,6 +369,7 @@ level4_X_ChartPattern_MASignalMenuDict = {
     "5": "BullCross MA",
     "6": "MA-Resist",
     "7": "BullCross VWAP",
+
     "0": "Cancel",
 }
 
@@ -357,6 +378,7 @@ level4_X_ChartPattern_BBands_SQZ_MenuDict = {
     "2": "TTM In-Squeeze",
     "3": "TTM Squeeze-Sell",
     "4": "All/Any",
+
     "0": "Cancel",
 }
 
@@ -365,6 +387,7 @@ level4_X_ChartPattern_Confluence_MenuDict = {
     "2": "Confluence Down / DeadCrossOver",
     "3": "Any/All (Confluence up/down/Crossovers)",
     "4": "8,21,55-EMA / 200-SMA Super-Confluence (BTST-Buy at close, Sell early next day)",
+
     "0": "Cancel",
 }
 
@@ -378,6 +401,7 @@ level3_X_PopularStocks_MenuDict = {
     "7": "MF/FIIs Net Ownership Decreased",
     "8": "Fair Value Buy Opportunities",
     "9": "Fair Value Sell Opportunities",
+
     "0": "Cancel",
 }
 
@@ -385,6 +409,7 @@ level3_X_StockPerformance_MenuDict = {
     "1": "Short term",
     "2": "Medium term",
     "3": "Long term",
+
     "0": "Cancel",
 }
 
@@ -392,23 +417,27 @@ level4_X_Lorenzian_MenuDict = {
     "1": "Buy",
     "2": "Sell",
     "3": "Any/All",
+
     "0": "Cancel",
 }
 Pin_MenuDict = {
     "1": "Pin this scan category or piped scan {0}",
     "2": "Pin these {0} stocks in the scan results (Just keep tracking only these {0} stocks)",
+
     "M": "Back to the Top/Main menu",
 }
 
 PRICE_CROSS_SMA_EMA_TYPE_MENUDICT = {
     "1": "SMA",
     "2": "EMA",
+
     "0": "Cancel"
 }
 
 PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT = {
     "1": "Crosses From Above",
     "2": "Crosses From Below",
+
     "0": "Cancel"
 }
 
@@ -609,8 +638,15 @@ class menus:
     def renderForMenu(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
         if selectedMenu is None and self.level == 0:
             # Top level Application Main menu
-            return self.renderMenuFromDictionary(dict=level0MenuDict,exceptionKeys=["X", "T", "E", "U", "Z", "L", "D"],coloredValues=(["P"] if not asList else []),
-                                                 defaultMenu="P",skip=skip, asList=asList, renderStyle=renderStyle, parent=selectedMenu,checkUpdate=True)
+            return self.renderMenuFromDictionary(dict=level0MenuDict,
+                                                 exceptionKeys=["X", "T", "E", "U", "Z", "L", "D"],
+                                                 coloredValues=(["P"] if not asList else []),
+                                                 defaultMenu="P",
+                                                 skip=skip, 
+                                                 asList=asList, 
+                                                 renderStyle=renderStyle, 
+                                                 parent=selectedMenu,
+                                                 checkUpdate=True)
         elif selectedMenu is not None:
             if selectedMenu.menuKey == "S" and selectedMenu.level == 0:
                     return self.renderLevel1_S_Menus(
@@ -740,8 +776,18 @@ class menus:
                         renderStyle=renderStyle,
                         parent=selectedMenu,
                     )
+                elif selectedMenu.menuKey in ["33"]:
+                    return self.renderMenuFromDictionary(dict=level3_X_PotentialProfitable_MenuDict,
+                                                         exceptionKeys=["0"],
+                                                         coloredValues=["2"],
+                                                         defaultMenu="2", 
+                                                         parent=selectedMenu)
                 elif selectedMenu.menuKey in ["40"]:
-                    return self.renderMenuFromDictionary(dict=PRICE_CROSS_SMA_EMA_TYPE_MENUDICT,exceptionKeys=["0"],coloredValues=["2"],defaultMenu="2", parent=selectedMenu)
+                    return self.renderMenuFromDictionary(dict=PRICE_CROSS_SMA_EMA_TYPE_MENUDICT,
+                                                         exceptionKeys=["0"],
+                                                         coloredValues=["2"],
+                                                         defaultMenu="2", 
+                                                         parent=selectedMenu)
             elif selectedMenu.level == 3:
                 self.level = 4
                 # next levelsub-menu of the selected sub-menu

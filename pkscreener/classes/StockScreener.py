@@ -732,7 +732,7 @@ class StockScreener:
                 )
         return None
 
-    def performValidityCheckForExecuteOptions(self,executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,buySellAll=3,intraday_data=None):
+    def performValidityCheckForExecuteOptions(self,executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,subMenuOption=3,intraday_data=None):
         isValid = True
         if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39]:
             return True
@@ -775,13 +775,16 @@ class StockScreener:
         elif executeOption == 28:
             isValid = screener.findHigherBullishOpens(processedData)
         elif executeOption == 30: # findBuySellSignalsFromATRTrailing # findATRTrailingStops
-            isValid = screener.findATRTrailingStops(fullData,sensitivity=configManager.atrTrailingStopSensitivity, atr_period=configManager.atrTrailingStopPeriod,ema_period=configManager.atrTrailingStopEMAPeriod,buySellAll=buySellAll,saveDict=saveDictionary,screenDict=screeningDictionary)
+            isValid = screener.findATRTrailingStops(fullData,sensitivity=configManager.atrTrailingStopSensitivity, atr_period=configManager.atrTrailingStopPeriod,ema_period=configManager.atrTrailingStopEMAPeriod,buySellAll=subMenuOption,saveDict=saveDictionary,screenDict=screeningDictionary)
         elif executeOption == 31: # findBuySellSignalsFromATRTrailing # findATRTrailingStops
             isValid = screener.findHighMomentum(processedData)
         elif executeOption == 32: # findIntradayOpenSetup
-            isValid = screener.findIntradayOpenSetup(processedData,intraday_data,saveDictionary,screeningDictionary,buySellAll=buySellAll)
-        elif executeOption == 33: # findPotentialProfitableEntries
-            isValid = screener.findPotentialProfitableEntries(processedData,fullData, saveDictionary,screeningDictionary)
+            isValid = screener.findIntradayOpenSetup(processedData,intraday_data,saveDictionary,screeningDictionary,buySellAll=subMenuOption)
+        elif executeOption == 33:
+            if subMenuOption == 1:
+                isValid = screener.findPotentialProfitableEntriesFrequentHighsBullishMAs(processedData,fullData, saveDictionary,screeningDictionary)
+            elif subMenuOption == 2:
+                isValid = screener.findPotentialProfitableEntriesBullishTodayForPDOPDC(processedData,saveDictionary,screeningDictionary)
         elif executeOption == 34: # findBullishAVWAP
             isValid = screener.findBullishAVWAP(fullData,screeningDictionary,saveDictionary)
         elif executeOption == 35: # findPerfectShortSellsFutures
