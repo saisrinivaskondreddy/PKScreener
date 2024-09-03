@@ -87,6 +87,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.vcpRangePercentageFromTop = 60
         self.vcpLegsToCheckForConsolidation = 3
         self.enableAdditionalVCPFilters = True
+        self.enableUsageAnalytics = False
         # This determines how many days apart the backtest calculations are run.
         # For example, for weekly backtest calculations, set this to 5 (5 days = 1 week)
         # For fortnightly, set this to 10 and so on (10 trading sessions = 2 weeks)
@@ -183,6 +184,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "duration", self.duration)
             parser.set("config", "enableAdditionalVCPFilters", "y" if (self.enableAdditionalVCPFilters) else "n")
             parser.set("config", "enablePortfolioCalculations", "y" if self.enablePortfolioCalculations else "n")
+            parser.set("config", "enableUsageAnalytics", "y" if self.enableUsageAnalytics else "n")
             parser.set("config", "generalTimeout", str(self.generalTimeout))
             parser.set("config", "logsEnabled", "y" if (self.logsEnabled or "PKDevTools_Default_Log_Level" in os.environ.keys()) else "n")
             parser.set("config", "longTimeout", str(self.longTimeout))
@@ -397,6 +399,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
                         f"[+] Enable additional VCP filters like range and consolidation? [Y/N, Current: {colorText.FAIL}{'y' if self.enableAdditionalVCPFilters else 'n'}{colorText.END}]: "
                     ) or ('y' if self.enableAdditionalVCPFilters else 'n')
                 ).lower()
+                self.enableUsageAnalytics = str(
+                    input(
+                        f"[+] Enable usage analytics to be captured? [Y/N, Current: {colorText.FAIL}{'y' if self.enableUsageAnalytics else 'n'}{colorText.END}]: "
+                    ) or ('y' if self.enableUsageAnalytics else 'n')
+                ).lower()
                 self.superConfluenceEMAPeriods = input(
                     f"[+] Comma separated EMA periods for super-confluence-checks. (numbers)({colorText.GREEN}Optimal = 8,21,55{colorText.END}, Current: {colorText.FAIL}{self.superConfluenceEMAPeriods}{colorText.END}): "
                 ) or self.superConfluenceEMAPeriods
@@ -434,6 +441,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "duration", str(self.duration + endDuration))
                 parser.set("config", "enableAdditionalVCPFilters", str(self.enableAdditionalVCPFilters))
                 parser.set("config", "enablePortfolioCalculations", str(self.enablePortfolioCalculations))
+                parser.set("config", "enableUsageAnalytics", str(self.enableUsageAnalytics))
                 parser.set("config", "generalTimeout", str(self.generalTimeout))
                 parser.set("config", "logsEnabled", str(self.logsEnabledPrompt))
                 parser.set("config", "longTimeout", str(self.longTimeout))
@@ -593,6 +601,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.enableAdditionalVCPFilters = (
                     False
                     if "y" not in str(parser.get("config", "enableAdditionalVCPFilters")).lower()
+                    else True
+                )
+                self.enableUsageAnalytics = (
+                    False
+                    if "y" not in str(parser.get("config", "enableUsageAnalytics")).lower()
                     else True
                 )
                 self.longTimeout = float(parser.get("config", "longTimeout"))

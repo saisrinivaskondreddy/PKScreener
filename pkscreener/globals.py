@@ -1927,7 +1927,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if len(monitorOption) == 0:
                 for choice in selectedChoice.keys():
                     monitorOption = (f"{monitorOption}:" if len(monitorOption) > 0  else '') + f"{selectedChoice[choice]}"
-            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results)])
+            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results),monitorOption])
             pinOption = input(
                     colorText.BOLD + colorText.FAIL + "[+] Select option: "
                 ) or 'M'
@@ -1944,6 +1944,42 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with pinned scan option. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -m {scannerOptionQuoted}{colorText.END}")
                 sleep(2)
                 os.system(f"{launcher} -a Y -m {scannerOptionQuoted}")
+            elif pinOption in ["3","4"]:
+                from pkscreener.classes.keys import getKeyBoardArrowInput
+                message = f"\n[+] {colorText.FAIL}Please use {colorText.END}{colorText.GREEN}Left / Right arrow keys{colorText.END} to slide (go back / forward) the {colorText.WARN}time-window by every {configManager.duration}{colorText.END} !"
+                direction = getKeyBoardArrowInput(message=message)
+                if direction is not None:
+                    if direction == "LEFT":
+                        if configManager.duration.endswith("m"):
+                            userPassedArgs.intraday = configManager.duration
+                        if userPassedArgs.backtestdaysago is not None:
+                            userPassedArgs.backtestdaysago += 1
+                        else:
+                            userPassedArgs.backtestdaysago = 1
+                        waitMessage = f"\n[+] {colorText.GREEN}Please wait ...Trying to go back by {configManager.duration}{colorText.END} !"
+                        OutputControls().printOutput(waitMessage)
+                        sleep(2)
+                        return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
+                    elif direction == "RIGHT":
+                        if userPassedArgs.backtestdaysago is not None:
+                            userPassedArgs.backtestdaysago -= 1
+                            if userPassedArgs.backtestdaysago < 0:
+                                userPassedArgs.backtestdaysago = 0
+                                waitMessage = f"\n[+] {colorText.FAIL}Already at the present time-window. Cannot go forward by {configManager.duration}{colorText.END} !"
+                            else:
+                                waitMessage = f"\n[+] {colorText.GREEN}Please wait ...Trying to go forward by {configManager.duration}{colorText.END} !"
+                            OutputControls().printOutput(waitMessage)
+                            sleep(2)
+                            return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
+                        else:
+                            waitMessage = f"\n[+] {colorText.FAIL}Already at the present time-window. Cannot go forward by {configManager.duration}{colorText.END} !"
+                            OutputControls().printOutput(waitMessage)
+                            sleep(2)
+                    else:
+                        OutputControls().printOutput(message)
+                        sleep(4)
+
+                    return None, None
 
     if userPassedArgs is not None:
         existingTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs.pipedtitle is not None else ""
@@ -2006,7 +2042,7 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                     userDownloadOption = menuOption
             )
     if menuOption not in ["C"] and (userPassedArgs.monitor is not None or "|" in userPassedArgs.options) :#not configManager.isIntradayConfig() and configManager.calculatersiintraday:
-        candleDuration = (userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else "1m")
+        candleDuration = (userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else ("1m" if configManager.duration.endswith("d") else configManager.duration))
         configManager.toggleConfig(candleDuration=candleDuration,clearCache=False)
         # We also need to load the intraday data to be able to calculate intraday RSI
         stockDictSecondary = Utility.tools.loadStockData(
@@ -2139,6 +2175,8 @@ def addOrRunPipedMenus():
         return None, None
 
 def describeUser():
+    if not configManager.enableUsageAnalytics:
+        return
     from pkscreener.classes.PKAnalytics import PKAnalyticsService
     service = PKAnalyticsService()
     func_args = None

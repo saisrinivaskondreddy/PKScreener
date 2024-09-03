@@ -423,6 +423,8 @@ level4_X_Lorenzian_MenuDict = {
 Pin_MenuDict = {
     "1": "Pin this scan category or piped scan {0}",
     "2": "Pin these {0} stocks in the scan results (Just keep tracking only these {0} stocks)",
+    "3": "Use Sliding-Window-Timeframe to run this scan category or piped scan {0}",
+    # "4": "Use Sliding-Window-Timeframe to just keep track of only these {0} stocks",
 
     "M": "Back to the Top/Main menu",
 }

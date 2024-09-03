@@ -141,7 +141,7 @@ import click
 # if __name__ == '__main__':
 #     main()
 
-def getKeyBoardArrowInput(message="Use Left / Right arrow keys to slide (going back / forward) the window over the timeframes!"):
+def getKeyBoardArrowInput(message="Use Left / Right arrow keys to slide (going back / forward) the time-window!"):
     printable = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
     direction = None
     click.echo(message, nl=True)
