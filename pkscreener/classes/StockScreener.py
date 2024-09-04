@@ -846,13 +846,15 @@ class StockScreener:
             'High':'max',
             'Low':'min',
             'Close':'last',
+            'Adj Close': 'last',
             'Volume':'sum'
         }
         # final_df = df.resample('W-FRI', closed='left').agg(ohlc_dict).shift('1d')
         # weeklyData = data.resample('W').agg(ohlc_dict)
-        candleDuration = self.configManager.duration[:-1]
-        durationFrequency = "T" if self.configManager.duration.endswith("m") else ("H" if self.configManager.duration.endswith("h") else ("M" if self.configManager.duration.endswith("mo") else ("W" if self.configManager.duration.endswith("wk") else "T")))
-        if int(candleDuration) >= 1 and (self.configManager.duration.endswith("m") or self.configManager.duration.endswith("h") or self.configManager.duration.endswith("mo") or self.configManager.duration.endswith("wk")):
+        candleDuration = self.configManager.duration[:1]
+        candleDurationFrequency = self.configManager.duration[1:]
+        durationFrequency = "T" if candleDurationFrequency=="m" else ("H" if candleDurationFrequency=="h" else ("M" if candleDurationFrequency=="mo" else ("W" if candleDurationFrequency=="wk" else "T")))
+        if int(candleDuration) >= 1 and (candleDurationFrequency in ["m","h","mo","wk"]):
             data = data.resample(f'{candleDuration}{durationFrequency}', offset='15min').agg(ohlc_dict)
         if backtestDuration == 0:
             fullData, processedData = screener.preprocessData(

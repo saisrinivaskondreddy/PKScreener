@@ -93,14 +93,17 @@ class ScreeningStatistics:
     def calc_relative_strength(self,df:pd.DataFrame):
         if df is None or len(df) <= 1:
             return -1
-        
+        closeColumn = 'Adj Close'
+        if closeColumn not in df.columns:
+            closeColumn = 'Close'
+
         with pd.option_context('mode.chained_assignment', None):
             df.sort_index(inplace=True)
             ## relative gain and losses
-            df['close_shift'] = df['Adj Close'].shift(1)
+            df['close_shift'] = df[closeColumn].shift(1)
             ## Gains (true) and Losses (False)
-            df['gains'] = df.apply(lambda x: x['Adj Close'] if x['Adj Close'] >= x['close_shift'] else 0, axis=1)
-            df['loss'] = df.apply(lambda x: x['Adj Close'] if x['Adj Close'] <= x['close_shift'] else 0, axis=1)
+            df['gains'] = df.apply(lambda x: x[closeColumn] if x[closeColumn] >= x['close_shift'] else 0, axis=1)
+            df['loss'] = df.apply(lambda x: x[closeColumn] if x[closeColumn] <= x['close_shift'] else 0, axis=1)
 
         avg_gain = df['gains'].mean()
         avg_losses = df['loss'].mean()
@@ -1624,6 +1627,8 @@ class ScreeningStatistics:
     
     # Relative volatality measure
     def findRVM(self, df=None,screenDict={}, saveDict={}):
+        if df is None or len(df) == 0 or len(df) < 144:
+            return 0
         # RVM over the lookback period of 15 periods
         rvm = pktalib.RVM(df["High"],df["Low"],df["Close"],15)
         screenDict["RVM(15)"] = rvm
