@@ -271,7 +271,7 @@ jobs:
       shell: bash
       continue-on-error: true
       run: |
-        python3 .github/workflows/workflowtriggers.py -f --misc
+        python3 .github/workflows/workflowtriggers.py -f --misc --user "-1002097332564"
       env:
         GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
 
