@@ -2839,7 +2839,8 @@ class ScreeningStatistics:
                     index += 1
         
         # Return the first requested number of legs in the order of leg1, leg2, leg3 etc.
-        return True, consolidationPercentages[:relativeLegsTocheck], devScore
+        conditionMet = len(consolidationPercentages[:relativeLegsTocheck]) > 0
+        return conditionMet, consolidationPercentages[:relativeLegsTocheck], devScore
 
     # validate if the stock has been having higher highs, higher lows
     # and higher close with latest close > supertrend and 8-EMA.

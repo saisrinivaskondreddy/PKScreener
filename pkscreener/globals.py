@@ -435,8 +435,14 @@ def handleSecondaryMenuChoices(
                     configManager.period = periodDurations[0]
                     configManager.duration = periodDurations[1]
                     configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
+                    configManager.deleteFileWithPattern(pattern="*stock_data_*.pkl*")
+                    input(colorText.FAIL+ "[+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
+                    sys.exit(0)
                 elif durationOption.upper() in ["5"]:
                     configManager.setConfig(ConfigManager.parser, default=False, showFileCreatedText=True)
+                    configManager.deleteFileWithPattern(pattern="*stock_data_*.pkl*")
+                    input(colorText.FAIL+ "[+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
+                    sys.exit(0)
                 return
             elif periodOption.upper() in ["B"]:
                 lastTradingDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(n=(22 if configManager.period == '1y' else 15))

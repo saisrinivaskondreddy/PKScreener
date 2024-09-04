@@ -849,10 +849,11 @@ class StockScreener:
             'Adj Close': 'last',
             'Volume':'sum'
         }
-        # final_df = df.resample('W-FRI', closed='left').agg(ohlc_dict).shift('1d')
-        # weeklyData = data.resample('W').agg(ohlc_dict)
-        candleDuration = self.configManager.duration[:1]
-        candleDurationFrequency = self.configManager.duration[1:]
+        import re
+        temp = re.compile("([0-9]+)([a-zA-Z]+)")
+        res = temp.match(self.configManager.duration).groups()
+        candleDuration = res[0]
+        candleDurationFrequency = res[1]
         durationFrequency = "T" if candleDurationFrequency=="m" else ("H" if candleDurationFrequency=="h" else ("M" if candleDurationFrequency=="mo" else ("W" if candleDurationFrequency=="wk" else "T")))
         if int(candleDuration) >= 1 and (candleDurationFrequency in ["m","h","mo","wk"]):
             data = data.resample(f'{candleDuration}{durationFrequency}', offset='15min').agg(ohlc_dict)
