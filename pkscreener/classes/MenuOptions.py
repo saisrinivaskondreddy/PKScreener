@@ -211,18 +211,18 @@ level1_T_MenuDict = {
 # Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo
 level2_T_MenuDict_L = {
     "1": "Daily (1y, 1d)",
-    "2": "Weekly (1y, 1wk)",
-    "3": "Monthly (1y, 1mo)",
-    "4": "Hourly (1y, 1h)",
+    "2": "Weekly (5y, 1wk)",
+    "3": "Monthly (max, 1mo)",
+    "4": "Hourly (3mo, 1h)",
     "5": "Custom",
 
     "M": "Back to the Top/Main menu",
 }
 level2_T_MenuDict_S = {
     "1": "1m (1d, 1m)",
-    "2": "5m (1d, 5m)",
-    "3": "15m (1d, 15m)",
-    "4": "30m (1d, 30m)",
+    "2": "5m (2d, 5m)",
+    "3": "15m (1mo, 15m)",
+    "4": "30m (1mo, 30m)",
     "5": "Custom",
 
     "M": "Back to the Top/Main menu",

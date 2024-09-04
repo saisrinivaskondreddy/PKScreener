@@ -36,7 +36,7 @@ import sys
 import time
 import urllib
 import warnings
-from datetime import datetime
+from datetime import datetime, UTC
 from time import sleep
 
 import numpy as np
@@ -3153,7 +3153,10 @@ def runScanners(
             criteria_dateTime = result[2].copy().index[-1-int(userPassedArgs.backtestdaysago)]
         else:
             criteria_dateTime = result[2].copy().index[-1]
-        criteria_dateTime = PKDateUtilities.utc_to_ist(criteria_dateTime)
+        localtz = datetime.now(UTC).astimezone().tzinfo
+        exchangeTz = PKDateUtilities.currentDateTime().astimezone().tzinfo
+        if localtz != exchangeTz:
+            criteria_dateTime = PKDateUtilities.utc_to_ist(criteria_dateTime,localTz=localtz)
     if result is not None and len(result) >=1 and "Date" not in saveResults.columns:
         temp_df = result[2].copy()
         temp_df.reset_index(inplace=True)
@@ -3274,7 +3277,7 @@ def saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, l
 def saveNotifyResultsFile(
     screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=None
 ):
-    global userPassedArgs, elapsed_time, selectedChoice, media_group_dict
+    global userPassedArgs, elapsed_time, selectedChoice, media_group_dict,criteria_dateTime
     if user is None and userPassedArgs.user is not None:
         user = userPassedArgs.user
     if ">|" in userPassedArgs.options:
@@ -3309,7 +3312,7 @@ def saveNotifyResultsFile(
         )
     if userPassedArgs.monitor is None:
         needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
-        pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0)
+        pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0) if criteria_dateTime is None else criteria_dateTime
         OutputControls().printOutput(
             colorText.GREEN
             + f"[+] Screening Completed. Found {len(screenResults) if screenResults is not None else 0} results in {round(elapsed_time,2)} sec. for {colorText.END}{colorText.FAIL}{pastDate}{colorText.END}{colorText.GREEN}. Queue Wait Time:{int(PKDateUtilities.currentDateTimestamp()-userPassedArgs.triggertimestamp-round(elapsed_time,2))}s! Press Enter to Continue.."
