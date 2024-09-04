@@ -155,7 +155,7 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
                                 widgetHeader = ":".join(cleanedScreenOptions.split(":")[:4])
                                 if "i " in screenOptions:
                                     widgetHeader = f'{":".join(widgetHeader.split(":")[:3])}:i:{cleanedScreenOptions.split("i ")[-1]}'
-                            self.monitor_df.loc[startRowIndex,[f"A{startColIndex+1}"]] = colorText.BOLD+colorText.HEAD+(widgetHeader if startColIndex==firstColIndex else col)+colorText.END
+                            self.monitor_df.loc[startRowIndex,[f"A{startColIndex+1}"]] = colorText.HEAD+(widgetHeader if startColIndex==firstColIndex else col)+colorText.END
                             highlightCols.append(startColIndex)
                         else:
                             self.monitor_df.loc[startRowIndex, [f"A{startColIndex+1}"]] = screen_monitor_df.iloc[rowIndex-1,colIndex]
@@ -171,8 +171,7 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
         # self.monitorNames[screenOptions] = f"(Dashboard) > {chosenMenu}"
         latestScanMenuOption = f"[+] {dbTimestamp} (Dashboard) > " + f"{chosenMenu} [{screenOptions}]"
         OutputControls().printOutput(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + latestScanMenuOption[:200]
             + colorText.END
             , enableMultipleLineOutput=True

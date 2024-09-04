@@ -143,8 +143,7 @@ def test_initPostLevel0Execution_negative():
     with patch("builtins.print") as mock_print:
         initPostLevel0Execution(menuOption, indexOption, executeOption)
         mock_print.assert_called_with(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + "\n[+] Please enter a valid numeric option & Try Again!"
             + colorText.END
         )
@@ -156,8 +155,7 @@ def test_initPostLevel1Execution_negative():
     with patch("builtins.print") as mock_print:
         initPostLevel1Execution(indexOption, executeOption)
         mock_print.assert_called_with(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + "\n[+] Please enter a valid numeric option & Try Again!"
             + colorText.END
         )
@@ -216,8 +214,7 @@ def test_handleScannerExecuteOption4_negative():
         with patch("builtins.input"):
             handleScannerExecuteOption4(executeOption, options)
             mock_print.assert_called_with(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Error: Non-numeric value entered! Please try again!"
                 + colorText.END
             )

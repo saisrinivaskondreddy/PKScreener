@@ -390,24 +390,21 @@ def setupLogger(shouldLog=False, trace=False):
 def warnAboutDependencies():
     if not Imports["talib"]:
         OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] TA-Lib is not installed. Looking for pandas_ta."
                 + colorText.END
             )
         sleep(1)
         if Imports["pandas_ta"]:
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.GREEN
+                colorText.GREEN
                 + "[+] Found and falling back on pandas_ta.\n[+] For full coverage(candle patterns), you may wish to read the README file in PKScreener repo : https://github.com/pkjmesra/PKScreener \n[+] or follow instructions from\n[+] https://github.com/ta-lib/ta-lib-python"
                 + colorText.END
             )
             sleep(1)
         else:
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Neither ta-lib nor pandas_ta was located. You need at least one of them to continue! \n[+] Please follow instructions from README file under PKScreener repo: https://github.com/pkjmesra/PKScreener"
                 + colorText.END
             )
@@ -884,16 +881,14 @@ def pkscreenercli():
             configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
         if args.testbuild and not args.prodbuild:
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Started in TestBuild mode!"
                 + colorText.END
             )
             runApplication()
         elif args.download:
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Download ONLY mode! Stocks will not be screened!"
                 + colorText.END
             )
@@ -963,8 +958,7 @@ def scheduleNextRun():
     sleepUntilNextExecution = not PKDateUtilities.isTradingTime()
     while sleepUntilNextExecution:
         OutputControls().printOutput(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + (
                 "SecondsAfterClosingTime[%d] SecondsBeforeMarketOpen [%d]. Next run at [%s]"
                 % (
@@ -992,7 +986,7 @@ def scheduleNextRun():
     global cron_runs
     if cron_runs > 0:
         OutputControls().printOutput(
-            colorText.BOLD + colorText.GREEN + f'=> Going to fetch again in {int(args.croninterval)} sec. at {(PKDateUtilities.currentDateTime() + datetime.timedelta(seconds=120)).strftime("%Y-%m-%d %H:%M:%S")} IST...' + colorText.END,
+            colorText.GREEN + f'=> Going to fetch again in {int(args.croninterval)} sec. at {(PKDateUtilities.currentDateTime() + datetime.timedelta(seconds=120)).strftime("%Y-%m-%d %H:%M:%S")} IST...' + colorText.END,
             end="\r",
             flush=True,
         )

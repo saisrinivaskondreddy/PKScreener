@@ -1835,7 +1835,7 @@ def test_positive_case_findPotentialBreakout(tools_instance):
     saveDict = {"Breakout": "125.0"}
     assert tools_instance.findPotentialBreakout(df, screenDict, saveDict, daysToLookback) == True
     assert saveDict["Breakout"] == "125.0(Potential)"
-    assert screenDict["Breakout"] == colorText.BOLD + colorText.GREEN + " (Potential)" + colorText.END
+    assert screenDict["Breakout"] == colorText.GREEN + " (Potential)" + colorText.END
 
 def test_negative_case_findPotentialBreakout(tools_instance):
     df = pd.DataFrame({
@@ -2103,7 +2103,7 @@ def test_validateLorentzian_buy_signal(tools_instance):
         result = tools_instance.validateLorentzian(df, screenDict, saveDict, lookFor=1)
         # Assert that the function returns True and sets the appropriate screenDict and saveDict values
         assert result == True
-        assert screenDict["Pattern"] == (colorText.BOLD + colorText.GREEN + "Lorentzian-Buy" + colorText.END)
+        assert screenDict["Pattern"] == (colorText.GREEN + "Lorentzian-Buy" + colorText.END)
         assert saveDict["Pattern"] == "Lorentzian-Buy"
         assert tools_instance.validateLorentzian(df, screenDict, saveDict, lookFor=2) == False
 
@@ -2125,7 +2125,7 @@ def test_validateLorentzian_sell_signal(tools_instance):
         result = tools_instance.validateLorentzian(df, screenDict, saveDict, lookFor=2)
         # Assert that the function returns True and sets the appropriate screenDict and saveDict values
         assert result == True
-        assert screenDict["Pattern"] == (colorText.BOLD + colorText.FAIL + "Lorentzian-Sell" + colorText.END)
+        assert screenDict["Pattern"] == (colorText.FAIL + "Lorentzian-Sell" + colorText.END)
         assert saveDict["Pattern"] == "Lorentzian-Sell"
         assert tools_instance.validateLorentzian(df, screenDict, saveDict, lookFor=1) == False
         mock_lc.df = pd.DataFrame([{"isNewSellSignal":False,"isNewBuySignal":False}])
@@ -2434,7 +2434,7 @@ def test_validateCCI():
     minCCI = 40
     maxCCI = 60
     assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == False
-    assert screenDict['CCI'] == colorText.BOLD + colorText.FAIL + '50' + colorText.END
+    assert screenDict['CCI'] == colorText.FAIL + '50' + colorText.END
 
     # Test case 2: CCI below minCCI and trend is Up
     df = pd.DataFrame({'CCI': [30]})
@@ -2443,7 +2443,7 @@ def test_validateCCI():
     minCCI = 40
     maxCCI = 60
     assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == True
-    assert screenDict['CCI'] == colorText.BOLD + colorText.GREEN + '30' + colorText.END
+    assert screenDict['CCI'] == colorText.GREEN + '30' + colorText.END
 
     # Test case 3: CCI above maxCCI and trend is Up
     df = pd.DataFrame({'CCI': [70]})
@@ -2452,7 +2452,7 @@ def test_validateCCI():
     minCCI = 40
     maxCCI = 60
     assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == True
-    assert screenDict['CCI'] == colorText.BOLD + colorText.GREEN + '70' + colorText.END
+    assert screenDict['CCI'] == colorText.GREEN + '70' + colorText.END
 
     # Test case 4: CCI within specified range and trend is not Up
     df = pd.DataFrame({'CCI': [50]})
@@ -2462,7 +2462,7 @@ def test_validateCCI():
     maxCCI = 60
     saveDict['Trend'] = 'Down'
     assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == False
-    assert screenDict['CCI'] == colorText.BOLD + colorText.FAIL + '50' + colorText.END
+    assert screenDict['CCI'] == colorText.FAIL + '50' + colorText.END
 
     df = pd.DataFrame({'CCI': [70]})
     screenDict = {}
@@ -2470,7 +2470,7 @@ def test_validateCCI():
     minCCI = 40
     maxCCI = 60
     assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == True
-    assert screenDict['CCI'] == colorText.BOLD + colorText.FAIL + '70' + colorText.END
+    assert screenDict['CCI'] == colorText.FAIL + '70' + colorText.END
 
 def test_validateConfluence():
     tool = ScreeningStatistics(None, None)
@@ -2480,7 +2480,7 @@ def test_validateConfluence():
     saveDict = {}
     percentage = 0.1
     assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.BOLD + colorText.GREEN + 'Confluence (5.0%)' + colorText.END
+    assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (5.0%)' + colorText.END
 
     # Test case 2: SMA and LMA are within specified percentage and SMA is less than LMA
     df = pd.DataFrame({'SMA': [50], 'LMA': [45], 'Close': [100]})
@@ -2488,7 +2488,7 @@ def test_validateConfluence():
     saveDict = {}
     percentage = 0.1
     assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.BOLD + colorText.GREEN + 'Confluence (5.0%)' + colorText.END
+    assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (5.0%)' + colorText.END
 
     # Test case 3: SMA and LMA are not within specified percentage
     df = pd.DataFrame({'SMA': [50], 'LMA': [60], 'Close': [100]})
@@ -2503,14 +2503,14 @@ def test_validateConfluence():
     saveDict = {}
     percentage = 0.1
     assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.BOLD + colorText.GREEN + 'Confluence (0.0%)' + colorText.END
+    assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (0.0%)' + colorText.END
 
     df = pd.DataFrame({'SMA': [45], 'LMA': [49], 'Close': [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
     assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.BOLD + colorText.FAIL + 'Confluence (4.0%)' + colorText.END
+    assert screenDict['MA-Signal'] == colorText.FAIL + 'Confluence (4.0%)' + colorText.END
 
 def test_validateConsolidation():
     tool = ScreeningStatistics(None, None)
@@ -2520,7 +2520,7 @@ def test_validateConsolidation():
     saveDict = {}
     percentage = 10
     assert tool.validateConsolidation(df, screenDict, saveDict, percentage) == 5.0
-    assert screenDict['Consol.'] == colorText.BOLD + colorText.GREEN + 'Range:5.0%' + colorText.END
+    assert screenDict['Consol.'] == colorText.GREEN + 'Range:5.0%' + colorText.END
 
     # Test case 2: High and low close prices not within specified percentage
     df = pd.DataFrame({'Close': [100, 80]})
@@ -2528,7 +2528,7 @@ def test_validateConsolidation():
     saveDict = {}
     percentage = 10
     assert tool.validateConsolidation(df, screenDict, saveDict, percentage) == 20.0
-    assert screenDict['Consol.'] == colorText.BOLD + colorText.FAIL + 'Range:20.0%' + colorText.END
+    assert screenDict['Consol.'] == colorText.FAIL + 'Range:20.0%' + colorText.END
 
     # Test case 3: High and low close prices are equal
     df = pd.DataFrame({'Close': [100, 100]})
@@ -2536,7 +2536,7 @@ def test_validateConsolidation():
     saveDict = {}
     percentage = 10
     assert tool.validateConsolidation(df, screenDict, saveDict, percentage) == 0.0
-    assert screenDict['Consol.'] == colorText.BOLD + colorText.FAIL + 'Range:0.0%' + colorText.END
+    assert screenDict['Consol.'] == colorText.FAIL + 'Range:0.0%' + colorText.END
 
 # # Positive test case for validateInsideBar function
 # def test_validateInsideBar_positive():
@@ -3018,5 +3018,5 @@ def test_validateVolumeSpreadAnalysis_spread0_lessthan_spread1(mock_data, mock_s
     mock_data.loc[0, "Volume"] = mock_data.iloc[0]["VolMA"] + 1000
     mock_data.loc[1, "Volume"] = mock_data["Volume"].iloc[0] -1000
     assert tools_instance.validateVolumeSpreadAnalysis(mock_data, mock_screen_dict, mock_save_dict) == True
-    assert mock_screen_dict.get("Pattern") == colorText.BOLD + colorText.GREEN + "Demand Rise" + colorText.END 
+    assert mock_screen_dict.get("Pattern") == colorText.GREEN + "Demand Rise" + colorText.END 
     assert mock_save_dict.get("Pattern") == 'Demand Rise'

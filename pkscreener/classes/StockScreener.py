@@ -1002,8 +1002,7 @@ class StockScreener:
         if printCounter:
             try:
                 OutputControls().printOutput(
-                            colorText.BOLD
-                            + colorText.GREEN
+                            colorText.GREEN
                             + (
                                 "[%d%%] Screened %d, Found %d. Fetching data & Analyzing %s..."
                                 % (
@@ -1020,8 +1019,7 @@ class StockScreener:
                             end="",
                         )
                 OutputControls().printOutput(
-                            colorText.BOLD
-                            + colorText.GREEN
+                            colorText.GREEN
                             + "=> Done!"
                             + colorText.END,
                             end="\r",

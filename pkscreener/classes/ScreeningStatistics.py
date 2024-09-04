@@ -842,14 +842,14 @@ class ScreeningStatistics:
                 action = True
             elif filter not in [3,4]: # Sell/All
                 return False
-            screenDict["Pattern"] = saved[0] + colorText.BOLD + (colorText.GREEN if action else colorText.FAIL) + f"BBands-SQZ-{'Buy' if action else 'Sell'}" + colorText.END
+            screenDict["Pattern"] = saved[0] + (colorText.GREEN if action else colorText.FAIL) + f"BBands-SQZ-{'Buy' if action else 'Sell'}" + colorText.END
             saveDict["Pattern"] = saved[1] + f"TTM-SQZ-{'Buy' if action else 'Sell'}"
             return True
         elif candle3Sqz and candle2Sqz and candle1Sqz:
             # Last 3 candles in squeeze
             if filter not in [2,4]: # SqZ/All
                 return False
-            screenDict["Pattern"] = f'{saved[0]}{colorText.BOLD}{colorText.WARN}TTM-SQZ{colorText.END}'
+            screenDict["Pattern"] = f'{saved[0]}{colorText.WARN}TTM-SQZ{colorText.END}'
             saveDict["Pattern"] = f'{saved[1]}TTM-SQZ'
             return True
         return False
@@ -911,7 +911,7 @@ class ScreeningStatistics:
         if np.isnan(maxClose) or np.isnan(maxHigh):
             saveDict["Breakout"] = "BO: 0 R: 0"
             screenDict["Breakout"] = (
-                colorText.BOLD + colorText.WARN + "BO: 0 R: 0" + colorText.END
+                colorText.WARN + "BO: 0 R: 0" + colorText.END
             )
             # self.default_logger.info(
             #     f'For Stock:{saveDict["Stock"]}, the breakout is unknown because max-high ({maxHigh}) or max-close ({maxClose}) are not defined.'
@@ -922,8 +922,7 @@ class ScreeningStatistics:
                 saveDict["Breakout"] = "BO: " + str(maxClose) + " R: " + str(maxHigh)
                 if recentClose >= maxClose:
                     screenDict["Breakout"] = (
-                        colorText.BOLD
-                        + colorText.GREEN
+                        colorText.GREEN
                         + "BO: "
                         + str(maxClose)
                         + colorText.END
@@ -940,8 +939,7 @@ class ScreeningStatistics:
                 #     f'Stock:{saveDict["Stock"]}, does not have a breakout yet because max-high ({maxHigh}) < max-close ({maxClose})'
                 # )
                 screenDict["Breakout"] = (
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "BO: "
                     + str(maxClose)
                     + colorText.END
@@ -956,8 +954,7 @@ class ScreeningStatistics:
                 saveDict["Breakout"] = "BO: " + str(maxHigh) + " R: 0"
                 if recentClose >= maxHigh:
                     screenDict["Breakout"] = (
-                        colorText.BOLD
-                        + colorText.GREEN
+                        colorText.GREEN
                         + "BO: "
                         + str(maxHigh)
                         + " R: 0"
@@ -971,8 +968,7 @@ class ScreeningStatistics:
                 #     f'Stock:{saveDict["Stock"]}, does not have a breakout yet because recent-close ({recentClose}) < max-high ({maxHigh})'
                 # )
                 screenDict["Breakout"] = (
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "BO: "
                     + str(maxHigh)
                     + " R: 0"
@@ -985,8 +981,7 @@ class ScreeningStatistics:
                 #     f'Stock:{saveDict["Stock"]}, has a breakout because recent-close ({recentClose}) >= max-close ({maxClose})'
                 # )
                 screenDict["Breakout"] = (
-                    colorText.BOLD
-                    + colorText.GREEN
+                    colorText.GREEN
                     + "BO: "
                     + str(maxClose)
                     + colorText.END
@@ -1000,8 +995,7 @@ class ScreeningStatistics:
             #     f'Stock:{saveDict["Stock"]}, does not have a breakout yet because recent-close ({recentClose}) < max-high ({maxHigh})'
             # )
             screenDict["Breakout"] = (
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "BO: "
                 + str(maxClose)
                 + colorText.END
@@ -1018,8 +1012,7 @@ class ScreeningStatistics:
                 #     f'Stock:{saveDict["Stock"]}, has a breakout because recent-close ({recentClose}) >= max-close ({maxClose})'
                 # )
                 screenDict["Breakout"] = (
-                    colorText.BOLD
-                    + colorText.GREEN
+                    colorText.GREEN
                     + "BO: "
                     + str(maxClose)
                     + " R: 0"
@@ -1030,8 +1023,7 @@ class ScreeningStatistics:
             #     f'Stock:{saveDict["Stock"]}, has a breakout because recent-close ({recentClose}) < max-close ({maxClose})'
             # )
             screenDict["Breakout"] = (
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "BO: "
                 + str(maxClose)
                 + " R: 0"
@@ -1449,7 +1441,7 @@ class ScreeningStatistics:
         ):
             saveDict["Breakout"] = saveDict["Breakout"] + "(Potential)"
             screenDict["Breakout"] = screenDict["Breakout"] + (
-                colorText.BOLD + colorText.GREEN + " (Potential)" + colorText.END
+                colorText.GREEN + " (Potential)" + colorText.END
             )
             return True
         return False
@@ -1516,7 +1508,6 @@ class ScreeningStatistics:
             saved = self.findCurrentSavedValue(screenDict,saveDict, "Pattern")
             screenDict["Pattern"] = (
                 saved[0] 
-                + colorText.BOLD
                 + colorText.GREEN
                 + f"PSAR-RSI-Rev"
                 + colorText.END
@@ -1567,7 +1558,6 @@ class ScreeningStatistics:
         if hasReversals:
             screenDict["MA-Signal"] = (
                 saved[0] 
-                + colorText.BOLD
                 + (colorText.GREEN if bullishMAReversal else (colorText.FAIL if bearishMAReversal else colorText.WARN))
                 + f"Reversal-[{','.join(results)}]{'EMA' if (maLength == 9 or self.configManager.useEMA) else 'MA'}"
                 + colorText.END
@@ -1608,11 +1598,11 @@ class ScreeningStatistics:
         maRsi = maRsi[::-1].head(3)
         saved = self.findCurrentSavedValue(screenDict,saveDict,"Trend")
         if lookFor in [1,3] and maRsi.iloc[0] <= data[rsiKey].iloc[0] and maRsi.iloc[1] > data[rsiKey].iloc[1]:
-            screenDict['MA-Signal'] = saved[0] + colorText.BOLD + colorText.GREEN + f'RSI-MA-Buy' + colorText.END
+            screenDict['MA-Signal'] = saved[0] + colorText.GREEN + f'RSI-MA-Buy' + colorText.END
             saveDict['MA-Signal'] = saved[1] + f'RSI-MA-Buy'
             return True if (rsiKey == "RSIi") else (self.findRSICrossingMA(df, screenDict, saveDict,lookFor=lookFor, maLength=maLength, rsiKey="RSIi") or True)
         elif lookFor in [2,3] and maRsi.iloc[0] >= data[rsiKey].iloc[0] and maRsi.iloc[1] < data[rsiKey].iloc[1]:
-            screenDict['MA-Signal'] = saved[0] + colorText.BOLD + colorText.FAIL + f'RSI-MA-Sell' + colorText.END
+            screenDict['MA-Signal'] = saved[0] + colorText.FAIL + f'RSI-MA-Sell' + colorText.END
             saveDict['MA-Signal'] = saved[1] + f'RSI-MA-Sell'
             return True if (rsiKey == "RSIi") else (self.findRSICrossingMA(df, screenDict, saveDict,lookFor=lookFor, maLength=maLength, rsiKey="RSIi") or True)
         return False if (rsiKey == "RSIi") else (self.findRSICrossingMA(df, screenDict, saveDict,lookFor=lookFor, maLength=maLength, rsiKey="RSIi"))
@@ -1698,7 +1688,7 @@ class ScreeningStatistics:
             except np.linalg.LinAlgError as e: # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
                 screenDict["Trend"] = (
-                    saved[0] + colorText.BOLD + colorText.WARN + "Unknown" + colorText.END
+                    saved[0] + colorText.WARN + "Unknown" + colorText.END
                 )
                 saveDict["Trend"] = saved[1] + "Unknown"
                 return saveDict["Trend"]
@@ -1708,38 +1698,38 @@ class ScreeningStatistics:
             angle = np.rad2deg(np.arctan(slope))
             if angle == 0:
                 screenDict["Trend"] = (
-                    saved[0] + colorText.BOLD + colorText.WARN + "Unknown" + colorText.END
+                    saved[0] + colorText.WARN + "Unknown" + colorText.END
                 )
                 saveDict["Trend"] = saved[1] + "Unknown"
             elif angle <= 30 and angle >= -30:
                 screenDict["Trend"] = (
-                    saved[0] + colorText.BOLD + colorText.WARN + "Sideways" + colorText.END
+                    saved[0] + colorText.WARN + "Sideways" + colorText.END
                 )
                 saveDict["Trend"] = saved[1] + "Sideways"
             elif angle >= 30 and angle < 61:
                 screenDict["Trend"] = (
-                    saved[0] + colorText.BOLD + colorText.GREEN + "Weak Up" + colorText.END
+                    saved[0] + colorText.GREEN + "Weak Up" + colorText.END
                 )
                 saveDict["Trend"] = saved[1] + "Weak Up"
             elif angle >= 60:
                 screenDict["Trend"] = (
-                    saved[0] + colorText.BOLD + colorText.GREEN + "Strong Up" + colorText.END
+                    saved[0] + colorText.GREEN + "Strong Up" + colorText.END
                 )
                 saveDict["Trend"] = saved[1] + "Strong Up"
             elif angle <= -30 and angle > -61:
                 screenDict["Trend"] = (
-                    saved[0] + colorText.BOLD + colorText.FAIL + "Weak Down" + colorText.END
+                    saved[0] + colorText.FAIL + "Weak Down" + colorText.END
                 )
                 saveDict["Trend"] = saved[1] + "Weak Down"
             elif angle < -60:
                 screenDict["Trend"] = (
-                    saved[0] + colorText.BOLD + colorText.FAIL + "Strong Down" + colorText.END
+                    saved[0] + colorText.FAIL + "Strong Down" + colorText.END
                 )
                 saveDict["Trend"] = saved[1] + "Strong Down"
         except np.linalg.LinAlgError as e: # pragma: no cover
             self.default_logger.debug(e, exc_info=True)
             screenDict["Trend"] = (
-                saved[0] + colorText.BOLD + colorText.WARN + "Unknown" + colorText.END
+                saved[0] + colorText.WARN + "Unknown" + colorText.END
             )
             saveDict["Trend"] = saved[1] + "Unknown"
         return saveDict["Trend"]
@@ -1786,7 +1776,7 @@ class ScreeningStatistics:
         saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
         if limit_lower < now["Close"].iloc[0] < limit_upper and slope > 0.15:
             screenDict["Pattern"] = (
-                saved[0] + colorText.BOLD + colorText.GREEN + "Trendline-Support" + colorText.END
+                saved[0] + colorText.GREEN + "Trendline-Support" + colorText.END
             )
             saveDict["Pattern"] = saved[1] + "Trendline-Support"
             return True
@@ -2129,27 +2119,22 @@ class ScreeningStatistics:
         if pred > 0.5:
             outText = "BEARISH"
             out = (
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + outText
                 + colorText.END
-                + colorText.BOLD
             )
             sug = "Hold your Short position!"
         else:
             outText = "BULLISH"
             out = (
-                colorText.BOLD
-                + colorText.GREEN
+                colorText.GREEN
                 + outText
                 + colorText.END
-                + colorText.BOLD
             )
             sug = "Stay Bullish!"
         if PKDateUtilities.isClosingHour():
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.WARN
+                colorText.WARN
                 + "Note: The AI prediction should be executed After 3 PM or Near to Closing time as the Prediction Accuracy is based on the Closing price!"
                 + colorText.END
             )
@@ -2158,18 +2143,15 @@ class ScreeningStatistics:
             Utility.tools.getSigmoidConfidence(pred[0])
         )
         OutputControls().printOutput(
-            colorText.BOLD
-            + colorText.BLUE
+            colorText.BLUE
             + "\n"
             + "[+] Nifty AI Prediction -> "
             + colorText.END
-            + colorText.BOLD
             + predictionText
             + colorText.END
         )
         OutputControls().printOutput(
-            colorText.BOLD
-            + colorText.BLUE
+            colorText.BLUE
             + "\n"
             + "[+] Nifty AI Prediction -> "
             + colorText.END
@@ -2269,20 +2251,17 @@ class ScreeningStatistics:
                                             colorText.BLUE
                                             + str(final.index[0])
                                             + colorText.END,
-                                            colorText.BOLD
-                                            + colorText.WARN
+                                            colorText.WARN
                                             + data_list[cnt].split("_")[0].upper()
                                             + colorText.END,
                                             (
-                                                colorText.BOLD
-                                                + colorText.FAIL
+                                                colorText.FAIL
                                                 + data_list[cnt].split("_")[1].upper()
                                                 + colorText.END
                                             )
                                             if "sell" in data_list[cnt]
                                             else (
-                                                colorText.BOLD
-                                                + colorText.GREEN
+                                                colorText.GREEN
                                                 + data_list[cnt].split("_")[1].upper()
                                                 + colorText.END
                                             ),
@@ -2543,7 +2522,7 @@ class ScreeningStatistics:
                     (colorText.BOLD if ("Strong" in saveDict["Trend"]) else "") + colorText.FAIL + str(cci) + colorText.END
                 )
             return True
-        screenDict["CCI"] = colorText.BOLD + colorText.FAIL + str(cci) + colorText.END
+        screenDict["CCI"] = colorText.FAIL + str(cci) + colorText.END
         return False
 
     # Find Conflucence
@@ -2672,7 +2651,6 @@ class ScreeningStatistics:
             if recent[key1].iloc[0] >= recent[key2].iloc[0]:
                 screenDict["MA-Signal"] = (
                     saved[0] 
-                    + colorText.BOLD
                     + (colorText.GREEN if is50DMAUpTrend else (colorText.FAIL if is50DMADownTrend else colorText.WARN))
                     + f"{confText} ({difference}%)"
                     + colorText.END
@@ -2681,7 +2659,6 @@ class ScreeningStatistics:
             else:
                 screenDict["MA-Signal"] = (
                     saved[0] 
-                    + colorText.BOLD
                     + (colorText.GREEN if is50DMAUpTrend else (colorText.FAIL if is50DMADownTrend else colorText.WARN))
                     + f"{confText} ({difference}%)"
                     + colorText.END
@@ -2695,7 +2672,6 @@ class ScreeningStatistics:
         if isGoldenCrossOver or isDeadCrossOver:
             screenDict["MA-Signal"] = (
                     saved[0] 
-                    + colorText.BOLD
                     + (colorText.GREEN if is50DMAUpTrend else (colorText.FAIL if is50DMADownTrend else colorText.WARN))
                     + f"{confText} ({difference}%)"
                     + colorText.END
@@ -2778,8 +2754,7 @@ class ScreeningStatistics:
         lc = data.describe()["Close"]["min"]
         if (hc - lc) <= (hc * percentage / 100) and (hc - lc != 0):
             screenDict["Consol."] = (
-                colorText.BOLD
-                + colorText.GREEN
+                colorText.GREEN
                 + "Range:"
                 + str(round((abs((hc - lc) / hc) * 100), 1))
                 + "%"
@@ -2787,8 +2762,7 @@ class ScreeningStatistics:
             )
         else:
             screenDict["Consol."] = (
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "Range:"
                 + str(round((abs((hc - lc) / hc) * 100), 1))
                 + "%"
@@ -2936,7 +2910,6 @@ class ScreeningStatistics:
                     ):
                         screenDict["Pattern"] = (
                             saved[0]
-                            + colorText.BOLD
                             + colorText.WARN
                             + ("Inside Bar (%d)" % i)
                             + colorText.END
@@ -2959,7 +2932,6 @@ class ScreeningStatistics:
                     ):
                         screenDict["Pattern"] = (
                             saved[0]
-                            + colorText.BOLD
                             + colorText.WARN
                             + ("Inside Bar (%d)" % i)
                             + colorText.END
@@ -2990,7 +2962,6 @@ class ScreeningStatistics:
             if away > 0:
                 screenDict["Pattern"] = (
                     saved[0] 
-                    + colorText.BOLD
                     + colorText.GREEN
                     + f"IPO Base ({away} %)"
                     + colorText.END
@@ -2998,7 +2969,6 @@ class ScreeningStatistics:
             else:
                 screenDict["Pattern"] = (
                     saved[0]
-                    + colorText.BOLD
                     + colorText.GREEN
                     + "IPO Base "
                     + colorText.FAIL
@@ -3032,14 +3002,14 @@ class ScreeningStatistics:
             saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
             if lc.df.iloc[-1]["isNewBuySignal"]:
                 screenDict["Pattern"] = (
-                    saved[0] + colorText.BOLD + colorText.GREEN + "Lorentzian-Buy" + colorText.END
+                    saved[0] + colorText.GREEN + "Lorentzian-Buy" + colorText.END
                 )
                 saveDict["Pattern"] = saved[1] + "Lorentzian-Buy"
                 if lookFor != 2: # Not Sell
                     return True
             elif lc.df.iloc[-1]["isNewSellSignal"]:
                 screenDict["Pattern"] = (
-                    saved[0] + colorText.BOLD + colorText.FAIL + "Lorentzian-Sell" + colorText.END
+                    saved[0] + colorText.FAIL + "Lorentzian-Sell" + colorText.END
                 )
                 saveDict["Pattern"] = saved[1] + "Lorentzian-Sell"
                 if lookFor != 1: # Not Buy
@@ -3255,7 +3225,6 @@ class ScreeningStatistics:
                         saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
                         screenDict["Pattern"] = (
                             saved[0]
-                            + colorText.BOLD
                             + colorText.GREEN
                             + "Momentum Gainer"
                             + colorText.END
@@ -3289,24 +3258,24 @@ class ScreeningStatistics:
                 and recent["Close"].iloc[0] > recent["SMA"].iloc[0]
             ):
                 screenDict["MA-Signal"] = (
-                    saved[0] + colorText.BOLD + colorText.GREEN + "Bullish" + colorText.END
+                    saved[0] + colorText.GREEN + "Bullish" + colorText.END
                 )
                 saveDict["MA-Signal"] = saved[1] + "Bullish"
                 maSignals.append("3")
             elif recent["SMA"].iloc[0] < recent["LMA"].iloc[0]:
                 screenDict["MA-Signal"] = (
-                    saved[0] + colorText.BOLD + colorText.FAIL + "Bearish" + colorText.END
+                    saved[0] + colorText.FAIL + "Bearish" + colorText.END
                 )
                 saveDict["MA-Signal"] = saved[1] + "Bearish"
                 maSignals.append("2")
             elif recent["SMA"].iloc[0] == 0:
                 screenDict["MA-Signal"] = (
-                    saved[0] + colorText.BOLD + colorText.WARN + "Unknown" + colorText.END
+                    saved[0] + colorText.WARN + "Unknown" + colorText.END
                 )
                 saveDict["MA-Signal"] = saved[1] + "Unknown"
             else:
                 screenDict["MA-Signal"] = (
-                    saved[0] + colorText.BOLD + colorText.WARN + "Neutral" + colorText.END
+                    saved[0] + colorText.WARN + "Neutral" + colorText.END
                 )
                 saveDict["MA-Signal"] = saved[1] + "Neutral"
         reversedData = data[::-1]  # Reverse the dataframe
@@ -3336,7 +3305,7 @@ class ScreeningStatistics:
                 # Taking Support
                 if close > ma and low <= (ma + maDevs[index]) and str(maLength) in ["0","1"]:
                     screenDict["MA-Signal"] = (
-                        saved[0] + colorText.BOLD + colorText.GREEN + f"{maTexts[index]}-Support" + colorText.END
+                        saved[0] + colorText.GREEN + f"{maTexts[index]}-Support" + colorText.END
                     )
                     saveDict["MA-Signal"] = saved[1] + f"{maTexts[index]}-Support"
                     maReversal = 1
@@ -3344,7 +3313,7 @@ class ScreeningStatistics:
                 # Validating Resistance
                 elif close < ma and high >= (ma - maDevs[index]) and str(maLength) in ["0","6"]:
                     screenDict["MA-Signal"] = (
-                        saved[0] + colorText.BOLD + colorText.FAIL + f"{maTexts[index]}-Resist" + colorText.END
+                        saved[0] + colorText.FAIL + f"{maTexts[index]}-Resist" + colorText.END
                     )
                     saveDict["MA-Signal"] = saved[1] + f"{maTexts[index]}-Resist"
                     maReversal = -1
@@ -3357,7 +3326,7 @@ class ScreeningStatistics:
                     if open < ma and close > ma:
                         if (str(maLength) in ["0","5"]) or (str(maLength) in ["7"] and index == maTexts.index("VWAP")):
                             screenDict["MA-Signal"] = (
-                                saved[0] + colorText.BOLD + colorText.GREEN + f"BullCross-{maTexts[index]}" + colorText.END
+                                saved[0] + colorText.GREEN + f"BullCross-{maTexts[index]}" + colorText.END
                             )
                             saveDict["MA-Signal"] = saved[1] + f"BullCross-{maTexts[index]}"
                             maReversal = 1
@@ -3367,7 +3336,7 @@ class ScreeningStatistics:
                     # Crossing down
                     if open > sma and close < sma and str(maLength) in ["0","4"]:
                         screenDict["MA-Signal"] = (
-                            saved[0] + colorText.BOLD + colorText.FAIL + f"BearCross-{maTexts[index]}" + colorText.END
+                            saved[0] + colorText.FAIL + f"BearCross-{maTexts[index]}" + colorText.END
                         )
                         saveDict["MA-Signal"] = saved[1] + f"BearCross-{maTexts[index]}"
                         maReversal = -1
@@ -3400,7 +3369,7 @@ class ScreeningStatistics:
                     and now_candle["Close"].iloc[0] >= recent["Close"].iloc[0]
                 ):
                     screenDict["Pattern"] = (
-                        saved[0] + colorText.BOLD + colorText.GREEN + f"Buy-NR{nr}" + colorText.END
+                        saved[0] + colorText.GREEN + f"Buy-NR{nr}" + colorText.END
                     )
                     saveDict["Pattern"] = saved[1] + f"Buy-NR{nr}"
                     return True
@@ -3409,7 +3378,7 @@ class ScreeningStatistics:
                     and now_candle["Close"].iloc[0] <= recent["Close"].iloc[0]
                 ):
                     screenDict["Pattern"] = (
-                        saved[0] + colorText.BOLD + colorText.FAIL + f"Sell-NR{nr}" + colorText.END
+                        saved[0] + colorText.FAIL + f"Sell-NR{nr}" + colorText.END
                     )
                     saveDict["Pattern"] = saved[1] + f"Sell-NR{nr}"
                     return True
@@ -3420,7 +3389,7 @@ class ScreeningStatistics:
             recent = rangeData.head(1)
             if recent["Range"].iloc[0] == rangeData.describe()["Range"]["min"]:
                 screenDict["Pattern"] = (
-                    saved[0] + colorText.BOLD + colorText.GREEN + f"NR{nr}" + colorText.END
+                    saved[0] + colorText.GREEN + f"NR{nr}" + colorText.END
                 )
                 saveDict["Pattern"] = saved[1] + f"NR{nr}"
                 return True
@@ -3506,10 +3475,10 @@ class ScreeningStatistics:
         # https://chartink.com/screener/rsi-screening
         if rsi> 0 and rsi >= minRSI and rsi <= maxRSI:  # or (rsi <= 71 and rsi >= 67):
             screenDict[rsiKey] = (
-                colorText.BOLD + colorText.GREEN + str(rsi) + colorText.END
+                colorText.GREEN + str(rsi) + colorText.END
             )
             return True if (rsiKey == "RSIi") else (self.validateRSI(df, screenDict, saveDict, minRSI, maxRSI,rsiKey="RSIi") or True)
-        screenDict[rsiKey] = colorText.BOLD + colorText.FAIL + str(rsi) + colorText.END
+        screenDict[rsiKey] = colorText.FAIL + str(rsi) + colorText.END
         # If either daily or intraday RSI comes within range?
         return False if (rsiKey == "RSIi") else (self.validateRSI(df, screenDict, saveDict, minRSI, maxRSI,rsiKey="RSIi"))
 
@@ -3577,7 +3546,7 @@ class ScreeningStatistics:
                     ):
                         saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
                         screenDict["MA-Signal"] = (
-                            saved[0] + colorText.BOLD + colorText.GREEN + "Bullish" + colorText.END
+                            saved[0] + colorText.GREEN + "Bullish" + colorText.END
                         )
                         saveDict["MA-Signal"] = saved[1] + "Bullish"
                         return True
@@ -3636,7 +3605,6 @@ class ScreeningStatistics:
                     if isTightening:
                         screenDict["Pattern"] = (
                             saved[0] 
-                            + colorText.BOLD
                             + colorText.GREEN
                             + f"VCP (BO: {highestTop}, Cons.:{','.join(consolidations)})"
                             + colorText.END
@@ -3712,7 +3680,6 @@ class ScreeningStatistics:
             saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
             screenDict["Pattern"] = (
                 saved[0] 
-                + colorText.BOLD
                 + colorText.GREEN
                 + f"VCP(Minervini)"
                 + colorText.END
@@ -3779,7 +3746,6 @@ class ScreeningStatistics:
                     ):
                         screenDict["Pattern"] = (
                             saved[0] 
-                            + colorText.BOLD
                             + colorText.GREEN
                             + "Supply Drought"
                             + colorText.END
@@ -3794,7 +3760,6 @@ class ScreeningStatistics:
                     ):
                         screenDict["Pattern"] = (
                             saved[0] 
-                            + colorText.BOLD
                             + colorText.GREEN
                             + "Demand Rise"
                             + colorText.END

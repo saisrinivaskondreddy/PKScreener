@@ -57,8 +57,7 @@ def test_showDevInfo():
         result = tools.showDevInfo()
         # Assert that input() is called with the correct argument
         mock_input.assert_called_once_with(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + "[+] Press <Enter> to continue!"
             + colorText.END
         )
@@ -321,8 +320,7 @@ def test_promptFileExists():
         result = tools.promptFileExists()
         # Assert input() is called correct argument
         mock_input.assert_called_once_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "[>] stock_data_*.pkl already exists. Do you want to replace this? [Y/N]: "
         )
         # Assert that the result is "Y"
@@ -336,8 +334,7 @@ def test_promptRSIValues():
         result = tools.promptRSIValues()
         # Assert that input() is called twice with the correct arguments
         mock_input.assert_called_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "[+] Enter Max RSI value: "
             + colorText.END
         )
@@ -352,8 +349,7 @@ def test_promptCCIValues():
         result = tools.promptCCIValues()
         # Assert that input() is called twice with the correct arguments
         mock_input.assert_called_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "[+] Enter Max CCI value: "
             + colorText.END
         )
@@ -368,8 +364,7 @@ def test_promptVolumeMultiplier():
         result = tools.promptVolumeMultiplier()
         # Assert that input() is called with the correct argument
         mock_input.assert_called_once_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "\n[+] Enter Min Volume ratio value (Default = 2.5): "
             + colorText.END
         )
@@ -384,8 +379,7 @@ def test_promptReversalScreening():
         result = tools.promptReversalScreening()
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "\n[+] Enter MA Length (E.g. 50 or 200): "
             + colorText.END
         )
@@ -399,8 +393,7 @@ def test_promptReversalScreening_4x_Does_not_raise_value_error():
         result = tools.promptReversalScreening()
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + "\n[+] Invalid Option Selected. Press <Enter> to try again..."
             + colorText.END
         )
@@ -414,8 +407,7 @@ def test_promptReversalScreening_Input6():
         result = tools.promptReversalScreening()
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "\n[+] Enter NR timeframe [Integer Number] (E.g. 4, 7, etc.): "
             + colorText.END
         )
@@ -429,7 +421,7 @@ def test_promptReversalScreening_Input1():
         result = tools.promptReversalScreening()
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
-            colorText.BOLD + colorText.WARN + """[+] Select Option:""" + colorText.END
+            colorText.WARN + """[+] Select Option:""" + colorText.END
         )
         # Assert that the result is the correct tuple
         assert result == (1, None)
@@ -442,7 +434,7 @@ def test_promptChartPatterns():
         result = tools.promptChartPatterns()
         # Assert that input() is called with the correct arguments
         mock_input.assert_called_with(
-            colorText.BOLD + colorText.WARN + "[+] Select Option:" + colorText.END
+            colorText.WARN + "[+] Select Option:" + colorText.END
         )
         # Assert that the result is the correct tuple
         assert result == (4, 0)
@@ -454,8 +446,7 @@ def test_promptChartPatterns_Input1():
         result = tools.promptChartPatterns()
         # Assert that input() is called with the correct arguments
         mock_input.assert_called_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "\n[+] How many candles (TimeFrame) to look back Inside Bar formation? : "
             + colorText.END
         )
@@ -469,8 +460,7 @@ def test_promptChartPatterns_Input3():
         result = tools.promptChartPatterns()
         # Assert that input() is called with the correct arguments
         mock_input.assert_called_with(
-            colorText.BOLD
-            + colorText.WARN
+            colorText.WARN
             + "\n[+] Enter Percentage within which all MA/EMAs should be (Ideal: 1-2%)? : "
             + colorText.END
         )

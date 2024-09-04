@@ -222,8 +222,7 @@ def test_checkForUpdate_exception():
                         OTAUpdater.checkForUpdate(VERSION)
                         assert not mock_updateForPlatform.called
                         mock_print.assert_called_with(
-                            colorText.BOLD
-                            + colorText.FAIL
+                            colorText.FAIL
                             + "[+] Failure while checking update!"
                             + colorText.END
                         )

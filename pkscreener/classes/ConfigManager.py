@@ -231,8 +231,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 fp.close()
                 if showFileCreatedText:
                     OutputControls().printOutput(
-                        colorText.BOLD
-                        + colorText.GREEN
+                        colorText.GREEN
                         + "[+] Default configuration generated as user configuration is not found!"
                         + colorText.END
                     )
@@ -241,8 +240,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             except IOError as e:  # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "[+] Failed to save user config. Exiting.."
                     + colorText.END
                 )
@@ -254,8 +252,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.add_section("filters")
             OutputControls().printOutput("")
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.GREEN
+                colorText.GREEN
                 + "[+] PKScreener User Configuration:"
                 + colorText.END
             )
@@ -497,8 +494,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             # delete stock data due to config change
             self.deleteFileWithPattern()
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Cached Stock Data Deleted."
                 + colorText.END
             )
@@ -509,8 +505,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 fp.close()
                 self.getConfig(parser=parser)
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.GREEN
+                    colorText.GREEN
                     + "[+] User configuration saved."
                     + colorText.END
                 )
@@ -519,8 +514,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             except IOError as e:  # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "[+] Failed to save user config. Exiting.."
                     + colorText.END
                 )
@@ -644,14 +638,14 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 MarketHours().setMarketCloseHourMinute(self.marketClose)
             except configparser.NoOptionError as e:# pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
-                # input(colorText.BOLD + colorText.FAIL +
+                # input(colorText.FAIL +
                 #       '[+] pkscreener requires user configuration again. Press enter to continue..' + colorText.END)
                 parser.remove_section("config")
                 parser.remove_section("filters")
                 self.setConfig(parser, default=True, showFileCreatedText=False)
             except Exception as e:  # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
-                # input(colorText.BOLD + colorText.FAIL +
+                # input(colorText.FAIL +
                 #       '[+] pkscreener requires user configuration again. Press enter to continue..' + colorText.END)
                 parser.remove_section("config")
                 parser.remove_section("filters")
@@ -705,7 +699,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         try:
             prompt = "[+] PKScreener User Configuration:"
             f = open("pkscreener.ini", "r")
-            OutputControls().printOutput(colorText.BOLD + colorText.GREEN + prompt + colorText.END)
+            OutputControls().printOutput(colorText.GREEN + prompt + colorText.END)
             configData = f.read()
             f.close()
             OutputControls().printOutput("\n" + configData)
@@ -715,14 +709,12 @@ class tools(SingletonMixin, metaclass=SingletonType):
         except Exception as e:  # pragma: no cover
             self.default_logger.debug(e, exc_info=True)
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] User Configuration not found!"
                 + colorText.END
             )
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.WARN
+                colorText.WARN
                 + "[+] Configure the limits to continue."
                 + colorText.END
             )

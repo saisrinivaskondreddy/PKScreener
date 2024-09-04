@@ -99,8 +99,7 @@ class UserMenuChoicesHandler:
     def handleExitRequest(executeOption):
         if executeOption == "Z":
             input(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Press <Enter> to Exit!"
                 + colorText.END
             )

@@ -176,18 +176,17 @@ class tools:
         if respPepyTech is not None and respPepyTech.status_code == 200:
             totalDownloads = respPepyTech.text.split("</text>")[-2].split(">")[-1]
         downloadsInfo = f"[🔥] Total Downloads: {totalDownloads}"
-        OutputControls().printOutput(colorText.BOLD + colorText.WARN + devInfo + colorText.END)
-        OutputControls().printOutput(colorText.BOLD + colorText.WARN + versionInfo + colorText.END)
-        OutputControls().printOutput(colorText.BOLD + colorText.GREEN + downloadsInfo + colorText.END)
-        OutputControls().printOutput(colorText.BOLD + homePage + colorText.END)
-        OutputControls().printOutput(colorText.BOLD + colorText.FAIL + issuesInfo + colorText.END)
-        OutputControls().printOutput(colorText.BOLD + colorText.GREEN + communityInfo + colorText.END)
-        OutputControls().printOutput(colorText.BOLD + colorText.BLUE + latestInfo + colorText.END)
-        OutputControls().printOutput(colorText.BOLD + colorText.FAIL + donationInfo + colorText.END)
+        OutputControls().printOutput(colorText.WARN + devInfo + colorText.END)
+        OutputControls().printOutput(colorText.WARN + versionInfo + colorText.END)
+        OutputControls().printOutput(colorText.GREEN + downloadsInfo + colorText.END)
+        OutputControls().printOutput(homePage + colorText.END)
+        OutputControls().printOutput(colorText.FAIL + issuesInfo + colorText.END)
+        OutputControls().printOutput(colorText.GREEN + communityInfo + colorText.END)
+        OutputControls().printOutput(colorText.BLUE + latestInfo + colorText.END)
+        OutputControls().printOutput(colorText.FAIL + donationInfo + colorText.END)
         if defaultAnswer is None:
             input(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Press <Enter> to continue!"
                 + colorText.END
             )
@@ -231,8 +230,7 @@ class tools:
         except IOError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + f"{e}\n[+] Failed to save recently screened result table on disk! Skipping.."
                 + colorText.END
             )
@@ -246,8 +244,7 @@ class tools:
             df = pd.read_pickle(lastScreened)
             if df is not None and len(df) > 0:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.GREEN
+                    colorText.GREEN
                     + "\n[+] Showing recently screened results..\n"
                     + colorText.END
                 )
@@ -259,8 +256,7 @@ class tools:
                     ).encode("utf-8").decode(STD_ENCODING)
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Note: Trend calculation is based on number of recent days to screen as per your configuration."
                     + colorText.END
                 )
@@ -269,15 +265,13 @@ class tools:
         except FileNotFoundError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Failed to load recently screened result table from disk! Skipping.."
                 + colorText.END
             )
         if defaultAnswer is None:
             input(
-                colorText.BOLD
-                + colorText.GREEN
+                colorText.GREEN
                 + "[+] Press <Enter> to continue.."
                 + colorText.END
             )
@@ -315,8 +309,8 @@ class tools:
 
     def formatRatio(ratio, volumeRatio):
         if ratio >= volumeRatio and ratio != np.nan and (not math.isinf(ratio)):
-            return colorText.BOLD + colorText.GREEN + str(ratio) + "x" + colorText.END
-        return colorText.BOLD + colorText.FAIL + (f"{ratio}x" if pd.notna(ratio) else "") + colorText.END
+            return colorText.GREEN + str(ratio) + "x" + colorText.END
+        return colorText.FAIL + (f"{ratio}x" if pd.notna(ratio) else "") + colorText.END
 
     def getsize_multiline(font,srcText,x=0,y=0):
         zeroSizeImage = Image.new('RGB',(0, 0), (0,0,0))
@@ -402,8 +396,11 @@ class tools:
             colorText.UNDR,
             colorText.BLUE,
             colorText.GREEN,
+            colorText.BRIGHTGREEN,
             colorText.WARN,
+            colorText.BRIGHTYELLOW,
             colorText.FAIL,
+            colorText.BRIGHTRED,
             colorText.WHITE,
         ]
         cleanedUpStyledValue = str(styledText)
@@ -416,8 +413,11 @@ class tools:
         mainStyles = [
             colorText.BLUE,
             colorText.GREEN,
+            colorText.BRIGHTGREEN,
             colorText.WARN,
+            colorText.BRIGHTYELLOW,
             colorText.FAIL,
+            colorText.BRIGHTRED,
             colorText.WHITE,
         ]
         colorsDict = {
@@ -825,9 +825,9 @@ class tools:
             try:
                 with open(cache_file, "wb") as f:
                     pickle.dump(stockDict.copy(), f, protocol=pickle.HIGHEST_PROTOCOL)
-                    OutputControls().printOutput(colorText.BOLD + colorText.GREEN + "=> Done." + colorText.END)
+                    OutputControls().printOutput(colorText.GREEN + "=> Done." + colorText.END)
                 if downloadOnly:
-                    OutputControls().printOutput(colorText.BOLD + colorText.GREEN + f"=> {cache_file}" + colorText.END)
+                    OutputControls().printOutput(colorText.GREEN + f"=> {cache_file}" + colorText.END)
                     Committer.execOSCommand(f"git add {cache_file} -f >/dev/null 2>&1")
                     if "RUNNER" not in os.environ.keys():
                         copyFilePath = os.path.join(Archiver.get_user_outputs_dir(), f"copy_{fileName}")
@@ -837,8 +837,7 @@ class tools:
             except pickle.PicklingError as e:  # pragma: no cover
                 default_logger().debug(e, exc_info=True)
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "=> Error while Caching Stock Data."
                     + colorText.END
                 )
@@ -846,10 +845,10 @@ class tools:
                 default_logger().debug(e, exc_info=True)
         else:
             OutputControls().printOutput(
-                colorText.BOLD + colorText.GREEN + "=> Already Cached." + colorText.END
+                colorText.GREEN + "=> Already Cached." + colorText.END
             )
             if downloadOnly:
-                OutputControls().printOutput(colorText.BOLD + colorText.GREEN + f"=> {cache_file}" + colorText.END)
+                OutputControls().printOutput(colorText.GREEN + f"=> {cache_file}" + colorText.END)
         return cache_file
 
     def downloadLatestData(stockDict,configManager,stockCodes=[],exchangeSuffix=".NS",downloadOnly=False):
@@ -948,8 +947,7 @@ class tools:
             stockDict, stockDataLoaded = tools.downloadSavedDataFromServer(stockDict,configManager, downloadOnly, defaultAnswer, retrial, forceLoad, stockCodes, exchangeSuffix, isIntraday, forceRedownload, cache_file, isTrading)
         if not stockDataLoaded:
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] Cache unavailable on pkscreener server, Continuing.."
                 + colorText.END
             )
@@ -969,8 +967,7 @@ class tools:
                 stockData = pickle.load(f)
                 if not downloadOnly:
                     OutputControls().printOutput(
-                            colorText.BOLD
-                            + colorText.GREEN
+                            colorText.GREEN
                             + f"[+] Automatically Using Cached Stock Data {'due to After-Market hours' if not PKDateUtilities.isTradingTime() else ''}!"
                             + colorText.END
                         )
@@ -1020,8 +1017,7 @@ class tools:
                 default_logger().debug(e, exc_info=True)
                 f.close()
                 OutputControls().printOutput(
-                        colorText.BOLD
-                        + colorText.FAIL
+                        colorText.FAIL
                         + "[+] Error while Reading Stock Cache."
                         + colorText.END
                     )
@@ -1031,8 +1027,7 @@ class tools:
                 default_logger().debug(e, exc_info=True)
                 f.close()
                 OutputControls().printOutput(
-                        colorText.BOLD
-                        + colorText.FAIL
+                        colorText.FAIL
                         + "[+] Stock Cache Corrupted."
                         + colorText.END
                     )
@@ -1043,14 +1038,12 @@ class tools:
     def downloadSavedDataFromServer(stockDict, configManager, downloadOnly, defaultAnswer, retrial, forceLoad, stockCodes, exchangeSuffix, isIntraday, forceRedownload, cache_file, isTrading):
         stockDataLoaded = False
         OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "[+] Market Stock Data is not cached, or forced to redownload .."
                     + colorText.END
                 )
         OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.GREEN
+                colorText.GREEN
                 + f"[+] Downloading {'Intraday' if configManager.isIntradayConfig() else 'Daily'} cache from server for faster processing, Please Wait.."
                 + colorText.END
             )
@@ -1195,8 +1188,7 @@ class tools:
             if defaultAnswer is None:
                 response = str(
                     input(
-                        colorText.BOLD
-                        + colorText.WARN
+                        colorText.WARN
                         + "[>] Do you want to save the results in excel file? [Y/N](Default:Y): "
                     ) or "Y"
                 ).upper()
@@ -1264,8 +1256,7 @@ class tools:
                     writer.close()
                     isSaved = True
             OutputControls().printOutput(
-                colorText.BOLD
-                + (colorText.GREEN if isSaved else colorText.FAIL)
+                (colorText.GREEN if isSaved else colorText.FAIL)
                 + (("[+] Results saved to %s" % filePath) if isSaved else "[+] Failed saving results into Excel file!")
                 + colorText.END
             )
@@ -1278,8 +1269,7 @@ class tools:
             if defaultAnswer is None:
                 response = str(
                     input(
-                        colorText.BOLD
-                        + colorText.WARN
+                        colorText.WARN
                         + "[>] "
                         + cache_file
                         + " already exists. Do you want to replace this? [Y/N] (Default: Y): "
@@ -1297,15 +1287,13 @@ class tools:
         try:
             minRSI, maxRSI = int(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "\n[+] Enter Min RSI value (Default=55): "
                     + colorText.END
                 ) or 55
             ), int(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Enter Max RSI value (Default=68): "
                     + colorText.END
                 ) or "68"
@@ -1329,15 +1317,13 @@ class tools:
         try:
             minCCI, maxCCI = int(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "\n[+] Enter Min CCI value (Default=110): "
                     + colorText.END
                 ) or "110"
             ), int(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Enter Max CCI value (Default=300): "
                     + colorText.END
                 ) or "300"
@@ -1357,8 +1343,7 @@ class tools:
         try:
             volumeRatio = float(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "\n[+] Enter Min Volume ratio value (Default = 2.5): "
                     + colorText.END
                 ) or "2.5"
@@ -1390,8 +1375,7 @@ class tools:
             tools.promptMenus(menu=menu)
             resp = int(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + """[+] Select Option:"""
                     + colorText.END
                 ) or defaultOption
@@ -1402,8 +1386,7 @@ class tools:
         except ValueError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
             input(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "\n[+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
             )
@@ -1415,8 +1398,7 @@ class tools:
             tools.promptMenus(menu=menu)
             resp = int(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + """[+] Select Option:"""
                     + colorText.END
                 ) or "3"
@@ -1427,8 +1409,7 @@ class tools:
                         defaultMALength = 9 if configManager.duration.endswith("m") else 50
                         maLength = int(
                             input(
-                                colorText.BOLD
-                                + colorText.WARN
+                                colorText.WARN
                                 + f"\n[+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default={defaultMALength}): "
                                 + colorText.END
                             ) or str(defaultMALength)
@@ -1437,8 +1418,7 @@ class tools:
                     except ValueError as e:  # pragma: no cover
                         default_logger().debug(e, exc_info=True)
                         OutputControls().printOutput(
-                            colorText.BOLD
-                            + colorText.FAIL
+                            colorText.FAIL
                             + "\n[!] Invalid Input! MA Length should be single integer value!\n"
                             + colorText.END
                         )
@@ -1447,8 +1427,7 @@ class tools:
                     try:
                         maLength = int(
                             input(
-                                colorText.BOLD
-                                + colorText.WARN
+                                colorText.WARN
                                 + "\n[+] Enter NR timeframe [Integer Number] (E.g. 4, 7, etc.) (Default=4): "
                                 + colorText.END
                             ) or "4"
@@ -1457,8 +1436,7 @@ class tools:
                     except ValueError as e:  # pragma: no cover
                         default_logger().debug(e, exc_info=True)
                         OutputControls().printOutput(
-                            colorText.BOLD
-                            + colorText.FAIL
+                            colorText.FAIL
                             + "\n[!] Invalid Input! NR timeframe should be single integer value!\n"
                             + colorText.END
                         )
@@ -1473,8 +1451,7 @@ class tools:
         except ValueError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
             input(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "\n[+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
             )
@@ -1486,8 +1463,7 @@ class tools:
             tools.promptMenus(menu=menu)
             resp = int(
                 input(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + """[+] Select Option:"""
                     + colorText.END
                 ) or "3"
@@ -1495,8 +1471,7 @@ class tools:
             if resp == 1 or resp == 2:
                 candles = int(
                     input(
-                        colorText.BOLD
-                        + colorText.WARN
+                        colorText.WARN
                         + "\n[+] How many candles (TimeFrame) to look back Inside Bar formation? (Default=3): "
                         + colorText.END
                     ) or "3"
@@ -1505,8 +1480,7 @@ class tools:
             if resp == 3:
                 percent = float(
                     input(
-                        colorText.BOLD
-                        + colorText.WARN
+                        colorText.WARN
                         + "\n[+] Enter Percentage within which all MA/EMAs should be (Ideal: 0.1-2%)? (Default=0.8): "
                         + colorText.END
                     ) or "0.8"
@@ -1518,8 +1492,7 @@ class tools:
         except ValueError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
             input(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "\n[+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
             )
@@ -1559,8 +1532,7 @@ class tools:
                 resp = fetcher.fetchURL(file_url, stream=True)
                 if resp is not None and resp.status_code == 200:
                     OutputControls().printOutput(
-                        colorText.BOLD
-                        + colorText.GREEN
+                        colorText.GREEN
                         + "[+] Downloading AI model (v2) for Nifty predictions, Please Wait.."
                         + colorText.END
                     )
@@ -1601,8 +1573,7 @@ class tools:
                     except:
                         OutputControls().printOutput("This installation might not work well, especially for NIFTY prediction. Please install 'keras' library on your machine!")
                         OutputControls().printOutput(
-                                colorText.BOLD
-                                + colorText.FAIL
+                                colorText.FAIL
                                 + "[+] 'Keras' library is not installed. You may wish to follow instructions from\n[+] https://github.com/pkjmesra/PKScreener/"
                                 + colorText.END
                             )
@@ -1616,8 +1587,7 @@ class tools:
                 tools.getNiftyModel(retrial=True)
         if model is None:
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + "[+] 'Keras' library is not installed. Prediction failed! You may wish to follow instructions from\n[+] https://github.com/pkjmesra/PKScreener/"
                 + colorText.END
             )

@@ -308,6 +308,7 @@ class PKScanRunner:
         from pkscreener.classes.Fetcher import screenerStockDataFetcher
         nsei_df = screenerStockDataFetcher().fetchStockData(PKScanRunner.configManager.baseIndex,'1y','1d',None,0,0,0,exchangeSuffix="")
         rs_score_index = -1
+        PKScanRunner.configManager.getConfig(parser)
         if nsei_df is not None:
             rs_score_index = scr.calc_relative_strength(nsei_df[::-1])
         consumers = [
@@ -362,8 +363,7 @@ class PKScanRunner:
             else:
                 cleanup_on_sigterm()
         OutputControls().printOutput(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + f"[+] Using Period:{PKScanRunner.configManager.period} and Duration:{PKScanRunner.configManager.duration} for scan! You can change this in user config."
             + colorText.END
         )

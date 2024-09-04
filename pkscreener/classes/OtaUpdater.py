@@ -192,15 +192,13 @@ rm updater.sh
             if prod_update:
                 if skipDownload:
                     OutputControls().printOutput(
-                        colorText.BOLD
-                        + colorText.GREEN
+                        colorText.GREEN
                         + f"    [+] A {updateType} software update (v{tag} [{size} MB]) is available. Check out with the menu option U."
                         + colorText.END
                     )
                     return
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] What's New in this Update?\n"
                     + colorText.END
                     + colorText.GREEN
@@ -209,8 +207,7 @@ rm updater.sh
                 )
                 try:
                     action = input(
-                            colorText.BOLD
-                            + colorText.FAIL
+                            colorText.FAIL
                             + (
                                 f"\n[+] New {updateType} Software update (v%s) available. Download Now (Size: %dMB)? [Y/N]: "
                                 % (str(tag), size)
@@ -239,8 +236,7 @@ rm updater.sh
                         except Exception as e:  # pragma: no cover
                             default_logger().debug(e, exc_info=True)
                             OutputControls().printOutput(
-                                colorText.BOLD
-                                + colorText.WARN
+                                colorText.WARN
                                 + "[+] Error occured while updating!"
                                 + colorText.END
                             )
@@ -248,8 +244,7 @@ rm updater.sh
             elif not prod_update and not skipDownload:
                 if tag.lower() == VERSION.lower():
                     OutputControls().printOutput(
-                        colorText.BOLD
-                        + colorText.GREEN
+                        colorText.GREEN
                         + (
                             "[+] No new update available. You have the latest version (v%s) !"
                             % VERSION
@@ -262,16 +257,14 @@ rm updater.sh
                         float(now_components[2]) > float(version_components[2]) or \
                         float(now_components[3]) > float(version_components[3]):
                         OutputControls().printOutput(
-                            colorText.BOLD
-                            + colorText.FAIL
+                            colorText.FAIL
                             + (f"[+] This version (v{VERSION}) is in Development! Thanks for trying out!")
                             + colorText.END
                         )
                         return OTAUpdater.developmentVersion
                     else:
                         OutputControls().printOutput(
-                        colorText.BOLD
-                        + colorText.GREEN
+                        colorText.GREEN
                         + (
                             "[+] No new update available. You have the latest version (v%s) !"
                             % VERSION
@@ -283,8 +276,7 @@ rm updater.sh
             if OTAUpdater.checkForUpdate.url is not None:
                 OutputControls().printOutput(e)
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.BLUE
+                    colorText.BLUE
                     + (
                         "[+] Download update manually from %s\n"
                         % OTAUpdater.checkForUpdate.url
@@ -297,16 +289,14 @@ rm updater.sh
                 )
             if resp is not None and resp.json()["message"] == "Not Found":
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + OTAUpdater.checkForUpdate.url
                     + colorText.END
                 )
             if not skipDownload:
                 OutputControls().printOutput(e)
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "[+] Failure while checking update!"
                     + colorText.END
                 )

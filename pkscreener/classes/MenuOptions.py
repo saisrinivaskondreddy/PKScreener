@@ -856,14 +856,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + optionText
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -895,14 +893,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a menu option:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -939,14 +935,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a Strategy for Screening:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > """
@@ -972,14 +966,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a configuration period for Screening:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1007,14 +999,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1042,14 +1032,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a scanner:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1078,14 +1066,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a sectoral index:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1113,14 +1099,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an Index for Screening:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1148,14 +1132,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a config period/candle-duration combination: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1183,14 +1165,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a config period/candle-duration combination: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1218,14 +1198,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select a Criterion for Stock Screening: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1252,14 +1230,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1286,14 +1262,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1320,14 +1294,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1354,14 +1326,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1388,14 +1358,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1423,14 +1391,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1457,14 +1423,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """
@@ -1491,14 +1455,12 @@ class menus:
         else:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.WARN
+                    colorText.WARN
                     + "[+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + menuText
+                    menuText
                     + """
 
     Enter your choice > (default is """

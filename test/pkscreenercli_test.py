@@ -180,8 +180,7 @@ def test_pkscreenercli_test_build_mode():
         pkscreenercli.args.testbuild = True
         pkscreenercli.pkscreenercli()
         mock_print.assert_called_with(
-            colorText.BOLD
-            + colorText.FAIL
+            colorText.FAIL
             + "[+] Started in TestBuild mode!"
             + colorText.END
         )

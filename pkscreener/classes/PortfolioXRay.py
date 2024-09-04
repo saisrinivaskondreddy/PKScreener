@@ -845,7 +845,7 @@ def formatGridOutput(df,replacenan=True):
                         str(x),
                         (
                             (
-                                (colorText.BOLD + colorText.WHITE)
+                                (colorText.WHITE)
                                 if x == maxGrowth
                                 else colorText.GREEN
                             )
@@ -867,7 +867,7 @@ def formatGridOutput(df,replacenan=True):
                         str(x),
                         (
                             (
-                                (colorText.BOLD + colorText.WHITE)
+                                (colorText.WHITE)
                                 if x == maxGrowth
                                 else colorText.GREEN
                             )

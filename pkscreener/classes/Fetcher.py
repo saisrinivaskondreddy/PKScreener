@@ -140,8 +140,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             sys.stdout.write("\r\033[K")
             try:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.GREEN
+                    colorText.GREEN
                     + (
                         "[%d%%] Screened %d, Found %d. Fetching data & Analyzing %s..."
                         % (
@@ -162,8 +161,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                 pass
             if len(data) == 0:
                 OutputControls().printOutput(
-                    colorText.BOLD
-                    + colorText.FAIL
+                    colorText.FAIL
                     + "=> Failed to fetch!"
                     + colorText.END,
                     end="\r",
@@ -171,7 +169,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                 )
                 raise StockDataEmptyException
             OutputControls().printOutput(
-                colorText.BOLD + colorText.GREEN + "=> Done!" + colorText.END,
+                colorText.GREEN + "=> Done!" + colorText.END,
                 end="\r",
                 flush=True,
             )
@@ -234,8 +232,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         except FileNotFoundError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + f"[+] watchlist.xlsx not found in {os.getcwd()}"
                 + colorText.END
             )
@@ -246,8 +243,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         except KeyError as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.FAIL
+                colorText.FAIL
                 + '[+] Bad Watchlist Format: First Column (A1) should have Header named "Stock Code"'
                 + colorText.END
             )
@@ -257,8 +253,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             sample_data = pd.DataFrame(sample, columns=["Stock Code"])
             sample_data.to_excel("watchlist_template.xlsx", index=False, header=True)
             OutputControls().printOutput(
-                colorText.BOLD
-                + colorText.BLUE
+                colorText.BLUE
                 + f"[+] watchlist_template.xlsx created in {os.getcwd()} as a referance template."
                 + colorText.END
             )
