@@ -34,6 +34,8 @@ from PKDevTools.classes.log import default_logger
 from PKDevTools.classes.Singleton import SingletonType, SingletonMixin
 from PKDevTools.classes.OutputControls import OutputControls
 from PKDevTools.classes.MarketHours import MarketHours
+import re
+
 parser = configparser.ConfigParser(strict=False)
 
 # Default attributes for Downloading Cache from Git repo
@@ -109,6 +111,42 @@ class tools(SingletonMixin, metaclass=SingletonType):
             self.periods.extend(self.maxBacktestWindow)
         MarketHours().setMarketOpenHourMinute(self.marketOpen)
         MarketHours().setMarketCloseHourMinute(self.marketClose)
+
+    @property
+    def candleDurationInt(self):
+        temp = re.compile("([0-9]+)([a-zA-Z]+)")
+        try:
+            res = temp.match(self.duration).groups()
+        except:
+            return self.duration
+        return res[0]
+    
+    @property
+    def candleDurationFrequency(self):
+        temp = re.compile("([0-9]+)([a-zA-Z]+)")
+        try:
+            res = temp.match(self.duration).groups()
+        except:
+            return self.duration
+        return res[1]
+
+    @property
+    def candlePeriodInt(self):
+        temp = re.compile("([0-9]+)([a-zA-Z]+)")
+        try:
+            res = temp.match(self.period).groups()
+        except:
+            return self.period
+        return res[0]
+    
+    @property
+    def candlePeriodFrequency(self):
+        temp = re.compile("([0-9]+)([a-zA-Z]+)")
+        try:
+            res = temp.match(self.period).groups()
+        except:
+            return self.period
+        return res[1]
 
     @property
     def periodsRange(self):
@@ -692,7 +730,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             pass
 
     def isIntradayConfig(self):
-        return self.period == "1d"
+        return self.duration.endswith("m") or self.duration.endswith("h")
 
     # Print config file
     def showConfigFile(self, defaultAnswer=None):

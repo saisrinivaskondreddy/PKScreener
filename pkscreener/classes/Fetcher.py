@@ -99,16 +99,16 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         elif isinstance(stockCode,str):
             if len(exchangeSuffix) > 0:
                 stockCode = f"{stockCode}{exchangeSuffix}" if (not stockCode.endswith(exchangeSuffix) and not stockCode.startswith("^")) else stockCode
-        if (period == '1d' or duration[-1] == "m"):
+        if (period in ["1d","5d","1mo","3mo","5mo"] or duration[-1] in ["m","h"]):
             # Since this is intraday data, we'd just need to start from the last trading session
-            if start is None:
-                start = PKDateUtilities.tradingDate().strftime("%Y-%m-%d")
-            if end is None:
-                end = PKDateUtilities.currentDateTime().strftime("%Y-%m-%d")
-            if start == end:
+            # if start is None:
+            #     start = PKDateUtilities.tradingDate().strftime("%Y-%m-%d")
+            # if end is None:
+            #     end = PKDateUtilities.currentDateTime().strftime("%Y-%m-%d")
+            # if start == end:
                 # If we send start and end dates for intraday, it comes back with empty dataframe
-                start = None
-                end = None
+            start = None
+            end = None
         data = None
         with SuppressOutput(suppress_stdout=(not printCounter), suppress_stderr=(not printCounter)):
             try:

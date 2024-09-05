@@ -220,7 +220,7 @@ level2_T_MenuDict_L = {
 }
 level2_T_MenuDict_S = {
     "1": "1m (1d, 1m)",
-    "2": "5m (2d, 5m)",
+    "2": "5m (5d, 5m)",
     "3": "15m (1mo, 15m)",
     "4": "30m (1mo, 30m)",
     "5": "Custom",

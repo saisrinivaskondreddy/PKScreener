@@ -2168,6 +2168,8 @@ class ScreeningStatistics:
         data = data.replace([np.inf, -np.inf], 0)
         data.reset_index(inplace=True)
         data.rename(columns={"index": "Date"}, inplace=True)
+        data = data[data["High"]>0]
+        data = data[data["Low"]>0]
         data["tops"] = (data["High"].iloc[list(pktalib.argrelextrema(np.array(data["High"]), np.greater_equal, order=window)[0])].head(numTopsBottoms))
         data["bots"] = (data["Low"].iloc[list(pktalib.argrelextrema(np.array(data["Low"]), np.less_equal, order=window)[0])].head(numTopsBottoms))
         tops = data[data.tops > 0]
@@ -2839,7 +2841,7 @@ class ScreeningStatistics:
                     index += 1
         
         # Return the first requested number of legs in the order of leg1, leg2, leg3 etc.
-        conditionMet = len(consolidationPercentages[:relativeLegsTocheck]) > 0
+        conditionMet = len(consolidationPercentages[:relativeLegsTocheck]) >= relativeLegsTocheck
         return conditionMet, consolidationPercentages[:relativeLegsTocheck], devScore
 
     # validate if the stock has been having higher highs, higher lows

@@ -306,7 +306,7 @@ class PKScanRunner:
         sec_cache_file = cache_file if "intraday_" in cache_file else f"intraday_{cache_file}"
         # Get RS rating stock value of the index
         from pkscreener.classes.Fetcher import screenerStockDataFetcher
-        nsei_df = screenerStockDataFetcher().fetchStockData(PKScanRunner.configManager.baseIndex,'1y','1d',None,0,0,0,exchangeSuffix="")
+        nsei_df = screenerStockDataFetcher().fetchStockData(PKScanRunner.configManager.baseIndex,PKScanRunner.configManager.period,PKScanRunner.configManager.duration,None,0,0,0,exchangeSuffix="")
         rs_score_index = -1
         PKScanRunner.configManager.getConfig(parser)
         if nsei_df is not None:
