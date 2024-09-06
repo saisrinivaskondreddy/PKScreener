@@ -2544,7 +2544,7 @@ def printNotifySaveScreenedResults(
     printableColumns = []
     if userPassedArgs.monitor is not None:
         return
-    if saved_screen_results is not None and show_saved_diff_results:
+    if userPassedArgs.stocklist is not None and saved_screen_results is not None and show_saved_diff_results:
         diff_from_prev_scan = pd.concat([saved_screen_results, screenResults])
         diff_from_prev_scan = diff_from_prev_scan.reset_index(drop=True)
         df_gpby = diff_from_prev_scan.groupby([diff_from_prev_scan.columns[0]])
@@ -2619,32 +2619,33 @@ def printNotifySaveScreenedResults(
             console_results = tabulated_results
             printableColumns = screenResults.columns
     OutputControls().printOutput(f"{console_results}\n", enableMultipleLineOutput=True)
-    if diff_from_prev_scan is not None:
-        diff_from_prev_scan = diff_from_prev_scan[printableColumns]
-        saved_screen_results = copyScreenResults
-        tabulated_diff_from_prev = colorText.miniTabulator().tabulate(
-            diff_from_prev_scan, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
-            maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
-        ).encode("utf-8").decode(STD_ENCODING)
-        OutputControls().printOutput(f"{colorText.WARN}\n[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}\n\n", enableMultipleLineOutput=True)
-    if onlyInCurrent_df is not None and not onlyInCurrent_df.empty and len(onlyInCurrent_df) > 0:
-        onlyInCurrent_df = onlyInCurrent_df[printableColumns]
-        tabulated_onlyInCurrent_df = colorText.miniTabulator().tabulate(
-            onlyInCurrent_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
-            maxcolwidths=Utility.tools.getMaxColumnWidths(onlyInCurrent_df)
-        ).encode("utf-8").decode(STD_ENCODING)
-        OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the previous results (these are only in the current results):\n\n{colorText.END}{tabulated_onlyInCurrent_df}\n\n", enableMultipleLineOutput=True)
-    if common_df is not None and not common_df.empty and len(common_df) > 0:
-        common_df = common_df[printableColumns]
-        tabulated_common_df = colorText.miniTabulator().tabulate(
-            common_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
-            maxcolwidths=Utility.tools.getMaxColumnWidths(common_df)
-        ).encode("utf-8").decode(STD_ENCODING)
-        OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were common with the current results:\n\n{colorText.END}{tabulated_common_df}\n\n", enableMultipleLineOutput=True)
-    if len(addedList) > 0:
-        OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the current results and may have been added in the previous results:\n\n{colorText.END}{','.join(addedList)}\n\n", enableMultipleLineOutput=True)
-    else:
-        OutputControls().printOutput(f"{colorText.WARN}\n[+] No new stock may have been added in the previous results:\n\n{colorText.END}\n\n", enableMultipleLineOutput=True)
+    if userPassedArgs.stocklist is not None:
+        if diff_from_prev_scan is not None:
+            diff_from_prev_scan = diff_from_prev_scan[printableColumns]
+            saved_screen_results = copyScreenResults
+            tabulated_diff_from_prev = colorText.miniTabulator().tabulate(
+                diff_from_prev_scan, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+                maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
+            ).encode("utf-8").decode(STD_ENCODING)
+            OutputControls().printOutput(f"{colorText.WARN}\n[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}\n\n", enableMultipleLineOutput=True)
+        if onlyInCurrent_df is not None and not onlyInCurrent_df.empty and len(onlyInCurrent_df) > 0:
+            onlyInCurrent_df = onlyInCurrent_df[printableColumns]
+            tabulated_onlyInCurrent_df = colorText.miniTabulator().tabulate(
+                onlyInCurrent_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+                maxcolwidths=Utility.tools.getMaxColumnWidths(onlyInCurrent_df)
+            ).encode("utf-8").decode(STD_ENCODING)
+            OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the previous results (these are only in the current results):\n\n{colorText.END}{tabulated_onlyInCurrent_df}\n\n", enableMultipleLineOutput=True)
+        if common_df is not None and not common_df.empty and len(common_df) > 0:
+            common_df = common_df[printableColumns]
+            tabulated_common_df = colorText.miniTabulator().tabulate(
+                common_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+                maxcolwidths=Utility.tools.getMaxColumnWidths(common_df)
+            ).encode("utf-8").decode(STD_ENCODING)
+            OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were common with the current results:\n\n{colorText.END}{tabulated_common_df}\n\n", enableMultipleLineOutput=True)
+        if len(addedList) > 0:
+            OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the current results and may have been added in the previous results:\n\n{colorText.END}{','.join(addedList)}\n\n", enableMultipleLineOutput=True)
+        else:
+            OutputControls().printOutput(f"{colorText.WARN}\n[+] No new stock may have been added in the previous results:\n\n{colorText.END}\n\n", enableMultipleLineOutput=True)
     
     _, reportNameInsights = getBacktestReportFilename(
         sortKey="Date", optionalName="Insights"
