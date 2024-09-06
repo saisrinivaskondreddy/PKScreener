@@ -1960,7 +1960,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 numRequestsInASecond = 0
                 while (direction is not None and direction not in ["RETURN","CANCEL"]):
                     requestTimeDiff = PKDateUtilities.currentDateTime() - requestTime
-                    if requestTimeDiff.total_seconds() <= 0.06:
+                    if requestTimeDiff.total_seconds() <= 0.4:
                         numRequestsInASecond += 1 # Track the number of requests in a second
                     else:
                         numRequestsInASecond = 0
