@@ -1623,6 +1623,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             OutputControls().printOutput(f"{colorText.FAIL}Cannot continue. Failed to download latest data!{colorText.END}")
                             sleep(3)
                             return None, None
+                        listStockCodes = stockDictPrimary.keys()
                     loadedStockData = True
                     show_saved_diff_results = True
                     
@@ -1959,7 +1960,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 numRequestsInASecond = 0
                 while (direction is not None and direction not in ["RETURN","CANCEL"]):
                     requestTimeDiff = PKDateUtilities.currentDateTime() - requestTime
-                    if requestTimeDiff.total_seconds() <= 1:
+                    if requestTimeDiff.total_seconds() <= 0.06:
                         numRequestsInASecond += 1 # Track the number of requests in a second
                     else:
                         numRequestsInASecond = 0
@@ -1974,23 +1975,23 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     if direction in ["LEFT", "DOWN"]:
                         prevTime = currentTime - timedelta(minutes=(candleDuration*multiplier if direction == "DOWN" else 1*fastMultiplier))
                         currentTime = prevTime
-                        prevTime_comps = prevTime.split(" ")
+                        prevTime_comps = prevTime.strftime("%Y-%m-%d %H:%M:%S").split(" ")
                         dateComp = prevTime_comps[0]
                         timeComp = prevTime_comps[1].split(":")
                         prevTime = f"{colorText.FAIL}{dateComp}{colorText.END} {prevTime_comps[1]}" if direction == "DOWN" else f"{dateComp} {colorText.FAIL}{timeComp[0]}:{timeComp[1]}{colorText.END}:{timeComp[2]}"
                         OutputControls().moveCursorUpLines(lines=5)
                         OutputControls().printOutput(message)
-                        OutputControls().printOutput(f"[+] {colorText.FAIL}Go back to: {colorText.END}{colorText.GREEN}{prevTime}{colorText.END}{colorText.WARN} ? Press <Enter> to confirm.{colorText.END}")
+                        OutputControls().printOutput(f"[+] {colorText.WARN}Go back to: {colorText.END}{colorText.GREEN}{prevTime}{colorText.END}{colorText.WARN} ? Press <Enter> to confirm.{colorText.END}")
                     elif direction in ["RIGHT","UP"]:
                         prevTime = currentTime + timedelta(minutes=(candleDuration*multiplier if direction == "UP" else 1*fastMultiplier))
                         currentTime = prevTime
-                        prevTime_comps = prevTime.split(" ")
+                        prevTime_comps = prevTime.strftime("%Y-%m-%d %H:%M:%S").split(" ")
                         dateComp = prevTime_comps[0]
                         timeComp = prevTime_comps[1].split(":")
                         prevTime = f"{colorText.FAIL}{dateComp}{colorText.END} {prevTime_comps[1]}" if direction == "UP" else f"{dateComp} {colorText.FAIL}{timeComp[0]}:{timeComp[1]}{colorText.END}:{timeComp[2]}"
                         OutputControls().moveCursorUpLines(lines=5)
                         OutputControls().printOutput(message)
-                        OutputControls().printOutput(f"[+] {colorText.FAIL}Go forward to: {colorText.END}{colorText.GREEN}{prevTime}{colorText.END}{colorText.WARN} ? Press <Enter> to confirm.{colorText.END}")
+                        OutputControls().printOutput(f"[+] {colorText.WARN}Go forward to: {colorText.END}{colorText.GREEN}{prevTime}{colorText.END}{colorText.WARN} ? Press <Enter> to confirm.{colorText.END}")
                     requestTime = PKDateUtilities.currentDateTime()
                     direction = getKeyBoardArrowInput(message=None)
                 if direction is not None and direction == "RETURN":
@@ -2536,7 +2537,9 @@ def printNotifySaveScreenedResults(
 ):
     global userPassedArgs, elapsed_time, media_group_dict, saved_screen_results
     diff_from_prev_scan = None
-    common_df = None
+    onlyInCurrent_df = None
+    common_df  = None
+    addedList = []
     criteria_dateTime = None
     printableColumns = []
     if userPassedArgs.monitor is not None:
@@ -2549,8 +2552,10 @@ def printNotifySaveScreenedResults(
         idx = [x[0] for x in df_gpby.groups.values() if len(x) == 1]
         diff_from_prev_scan = diff_from_prev_scan.reindex(idx)
     if userPassedArgs.stocklist is not None:
-        common_df = screenResults[~screenResults.index.isin(userPassedArgs.stocklist.split(","))]
-        diff_from_prev_scan = screenResults[screenResults.index.isin(userPassedArgs.stocklist.split(","))]
+        passedList = userPassedArgs.stocklist.split(",")
+        onlyInCurrent_df = screenResults[~screenResults.index.isin(passedList)]
+        common_df = screenResults[screenResults.index.isin(passedList)]
+        addedList = list(set(passedList) - set(common_df.index))
     
     MAX_ALLOWED = (configManager.maxdisplayresults if userPassedArgs.maxdisplayresults is None else (int(userPassedArgs.maxdisplayresults) if not testing else 1))
     tabulated_backtest_summary = ""
@@ -2607,7 +2612,8 @@ def printNotifySaveScreenedResults(
             console_results = colorText.miniTabulator().tabulate(
                                     copyScreenResults, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
                                     maxcolwidths=Utility.tools.getMaxColumnWidths(copyScreenResults)
-                                ).encode("utf-8").decode(STD_ENCODING)
+                                ).encode("utf-8")
+            console_results = console_results.decode(STD_ENCODING)
             printableColumns = copyScreenResults.columns
         except:
             console_results = tabulated_results
@@ -2621,7 +2627,25 @@ def printNotifySaveScreenedResults(
             maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
         ).encode("utf-8").decode(STD_ENCODING)
         OutputControls().printOutput(f"{colorText.WARN}\n[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}\n\n", enableMultipleLineOutput=True)
-
+    if onlyInCurrent_df is not None and not onlyInCurrent_df.empty and len(onlyInCurrent_df) > 0:
+        onlyInCurrent_df = onlyInCurrent_df[printableColumns]
+        tabulated_onlyInCurrent_df = colorText.miniTabulator().tabulate(
+            onlyInCurrent_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+            maxcolwidths=Utility.tools.getMaxColumnWidths(onlyInCurrent_df)
+        ).encode("utf-8").decode(STD_ENCODING)
+        OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the previous results (these are only in the current results):\n\n{colorText.END}{tabulated_onlyInCurrent_df}\n\n", enableMultipleLineOutput=True)
+    if common_df is not None and not common_df.empty and len(common_df) > 0:
+        common_df = common_df[printableColumns]
+        tabulated_common_df = colorText.miniTabulator().tabulate(
+            common_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+            maxcolwidths=Utility.tools.getMaxColumnWidths(common_df)
+        ).encode("utf-8").decode(STD_ENCODING)
+        OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were common with the current results:\n\n{colorText.END}{tabulated_common_df}\n\n", enableMultipleLineOutput=True)
+    if len(addedList) > 0:
+        OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the current results and may have been added in the previous results:\n\n{colorText.END}{','.join(addedList)}\n\n", enableMultipleLineOutput=True)
+    else:
+        OutputControls().printOutput(f"{colorText.WARN}\n[+] No new stock may have been added in the previous results:\n\n{colorText.END}\n\n", enableMultipleLineOutput=True)
+    
     _, reportNameInsights = getBacktestReportFilename(
         sortKey="Date", optionalName="Insights"
     )
@@ -3186,7 +3210,7 @@ def runScanners(
         if userPassedArgs is not None and userPassedArgs.backtestdaysago is not None:
             criteria_dateTime = result[2].copy().index[-1-int(userPassedArgs.backtestdaysago)]
         else:
-            criteria_dateTime = result[2].copy().index[-1]
+            criteria_dateTime = result[2].copy().index[-1] if userPassedArgs.slicewindow is None else datetime.strptime(userPassedArgs.slicewindow.replace("'",""),"%Y-%m-%d %H:%M:%S.%f%z")
         localtz = datetime.now(UTC).astimezone().tzinfo
         exchangeTz = PKDateUtilities.currentDateTime().astimezone().tzinfo
         if localtz != exchangeTz:

@@ -82,7 +82,7 @@ class PKMarketOpenCloseAnalyser:
         daily_exists, daily_cache_file, stockDict = PKMarketOpenCloseAnalyser.ensureDailyStockDataExists(listStockCodes=listStockCodes)
         updatedCandleData = PKMarketOpenCloseAnalyser.updatedCandleData
         allDailyCandles = PKMarketOpenCloseAnalyser.allDailyCandles
-        if  (int_exists and daily_exists) and (updatedCandleData is None or allDailyCandles is None):
+        if  ((int_exists or len(stockDictInt) > 0) and (daily_exists or len(stockDict) > 0)) and (updatedCandleData is None or allDailyCandles is None):
             allDailyCandles = PKMarketOpenCloseAnalyser.getLatestDailyCandleData(daily_cache_file,stockDict)
             morningIntradayCandle = PKMarketOpenCloseAnalyser.getIntradayCandleFromMorning(int_cache_file,sliceWindowDatetime=sliceWindowDatetime,stockDictInt=stockDictInt)
             updatedCandleData = PKMarketOpenCloseAnalyser.combineDailyStockDataWithMorningSimulation(allDailyCandles,morningIntradayCandle)
@@ -130,13 +130,16 @@ class PKMarketOpenCloseAnalyser:
                 copyFileSize = os.stat(copyFilePath).st_size if os.path.exists(copyFilePath) else 0
                 if copyFileSize >= 1024*1024*40:
                     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
+                    PKMarketOpenCloseAnalyser.configManager.period = savedPeriod
+                    PKMarketOpenCloseAnalyser.configManager.duration = savedDuration
+                    PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
                     return True, cache_file, stockDict
             stockDict = Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=listStockCodes,isIntraday=True)
             exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=True)
             PKMarketOpenCloseAnalyser.configManager.period = savedPeriod
             PKMarketOpenCloseAnalyser.configManager.duration = savedDuration
             PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
-            if not exists:
+            if not exists and len(stockDict) <= 0:
                 OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()}/ !")
                 OutputControls().printOutput(f"[+] Please run {colorText.FAIL}pkscreener{colorText.END}{colorText.GREEN} -a Y -e -d -i 1m{colorText.END} and then run this menu option again.")
                 input("Press any key to continue...")
@@ -178,13 +181,16 @@ class PKMarketOpenCloseAnalyser:
                 copyFileSize = os.stat(copyFilePath).st_size if os.path.exists(copyFilePath) else 0
                 if copyFileSize >= 1024*1024*40:
                     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
+                    PKMarketOpenCloseAnalyser.configManager.period = savedPeriod
+                    PKMarketOpenCloseAnalyser.configManager.duration = savedDuration
+                    PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
                     return True, cache_file, stockDict
             stockDict = Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=listStockCodes,isIntraday=False,forceRedownload=True)
             exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=False)
             PKMarketOpenCloseAnalyser.configManager.period = savedPeriod
             PKMarketOpenCloseAnalyser.configManager.duration = savedDuration
             PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
-            if not exists:
+            if not exists and len(stockDict) <= 0:
                 OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()}/ !")
                 OutputControls().printOutput(f"[+] Please run {colorText.FAIL}pkscreener{colorText.END}{colorText.GREEN} -a Y -e -d{colorText.END} and then run this menu option again.")
                 input("Press any key to continue...")
@@ -255,7 +261,8 @@ class PKMarketOpenCloseAnalyser:
                 df = pd.DataFrame(data=allDailyIntradayCandles[stock]["data"],
                                 columns=allDailyIntradayCandles[stock]["columns"],
                                 index=allDailyIntradayCandles[stock]["index"])
-                df = df.head(numOfCandles)
+                if sliceWindowDatetime is None:
+                    df = df.head(numOfCandles)
                 try:
                     alertCandleTimestamp = sliceWindowDatetime if sliceWindowDatetime is not None else f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30'
                     df = df[df.index <=  pd.to_datetime(alertCandleTimestamp).to_datetime64()]
@@ -263,6 +270,8 @@ class PKMarketOpenCloseAnalyser:
                     alertCandleTimestamp = sliceWindowDatetime if sliceWindowDatetime is not None else f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30'
                     df = df[df.index <=  pd.to_datetime(alertCandleTimestamp, utc=True)]
                     pass
+                with pd.option_context('mode.chained_assignment', None):
+                    df.dropna(axis=0, how="all", inplace=True)
                 if df is not None and len(df) > 0:
                     combinedCandle = {"Open":PKMarketOpenCloseAnalyser.getMorningOpen(df), "High":max(df["High"]), 
                                     "Low":min(df["Low"]),"Close":PKMarketOpenCloseAnalyser.getMorningClose(df),
@@ -279,7 +288,7 @@ class PKMarketOpenCloseAnalyser:
     def getMorningOpen(df):
         open = df["Open"][0]
         index = 0
-        while open is np.nan and index < len(df):
+        while np.isnan(open) and index < len(df):
             open = df["Open"][index + 1]
             index += 1
         return open
@@ -287,7 +296,7 @@ class PKMarketOpenCloseAnalyser:
     def getMorningClose(df):
         close = df["Close"][-1]
         index = len(df)
-        while close is np.nan and index >= 0:
+        while np.isnan(close) and index >= 0:
             close = df["Close"][index - 1]
             index -= 1
         return close

@@ -307,13 +307,13 @@ def get_debug_args():
         return args
     except Exception as e:
         return None
-    # return ' --systemlaunched -a y -e -o "X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:" -u -1001785195297 --stocklist SWELECTES,KEC,STEELCAS,MUTHOOTCAP,VIPIND,ASHOKA,NDLVENTURE,ALKALI,NECLIFE,LAL,LIBAS,AEROFLEX,SEPC,SATINDLTD,KOTHARIPET,FINOPB,UTIAMC,HOMEFIRST'.split(" ")
+    # return ' --systemlaunched -a y -e -o "X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:" -u -1001785195297 --stocklist GLS,NESCO,SBICARD,DREAMFOLKS,JAGRAN,ACEINTEG,RAMASTEEL'.split(" ")
 
 args = get_debug_args()
 argsv = argParser.parse_known_args(args=args)
 # argsv = argParser.parse_known_args()
 args = argsv[0]
-# args.slicewindow = "2024-09-05 13:33:12.481253+05:30"
+# args.slicewindow = "2024-09-06 10:55:12.481253+05:30"
 results = None
 resultStocks = None
 plainResults = None
@@ -437,7 +437,7 @@ def runApplication():
     if args is not None and not args.exit:
         argsv = argParser.parse_known_args()
         args = argsv[0]
-    # args.slicewindow = "2024-09-05 13:33:12.481253+05:30"
+    # args.slicewindow = "2024-09-06 10:55:12.481253+05:30"
     if args.user is None:
         from PKDevTools.classes.Telegram import get_secrets
         Channel_Id, _, _, _ = get_secrets()
