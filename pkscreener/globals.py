@@ -155,6 +155,7 @@ DEV_CHANNEL_ID="-1001785195297"
 criteria_dateTime = None
 saved_screen_results = None
 show_saved_diff_results = False
+resultsContentsEncoded = None
 
 def startMarketMonitor(mp_dict,keyboardevent):
     from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
@@ -464,10 +465,13 @@ def handleSecondaryMenuChoices(
                 requestingUser = f" -u {userPassedArgs.user}" if userPassedArgs.user is not None else ""
                 enableLog = f" -l" if userPassedArgs.log else ""
                 enableTelegramMode = f" --telegram" if userPassedArgs is not None and userPassedArgs.telegram else ""
+                stockListParam = f" --stocklist {userPassedArgs.stocklist}" if userPassedArgs.stocklist else ""
+                slicewindowParam = f" --slicewindow {userPassedArgs.slicewindow}" if userPassedArgs.slicewindow else ""
+                fnameParam = f" --fname {resultsContentsEncoded}" if resultsContentsEncoded else ""
                 launcher = f"python3.11 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
-                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in quick backtest mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit quick backtest mode.{colorText.END}")
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in quick backtest mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit quick backtest mode.{colorText.END}")
                 sleep(2)
-                os.system(f"{launcher} --systemlaunched -a Y -e --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}")
+                os.system(f"{launcher} --systemlaunched -a Y -e --backtestdaysago {int(backtestDaysAgo)}{requestingUser}{enableLog}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}")
                 Utility.tools.clearScreen(clearAlways=True,forceTop=True)
                 return None, None
         elif userPassedArgs is not None and userPassedArgs.options is not None:
@@ -1020,9 +1024,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 backtestParam = f" --backtestdaysago {userPassedArgs.backtestdaysago}" if userPassedArgs.backtestdaysago else ""
                 stockListParam = f" --stocklist {userPassedArgs.stocklist}" if userPassedArgs.stocklist else ""
                 slicewindowParam = f" --slicewindow {userPassedArgs.slicewindow}" if userPassedArgs.slicewindow else ""
-                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{colorText.END}")
+                fnameParam = f" --fname {resultsContentsEncoded}" if resultsContentsEncoded else ""
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}{colorText.END}")
                 sleep(2)
-                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}")
+                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}")
                 OutputControls().printOutput(
                         colorText.GREEN
                         + f"[+] Finished running all piped scanners!"
@@ -1984,6 +1989,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         OutputControls().printOutput(f"[+] {colorText.WARN}Go back to: {colorText.END}{colorText.GREEN}{prevTime}{colorText.END}{colorText.WARN} ? Press <Enter> to confirm.{colorText.END}")
                     elif direction in ["RIGHT","UP"]:
                         prevTime = currentTime + timedelta(minutes=(candleDuration*multiplier if direction == "UP" else 1*fastMultiplier))
+                        if prevTime > PKDateUtilities.currentDateTime():
+                            prevTime = PKDateUtilities.currentDateTime()
                         currentTime = prevTime
                         prevTime_comps = prevTime.strftime("%Y-%m-%d %H:%M:%S").split(" ")
                         dateComp = prevTime_comps[0]
@@ -2008,8 +2015,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         userPassedArgs.backtestdaysago = None
                     elif tradingDaysInThePast == 0:
                         userPassedArgs.slicewindow = f"'{currentTime}'"
-                    
-                    sleep(2)
+                    Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+                    OutputControls().printOutput(f"{colorText.WARN}Launching into the selected time-window!{colorText.END}{colorText.GREEN} Brace yourself for the time-travel!{colorText.END}")
+                    sleep(5)
                     return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
 
             show_saved_diff_results = False
@@ -2192,9 +2200,12 @@ def addOrRunPipedMenus():
         enableTelegramMode = f" --telegram" if userPassedArgs is not None and userPassedArgs.telegram else ""
         backtestParam = f" --backtestdaysago {userPassedArgs.backtestdaysago}" if userPassedArgs.backtestdaysago else ""
         runIntradayAnalysisParam = f" --runintradayanalysis" if shouldRunIntradayAnalysis else ""
-        OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{colorText.END}")
+        stockListParam = f" --stocklist {userPassedArgs.stocklist}" if userPassedArgs.stocklist else ""
+        slicewindowParam = f" --slicewindow {userPassedArgs.slicewindow}" if userPassedArgs.slicewindow else ""
+        fnameParam = f" --fname {resultsContentsEncoded}" if resultsContentsEncoded else ""
+        OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}{colorText.END}")
         sleep(2)
-        os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}")
+        os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}")
         userPassedArgs.pipedmenus = None
         OutputControls().printOutput(
                 colorText.GREEN
@@ -2532,15 +2543,29 @@ def updateMenuChoiceHierarchy():
     default_logger().info(menuChoiceHierarchy)
     return menuChoiceHierarchy
 
+def saveScreenResultsEncoded(encodedText:None):
+    import uuid
+    uuidFileName = str(uuid.uuid4())
+    fileName = os.path.join(Archiver.get_user_outputs_dir(), uuidFileName)
+    with open(fileName, 'w') as f:
+        f.write(encodedText)
+    return f'{uuidFileName}~{PKDateUtilities.currentDateTime().strftime("%Y-%m-%d %H:%M:%S.%f%z").replace(" ","~")}'
+
+def readScreenResultsDecoded(fileName=None):
+    filePath = os.path.join(Archiver.get_user_outputs_dir(), fileName)
+    contents = None
+    with open(filePath, 'r') as f:
+        contents = f.read()
+    return contents
+
 def printNotifySaveScreenedResults(
     screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None
 ):
-    global userPassedArgs, elapsed_time, media_group_dict, saved_screen_results
+    global userPassedArgs, elapsed_time, media_group_dict, saved_screen_results, resultsContentsEncoded,criteria_dateTime
     diff_from_prev_scan = None
     onlyInCurrent_df = None
     common_df  = None
     addedList = []
-    criteria_dateTime = None
     printableColumns = []
     if userPassedArgs.monitor is not None:
         return
@@ -2612,14 +2637,16 @@ def printNotifySaveScreenedResults(
             console_results = colorText.miniTabulator().tabulate(
                                     copyScreenResults, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
                                     maxcolwidths=Utility.tools.getMaxColumnWidths(copyScreenResults)
-                                ).encode("utf-8")
-            console_results = console_results.decode(STD_ENCODING)
+                                ).encode("utf-8").decode(STD_ENCODING)
+            console_results = console_results
             printableColumns = copyScreenResults.columns
         except:
             console_results = tabulated_results
             printableColumns = screenResults.columns
-    OutputControls().printOutput(f"{console_results}\n", enableMultipleLineOutput=True)
-    if userPassedArgs.stocklist is not None:
+        resultsContentsEncoded = saveScreenResultsEncoded(encodedText=console_results)
+    if userPassedArgs.stocklist is None:
+        OutputControls().printOutput(f"{console_results}\n", enableMultipleLineOutput=True)
+    else:
         if diff_from_prev_scan is not None:
             diff_from_prev_scan = diff_from_prev_scan[printableColumns]
             saved_screen_results = copyScreenResults
@@ -2628,25 +2655,43 @@ def printNotifySaveScreenedResults(
                 maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
             ).encode("utf-8").decode(STD_ENCODING)
             OutputControls().printOutput(f"{colorText.WARN}\n[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}\n\n", enableMultipleLineOutput=True)
+        lastReportDateTime = "Unknown"
+        if userPassedArgs.fname is not None:
+            fnames = userPassedArgs.fname.split("~")
+            lastReportDateTime = f"{fnames[1]} {fnames[2]}"
+            resultsContentsDecoded = readScreenResultsDecoded(fnames[0])
+            os.remove(os.path.join(Archiver.get_user_outputs_dir(), fnames[0]))
         if onlyInCurrent_df is not None and not onlyInCurrent_df.empty and len(onlyInCurrent_df) > 0:
             onlyInCurrent_df = onlyInCurrent_df[printableColumns]
             tabulated_onlyInCurrent_df = colorText.miniTabulator().tabulate(
                 onlyInCurrent_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
                 maxcolwidths=Utility.tools.getMaxColumnWidths(onlyInCurrent_df)
             ).encode("utf-8").decode(STD_ENCODING)
-            OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the previous results (these are only in the current results):\n\n{colorText.END}{tabulated_onlyInCurrent_df}\n\n", enableMultipleLineOutput=True)
+            OutputControls().printOutput(f"\n[+] {colorText.WARN}These were not found in the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}{colorText.WARN} (these are only in the current results at {colorText.END}{colorText.GREEN}{criteria_dateTime}{colorText.END}{colorText.WARN}):\n{colorText.END}{tabulated_onlyInCurrent_df}\n", enableMultipleLineOutput=True)
         if common_df is not None and not common_df.empty and len(common_df) > 0:
             common_df = common_df[printableColumns]
             tabulated_common_df = colorText.miniTabulator().tabulate(
                 common_df, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
                 maxcolwidths=Utility.tools.getMaxColumnWidths(common_df)
             ).encode("utf-8").decode(STD_ENCODING)
-            OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were common with the current results:\n\n{colorText.END}{tabulated_common_df}\n\n", enableMultipleLineOutput=True)
+            OutputControls().printOutput(f"\n[+] {colorText.WARN}These were common between the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}{colorText.WARN} and the current results at {colorText.END}{colorText.GREEN}{criteria_dateTime}{colorText.END}{colorText.WARN}):\n{colorText.END}{tabulated_common_df}\n", enableMultipleLineOutput=True)
         if len(addedList) > 0:
-            OutputControls().printOutput(f"{colorText.WARN}\n[+] These stocks were not found in the current results and may have been added in the previous results:\n\n{colorText.END}{','.join(addedList)}\n\n", enableMultipleLineOutput=True)
+            reportLines = resultsContentsDecoded.splitlines(keepends=True)
+            filteredReportLines = reportLines[:3]
+            shouldKeep = False
+            for line in reportLines[3:]:
+                if line.startswith("|"):
+                    item = line.split("|")[1].strip()
+                    if len(item) > 0:
+                        shouldKeep = item in addedList
+                if shouldKeep:
+                    filteredReportLines.append(line)
+            resultsContentsDecoded = "".join(filteredReportLines)
+            OutputControls().printOutput(f"\n[+] {colorText.WARN}These may have been newly added in the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}{colorText.WARN} and were not found in the current results at {colorText.END}{colorText.GREEN}{criteria_dateTime}{colorText.END}{colorText.WARN}):\n{colorText.END}{resultsContentsDecoded}\n", enableMultipleLineOutput=True)
         else:
-            OutputControls().printOutput(f"{colorText.WARN}\n[+] No new stock may have been added in the previous results:\n\n{colorText.END}\n\n", enableMultipleLineOutput=True)
+            OutputControls().printOutput(f"\n[+] {colorText.WARN}No new stock may have been added in the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}", enableMultipleLineOutput=True)
     
+    criteria_dateTime = None
     _, reportNameInsights = getBacktestReportFilename(
         sortKey="Date", optionalName="Insights"
     )

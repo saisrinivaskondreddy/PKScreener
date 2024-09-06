@@ -158,6 +158,11 @@ argParser.add_argument(
     required=False,
 )
 argParser.add_argument(
+    "--fname",
+    help="file name with results contents",
+    required=False,
+)
+argParser.add_argument(
     "--forceBacktestsForZeroResultDays",
     help="Force run the backtests even for those days when we already have zero results saved in the repo",
     action=argparse.BooleanOptionalAction,
