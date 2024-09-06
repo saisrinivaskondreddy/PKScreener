@@ -2834,14 +2834,14 @@ class ScreeningStatistics:
                 index = 0
                 while (index+1) < legsToCheck:
                     # prev one < new one.
-                    if consolidationPercentages[index] < consolidationPercentages[index+1]:
+                    if consolidationPercentages[index] <= consolidationPercentages[index+1]:
                         return False, consolidationPercentages[:relativeLegsTocheck]
                     if index < relativeLegsTocheck:
                         devScore += 2-(consolidationPercentages[index]/consolidationPercentages[index+1])
                     index += 1
         
         # Return the first requested number of legs in the order of leg1, leg2, leg3 etc.
-        conditionMet = len(consolidationPercentages[:relativeLegsTocheck]) >= relativeLegsTocheck
+        conditionMet = len(consolidationPercentages[:relativeLegsTocheck]) >= legsToCheck
         return conditionMet, consolidationPercentages[:relativeLegsTocheck], devScore
 
     # validate if the stock has been having higher highs, higher lows

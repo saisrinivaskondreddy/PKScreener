@@ -36,7 +36,7 @@ import sys
 import time
 import urllib
 import warnings
-from datetime import datetime, UTC
+from datetime import datetime, UTC, timedelta
 from time import sleep
 
 import numpy as np
@@ -1019,9 +1019,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 enableTelegramMode = f" --telegram" if userPassedArgs is not None and userPassedArgs.telegram else ""
                 backtestParam = f" --backtestdaysago {userPassedArgs.backtestdaysago}" if userPassedArgs.backtestdaysago else ""
                 stockListParam = f" --stocklist {userPassedArgs.stocklist}" if userPassedArgs.stocklist else ""
-                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{colorText.END}")
+                slicewindowParam = f" --slicewindow {userPassedArgs.slicewindow}" if userPassedArgs.slicewindow else ""
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{colorText.END}")
                 sleep(2)
-                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}")
+                os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}")
                 OutputControls().printOutput(
                         colorText.GREEN
                         + f"[+] Finished running all piped scanners!"
@@ -1610,6 +1611,21 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             elif indexOption == "E":
                 return handleMonitorFiveEMA()
             else:
+                if userPassedArgs.slicewindow is not None:
+                    if userPassedArgs.options.startswith("X:12:"):
+                        analysis_dict = {}
+                        shouldSuppress = not OutputControls().enableMultipleLineOutput
+                        with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
+                            listStockCodes = fetcher.fetchStockCodes(tickerOption=12, stockCode=None)
+                        currentTime = userPassedArgs.slicewindow.replace("'","")
+                        stockDictPrimary,endOfdayCandles = PKMarketOpenCloseAnalyser.getStockDataForSimulation(sliceWindowDatetime=currentTime,listStockCodes=listStockCodes)
+                        if stockDictPrimary is None:
+                            OutputControls().printOutput(f"{colorText.FAIL}Cannot continue. Failed to download latest data!{colorText.END}")
+                            sleep(3)
+                            return None, None
+                    loadedStockData = True
+                    show_saved_diff_results = True
+                    
                 if str(menuOption).upper() == "C":
                     stockDictPrimary,endOfdayCandles = PKMarketOpenCloseAnalyser.getStockDataForSimulation()
                     if stockDictPrimary is None or endOfdayCandles is None:
@@ -1702,7 +1718,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 actualHistoricalDuration = samplingDuration - fillerPlaceHolder
                 if actualHistoricalDuration >= 0:
                     progressbar()
-        sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
+        OutputControls().moveCursorUpLines(2)    #sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
         if not keyboardInterruptEventFired:
             global tasks_queue, results_queue, consumers, logging_queue
             screenResults, saveResults, backtest_df, tasks_queue, results_queue, consumers,logging_queue = PKScanRunner.runScanWithParams(userPassedArgs,keyboardInterruptEvent,screenCounter,screenResultsCounter,stockDictPrimary,stockDictSecondary,testing, backtestPeriod, menuOption,executeOption, samplingDuration, items,screenResults, saveResults, backtest_df,scanningCb=runScanners,tasks_queue=tasks_queue, results_queue=results_queue, consumers=consumers,logging_queue=logging_queue)
@@ -1935,48 +1951,66 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 os.system(f"{launcher} -a Y -m {scannerOptionQuoted}")
             elif pinOption in ["3","4"]:
                 from pkscreener.classes.keys import getKeyBoardArrowInput
-                message = f"\n[+] {colorText.FAIL}Please use {colorText.END}{colorText.GREEN}Left / Right arrow keys{colorText.END} to slide (go back / forward) the {colorText.WARN}time-window by every {configManager.duration}{colorText.END} !"
-                direction = getKeyBoardArrowInput(message=message)
-                if direction is not None:
+                message = f"\n[+] {colorText.FAIL}Please use {colorText.END}{colorText.GREEN}Left / Right arrow keys{colorText.END} to slide through the {colorText.WARN}time-window by every 1 minute.{colorText.END}\n[+] Use {colorText.GREEN}Up / Down arrow keys{colorText.END} to jump {colorText.GREEN}forward / backwards{colorText.END} by {colorText.WARN}{configManager.duration}{colorText.END}\n[+] {colorText.FAIL}Press any oher key to cancel.{colorText.END}"
+                currentTime = PKDateUtilities.currentDateTime()
+                requestTime = PKDateUtilities.currentDateTime()
+                OutputControls().printOutput(message)
+                direction = getKeyBoardArrowInput(message=None)
+                numRequestsInASecond = 0
+                while (direction is not None and direction not in ["RETURN","CANCEL"]):
+                    requestTimeDiff = PKDateUtilities.currentDateTime() - requestTime
+                    if requestTimeDiff.total_seconds() <= 1:
+                        numRequestsInASecond += 1 # Track the number of requests in a second
+                    else:
+                        numRequestsInASecond = 0
+                    if numRequestsInASecond >= 10:
+                        numRequestsInASecond = 0
+                        fastMultiplier = 60 # Let the clock move faster if the user really wants to go faster
+                    else:
+                        fastMultiplier = 1
+                    candleFrequency = configManager.candleDurationFrequency
+                    candleDuration = configManager.candleDurationInt
+                    multiplier = fastMultiplier * (60 if candleFrequency == "h" else (24*60 if candleFrequency == "d" else (24*60*5 if candleFrequency == "wk" else (24*60*5*20 if candleFrequency == "mo" else 1))))
+                    if direction in ["LEFT", "DOWN"]:
+                        prevTime = currentTime - timedelta(minutes=(candleDuration*multiplier if direction == "DOWN" else 1*fastMultiplier))
+                        currentTime = prevTime
+                        prevTime_comps = prevTime.split(" ")
+                        dateComp = prevTime_comps[0]
+                        timeComp = prevTime_comps[1].split(":")
+                        prevTime = f"{colorText.FAIL}{dateComp}{colorText.END} {prevTime_comps[1]}" if direction == "DOWN" else f"{dateComp} {colorText.FAIL}{timeComp[0]}:{timeComp[1]}{colorText.END}:{timeComp[2]}"
+                        OutputControls().moveCursorUpLines(lines=5)
+                        OutputControls().printOutput(message)
+                        OutputControls().printOutput(f"[+] {colorText.FAIL}Go back to: {colorText.END}{colorText.GREEN}{prevTime}{colorText.END}{colorText.WARN} ? Press <Enter> to confirm.{colorText.END}")
+                    elif direction in ["RIGHT","UP"]:
+                        prevTime = currentTime + timedelta(minutes=(candleDuration*multiplier if direction == "UP" else 1*fastMultiplier))
+                        currentTime = prevTime
+                        prevTime_comps = prevTime.split(" ")
+                        dateComp = prevTime_comps[0]
+                        timeComp = prevTime_comps[1].split(":")
+                        prevTime = f"{colorText.FAIL}{dateComp}{colorText.END} {prevTime_comps[1]}" if direction == "UP" else f"{dateComp} {colorText.FAIL}{timeComp[0]}:{timeComp[1]}{colorText.END}:{timeComp[2]}"
+                        OutputControls().moveCursorUpLines(lines=5)
+                        OutputControls().printOutput(message)
+                        OutputControls().printOutput(f"[+] {colorText.FAIL}Go forward to: {colorText.END}{colorText.GREEN}{prevTime}{colorText.END}{colorText.WARN} ? Press <Enter> to confirm.{colorText.END}")
+                    requestTime = PKDateUtilities.currentDateTime()
+                    direction = getKeyBoardArrowInput(message=None)
+                if direction is not None and direction == "RETURN":
+                    # We need to take the data until "currentTime" from intraday data
                     if userPassedArgs is not None and userPassedArgs.progressstatus is not None:
                         runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1].strip()
                         if runOptionName.startswith("P"):
                             userPassedArgs.options = runOptionName.replace("_",":")
                     userPassedArgs.stocklist = ','.join(screenResults.index)
-                    if direction == "LEFT":
-                        analysis_dict = {}
-                        show_saved_diff_results = True
-                        if configManager.duration.endswith("m"):
-                            userPassedArgs.intraday = configManager.duration
-                        if userPassedArgs.backtestdaysago is not None:
-                            userPassedArgs.backtestdaysago = int(userPassedArgs.backtestdaysago) + 1
-                        else:
-                            userPassedArgs.backtestdaysago = 1
-                        waitMessage = f"\n[+] {colorText.GREEN}Please wait ...Trying to go back by {configManager.duration}{colorText.END} !"
-                        OutputControls().printOutput(waitMessage)
-                        sleep(2)
-                        return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
-                    elif direction == "RIGHT":
-                        analysis_dict = {}
-                        show_saved_diff_results = True
-                        if userPassedArgs.backtestdaysago is not None:
-                            userPassedArgs.backtestdaysago = int(userPassedArgs.backtestdaysago)
-                            userPassedArgs.backtestdaysago -= 1
-                            if userPassedArgs.backtestdaysago < 0:
-                                userPassedArgs.backtestdaysago = 0
-                                waitMessage = f"\n[+] {colorText.FAIL}Already at the present time-window. Cannot go forward by {configManager.duration}{colorText.END} !"
-                            else:
-                                waitMessage = f"\n[+] {colorText.GREEN}Please wait ...Trying to go forward by {configManager.duration}{colorText.END} !"
-                            OutputControls().printOutput(waitMessage)
-                            sleep(2)
-                            return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
-                        else:
-                            waitMessage = f"\n[+] {colorText.FAIL}Already at the present time-window. Cannot go forward by {configManager.duration}{colorText.END} !"
-                            OutputControls().printOutput(waitMessage)
-                            sleep(2)
-                    else:
-                        OutputControls().printOutput(message)
-                        sleep(4)
+                    tradingDaysInThePast = PKDateUtilities.trading_days_between(currentTime,PKDateUtilities.tradingDate())
+                    if tradingDaysInThePast > 0:
+                        userPassedArgs.backtestdaysago = tradingDaysInThePast
+                    elif tradingDaysInThePast < 0:
+                        userPassedArgs.backtestdaysago = None
+                    elif tradingDaysInThePast == 0:
+                        userPassedArgs.slicewindow = f"'{currentTime}'"
+                    
+                    sleep(2)
+                    return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
+
             show_saved_diff_results = False
             return None, None
 

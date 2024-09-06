@@ -229,6 +229,12 @@ argParser.add_argument(
     required=False,
 )
 argParser.add_argument(
+    "--slicewindow",
+    type=str,
+    help="Time slice window value - a date or datetime string with timezone in international format",
+    required=False,
+)
+argParser.add_argument(
     "--stocklist",
     type=str,
     help="Comma separated list of stocks passed from previous scan results",
@@ -301,12 +307,13 @@ def get_debug_args():
         return args
     except Exception as e:
         return None
-        # return " -a Y -e -l -o X:12:30:D:D:D:D:D".split(" ")
+    # return ' --systemlaunched -a y -e -o "X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:" -u -1001785195297 --stocklist SWELECTES,KEC,STEELCAS,MUTHOOTCAP,VIPIND,ASHOKA,NDLVENTURE,ALKALI,NECLIFE,LAL,LIBAS,AEROFLEX,SEPC,SATINDLTD,KOTHARIPET,FINOPB,UTIAMC,HOMEFIRST'.split(" ")
 
 args = get_debug_args()
 argsv = argParser.parse_known_args(args=args)
 # argsv = argParser.parse_known_args()
 args = argsv[0]
+# args.slicewindow = "2024-09-05 13:33:12.481253+05:30"
 results = None
 resultStocks = None
 plainResults = None
@@ -422,6 +429,7 @@ def runApplication():
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time,argParser
     from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     args = get_debug_args()
+    
     if not isinstance(args,argparse.Namespace):
         argsv = argParser.parse_known_args(args=args)
         # argsv = argParser.parse_known_args()
@@ -429,6 +437,7 @@ def runApplication():
     if args is not None and not args.exit:
         argsv = argParser.parse_known_args()
         args = argsv[0]
+    # args.slicewindow = "2024-09-05 13:33:12.481253+05:30"
     if args.user is None:
         from PKDevTools.classes.Telegram import get_secrets
         Channel_Id, _, _, _ = get_secrets()
@@ -456,6 +465,7 @@ def runApplication():
                 choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
                 args.progressstatus = f"[+] {choices} => Running {choices}"
                 args.usertag = PREDEFINED_SCAN_MENU_TEXTS[indexNum]
+                args.maxdisplayresults = 2000
         except:
             choices = ""
             pass

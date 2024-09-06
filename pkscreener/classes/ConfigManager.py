@@ -119,7 +119,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             res = temp.match(self.duration).groups()
         except:
             return self.duration
-        return res[0]
+        return int(res[0])
     
     @property
     def candleDurationFrequency(self):
@@ -137,7 +137,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             res = temp.match(self.period).groups()
         except:
             return self.period
-        return res[0]
+        return int(res[0])
     
     @property
     def candlePeriodFrequency(self):

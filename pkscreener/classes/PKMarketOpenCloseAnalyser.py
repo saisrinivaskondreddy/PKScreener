@@ -77,14 +77,14 @@ class PKMarketOpenCloseAnalyser:
     updatedCandleData = None
     allDailyCandles = None
     allIntradayCandles = None
-    def getStockDataForSimulation():
-        int_exists, int_cache_file = PKMarketOpenCloseAnalyser.ensureIntradayStockDataExists()
-        daily_exists, daily_cache_file = PKMarketOpenCloseAnalyser.ensureDailyStockDataExists()
+    def getStockDataForSimulation(sliceWindowDatetime=None,listStockCodes=[]):
+        int_exists, int_cache_file, stockDictInt = PKMarketOpenCloseAnalyser.ensureIntradayStockDataExists(listStockCodes=listStockCodes)
+        daily_exists, daily_cache_file, stockDict = PKMarketOpenCloseAnalyser.ensureDailyStockDataExists(listStockCodes=listStockCodes)
         updatedCandleData = PKMarketOpenCloseAnalyser.updatedCandleData
         allDailyCandles = PKMarketOpenCloseAnalyser.allDailyCandles
         if  (int_exists and daily_exists) and (updatedCandleData is None or allDailyCandles is None):
-            allDailyCandles = PKMarketOpenCloseAnalyser.getLatestDailyCandleData(daily_cache_file)
-            morningIntradayCandle = PKMarketOpenCloseAnalyser.getIntradayCandleFromMorning(int_cache_file)
+            allDailyCandles = PKMarketOpenCloseAnalyser.getLatestDailyCandleData(daily_cache_file,stockDict)
+            morningIntradayCandle = PKMarketOpenCloseAnalyser.getIntradayCandleFromMorning(int_cache_file,sliceWindowDatetime=sliceWindowDatetime,stockDictInt=stockDictInt)
             updatedCandleData = PKMarketOpenCloseAnalyser.combineDailyStockDataWithMorningSimulation(allDailyCandles,morningIntradayCandle)
             # PKMarketOpenCloseAnalyser.updatedCandleData = updatedCandleData
             # PKMarketOpenCloseAnalyser.allDailyCandles = allDailyCandles
@@ -103,12 +103,13 @@ class PKMarketOpenCloseAnalyser:
         Utility.tools.saveStockData(allDailyCandles,PKMarketOpenCloseAnalyser.configManager,1,False,False, True)
         return save_df, screen_df
 
-    def ensureIntradayStockDataExists():
+    def ensureIntradayStockDataExists(listStockCodes=[]):
         # Ensure that the intraday_stock_data_<date>.pkl file exists
         exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=True)
         copyFilePath = os.path.join(Archiver.get_user_outputs_dir(), f"copy_{cache_file}")
         srcFilePath = os.path.join(Archiver.get_user_outputs_dir(), cache_file)
         srcFileSize = os.stat(srcFilePath).st_size if os.path.exists(srcFilePath) else 0
+        stockDict = None
         if exists and srcFileSize < 1024*1024*40:
              # File less than 30MB ? Must have been corrupted
             try:
@@ -116,26 +117,29 @@ class PKMarketOpenCloseAnalyser:
                 exists = False
             except:
                 pass
-        if not exists:
+        isTrading = PKDateUtilities.isTradingTime()
+        if not exists or isTrading:
             savedPeriod = PKMarketOpenCloseAnalyser.configManager.period
             savedDuration = PKMarketOpenCloseAnalyser.configManager.duration
             PKMarketOpenCloseAnalyser.configManager.period = "1d"
             PKMarketOpenCloseAnalyser.configManager.duration = "1m"
+            PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
             OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()} !")
             OutputControls().printOutput(f"[+] {colorText.GREEN}Trying to download {cache_file}{colorText.END}. Please wait ...")
-            if os.path.exists(copyFilePath):
+            if os.path.exists(copyFilePath) and not isTrading:
                 copyFileSize = os.stat(copyFilePath).st_size if os.path.exists(copyFilePath) else 0
                 if copyFileSize >= 1024*1024*40:
                     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
-                    return True, cache_file
-            Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=[],isIntraday=True)
+                    return True, cache_file, stockDict
+            stockDict = Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=listStockCodes,isIntraday=True)
             exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=True)
+            PKMarketOpenCloseAnalyser.configManager.period = savedPeriod
+            PKMarketOpenCloseAnalyser.configManager.duration = savedDuration
+            PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
             if not exists:
                 OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()}/ !")
                 OutputControls().printOutput(f"[+] Please run {colorText.FAIL}pkscreener{colorText.END}{colorText.GREEN} -a Y -e -d -i 1m{colorText.END} and then run this menu option again.")
                 input("Press any key to continue...")
-            PKMarketOpenCloseAnalyser.configManager.period = savedPeriod
-            PKMarketOpenCloseAnalyser.configManager.duration = savedDuration
         try:
             if os.path.exists(copyFilePath) and exists:
                 shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
@@ -143,14 +147,15 @@ class PKMarketOpenCloseAnalyser:
                 shutil.copy(srcFilePath,copyFilePath)
         except:
             pass
-        return exists, cache_file
+        return exists, cache_file, stockDict
 
-    def ensureDailyStockDataExists():
+    def ensureDailyStockDataExists(listStockCodes=[]):
         # Ensure that the stock_data_<date>.pkl file exists
         exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=False)
         copyFilePath = os.path.join(Archiver.get_user_outputs_dir(), f"copy_{cache_file}")
         srcFilePath = os.path.join(Archiver.get_user_outputs_dir(), cache_file)
         srcFileSize = os.stat(srcFilePath).st_size if os.path.exists(srcFilePath) else 0
+        stockDict = None
         if exists and srcFileSize < 1024*1024*40:
              # File less than 30MB ? Must have been corrupted
             try:
@@ -158,18 +163,27 @@ class PKMarketOpenCloseAnalyser:
                 exists = False
             except:
                 pass
-        if not exists:
+        isTrading = PKDateUtilities.isTradingTime()
+        if not exists or isTrading:
+            savedPeriod = PKMarketOpenCloseAnalyser.configManager.period
+            savedDuration = PKMarketOpenCloseAnalyser.configManager.duration
+            PKMarketOpenCloseAnalyser.configManager.period = "1y"
+            PKMarketOpenCloseAnalyser.configManager.duration = "1d"
+            PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
             OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()} !")
         # We should download a fresh copy anyways because we may have altered the existing copy in
         # the previous run. -- !!!! Not required if we saved at the end of last operation !!!!
             OutputControls().printOutput(f"[+] {colorText.GREEN}Trying to download {cache_file}{colorText.END}. Please wait ...")
-            if os.path.exists(copyFilePath):
+            if os.path.exists(copyFilePath) and not isTrading:
                 copyFileSize = os.stat(copyFilePath).st_size if os.path.exists(copyFilePath) else 0
                 if copyFileSize >= 1024*1024*40:
                     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
-                    return True, cache_file
-            Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=[],isIntraday=False,forceRedownload=True)
+                    return True, cache_file, stockDict
+            stockDict = Utility.tools.loadStockData(stockDict={},configManager=PKMarketOpenCloseAnalyser.configManager,downloadOnly=False,defaultAnswer='Y',retrial=False,forceLoad=False,stockCodes=listStockCodes,isIntraday=False,forceRedownload=True)
             exists, cache_file = Utility.tools.afterMarketStockDataExists(intraday=False)
+            PKMarketOpenCloseAnalyser.configManager.period = savedPeriod
+            PKMarketOpenCloseAnalyser.configManager.duration = savedDuration
+            PKMarketOpenCloseAnalyser.configManager.setConfig(parser, default=True, showFileCreatedText=False)
             if not exists:
                 OutputControls().printOutput(f"[+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_outputs_dir()}/ !")
                 OutputControls().printOutput(f"[+] Please run {colorText.FAIL}pkscreener{colorText.END}{colorText.GREEN} -a Y -e -d{colorText.END} and then run this menu option again.")
@@ -181,7 +195,7 @@ class PKMarketOpenCloseAnalyser:
                 shutil.copy(srcFilePath,copyFilePath)
         except:
             pass
-        return exists, cache_file
+        return exists, cache_file, stockDict
     
     def simulateMorningTrade(updatedCandleData):
         # 1. For each stock, remove the latest daily data for today from stock_data_<date>.pkl
@@ -197,8 +211,10 @@ class PKMarketOpenCloseAnalyser:
         morningIntraday_df = None
         return stockListFromMorningTrade, morningIntraday_df
     
-    def getLatestDailyCandleData(daily_cache_file):
+    def getLatestDailyCandleData(daily_cache_file,stockDict=None):
         allDailyCandles = None
+        if stockDict is not None and len(stockDict) > 0:
+            return stockDict
         dailyDB = PKDailyStockDataDB(fileName=daily_cache_file)
         allDailyCandles = dailyDB.pickler.pickler.unpickle(fileName=dailyDB.pickler.fileName)
         # latestDailyCandle = {}
@@ -213,12 +229,15 @@ class PKMarketOpenCloseAnalyser:
         #         continue
         return allDailyCandles
     
-    def getIntradayCandleFromMorning(int_cache_file=None,candle1MinuteNumberSinceMarketStarted=0):
+    def getIntradayCandleFromMorning(int_cache_file=None,candle1MinuteNumberSinceMarketStarted=0,sliceWindowDatetime=None,stockDictInt=None):
         if candle1MinuteNumberSinceMarketStarted <= 0:
             candle1MinuteNumberSinceMarketStarted = PKMarketOpenCloseAnalyser.configManager.morninganalysiscandlenumber
         morningIntradayCandle = None
-        intradayDB = PKIntradayStockDataDB(fileName=int_cache_file)
-        allDailyIntradayCandles = intradayDB.pickler.pickler.unpickle(fileName=intradayDB.pickler.fileName)
+        if stockDictInt is not None and len(stockDictInt) > 0:
+            allDailyIntradayCandles = stockDictInt
+        else:
+            intradayDB = PKIntradayStockDataDB(fileName=int_cache_file)
+            allDailyIntradayCandles = intradayDB.pickler.pickler.unpickle(fileName=intradayDB.pickler.fileName)
         PKMarketOpenCloseAnalyser.allIntradayCandles = allDailyIntradayCandles
         morningIntradayCandle = {}
         stocks = list(allDailyIntradayCandles.keys())
@@ -238,9 +257,11 @@ class PKMarketOpenCloseAnalyser:
                                 index=allDailyIntradayCandles[stock]["index"])
                 df = df.head(numOfCandles)
                 try:
-                    df = df[df.index <=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30').to_datetime64()]
+                    alertCandleTimestamp = sliceWindowDatetime if sliceWindowDatetime is not None else f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30'
+                    df = df[df.index <=  pd.to_datetime(alertCandleTimestamp).to_datetime64()]
                 except:
-                    df = df[df.index <=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30', utc=True)]
+                    alertCandleTimestamp = sliceWindowDatetime if sliceWindowDatetime is not None else f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30'
+                    df = df[df.index <=  pd.to_datetime(alertCandleTimestamp, utc=True)]
                     pass
                 if df is not None and len(df) > 0:
                     combinedCandle = {"Open":PKMarketOpenCloseAnalyser.getMorningOpen(df), "High":max(df["High"]), 
