@@ -1989,6 +1989,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     multiplier = fastMultiplier * (60 if candleFrequency == "h" else (24*60 if candleFrequency == "d" else (24*60*5 if candleFrequency == "wk" else (24*60*5*20 if candleFrequency == "mo" else 1))))
                     if direction in ["LEFT", "DOWN"]:
                         prevTime = currentTime - timedelta(minutes=(candleDuration*multiplier if direction == "DOWN" else 1*fastMultiplier))
+                        minPastDate = PKDateUtilities.currentDateTime() - timedelta(days=364)
+                        if prevTime <= minPastDate:
+                            prevTime = minPastDate
                         currentTime = prevTime
                         prevTime_comps = prevTime.strftime("%Y-%m-%d %H:%M:%S").split(" ")
                         dateComp = prevTime_comps[0]
