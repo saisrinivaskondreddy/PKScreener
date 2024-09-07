@@ -1302,6 +1302,16 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     configManager.vcpLegsToCheckForConsolidation = input(
                         f"[+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END}, Current: {colorText.FAIL}{configManager.vcpLegsToCheckForConsolidation}{colorText.END}): "
                     ) or configManager.vcpLegsToCheckForConsolidation
+                    userInput = str(
+                        input(
+                            f"[+] Enable additional 20/50-EMA filters? [Y/N, Current: {colorText.FAIL}{'y' if configManager.enableAdditionalVCPEMAFilters else 'n'}{colorText.END}]. Recommended ({colorText.GREEN}{'Y' if configManager.isIntradayConfig() else 'N'}{colorText.END}):"
+                        ) or ('y' if configManager.isIntradayConfig() else 'n')
+                        ).lower()
+                    configManager.enableAdditionalVCPEMAFilters = (
+                        False
+                        if "y" not in str(userInput).lower()
+                        else True
+                    )
                 configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
             if maLength == 0:
                 if respChartPattern in [3, 6, 9]:

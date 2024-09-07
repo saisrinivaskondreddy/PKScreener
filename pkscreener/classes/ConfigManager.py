@@ -89,6 +89,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.vcpRangePercentageFromTop = 20
         self.vcpLegsToCheckForConsolidation = 3
         self.enableAdditionalVCPFilters = True
+        self.enableAdditionalVCPEMAFilters = False
         self.enableUsageAnalytics = False
         # This determines how many days apart the backtest calculations are run.
         # For example, for weekly backtest calculations, set this to 5 (5 days = 1 week)
@@ -220,6 +221,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "defaultIndex", str(self.defaultIndex))
             parser.set("config", "defaultMonitorOptions", str(self.defaultMonitorOptions))
             parser.set("config", "duration", self.duration)
+            parser.set("config", "enableAdditionalVCPEMAFilters", "y" if (self.enableAdditionalVCPEMAFilters) else "n")
             parser.set("config", "enableAdditionalVCPFilters", "y" if (self.enableAdditionalVCPFilters) else "n")
             parser.set("config", "enablePortfolioCalculations", "y" if self.enablePortfolioCalculations else "n")
             parser.set("config", "enableUsageAnalytics", "y" if self.enableUsageAnalytics else "n")
@@ -434,6 +436,12 @@ class tools(SingletonMixin, metaclass=SingletonType):
                         f"[+] Enable additional VCP filters like range and consolidation? [Y/N, Current: {colorText.FAIL}{'y' if self.enableAdditionalVCPFilters else 'n'}{colorText.END}]: "
                     ) or ('y' if self.enableAdditionalVCPFilters else 'n')
                 ).lower()
+                self.enableAdditionalVCPEMAFilters = str(
+                    input(
+                        f"[+] Enable additional 20/50-EMA filters? [Y/N, Current: {colorText.FAIL}{'y' if self.enableAdditionalVCPEMAFilters else 'n'}{colorText.END}]: "
+                    ) or ('y' if self.enableAdditionalVCPEMAFilters else 'n')
+                ).lower()
+                
                 self.enableUsageAnalytics = str(
                     input(
                         f"[+] Enable usage analytics to be captured? [Y/N, Current: {colorText.FAIL}{'y' if self.enableUsageAnalytics else 'n'}{colorText.END}]: "
@@ -474,6 +482,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     endDuration = str(self.duration)[-1].lower()
                     endDuration = "d" if endDuration not in ["m","h","d","k","o"] else ""
                 parser.set("config", "duration", str(self.duration + endDuration))
+                parser.set("config", "enableAdditionalVCPEMAFilters", str(self.enableAdditionalVCPEMAFilters))
                 parser.set("config", "enableAdditionalVCPFilters", str(self.enableAdditionalVCPFilters))
                 parser.set("config", "enablePortfolioCalculations", str(self.enablePortfolioCalculations))
                 parser.set("config", "enableUsageAnalytics", str(self.enableUsageAnalytics))
@@ -630,6 +639,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.atrTrailingStopSensitivity = float(parser.get("config", "atrtrailingstopsensitivity"))
                 self.generalTimeout = float(parser.get("config", "generalTimeout"))
                 self.defaultIndex = int(parser.get("config", "defaultIndex"))
+                self.enableAdditionalVCPEMAFilters = (
+                    False
+                    if "y" not in str(parser.get("config", "enableAdditionalVCPEMAFilters")).lower()
+                    else True
+                )
                 self.enableAdditionalVCPFilters = (
                     False
                     if "y" not in str(parser.get("config", "enableAdditionalVCPFilters")).lower()

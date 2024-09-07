@@ -3563,6 +3563,12 @@ class ScreeningStatistics:
             return False
         data = df.copy()
         try:
+            if self.configManager.enableAdditionalVCPEMAFilters:
+                reversedData = data[::-1] 
+                ema = pktalib.EMA(reversedData["Close"], timeperiod=50)
+                sema20 = pktalib.EMA(reversedData["Close"], timeperiod=20)
+                if not (data["Close"].iloc[0] >= ema.tail(1).iloc[0] and data["Close"].iloc[0] >= sema20.tail(1).iloc[0]):
+                    return False
             percentageFromTop /= 100
             data.reset_index(inplace=True)
             data.rename(columns={"index": "Date"}, inplace=True)
