@@ -2559,13 +2559,17 @@ def updateMenuChoiceHierarchy():
 def saveScreenResultsEncoded(encodedText:None):
     import uuid
     uuidFileName = str(uuid.uuid4())
-    fileName = os.path.join(Archiver.get_user_outputs_dir(), uuidFileName)
+    os.makedirs(os.path.dirname(os.path.join(Archiver.get_user_outputs_dir(),f"DeleteThis{os.sep}")), exist_ok=True)
+    toBeDeletedFolder = os.path.join(Archiver.get_user_outputs_dir(),"DeleteThis")
+    fileName = os.path.join(toBeDeletedFolder, uuidFileName)
     with open(fileName, 'w') as f:
         f.write(encodedText)
     return f'{uuidFileName}~{PKDateUtilities.currentDateTime().strftime("%Y-%m-%d %H:%M:%S.%f%z").replace(" ","~")}'
 
 def readScreenResultsDecoded(fileName=None):
-    filePath = os.path.join(Archiver.get_user_outputs_dir(), fileName)
+    os.makedirs(os.path.dirname(os.path.join(Archiver.get_user_outputs_dir(),f"DeleteThis{os.sep}")), exist_ok=True)
+    toBeDeletedFolder = os.path.join(Archiver.get_user_outputs_dir(),"DeleteThis")
+    filePath = os.path.join(toBeDeletedFolder, fileName)
     contents = None
     with open(filePath, 'r') as f:
         contents = f.read()
@@ -2580,15 +2584,26 @@ def printNotifySaveScreenedResults(
     common_df  = None
     addedList = []
     printableColumns = []
+    lastReportDateTime = "Unknown"
     if userPassedArgs.monitor is not None:
         return
     if userPassedArgs.stocklist is not None and saved_screen_results is not None and show_saved_diff_results:
         diff_from_prev_scan = pd.concat([saved_screen_results, screenResults])
-        diff_from_prev_scan = diff_from_prev_scan.reset_index(drop=True)
+        diff_from_prev_scan = diff_from_prev_scan.reset_index()
         df_gpby = diff_from_prev_scan.groupby([diff_from_prev_scan.columns[0]])
         # get index of unique records
         idx = [x[0] for x in df_gpby.groups.values() if len(x) == 1]
         diff_from_prev_scan = diff_from_prev_scan.reindex(idx)
+        diff_from_prev_scan = diff_from_prev_scan.set_index(["Stock"])
+        if resultsContentsEncoded is not None:
+            fnames = resultsContentsEncoded.split("~")
+            lastReportDateTime = f"{fnames[1]} {fnames[2]}"
+            resultsContentsDecoded = readScreenResultsDecoded(fnames[0])
+            toBeDeletedFolder = os.path.join(Archiver.get_user_outputs_dir(),"DeleteThis")
+            try:
+                os.remove(os.path.join(toBeDeletedFolder, fnames[0]))
+            except:
+                pass
     if userPassedArgs.stocklist is not None:
         passedList = userPassedArgs.stocklist.split(",")
         onlyInCurrent_df = screenResults[~screenResults.index.isin(passedList)]
@@ -2661,19 +2676,22 @@ def printNotifySaveScreenedResults(
         OutputControls().printOutput(f"{console_results}\n", enableMultipleLineOutput=True)
     else:
         if diff_from_prev_scan is not None:
-            diff_from_prev_scan = diff_from_prev_scan[printableColumns]
+            # diff_from_prev_scan = diff_from_prev_scan[printableColumns]
             saved_screen_results = copyScreenResults
-            tabulated_diff_from_prev = colorText.miniTabulator().tabulate(
-                diff_from_prev_scan, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
-                maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
-            ).encode("utf-8").decode(STD_ENCODING)
-            OutputControls().printOutput(f"{colorText.WARN}\n[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}\n\n", enableMultipleLineOutput=True)
-        lastReportDateTime = "Unknown"
+            # tabulated_diff_from_prev = colorText.miniTabulator().tabulate(
+            #     diff_from_prev_scan, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
+            #     maxcolwidths=Utility.tools.getMaxColumnWidths(diff_from_prev_scan)
+            # ).encode("utf-8").decode(STD_ENCODING)
+            # OutputControls().printOutput(f"{colorText.WARN}\n[+] Diff. from previous scan:\n\n{colorText.END}{tabulated_diff_from_prev}\n\n", enableMultipleLineOutput=True)
         if userPassedArgs.fname is not None:
             fnames = userPassedArgs.fname.split("~")
             lastReportDateTime = f"{fnames[1]} {fnames[2]}"
             resultsContentsDecoded = readScreenResultsDecoded(fnames[0])
-            os.remove(os.path.join(Archiver.get_user_outputs_dir(), fnames[0]))
+            toBeDeletedFolder = os.path.join(Archiver.get_user_outputs_dir(),"DeleteThis")
+            try:
+                os.remove(os.path.join(toBeDeletedFolder, fnames[0]))
+            except:
+                pass
         if onlyInCurrent_df is not None and not onlyInCurrent_df.empty and len(onlyInCurrent_df) > 0:
             onlyInCurrent_df = onlyInCurrent_df[printableColumns]
             tabulated_onlyInCurrent_df = colorText.miniTabulator().tabulate(
