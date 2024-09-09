@@ -1734,7 +1734,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 actualHistoricalDuration = samplingDuration - fillerPlaceHolder
                 if actualHistoricalDuration >= 0:
                     progressbar()
-        OutputControls().moveCursorUpLines(2)    #sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
+        OutputControls().moveCursorUpLines(1 if userPassedArgs.monitor else 2)    #sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
         if not keyboardInterruptEventFired:
             global tasks_queue, results_queue, consumers, logging_queue
             screenResults, saveResults, backtest_df, tasks_queue, results_queue, consumers,logging_queue = PKScanRunner.runScanWithParams(userPassedArgs,keyboardInterruptEvent,screenCounter,screenResultsCounter,stockDictPrimary,stockDictSecondary,testing, backtestPeriod, menuOption,executeOption, samplingDuration, items,screenResults, saveResults, backtest_df,scanningCb=runScanners,tasks_queue=tasks_queue, results_queue=results_queue, consumers=consumers,logging_queue=logging_queue)
