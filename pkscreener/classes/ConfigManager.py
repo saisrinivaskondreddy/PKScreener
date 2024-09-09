@@ -48,7 +48,7 @@ default_timeout = 2
 class tools(SingletonMixin, metaclass=SingletonType):
     def __init__(self):
         super(tools, self).__init__()
-        self.alwaysHiddenDisplayColumns = ",52Wk-L,RSI,22-Pd,Consol.,Pattern,CCI,Trend(22Prds)"
+        self.alwaysHiddenDisplayColumns = ",52Wk-L,RSI,22-Pd,Consol.,Pattern,CCI"
         self.consolidationPercentage = 10
         self.telegramImageFormat = "JPEG"
         self.telegramImageCompressionRatio = 0.6
