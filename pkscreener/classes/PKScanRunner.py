@@ -28,6 +28,7 @@ import time
 import pandas as pd
 import multiprocessing
 from time import sleep
+from halo import Halo
 
 from PKDevTools.classes import Archiver
 from PKDevTools.classes.ColorText import colorText
@@ -250,7 +251,8 @@ class PKScanRunner:
             worker.objectDictionaryPrimary = stockDictPrimary
             worker.objectDictionarySecondary = stockDictSecondary
             worker.refreshDatabase = True
-            
+    
+    # @Halo(text='', spinner='dots')
     def runScanWithParams(userPassedArgs,keyboardInterruptEvent,screenCounter,screenResultsCounter,stockDictPrimary,stockDictSecondary,testing, backtestPeriod, menuOption, executeOption, samplingDuration, items,screenResults, saveResults, backtest_df,scanningCb,tasks_queue, results_queue, consumers,logging_queue):
         if tasks_queue is None or results_queue is None or consumers is None:
             tasks_queue, results_queue, consumers,logging_queue = PKScanRunner.prepareToRunScan(menuOption,keyboardInterruptEvent,screenCounter, screenResultsCounter, stockDictPrimary,stockDictSecondary, items,executeOption,userPassedArgs)
@@ -299,6 +301,7 @@ class PKScanRunner:
         return screenResults, saveResults,backtest_df,tasks_queue, results_queue, consumers, logging_queue
 
     @exit_after(180) # Should not remain stuck starting the multiprocessing clients beyond this time
+    @Halo(text='', spinner='dots')
     def prepareToRunScan(menuOption,keyboardInterruptEvent, screenCounter, screenResultsCounter, stockDictPrimary,stockDictSecondary, items, executeOption,userPassedArgs):
         tasks_queue, results_queue, totalConsumers, logging_queue = PKScanRunner.initQueues(len(items),userPassedArgs)
         scr = ScreeningStatistics.ScreeningStatistics(PKScanRunner.configManager, default_logger())
@@ -350,6 +353,7 @@ class PKScanRunner:
         return tasks_queue,results_queue,consumers,logging_queue
 
     @exit_after(120) # Should not remain stuck starting the multiprocessing clients beyond this time
+    @Halo(text='', spinner='dots')
     def startWorkers(consumers):
         try:
             from pytest_cov.embed import cleanup_on_signal, cleanup_on_sigterm
@@ -376,6 +380,7 @@ class PKScanRunner:
         if OutputControls().enableMultipleLineOutput:
             sys.stdout.write("\x1b[1A") # Move cursor up to hide the starting times we printed above
 
+    @Halo(text='', spinner='dots')
     def terminateAllWorkers(userPassedArgs,consumers, tasks_queue, testing=False):
         shouldSuppress = (userPassedArgs is None) or (userPassedArgs is not None and not userPassedArgs.log)
         with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
@@ -416,7 +421,7 @@ class PKScanRunner:
     def shutdown(frame, signum):
         OutputControls().printOutput("Shutting down for test coverage")
 
-    # @exit_after(60)
+    # @Halo(text='', spinner='dots')
     def runScan(userPassedArgs,testing,numStocks,iterations,items,numStocksPerIteration,tasks_queue,results_queue,originalNumberOfStocks,backtest_df, *otherArgs,resultsReceivedCb=None):
         queueCounter = 0
         counter = 0

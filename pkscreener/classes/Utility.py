@@ -43,6 +43,7 @@ import time
 import joblib
 import numpy as np
 import pytz
+from halo import Halo
 from genericpath import isfile
 from PKDevTools.classes.log import default_logger
 from PKDevTools.classes.ColorText import colorText
@@ -463,6 +464,7 @@ class tools:
             cleanedUpStyledValues = [cellStyledValue]
         return cellFillColors, cleanedUpStyledValues
 
+    @Halo(text='', spinner='dots')
     def tableToImage(
         table,
         styledTable,
@@ -810,6 +812,7 @@ class tools:
                 break
         return exists, cache_file
 
+    @Halo(text='', spinner='dots')
     def saveStockData(stockDict, configManager, loadCount, intraday=False, downloadOnly=False, forceSave=False):
         exists, fileName = tools.afterMarketStockDataExists(
             configManager.isIntradayConfig() or intraday
@@ -851,6 +854,7 @@ class tools:
                 OutputControls().printOutput(colorText.GREEN + f"=> {cache_file}" + colorText.END)
         return cache_file
 
+    @Halo(text='', spinner='dots')
     def downloadLatestData(stockDict,configManager,stockCodes=[],exchangeSuffix=".NS",downloadOnly=False):
         numStocksPerIteration = (int(len(stockCodes)/int(len(stockCodes)/10)) if len(stockCodes) >= 10 else len(stockCodes)) + 1
         queueCounter = 0
@@ -889,6 +893,7 @@ class tools:
         default_logger().debug(f"Attempted fresh download of {len(stockCodes)} stocks and downloaded {len(processedStocks)} stocks. {len(leftOutStocks)} stocks remaining.")
         return stockDict, leftOutStocks
 
+    @Halo(text='', spinner='dots')
     def loadStockData(
         stockDict,
         configManager,
@@ -1506,6 +1511,7 @@ class tools:
             spinner = "dots_recur"
         return bar, spinner
 
+    @Halo(text='', spinner='dots')
     def getNiftyModel(retrial=False):
         files = [
             os.path.join(Archiver.get_user_outputs_dir(), "nifty_model_v2.h5"),

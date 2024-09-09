@@ -244,6 +244,8 @@ class StockScreener:
                 isConfluence = False
                 isInsideBar = 0
                 isMaReversal = 0
+                bullishCount = 0 
+                bearishCount = 0
                 isIpoBase = False
                 isMaSupport = False
                 isLorentzian = False
@@ -420,7 +422,7 @@ class StockScreener:
                                 screener.findRSRating(index_rs_value=hostRef.rs_strange_index,df=fullData,screenDict=screeningDictionary, saveDict=saveDictionary)
                             screener.findRVM(df=fullData,screenDict=screeningDictionary, saveDict=saveDictionary)
                     elif respChartPattern == 9:
-                        hasMASignalFilter = screener.validateMovingAverages(
+                        hasMASignalFilter,_, _ = screener.validateMovingAverages(
                             fullData, screeningDictionary, saveDictionary,maRange=1.25,maLength=maLength
                         )
                         if not hasMASignalFilter:
@@ -487,7 +489,7 @@ class StockScreener:
                         return returnLegibleData(f"isValidCci:{isValidCci}")
 
                 if not (isConfluence or isShortTermBullish or hasMASignalFilter):
-                    isMaReversal = screener.validateMovingAverages(
+                    isMaReversal,bullishCount, bearishCount = screener.validateMovingAverages(
                         processedData, screeningDictionary, saveDictionary, maRange=1.25
                     )
                 if executeOption == 6:
@@ -573,7 +575,7 @@ class StockScreener:
                         or ((executeOption == 7) and ((respChartPattern < 3 and isInsideBar > 0) 
                                                                   or (isConfluence)
                                                                   or (isIpoBase and newlyListedOnly and not respChartPattern < 3)
-                                                                  or (isVCP)
+                                                                  or (isVCP and ((bearishCount == 0) if configManager.enableAdditionalVCPEMAFilters else True))
                                                                   or (isBuyingTrendline)
                                                                   or (respChartPattern == 6 and hasBbandsSqz)
                                                                   or (respChartPattern == 7 and isCandlePattern)

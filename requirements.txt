@@ -5,6 +5,7 @@ click
 gitpython
 gspread
 gspread_pandas
+Halo
 joblib
 keras
 lxml==4.9.4 # 5.0.0 or above causes problems.

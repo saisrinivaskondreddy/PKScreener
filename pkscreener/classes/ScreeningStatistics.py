@@ -3350,7 +3350,8 @@ class ScreeningStatistics:
             hasRespectiveMAInList = str(maLength) in maSignals
             hasVWAP = "BullCross-VWAP" in saveDict["MA-Signal"]
             returnValue = (hasVWAP and hasRespectiveMAInList) if maLength == 7 else hasRespectiveMAInList
-        return returnValue
+        savedMASignals = saveDict["MA-Signal"]
+        return returnValue, savedMASignals.count("Bull") + savedMASignals.count("Support"), savedMASignals.count("Bear") + savedMASignals.count("Resist")
 
     # Find NRx range for Reversal
     def validateNarrowRange(self, df, screenDict, saveDict, nr=4):

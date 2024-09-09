@@ -61,6 +61,7 @@ from PKDevTools.classes.Telegram import (
 from PKNSETools.morningstartools.PKMorningstarDataFetcher import morningstarDataFetcher
 from PKNSETools.Nasdaq.PKNasdaqIndex import PKNasdaqIndexFetcher
 from tabulate import tabulate
+from halo import Halo
 
 import pkscreener.classes.ConfigManager as ConfigManager
 import pkscreener.classes.Fetcher as Fetcher
@@ -806,6 +807,7 @@ def resetUserMenuChoiceOptions():
     menuChoiceHierarchy = ""
     userPassedArgs.pipedtitle = ""
 
+@Halo(text='', spinner='dots')
 def refreshStockData(startupoptions=None):
     global consumers,stockDictPrimary, loadedStockData, listStockCodes, stockDictSecondary
     options = startupoptions.replace("|","").split(" ")[0].replace(":i","")
@@ -823,8 +825,7 @@ def closeWorkersAndExit():
     global consumers, tasks_queue,userPassedArgs
     if consumers is not None:
         PKScanRunner.terminateAllWorkers(userPassedArgs=userPassedArgs,consumers=consumers, tasks_queue=tasks_queue, testing=userPassedArgs.testbuild)
-    
-# @tracelog
+
 def main(userArgs=None,optionalFinalOutcome_df=None):
     global show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
@@ -1399,12 +1400,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             selectedChoice["3"] = str(popOption)
         if popOption in [1,2,4]:
             updateMenuChoiceHierarchy()
-            if popOption == 4:
-                screenResults = mstarFetcher.fetchMorningstarTopDividendsYieldStocks()
-            elif popOption in [1,2]:
-                screenResults = mstarFetcher.fetchMorningstarFundFavouriteStocks(
-                    "NoOfFunds" if popOption == 2 else "ChangeInShares"
-                )
+            screenResults = getMFIStats(popOption)
             if menuOption in ["X"]:
                 printNotifySaveScreenedResults(
                     screenResults,
@@ -1436,7 +1432,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             selectedChoice["3"] = str(popOption)
         updateMenuChoiceHierarchy()
-        screenResults = mstarFetcher.fetchMorningstarStocksPerformanceForExchange()
+        screenResults = getPerformanceStats()
         if menuOption in ["X"]:
             printNotifySaveScreenedResults(
                 screenResults,
@@ -2046,6 +2042,21 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             return screenResults, saveResults
 
+@Halo(text='', spinner='dots')
+def getPerformanceStats():
+    return mstarFetcher.fetchMorningstarStocksPerformanceForExchange()
+
+@Halo(text='', spinner='dots')
+def getMFIStats(popOption):
+    if popOption == 4:
+        screenResults = mstarFetcher.fetchMorningstarTopDividendsYieldStocks()
+    elif popOption in [1,2]:
+        screenResults = mstarFetcher.fetchMorningstarFundFavouriteStocks(
+                    "NoOfFunds" if popOption == 2 else "ChangeInShares"
+                )
+    return screenResults
+
+@Halo(text='', spinner='dots')
 def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOptionName=None):
     global analysis_dict, userPassedArgs
     if screenResults is not None:
@@ -2250,6 +2261,7 @@ def describeUser():
     except Exception as e:
         pass
 
+@Halo(text='', spinner='dots')
 def prepareGroupedXRay(backtestPeriod, backtest_df):
     df_grouped = backtest_df.groupby("Date")
     userPassedArgs.backtestdaysago = backtestPeriod
@@ -2647,6 +2659,12 @@ def printNotifySaveScreenedResults(
     tabulated_results = ""
     console_results = ""
     if screenResults is not None and len(screenResults) > 0:
+        try:
+            screenResults = screenResults.loc[:,(screenResults!='-').any(axis=0)] # .all for at least 1 contianing -
+            saveResults = saveResults.loc[:,(saveResults!='-').any(axis=0)]
+        except ValueError:
+            # The truth value of a Series is ambiguous.
+            pass
         tabulated_results = colorText.miniTabulator().tabulate(
             screenResults, headers="keys", tablefmt=colorText.No_Pad_GridFormat,
             maxcolwidths=Utility.tools.getMaxColumnWidths(screenResults)
@@ -2935,6 +2953,7 @@ def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,us
             pass
     return kite_file_path, kite_caption
 
+@Halo(text='', spinner='dots')
 def prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, testing, user, pngName, pngExtension, eligible):
     targetDateG10k = None
     if selectedChoice["0"] == "G" or \
