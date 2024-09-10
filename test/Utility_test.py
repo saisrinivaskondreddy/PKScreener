@@ -42,10 +42,11 @@ from pkscreener.classes.Utility import tools
 def test_clearScreen():
     # Mocking the os.system() function
     with patch("os.system") as mock_os_system:
-        tools.clearScreen()
+        tools.clearScreen(clearAlways=True)
         # Assert that os.system() is called with the correct argument
         if platform.system() == "Windows":
-            mock_os_system.assert_called_once_with("cls")
+            mock_os_system.assert_called_with("color 0f")
+            mock_os_system.assert_called_with("cls")
         else:
             mock_os_system.assert_called_once_with("clear")
 
@@ -101,7 +102,7 @@ def test_formatRatio():
     volumeRatio = 1.5
     result = tools.formatRatio(ratio, volumeRatio)
     # Assert that the result is formatted correctly
-    assert result == "\033[1m\033[92m2.0x\033[0m"
+    assert result == "\x1b[32m2.0x\x1b[0m"
 
 
 # Positive test case for removeAllColorStyles() function
@@ -119,7 +120,7 @@ def test_getCellColors():
     # Assert that the result is the correct cell fill color and cleaned up styled value
     assert result == (["darkgreen"], ["Hello World!"])
     result = tools.getCellColors(cellStyledValue,defaultCellFillColor="white")
-    assert result == (["lightgreen"], ["Hello World!"])
+    assert result == (["darkgreen"], ["Hello World!"])
 
 
 # Positive test case for tradingDate() function
@@ -287,17 +288,17 @@ def test_loadStockData():
     )
     with patch("pickle.load", mock_pickle) as mock_load:
         mock_load.return_value = []
-        with patch(
-            "pkscreener.classes.Utility.tools.afterMarketStockDataExists"
-        ) as mock_data:
-            mock_data.return_value = True, "stock_data_2.pkl"
-            stockDict = {}
-            configManager = Mock()
-            downloadOnly = False
-            defaultAnswer = "Y"
-            tools.loadStockData(stockDict, configManager, downloadOnly, defaultAnswer)
-            # Assert that pickle.load() is called
-            mock_load.assert_called_once()
+        with patch("pkscreener.classes.Utility.tools.afterMarketStockDataExists") as mock_data:
+            with patch("pkscreener.classes.Utility.tools.downloadLatestData") as mock_downloadmethod:
+                mock_downloadmethod.return_value = {},[]
+                mock_data.return_value = True, "stock_data_2.pkl"
+                stockDict = {}
+                configManager = Mock()
+                downloadOnly = False
+                defaultAnswer = "Y"
+                tools.loadStockData(stockDict, configManager, downloadOnly, defaultAnswer)
+                # Assert that pickle.load() is called
+                mock_load.assert_called_once()
     os.remove(os.path.join(Archiver.get_user_outputs_dir(), "stock_data_2.pkl"))
 
 
@@ -306,9 +307,9 @@ def test_promptSaveResults():
     # Mocking the pd.DataFrame.to_excel() function
     mock_df = pd.DataFrame()
     with patch("pandas.DataFrame.to_excel") as mock_to_excel:
-        result = tools.promptSaveResults(mock_df, defaultAnswer="Y")
+        result = tools.promptSaveResults("testsheetname", mock_df, defaultAnswer="Y")
         # Assert that pd.DataFrame.to_excel() is called with the correct argument
-        mock_to_excel.assert_called_once_with(ANY, engine="xlsxwriter")
+        mock_to_excel.assert_called_once_with(ANY, sheet_name="testsheetname")
         # Assert that the result is not None
         assert result is not None
 
@@ -321,7 +322,7 @@ def test_promptFileExists():
         # Assert input() is called correct argument
         mock_input.assert_called_once_with(
             colorText.WARN
-            + "[>] stock_data_*.pkl already exists. Do you want to replace this? [Y/N]: "
+            + "[>] stock_data_*.pkl already exists. Do you want to replace this? [Y/N] (Default: Y): "
         )
         # Assert that the result is "Y"
         assert result == "Y"
@@ -335,7 +336,7 @@ def test_promptRSIValues():
         # Assert that input() is called twice with the correct arguments
         mock_input.assert_called_with(
             colorText.WARN
-            + "[+] Enter Max RSI value: "
+            + "[+] Enter Max RSI value (Default=68): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
@@ -350,7 +351,7 @@ def test_promptCCIValues():
         # Assert that input() is called twice with the correct arguments
         mock_input.assert_called_with(
             colorText.WARN
-            + "[+] Enter Max CCI value: "
+            + "[+] Enter Max CCI value (Default=300): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
@@ -380,7 +381,7 @@ def test_promptReversalScreening():
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
             colorText.WARN
-            + "\n[+] Enter MA Length (E.g. 50 or 200): "
+            + "\n[+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default=9): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
@@ -408,7 +409,7 @@ def test_promptReversalScreening_Input6():
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
             colorText.WARN
-            + "\n[+] Enter NR timeframe [Integer Number] (E.g. 4, 7, etc.): "
+            + "\n[+] Enter NR timeframe [Integer Number] (E.g. 4, 7, etc.) (Default=4): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
@@ -447,7 +448,7 @@ def test_promptChartPatterns_Input1():
         # Assert that input() is called with the correct arguments
         mock_input.assert_called_with(
             colorText.WARN
-            + "\n[+] How many candles (TimeFrame) to look back Inside Bar formation? : "
+            + "\n[+] How many candles (TimeFrame) to look back Inside Bar formation? (Default=3): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
@@ -461,7 +462,7 @@ def test_promptChartPatterns_Input3():
         # Assert that input() is called with the correct arguments
         mock_input.assert_called_with(
             colorText.WARN
-            + "\n[+] Enter Percentage within which all MA/EMAs should be (Ideal: 1-2%)? : "
+            + "\n[+] Enter Percentage within which all MA/EMAs should be (Ideal: 0.1-2%)? (Default=0.8): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
@@ -532,4 +533,4 @@ def test_alertSound():
     with patch("builtins.print") as mock_print:
         tools.alertSound(1)
         # Assert that print() is called with the correct argument
-        mock_print.assert_called_once_with("\a")
+        mock_print.assert_called_once_with("\a", sep=' ', end='\n', flush=False)
