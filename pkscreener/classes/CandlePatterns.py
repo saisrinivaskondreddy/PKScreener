@@ -77,7 +77,7 @@ class CandlePatterns:
         # TA-Lib.
         check = pktalib.CDLDOJI(data["Open"], data["High"], data["Low"], data["Close"])
         if check is not None and check.tail(1).item() != 0:
-            dict["Pattern"] = self.findCurrentSavedValue(dict,saveDict,"Pattern")[0] + f"Doji" + colorText.END 
+            dict["Pattern"] = self.findCurrentSavedValue(dict,saveDict,"Pattern")[0] + colorText.GREEN + f"Doji" + colorText.END 
             saveDict["Pattern"] = self.findCurrentSavedValue(dict,saveDict,"Pattern")[1] +  f"Doji"
             hasCandleStickPattern = True
 

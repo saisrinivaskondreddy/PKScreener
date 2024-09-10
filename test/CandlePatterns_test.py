@@ -101,18 +101,18 @@ def test_findPattern_doji(candle_patterns):
     with prepPatch("CDLDOJI") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-        assert dict["Pattern"] == "\033[1mDoji\033[0m"
+        assert dict["Pattern"] == "\033[32mDoji\033[0m"
         assert saveDict["Pattern"] == "Doji"
 
 def test_findPattern_doji_with_existing_pattern(candle_patterns):
-    dict = {}
+    dict = {"Pattern":"Existing"}
     saveDict = {"Pattern":"Existing"}
     df = prepData()
     with prepPatch("CDLDOJI") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-        assert dict["Pattern"] == "\033[1mDoji, Existing\033[0m"
-        assert saveDict["Pattern"] == "Doji, Existing"
+        assert dict["Pattern"] == "Existing, \033[32mDoji\033[0m"
+        assert saveDict["Pattern"] == "Existing, Doji"
 
 def test_findPattern_morning_star(candle_patterns):
     dict = {}
@@ -121,7 +121,7 @@ def test_findPattern_morning_star(candle_patterns):
     with prepPatch("CDLMORNINGSTAR") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mMorning Star\033[0m"
+    assert dict["Pattern"] == "\033[32mMorning Star\033[0m"
     assert saveDict["Pattern"] == "Morning Star"
 
 
@@ -132,7 +132,7 @@ def test_findPattern_morning_dojistar(candle_patterns):
     with prepPatch("CDLMORNINGDOJISTAR") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mMorning Doji Star\033[0m"
+    assert dict["Pattern"] == "\033[32mMorning Doji Star\033[0m"
     assert saveDict["Pattern"] == "Morning Doji Star"
 
 
@@ -143,7 +143,7 @@ def test_findPattern_evening_star(candle_patterns):
     with prepPatch("CDLEVENINGSTAR") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mEvening Star\033[0m"
+    assert dict["Pattern"] == "\033[31mEvening Star\033[0m"
     assert saveDict["Pattern"] == "Evening Star"
 
 def test_findPattern_evening_doji_star(candle_patterns):
@@ -153,7 +153,7 @@ def test_findPattern_evening_doji_star(candle_patterns):
     with prepPatch("CDLEVENINGDOJISTAR") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mEvening Doji Star\033[0m"
+    assert dict["Pattern"] == "\033[31mEvening Doji Star\033[0m"
     assert saveDict["Pattern"] == "Evening Doji Star"
 
 def test_findPattern_ladder_bottom_bullish(candle_patterns):
@@ -163,7 +163,7 @@ def test_findPattern_ladder_bottom_bullish(candle_patterns):
     with prepPatch("CDLLADDERBOTTOM") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mBullish Ladder Bottom\033[0m"
+    assert dict["Pattern"] == "\033[32mBullish Ladder Bottom\033[0m"
     assert saveDict["Pattern"] == "Bullish Ladder Bottom"
 
 
@@ -175,7 +175,7 @@ def test_findPattern_ladder_bottom_bearish(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mBearish Ladder Bottom\033[0m"
+    assert dict["Pattern"] == "\033[31mBearish Ladder Bottom\033[0m"
     assert saveDict["Pattern"] == "Bearish Ladder Bottom"
 
 
@@ -186,7 +186,7 @@ def test_findPattern_3_line_strike_bullish(candle_patterns):
     with prepPatch("CDL3LINESTRIKE") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92m3 Line Strike\033[0m"
+    assert dict["Pattern"] == "\033[32m3 Line Strike\033[0m"
     assert saveDict["Pattern"] == "3 Line Strike"
 
 
@@ -198,7 +198,7 @@ def test_findPattern_3_line_strike_bearish(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91m3 Line Strike\033[0m"
+    assert dict["Pattern"] == "\033[31m3 Line Strike\033[0m"
     assert saveDict["Pattern"] == "3 Line Strike"
 
 
@@ -209,7 +209,7 @@ def test_findPattern_3_black_crows(candle_patterns):
     with prepPatch("CDL3BLACKCROWS") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91m3 Black Crows\033[0m"
+    assert dict["Pattern"] == "\033[31m3 Black Crows\033[0m"
     assert saveDict["Pattern"] == "3 Black Crows"
 
 
@@ -220,7 +220,7 @@ def test_findPattern_3_inside_up(candle_patterns):
     with prepPatch("CDL3INSIDE") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92m3 Inside Up\033[0m"
+    assert dict["Pattern"] == "\033[32m3 Inside Up\033[0m"
     assert saveDict["Pattern"] == "3 Outside Up"
 
 
@@ -232,7 +232,7 @@ def test_findPattern_3_inside_down(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91m3 Inside Down\033[0m"
+    assert dict["Pattern"] == "\033[31m3 Inside Down\033[0m"
     assert saveDict["Pattern"] == "3 Inside Down"
 
 
@@ -243,7 +243,7 @@ def test_findPattern_3_outside_up(candle_patterns):
     with prepPatch("CDL3OUTSIDE") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92m3 Outside Up\033[0m"
+    assert dict["Pattern"] == "\033[32m3 Outside Up\033[0m"
     assert saveDict["Pattern"] == "3 Outside Up"
 
 
@@ -255,7 +255,7 @@ def test_findPattern_3_outside_down(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91m3 Outside Down\033[0m"
+    assert dict["Pattern"] == "\033[31m3 Outside Down\033[0m"
     assert saveDict["Pattern"] == "3 Outside Down"
 
 
@@ -266,7 +266,7 @@ def test_findPattern_3_white_soldiers(candle_patterns):
     with prepPatch("CDL3WHITESOLDIERS") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92m3 White Soldiers\033[0m"
+    assert dict["Pattern"] == "\033[32m3 White Soldiers\033[0m"
     assert saveDict["Pattern"] == "3 White Soldiers"
 
 
@@ -277,7 +277,7 @@ def test_findPattern_bullish_harami(candle_patterns):
     with prepPatch("CDLHARAMI") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mBullish Harami\033[0m"
+    assert dict["Pattern"] == "\033[32mBullish Harami\033[0m"
     assert saveDict["Pattern"] == "Bullish Harami"
 
 
@@ -289,7 +289,7 @@ def test_findPattern_bearish_harami(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mBearish Harami\033[0m"
+    assert dict["Pattern"] == "\033[31mBearish Harami\033[0m"
     assert saveDict["Pattern"] == "Bearish Harami"
 
 
@@ -300,7 +300,7 @@ def test_findPattern_bullish_harami_cross(candle_patterns):
     with prepPatch("CDLHARAMICROSS") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mBullish Harami Cross\033[0m"
+    assert dict["Pattern"] == "\033[32mBullish Harami Cross\033[0m"
     assert saveDict["Pattern"] == "Bullish Harami Cross"
 
 
@@ -312,7 +312,7 @@ def test_findPattern_bearish_harami_cross(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mBearish Harami Cross\033[0m"
+    assert dict["Pattern"] == "\033[31mBearish Harami Cross\033[0m"
     assert saveDict["Pattern"] == "Bearish Harami Cross"
 
 
@@ -323,7 +323,7 @@ def test_findPattern_bullish_marubozu(candle_patterns):
     with prepPatch("CDLMARUBOZU") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mBullish Marubozu\033[0m"
+    assert dict["Pattern"] == "\033[32mBullish Marubozu\033[0m"
     assert saveDict["Pattern"] == "Bullish Marubozu"
 
 
@@ -335,7 +335,7 @@ def test_findPattern_bearish_marubozu(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mBearish Marubozu\033[0m"
+    assert dict["Pattern"] == "\033[31mBearish Marubozu\033[0m"
     assert saveDict["Pattern"] == "Bearish Marubozu"
 
 
@@ -346,7 +346,7 @@ def test_findPattern_hanging_man(candle_patterns):
     with prepPatch("CDLHANGINGMAN") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mHanging Man\033[0m"
+    assert dict["Pattern"] == "\033[31mHanging Man\033[0m"
     assert saveDict["Pattern"] == "Hanging Man"
 
 
@@ -357,7 +357,7 @@ def test_findPattern_hammer(candle_patterns):
     with prepPatch("CDLHAMMER") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mHammer\033[0m"
+    assert dict["Pattern"] == "\033[32mHammer\033[0m"
     assert saveDict["Pattern"] == "Hammer"
 
 
@@ -368,7 +368,7 @@ def test_findPattern_inverted_hammer(candle_patterns):
     with prepPatch("CDLINVERTEDHAMMER") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mInverted Hammer\033[0m"
+    assert dict["Pattern"] == "\033[32mInverted Hammer\033[0m"
     assert saveDict["Pattern"] == "Inverted Hammer"
 
 
@@ -379,7 +379,7 @@ def test_findPattern_shooting_star(candle_patterns):
     with prepPatch("CDLSHOOTINGSTAR") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mShooting Star\033[0m"
+    assert dict["Pattern"] == "\033[31mShooting Star\033[0m"
     assert saveDict["Pattern"] == "Shooting Star"
 
 
@@ -390,7 +390,7 @@ def test_findPattern_dragonfly_doji(candle_patterns):
     with prepPatch("CDLDRAGONFLYDOJI") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mDragonfly Doji\033[0m"
+    assert dict["Pattern"] == "\033[32mDragonfly Doji\033[0m"
     assert saveDict["Pattern"] == "Dragonfly Doji"
 
 
@@ -401,7 +401,7 @@ def test_findPattern_gravestone_doji(candle_patterns):
     with prepPatch("CDLGRAVESTONEDOJI") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mGravestone Doji\033[0m"
+    assert dict["Pattern"] == "\033[31mGravestone Doji\033[0m"
     assert saveDict["Pattern"] == "Gravestone Doji"
 
 
@@ -412,7 +412,7 @@ def test_findPattern_bullish_engulfing(candle_patterns):
     with prepPatch("CDLENGULFING") as cdl_obj:
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[92mBullish Engulfing\033[0m"
+    assert dict["Pattern"] == "\033[32mBullish Engulfing\033[0m"
     assert saveDict["Pattern"] == "Bullish Engulfing"
 
 
@@ -424,5 +424,5 @@ def test_findPattern_bearish_engulfing(candle_patterns):
         df.loc[3, "Close"] = -1
         cdl_obj.return_value = df.tail(1).squeeze()
         assert candle_patterns.findPattern(df, dict, saveDict) is True
-    assert dict["Pattern"] == "\033[1m\033[91mBearish Engulfing\033[0m"
+    assert dict["Pattern"] == "\033[31mBearish Engulfing\033[0m"
     assert saveDict["Pattern"] == "Bearish Engulfing"
