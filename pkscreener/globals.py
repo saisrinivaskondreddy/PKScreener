@@ -2063,7 +2063,7 @@ def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOp
         analysis_df = screenResults.copy()
     else:
         analysis_df = pd.DataFrame()
-    index_columns = ["Stock","%Chng","Volume","Pattern","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
+    index_columns = ["Stock","%Chng","Volume","Pattern","MA-Signal","Trend(22Prds)","Trend","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
     final_index_columns = []
     firstScanKey = userPassedArgs.options.split(">|")[0]
     for column in index_columns:

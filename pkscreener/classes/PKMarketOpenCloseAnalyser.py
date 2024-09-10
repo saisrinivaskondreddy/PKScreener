@@ -478,7 +478,7 @@ class PKMarketOpenCloseAnalyser:
         screen_df.replace(np.nan, "", regex=True)
         save_df.replace(np.nan, "", regex=True)
         # Drop the unnecessary columns for this scanner type to make way for other columns to be fitted nicely on screen
-        columnsToBeDropped = ["Breakout(22Prds)","MA-Signal","Trend(22Prds)","index","EoDLTP"]
+        columnsToBeDropped = ["Breakout(22Prds)","index","EoDLTP","RS_Rating^NSEI","RVM(15)"]
         for col in columnsToBeDropped:
             if col in save_df.columns:
                 save_df.drop(col, axis=1, inplace=True, errors="ignore")
