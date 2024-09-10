@@ -437,8 +437,8 @@ PRICE_CROSS_SMA_EMA_TYPE_MENUDICT = {
 }
 
 PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT = {
-    "1": "Crosses From Above",
-    "2": "Crosses From Below",
+    "1": "Price Crosses From Above (Sell)",
+    "2": "Price Crosses From Below (Buy)",
 
     "0": "Cancel"
 }

@@ -1194,8 +1194,8 @@ class tools:
                 response = str(
                     input(
                         colorText.WARN
-                        + "[>] Do you want to save the results in excel file? [Y/N](Default:Y): "
-                    ) or "Y"
+                        + f"[>] Do you want to save the results in excel file? [Y/N](Default:{colorText.END}{colorText.FAIL}N{colorText.END}): "
+                    ) or "N"
                 ).upper()
             else:
                 response = defaultAnswer

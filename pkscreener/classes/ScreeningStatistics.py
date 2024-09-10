@@ -2775,7 +2775,7 @@ class ScreeningStatistics:
 
     def validateConsolidationContraction(self, df,legsToCheck=2,stockName=None):
         if df is None or len(df) == 0:
-            return False
+            return False,[],0
         data = df.copy()
         # We can use window =3 because we need at least 3 candles to get the next top or bottom
         # but to better identify the pattern, we'd use window = 5
@@ -2835,7 +2835,7 @@ class ScreeningStatistics:
                 while (index+1) < legsToCheck:
                     # prev one < new one.
                     if consolidationPercentages[index] <= consolidationPercentages[index+1]:
-                        return False, consolidationPercentages[:relativeLegsTocheck]
+                        return False, consolidationPercentages[:relativeLegsTocheck], devScore
                     if index < relativeLegsTocheck:
                         devScore += 2-(consolidationPercentages[index]/consolidationPercentages[index+1])
                     index += 1

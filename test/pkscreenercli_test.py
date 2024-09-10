@@ -33,7 +33,7 @@ from PKDevTools.classes.ColorText import colorText
 from PKDevTools.classes.log import default_logger
 
 from pkscreener import pkscreenercli
-from pkscreener.globals import shutdown
+from pkscreener.classes.PKScanRunner import PKScanRunner
 
 
 # Mocking necessary functions or dependencies
@@ -195,8 +195,8 @@ def test_pkscreenercli_prodbuild_mode():
     try:
         import signal
 
-        signal.signal(signal.SIGBREAK, shutdown)
-        signal.signal(signal.SIGTERM, shutdown)
+        signal.signal(signal.SIGBREAK, PKScanRunner.shutdown)
+        signal.signal(signal.SIGTERM, PKScanRunner.shutdown)
     except Exception:# pragma: no cover
         pass
 
