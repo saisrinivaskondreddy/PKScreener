@@ -59,18 +59,20 @@ def cleanup():
 
 def test_fetchCodes_positive(configManager, tools_instance):
     with patch("requests_cache.CachedSession.get") as mock_get:
-        mock_get.return_value.status_code = 200
-        mock_get.return_value.text = "SYMBOL\nAAPL\nGOOG\n"
-        result = tools_instance.fetchNiftyCodes(12)
-        assert result == ["AAPL", "GOOG"]
-        mock_get.assert_called_once_with(
-            "https://archives.nseindia.com/content/equities/EQUITY_L.csv",
-            params=None,
-            proxies=None,
-            stream=False,
-            timeout=ANY,
-            headers=None,
-        )
+        with patch("pkscreener.classes.Fetcher.screenerStockDataFetcher.savedFileContents") as mock_contents:
+            mock_contents.return_value = None, "contents.txt", None
+            mock_get.return_value.status_code = 200
+            mock_get.return_value.text = "SYMBOL\nAAPL\nGOOG\n"
+            result = tools_instance.fetchNiftyCodes(12)
+            mock_get.assert_called_once_with(
+                "https://archives.nseindia.com/content/equities/EQUITY_L.csv",
+                params=None,
+                proxies=None,
+                stream=False,
+                timeout=ANY,
+                headers=ANY,
+            )
+            assert result == ["AAPL", "GOOG"]
 
 
 def test_fetchCodes_positive_proxy(configManager, tools_instance):
@@ -78,19 +80,21 @@ def test_fetchCodes_positive_proxy(configManager, tools_instance):
         with patch(
             "pkscreener.classes.Fetcher.screenerStockDataFetcher._getProxyServer"
         ) as mock_proxy:
-            mock_proxy.return_value = {"https": "127.0.0.1:8080"}
-            mock_get.return_value.status_code = 200
-            mock_get.return_value.text = "SYMBOL\nAAPL\nGOOG\n"
-            result = tools_instance.fetchNiftyCodes(12)
-            assert result == ["AAPL", "GOOG"]
-            mock_get.assert_called_once_with(
-                "https://archives.nseindia.com/content/equities/EQUITY_L.csv",
-                proxies={"https": "127.0.0.1:8080"},
-                params=None,
-                stream=False,
-                timeout=ANY,
-                headers=None,
-            )
+            with patch("pkscreener.classes.Fetcher.screenerStockDataFetcher.savedFileContents") as mock_contents:
+                mock_contents.return_value = None, "contents.txt", None
+                mock_proxy.return_value = {"https": "127.0.0.1:8080"}
+                mock_get.return_value.status_code = 200
+                mock_get.return_value.text = "SYMBOL\nAAPL\nGOOG\n"
+                result = tools_instance.fetchNiftyCodes(12)
+                assert result == ["AAPL", "GOOG"]
+                mock_get.assert_called_once_with(
+                    "https://archives.nseindia.com/content/equities/EQUITY_L.csv",
+                    params=None,
+                    proxies={"https": "127.0.0.1:8080"},
+                    stream=False,
+                    timeout=ANY,
+                    headers=ANY,
+                )
 
 
 def test_fetchCodes_negative(configManager, tools_instance):
@@ -188,50 +192,52 @@ def test_fetchStockCodes_positive_proxy(configManager, tools_instance):
         "pkscreener.classes.Fetcher.screenerStockDataFetcher._getProxyServer"
     ) as mock_proxy:
         with patch("requests_cache.CachedSession.get") as mock_get:
-            mock_proxy.return_value = {"https": "127.0.0.1:8080"}
-            mock_get.return_value.status_code = 200
-            mock_get.return_value.text = "\n".join(
-                [
-                    ",,,",
-                    ",,AAPL",
-                    ",,GOOG",
-                    ",,AAPL",
-                    ",,GOOG",
-                    ",,AAPL",
-                    ",,GOOG",
-                    ",,AAPL",
-                    ",,GOOG",
-                    ",,AAPL",
-                    ",,GOOG",
-                    ",,AAPL",
-                    ",,GOOG",
-                ]
-            )
-            result = tools_instance.fetchStockCodes(1)
-            assert len(result) == len(
-                [
-                    "AAPL",
-                    "GOOG",
-                    "AAPL",
-                    "GOOG",
-                    "AAPL",
-                    "GOOG",
-                    "AAPL",
-                    "GOOG",
-                    "AAPL",
-                    "GOOG",
-                    "AAPL",
-                    "GOOG",
-                ]
-            )
-            mock_get.assert_called_with(
-                ANY,
-                proxies=mock_proxy.return_value,
-                params=None,
-                stream=False,
-                timeout=ANY,
-                headers=None,
-            )
+            with patch("pkscreener.classes.Fetcher.screenerStockDataFetcher.savedFileContents") as mock_contents:
+                mock_contents.return_value = None, "contents.txt", None
+                mock_proxy.return_value = {"https": "127.0.0.1:8080"}
+                mock_get.return_value.status_code = 200
+                mock_get.return_value.text = "\n".join(
+                    [
+                        ",,,",
+                        ",,AAPL",
+                        ",,GOOG",
+                        ",,AAPL",
+                        ",,GOOG",
+                        ",,AAPL",
+                        ",,GOOG",
+                        ",,AAPL",
+                        ",,GOOG",
+                        ",,AAPL",
+                        ",,GOOG",
+                        ",,AAPL",
+                        ",,GOOG",
+                    ]
+                )
+                result = tools_instance.fetchStockCodes(1)
+                assert len(result) == len(
+                    [
+                        "AAPL",
+                        "GOOG",
+                        "AAPL",
+                        "GOOG",
+                        "AAPL",
+                        "GOOG",
+                        "AAPL",
+                        "GOOG",
+                        "AAPL",
+                        "GOOG",
+                        "AAPL",
+                        "GOOG",
+                    ]
+                )
+                mock_get.assert_called_with(
+                    ANY,
+                    proxies=mock_proxy.return_value,
+                    params=None,
+                    stream=False,
+                    timeout=ANY,
+                    headers=ANY,
+                )
 
 
 def test_fetchStockCodes_negative(configManager, tools_instance):
@@ -256,9 +262,11 @@ def test_fetchStockData_positive(configManager, tools_instance):
             interval="1m",
             proxy=None,
             progress=False,
-            timeout=configManager.longTimeout,
-            start=None,
-            end=None,
+            timeout=configManager.generalTimeout/4,
+            rounding=True,
+            group_by='ticker', 
+            start=None, 
+            end=None
         )
 
 
@@ -275,9 +283,11 @@ def test_fetchStockData_negative(configManager, tools_instance):
             interval="1m",
             proxy=None,
             progress=False,
-            timeout=configManager.longTimeout,
-            start=None,
-            end=None,
+            timeout=configManager.generalTimeout/4,
+            rounding=True,
+            group_by='ticker', 
+            start=None, 
+            end=None
         )
         yfd_df = pd.DataFrame({"A":[1,2,3]})
         mock_download.return_value = yfd_df
