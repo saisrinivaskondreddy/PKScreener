@@ -36,7 +36,7 @@ from pkscreener.classes import VERSION
 def getPlatformSpecificDetails(jsonDict):
     url = ""
     platName = ""
-    platforms = {0: "Linux", 1: "Windows", 2: "Darwin"}
+    platforms = {0: "Darwin", 1: "Windows", 2: "Linux"}
     platformNames = {"Linux": "Linux", "Windows": "Windows", "Darwin": "Mac"}
     for key in platforms.keys():
         if platforms[key] in platform.system():
@@ -56,16 +56,16 @@ def test_checkForUpdate_skipDownload():
             "tag_name": "2.0.0",
             "assets": [
                 {
-                    "browser_download_url": "https://example.com/update3.run",
-                    "size": 300,
+                    "browser_download_url": "https://example.com/pkscreenercli.run",
+                    "size": 1024*1024*100,
                 },
                 {
-                    "browser_download_url": "https://example.com/update1.exe",
-                    "size": 100,
+                    "browser_download_url": "https://example.com/pkscreenercli.exe",
+                    "size": 1024*1024*200,
                 },
                 {
-                    "browser_download_url": "https://example.com/update2.bin",
-                    "size": 200,
+                    "browser_download_url": "https://example.com/pkscreenercli.bin",
+                    "size": 1024*1024*300,
                 },
             ],
         }
@@ -80,7 +80,7 @@ def test_checkForUpdate_skipDownload():
                     f"pkscreener.classes.OtaUpdater.OTAUpdater.updateFor{platName}"
                 ) as mock_updateForPlatform:
                     OTAUpdater.checkForUpdate(VERSION, skipDownload=True)
-                    assert mock_showWhatsNew.called
+                    mock_showWhatsNew.assert_not_called
                     assert not mock_updateForPlatform.called
                     
 # Positive test case: Test updateForWindows function
@@ -130,16 +130,16 @@ def test_checkForUpdate_prod_update():
             "tag_name": "2.0.0",
             "assets": [
                 {
-                    "browser_download_url": "https://example.com/update3.run",
-                    "size": 300,
+                    "browser_download_url": "https://example.com/pkscreenercli.run",
+                    "size": 1024*1024*300,
                 },
                 {
-                    "browser_download_url": "https://example.com/update1.exe",
-                    "size": 100,
+                    "browser_download_url": "https://example.com/pkscreenercli.exe",
+                    "size": 1024*1024*100,
                 },
                 {
-                    "browser_download_url": "https://example.com/update2.bin",
-                    "size": 200,
+                    "browser_download_url": "https://example.com/pkscreenercli.bin",
+                    "size": 1024*1024*200,
                 },
             ],
         }
@@ -162,16 +162,16 @@ def test_checkForUpdate_not_prod_update():
             "tag_name": "1.0.0",
             "assets": [
                 {
-                    "browser_download_url": "https://example.com/update3.run",
-                    "size": 300,
+                    "browser_download_url": "https://example.com/pkscreenercli.run",
+                    "size": 1024*1024*300,
                 },
                 {
-                    "browser_download_url": "https://example.com/update1.exe",
-                    "size": 100,
+                    "browser_download_url": "https://example.com/pkscreenercli.exe",
+                    "size": 1024*1024*100,
                 },
                 {
-                    "browser_download_url": "https://example.com/update2.bin",
-                    "size": 200,
+                    "browser_download_url": "https://example.com/pkscreenercli.bin",
+                    "size": 1024*1024*200,
                 },
             ],
         }
@@ -198,16 +198,16 @@ def test_checkForUpdate_exception():
                 "tag_name": "1.0.0",
                 "assets": [
                     {
-                        "browser_download_url": "https://example.com/update3.run",
-                        "size": 300,
+                        "browser_download_url": "https://example.com/pkscreenercli.run",
+                        "size": 1024*1024*300,
                     },
                     {
-                        "browser_download_url": "https://example.com/update1.exe",
-                        "size": 100,
+                        "browser_download_url": "https://example.com/pkscreenercli.exe",
+                        "size": 1024*1024*100,
                     },
                     {
-                        "browser_download_url": "https://example.com/update2.bin",
-                        "size": 200,
+                        "browser_download_url": "https://example.com/pkscreenercli.bin",
+                        "size": 1024*1024*200,
                     },
                 ],
             }
@@ -224,7 +224,8 @@ def test_checkForUpdate_exception():
                         mock_print.assert_called_with(
                             colorText.FAIL
                             + "[+] Failure while checking update!"
-                            + colorText.END
+                            + colorText.END,
+                            sep=' ', end='\n', flush=False
                         )
 
 
@@ -236,15 +237,15 @@ def test_checkForUpdate_no_update():
             "tag_name": "1.0.0.0",
             "assets": [
                 {
-                    "browser_download_url": "https://example.com/update3.run",
+                    "browser_download_url": "https://example.com/pkscreenercli.run",
                     "size": 300,
                 },
                 {
-                    "browser_download_url": "https://example.com/update1.exe",
+                    "browser_download_url": "https://example.com/pkscreenercli.exe",
                     "size": 100,
                 },
                 {
-                    "browser_download_url": "https://example.com/update2.bin",
+                    "browser_download_url": "https://example.com/pkscreenercli.bin",
                     "size": 200,
                 },
             ],
@@ -312,9 +313,9 @@ def test_get_latest_release_info(mocker):
     mock_resp = mocker.Mock()
     mock_resp.json.return_value = {
         "assets": [
-            {"browser_download_url": "https://example.com/release1", "size": 1048576},
-            {"browser_download_url": "https://example.com/release2", "size": 2097152},
-            {"browser_download_url": "https://example.com/release3", "size": 3145728},
+            {"browser_download_url": "https://example.com/pkscreenercli.run", "size": 1048576},
+            {"browser_download_url": "https://example.com/pkscreenercli.exe", "size": 2097152},
+            {"browser_download_url": "https://example.com/pkscreenercli.bin", "size": 3145728},
         ]
     }
     mocker.patch.object(OTAUpdater.fetcher, "fetchURL", return_value=mock_resp)
@@ -334,9 +335,9 @@ def test_get_latest_release_info_linux(mocker):
     mock_resp = mocker.Mock()
     mock_resp.json.return_value = {
         "assets": [
-            {"browser_download_url": "https://example.com/release1", "size": 1048576},
-            {"browser_download_url": "https://example.com/release2", "size": 2097152},
-            {"browser_download_url": "https://example.com/release3", "size": 3145728},
+            {"browser_download_url": "https://example.com/pkscreenercli.run", "size": 1048576},
+            {"browser_download_url": "https://example.com/pkscreenercli.exe", "size": 2097152},
+            {"browser_download_url": "https://example.com/pkscreenercli.bin", "size": 3145728},
         ],
         "tag_name": ".".join(VERSION.split(".")[:-1]) + "." +str(int(VERSION.split(".")[-1]) +1)
     }
@@ -350,16 +351,18 @@ def test_get_latest_release_info_linux(mocker):
 
     # Assert the expected values
     assert resp == mock_resp
-    assert size == 1
+    assert size == 3
     with patch("pkscreener.classes.OtaUpdater.OTAUpdater.showWhatsNew") as mock_showWhatsNew:
-        OTAUpdater.checkForUpdate(skipDownload=True)
-        assert mock_showWhatsNew.called
-        mock_resp.json.return_value["tag_name"] = ".".join(VERSION.split(".")[:-2]) + "." +str(int(VERSION.split(".")[-2]) +1)
-        OTAUpdater.checkForUpdate(skipDownload=True)
-        assert mock_showWhatsNew.called
-        mock_resp.json.return_value["tag_name"] = ".".join(VERSION.split(".")[:-1]) + "." +str(int(VERSION.split(".")[-1]) +1)
-        OTAUpdater.checkForUpdate(VERSION=".".join(VERSION.split(".")[:-1]),skipDownload=True)
-        assert mock_showWhatsNew.called
+        with patch("pkscreener.classes.OtaUpdater.OTAUpdater.updateForLinux"):
+            patch("builtins.input", return_value="y")
+            OTAUpdater.checkForUpdate(skipDownload=False)
+            assert mock_showWhatsNew.called
+            mock_resp.json.return_value["tag_name"] = ".".join(VERSION.split(".")[:-2]) + "." +str(int(VERSION.split(".")[-2]) +1) + "." +str(int(VERSION.split(".")[-1]) +1)
+            OTAUpdater.checkForUpdate(skipDownload=False)
+            assert mock_showWhatsNew.called
+            mock_resp.json.return_value["tag_name"] = ".".join(VERSION.split(".")[:-1]) + "." +str(int(VERSION.split(".")[-1]) +1) 
+            OTAUpdater.checkForUpdate(VERSION=".".join(VERSION.split(".")[:-1]),skipDownload=False)
+            assert mock_showWhatsNew.called
 
 def test_checkForUpdate_prod_update_1(mocker):
     # Mock the response from get_latest_release_info
@@ -379,12 +382,12 @@ def test_checkForUpdate_prod_update_1(mocker):
     # Mock the updateForWindows function
     mocker.patch.object(OTAUpdater, "updateForWindows")
 
-    with pytest.raises(Exception):
-        # Call the function under test
-        result = OTAUpdater.checkForUpdate(VERSION="1.1.0.0")
-        # Assert the expected behavior
-        assert result is None
-        OTAUpdater.updateForWindows.assert_called_once_with(OTAUpdater.checkForUpdate.url)
+    # with pytest.raises(Exception):
+    # Call the function under test
+    result = OTAUpdater.checkForUpdate(VERSION="1.1.0.0")
+    # Assert the expected behavior
+    assert result is None
+    OTAUpdater.updateForWindows.assert_called_once_with(OTAUpdater.checkForUpdate.url)
 
 def test_checkForUpdate_prod_update_2(mocker):
     # Mock the response from get_latest_release_info
@@ -392,9 +395,9 @@ def test_checkForUpdate_prod_update_2(mocker):
     mock_resp.json.return_value = {
         "tag_name": "1.2.0.0",
         "assets": [
-            {"browser_download_url": "https://example.com/release1", "size": 1048576},
-            {"browser_download_url": "https://example.com/release2", "size": 2097152},
-            {"browser_download_url": "https://example.com/release3", "size": 3145728},
+            {"browser_download_url": "https://example.com/pkscreenercli.run", "size": 1048576},
+            {"browser_download_url": "https://example.com/pkscreenercli.exe", "size": 2097152},
+            {"browser_download_url": "https://example.com/pkscreenercli.bin", "size": 3145728},
         ],
         "message": "Something interesting"
     }

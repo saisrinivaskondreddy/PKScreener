@@ -139,7 +139,7 @@ rm updater.sh
         resp = OTAUpdater.fetcher.fetchURL(
             "https://api.github.com/repos/pkjmesra/PKScreener/releases/latest"
         )  
-
+        size = 0
         if "Windows" in platform.system():
             exe_name = "pkscreenercli.exe"
         elif "Darwin" in platform.system():
@@ -213,7 +213,7 @@ rm updater.sh
                                 % (str(tag), size)
                             )
                         ) or "y"
-                except EOFError: # user pressed enter
+                except (EOFError, OSError): # user pressed enter
                     action = "y"
                     pass
                 if action is not None and action.lower() == "y":
@@ -298,6 +298,6 @@ rm updater.sh
                 OutputControls().printOutput(
                     colorText.FAIL
                     + "[+] Failure while checking update!"
-                    + colorText.END
+                    + colorText.END,
                 )
         return
