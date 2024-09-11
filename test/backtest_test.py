@@ -108,17 +108,17 @@ def test_backtest_summary_with_data():
 
 def test_formatted_output_high_outcome():
     result = Utility.tools.formattedBacktestOutput(85)
-    assert result == "\x1b[92m85.00%\x1b[0m"
+    assert result == "\x1b[32m85.00%\x1b[0m"
 
 
 def test_formatted_output_medium_outcome():
     result = Utility.tools.formattedBacktestOutput(65)
-    assert result == "\x1b[93m65.00%\x1b[0m"
+    assert result == "\x1b[33m65.00%\x1b[0m"
 
 
 def test_formatted_output_low_outcome():
     result = Utility.tools.formattedBacktestOutput(45)
-    assert result == "\x1b[91m45.00%\x1b[0m"
+    assert result == "\x1b[31m45.00%\x1b[0m"
 
 
 def sample_summary_data():
@@ -300,14 +300,13 @@ def test_backtestSummary_no_data():
 
 
 def test_formattedOutput():
-    assert Utility.tools.formattedBacktestOutput(85) == "\x1b[92m85.00%\x1b[0m"
-    assert Utility.tools.formattedBacktestOutput(70) == "\x1b[93m70.00%\x1b[0m"
-    assert Utility.tools.formattedBacktestOutput(40) == "\x1b[91m40.00%\x1b[0m"
+    assert Utility.tools.formattedBacktestOutput(85) == "\x1b[32m85.00%\x1b[0m"
+    assert Utility.tools.formattedBacktestOutput(70) == "\x1b[33m70.00%\x1b[0m"
+    assert Utility.tools.formattedBacktestOutput(40) == "\x1b[31m40.00%\x1b[0m"
 
 
 def test_backtest(sample_data):
     stock = "AAPL"
-    saveDict = None
     screenedDict = {
         "Consol.": True,
         "Breakout": False,
@@ -321,6 +320,8 @@ def test_backtest(sample_data):
         "Pattern": True,
         "CCI": False
     }
+    saveDict = screenedDict
+    saveDict["Date"] = "SomeDate"
     periods = 30
     backTestedData = None
     sellSignal = False
