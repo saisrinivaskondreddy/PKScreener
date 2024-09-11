@@ -144,8 +144,9 @@ def test_initPostLevel0Execution_negative():
         initPostLevel0Execution(menuOption, indexOption, executeOption)
         mock_print.assert_called_with(
             colorText.FAIL
-            + "\n[+] Please enter a valid numeric option & Try Again!"
-            + colorText.END
+            + "[+] You chose: Scanners"
+            + colorText.END,
+             sep=' ', end='\n', flush=False
         )
 
 
@@ -157,7 +158,8 @@ def test_initPostLevel1Execution_negative():
         mock_print.assert_called_with(
             colorText.FAIL
             + "\n[+] Please enter a valid numeric option & Try Again!"
-            + colorText.END
+            + colorText.END,
+             sep=' ', end='\n', flush=False
         )
 
 
@@ -216,7 +218,8 @@ def test_handleScannerExecuteOption4_negative():
             mock_print.assert_called_with(
                 colorText.FAIL
                 + "[+] Error: Non-numeric value entered! Please try again!"
-                + colorText.END
+                + colorText.END,
+                sep=' ', end='\n', flush=False
             )
 
 
