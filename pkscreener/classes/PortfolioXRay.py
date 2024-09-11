@@ -437,9 +437,14 @@ def cleanupData(savedResults):
     saveResults.loc[:, f"Consol."] = saveResults.loc[
             :, f"Consol."
         ].apply(lambda x: x.replace("Range:", "").replace("%", ""))
+    try:
+        saveResults = saveResults.loc[:,(saveResults!='').any(axis=0)]
+    except ValueError:
+        # The truth value of a Series is ambiguous.
+        pass
     saveResults[["Breakout", "Resistance"]] = saveResults[
             f"Breakout({configManager.daysToLookback}Prds)"
-        ].str.split(" R: ", n=1, expand=True)
+        ].astype(str).str.split(" R: ", n=1, expand=True)
     saveResults.loc[:, "Breakout"] = saveResults.loc[:, "Breakout"].apply(
             lambda x: x.replace("BO: ", "").replace(" ", "")
         )
@@ -471,27 +476,28 @@ def getbacktestPeriod(args):
 
 def statScanCalculations(userArgs, saveResults, periods,progressLabel:str=None):
     scanResults = []
-    task1 = PKTask(f"[{len(saveResults)}] RSI Stats",long_running_fn=statScanCalculationForRSI)
-    task2 = PKTask(f"[{len(saveResults)}] Trend Stats",long_running_fn=statScanCalculationForTrend)
-    task3 = PKTask(f"[{len(saveResults)}] MA Stats",long_running_fn=statScanCalculationForMA)
-    task4 = PKTask(f"[{len(saveResults)}] Volume Stats",long_running_fn=statScanCalculationForVol)
-    task5 = PKTask(f"[{len(saveResults)}] Consolidation Stats",long_running_fn=statScanCalculationForConsol)
-    task6 = PKTask(f"[{len(saveResults)}] Breakout Stats",long_running_fn=statScanCalculationForBO)
-    task7 = PKTask(f"[{len(saveResults)}] 52Week Stats",long_running_fn=statScanCalculationFor52Wk)
-    task8 = PKTask(f"[{len(saveResults)}] CCI Stats",long_running_fn=statScanCalculationForCCI)
-    task9 = PKTask(f"[{len(saveResults)}] CCI Stats",long_running_fn=statScanCalculationForPatterns)
-    task10 = PKTask(f"[{len(saveResults)}] NoFilter Stats",long_running_fn=statScanCalculationForNoFilter)
-    tasksList=[task1,task2,task3,task4,task5,task6,task7,task8,task9,task10]
-    for task in tasksList:
-        task.long_running_fn_args = (userArgs, saveResults, periods, scanResults)
-    if configManager.enablePortfolioCalculations:
-        PKScheduler.scheduleTasks(tasksList,label=progressLabel,showProgressBars=True,timeout=600)
-    else:
+    if saveResults is not None and len(saveResults) >= 1:
+        task1 = PKTask(f"[{len(saveResults)}] RSI Stats",long_running_fn=statScanCalculationForRSI)
+        task2 = PKTask(f"[{len(saveResults)}] Trend Stats",long_running_fn=statScanCalculationForTrend)
+        task3 = PKTask(f"[{len(saveResults)}] MA Stats",long_running_fn=statScanCalculationForMA)
+        task4 = PKTask(f"[{len(saveResults)}] Volume Stats",long_running_fn=statScanCalculationForVol)
+        task5 = PKTask(f"[{len(saveResults)}] Consolidation Stats",long_running_fn=statScanCalculationForConsol)
+        task6 = PKTask(f"[{len(saveResults)}] Breakout Stats",long_running_fn=statScanCalculationForBO)
+        task7 = PKTask(f"[{len(saveResults)}] 52Week Stats",long_running_fn=statScanCalculationFor52Wk)
+        task8 = PKTask(f"[{len(saveResults)}] CCI Stats",long_running_fn=statScanCalculationForCCI)
+        task9 = PKTask(f"[{len(saveResults)}] CCI Stats",long_running_fn=statScanCalculationForPatterns)
+        task10 = PKTask(f"[{len(saveResults)}] NoFilter Stats",long_running_fn=statScanCalculationForNoFilter)
+        tasksList=[task1,task2,task3,task4,task5,task6,task7,task8,task9,task10]
         for task in tasksList:
-            task.long_running_fn(*(task,))
-    for task in tasksList:
-        if task.result is not None and len(task.result) > 0:
-            scanResults.extend(task.result)
+            task.long_running_fn_args = (userArgs, saveResults, periods, scanResults)
+        if configManager.enablePortfolioCalculations:
+            PKScheduler.scheduleTasks(tasksList,label=progressLabel,showProgressBars=True,timeout=600)
+        else:
+            for task in tasksList:
+                task.long_running_fn(*(task,))
+        for task in tasksList:
+            if task.result is not None and len(task.result) > 0:
+                scanResults.extend(task.result)
     return scanResults
 
 def statScanCalculationForCCI(*args, **kwargs):
