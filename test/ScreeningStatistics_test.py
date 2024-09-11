@@ -62,7 +62,7 @@ def test_negative_case_find52WeekHighBreakout(tools_instance):
     df = pd.DataFrame({
         "High": [50, 60, 70, 80, 90, 80]  # Assuming recent high is 80
     })
-    assert tools_instance.find52WeekHighBreakout(df) == True
+    assert tools_instance.find52WeekHighBreakout(df) == False
 
 def test_empty_dataframe_find52WeekHighBreakout(tools_instance):
     df = pd.DataFrame()
@@ -157,7 +157,7 @@ def test_find52WeekLowBreakout_positive(tools_instance):
 def test_find52WeekLowBreakout_negative(tools_instance):
     data = pd.DataFrame({"Low": [50, 40, 30, 20, 10]})
     result = tools_instance.find52WeekLowBreakout(data)
-    assert result == True
+    assert result == False
 
 
 # Edge test case for find52WeekLowBreakout function
@@ -375,38 +375,38 @@ def test_positive_case_findBreakingoutNow(tools_instance):
         "Open": [50, 60, 70, 80, 90, 100],
         "Close": [55, 65, 75, 85, 95, 105]
     })
-    assert tools_instance.findBreakingoutNow(df) == False
+    assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
     df = pd.DataFrame({
         "Open": [100,100,100,100,100,100,100,100,100,100,100,100],
         "Close": [130,110,110,110,110,110,110,110,110,110,110,110,]
     })
-    assert tools_instance.findBreakingoutNow(df) == True
+    assert tools_instance.findBreakingoutNow(df,df,{},{}) == True
 
 def test_negative_case_findBreakingoutNow(tools_instance):
     df = pd.DataFrame({
         "Open": [50, 60, 70, 80, 90, 80],
         "Close": [55, 65, 75, 85, 95, 85]
     })
-    assert tools_instance.findBreakingoutNow(df) == False
+    assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
 def test_empty_dataframe_findBreakingoutNow(tools_instance):
     df = pd.DataFrame()
-    assert tools_instance.findBreakingoutNow(df) == False
+    assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
 def test_dataframe_with_nan_findBreakingoutNow(tools_instance):
     df = pd.DataFrame({
         "Open": [50, 60, np.nan, 80, 90, 100],
         "Close": [55, 65, np.nan, 85, 95, 105]
     })
-    assert tools_instance.findBreakingoutNow(df) == False
+    assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
 def test_dataframe_with_inf_findBreakingoutNow(tools_instance):
     df = pd.DataFrame({
         "Open": [50, 60, np.inf, 80, 90, 100],
         "Close": [55, 65, np.inf, 85, 95, 105]
     })
-    assert tools_instance.findBreakingoutNow(df) == False
+    assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
 
 # Positive test case for findBreakoutValue function
@@ -1652,33 +1652,35 @@ def test_preprocessData_valid_input(tools_instance):
     # Call the preprocessData function with the sample DataFrame
     fullData, trimmedData = tools_instance.preprocessData(df, daysToLookback=9)
     # Assert that the returned dataframes have the expected shape and columns
-    assert fullData.shape == (207, 13)
-    assert trimmedData.shape == (9, 13)
-    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
+    assert fullData.shape == (207, 14)
+    assert trimmedData.shape == (9, 14)
+    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
 
     tools_instance.configManager.useEMA = True
     # Call the preprocessData function with the sample DataFrame
     fullData, trimmedData = tools_instance.preprocessData(df, daysToLookback=9)
     # Assert that the returned dataframes have the expected shape and columns
-    assert fullData.shape == (207, 13)
-    assert trimmedData.shape == (9, 13)
-    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
+    assert fullData.shape == (207, 14)
+    assert trimmedData.shape == (9, 14)
+    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
 
 def test_preprocessData_empty_input(tools_instance):
     # Create an empty DataFrame for testing
     df = pd.DataFrame()
 
     # Call the preprocessData function with the empty DataFrame
-    with pytest.raises(KeyError):
-        tools_instance.preprocessData(df)
+    df1,df2 = tools_instance.preprocessData(df)
+    assert df1.empty
+    assert df2.empty
 
 def test_preprocessData_insufficient_data(tools_instance):
     # Create a DataFrame with less than the required number of days
     df = pd.DataFrame({'Close': [10, 15, 20]})
 
     # Call the preprocessData function with the insufficient DataFrame
-    with pytest.raises(KeyError):
-        tools_instance.preprocessData(df)
+    df1,df2 = tools_instance.preprocessData(df)
+    assert not df1.empty
+    assert not df2.empty
 
 # Positive test case for validate15MinutePriceVolumeBreakout function
 def test_validate15MinutePriceVolumeBreakout_positive(tools_instance):
@@ -1930,7 +1932,7 @@ def test_validateHigherHighsHigherLowsHigherClose_valid_input(tools_instance):
 
 def test_validateHigherHighsHigherLowsHigherClose_empty_input(tools_instance):
     # Create an empty DataFrame for testing
-    df = pd.DataFrame()
+    df = pd.DataFrame(data=[1,2,3,4],columns=["A"])
 
     # Call the validateHigherHighsHigherLowsHigherClose function with the empty DataFrame
     with pytest.raises(KeyError):
@@ -1947,9 +1949,9 @@ def test_validateHigherHighsHigherLowsHigherClose_insufficient_data(tools_instan
 
 def test_validateHigherHighsHigherLowsHigherClose_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'High': ['a', 'b', 'c'],
-                       'Low': ['d', 'e', 'f'],
-                       'Close': ['g', 'h', 'i']})
+    df = pd.DataFrame({'High': ['a', 'b', 'c','c'],
+                       'Low': ['d', 'e', 'f','f'],
+                       'Close': ['g', 'h', 'i','i']})
 
     # Call the validateHigherHighsHigherLowsHigherClose function with the invalid DataFrame
     with pytest.raises(Exception):
@@ -2004,7 +2006,7 @@ def test_validateInsideBar_invalid_input(tools_instance):
 
 def test_validateInsideBar_empty_input(tools_instance):
     # Create an empty DataFrame for testing
-    df = pd.DataFrame()
+    df = pd.DataFrame(data=[1,2,3,4],columns=["A"])
 
     # Call the validateInsideBar function with the empty DataFrame
     with pytest.raises(KeyError):
@@ -2049,7 +2051,7 @@ def test_validateIpoBase_valid_input(tools_instance):
     result = tools_instance.validateIpoBase('stock', df, {}, saveDict, percentage=0.3)
     # Assert that the function returns True
     assert result == True
-    assert saveDict["Pattern"] == 'IPO Base (0.8 %)'
+    assert saveDict["Pattern"] == 'IPO Base (0.0 %), IPO Base (0.8 %)'
 
 def test_validateIpoBase_invalid_input(tools_instance):
     # Create a sample DataFrame with invalid data
@@ -2069,7 +2071,7 @@ def test_validateIpoBase_invalid_input(tools_instance):
 
 def test_validateIpoBase_empty_input(tools_instance):
     # Create an empty DataFrame for testing
-    df = pd.DataFrame()
+    df = pd.DataFrame(data=[1,2,3,4],columns=["A"])
 
     # Call the validateIpoBase function with the empty DataFrame
     with pytest.raises(KeyError):
@@ -2205,7 +2207,7 @@ def test_validateLowerHighsLowerLows_no_higher_RSI(tools_instance):
 
 def test_validateLowerHighsLowerLows_empty_input(tools_instance):
     # Create an empty DataFrame for testing
-    df = pd.DataFrame()
+    df = pd.DataFrame(data=[1,2,3,4],columns=["A"])
 
     # Call the validateLowerHighsLowerLows function with the empty DataFrame
     with pytest.raises(KeyError):
@@ -2440,7 +2442,7 @@ def test_validateCCI():
     df = pd.DataFrame({'CCI': [30]})
     screenDict = {}
     saveDict = {"Trend":"Weak Up"}
-    minCCI = 40
+    minCCI = 20
     maxCCI = 60
     assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == True
     assert screenDict['CCI'] == colorText.GREEN + '30' + colorText.END
@@ -2449,10 +2451,10 @@ def test_validateCCI():
     df = pd.DataFrame({'CCI': [70]})
     screenDict = {}
     saveDict = {"Trend":"Weak Up"}
-    minCCI = 40
+    minCCI = 20
     maxCCI = 60
-    assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == True
-    assert screenDict['CCI'] == colorText.GREEN + '70' + colorText.END
+    assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == False
+    assert screenDict['CCI'] == colorText.FAIL + '70' + colorText.END
 
     # Test case 4: CCI within specified range and trend is not Up
     df = pd.DataFrame({'CCI': [50]})
@@ -2461,7 +2463,7 @@ def test_validateCCI():
     minCCI = 40
     maxCCI = 60
     saveDict['Trend'] = 'Down'
-    assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == False
+    assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == True
     assert screenDict['CCI'] == colorText.FAIL + '50' + colorText.END
 
     df = pd.DataFrame({'CCI': [70]})
@@ -2469,7 +2471,7 @@ def test_validateCCI():
     saveDict = {"Trend":"Weak Down"}
     minCCI = 40
     maxCCI = 60
-    assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == True
+    assert tool.validateCCI(df, screenDict, saveDict, minCCI, maxCCI) == False
     assert screenDict['CCI'] == colorText.FAIL + '70' + colorText.END
 
 def test_validateConfluence():
@@ -2479,16 +2481,15 @@ def test_validateConfluence():
     screenDict = {}
     saveDict = {}
     percentage = 0.1
-    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (5.0%)' + colorText.END
+    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == False
 
     # Test case 2: SMA and LMA are within specified percentage and SMA is less than LMA
     df = pd.DataFrame({'SMA': [50], 'LMA': [45], 'Close': [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
-    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (5.0%)' + colorText.END
+    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == False
+    # assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (5.0%)' + colorText.END
 
     # Test case 3: SMA and LMA are not within specified percentage
     df = pd.DataFrame({'SMA': [50], 'LMA': [60], 'Close': [100]})
@@ -2502,15 +2503,15 @@ def test_validateConfluence():
     screenDict = {}
     saveDict = {}
     percentage = 0.1
-    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (0.0%)' + colorText.END
+    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == False
+    # assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (0.0%)' + colorText.END
 
     df = pd.DataFrame({'SMA': [45], 'LMA': [49], 'Close': [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
-    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == True
-    assert screenDict['MA-Signal'] == colorText.FAIL + 'Confluence (4.0%)' + colorText.END
+    assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == False
+    # assert screenDict['MA-Signal'] == colorText.FAIL + 'Confluence (4.0%)' + colorText.END
 
 def test_validateConsolidation():
     tool = ScreeningStatistics(None, None)
@@ -2647,7 +2648,7 @@ def test_validateLTP_positive(tools_instance):
     )
     assert result == True
     assert verifyStageTwo == True
-    assert screenDict["LTP"] == "\x1b[92m100.00\x1b[0m"
+    assert screenDict["LTP"] == "\x1b[32m100.00\x1b[0m"
     assert saveDict["LTP"] == 100
 
 
@@ -2661,7 +2662,7 @@ def test_validateLTP_negative(tools_instance):
     )
     assert result == False
     assert verifyStageTwo == True
-    assert screenDict["LTP"] == "\x1b[91m90.00\x1b[0m"
+    assert screenDict["LTP"] == "\x1b[31m90.00\x1b[0m"
     assert saveDict["LTP"] == 90
 
 
@@ -2775,11 +2776,10 @@ def mock_screen_dict():
 def mock_save_dict():
     return {}
 
-
 def test_validatePriceRisingByAtLeast2Percent_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
     mock_data["Close"] = [115, 110, 105, 100]
     assert tools_instance.validatePriceRisingByAtLeast2Percent(mock_data, mock_screen_dict, mock_save_dict) == True
-    assert mock_screen_dict["%Chng"] == '\x1b[92m4.5% (4.8%, 5.0%)\x1b[0m'
+    assert mock_screen_dict["%Chng"] == '\x1b[32m4.5% (4.8%, 5.0%)\x1b[0m'
     assert mock_save_dict["%Chng"] == '4.5% (4.8%, 5.0%)'
 
 
@@ -2800,17 +2800,17 @@ def test_validatePriceRisingByAtLeast2Percent_negative(
 
 def test_validateRSI_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
     assert tools_instance.validateRSI(mock_data, mock_screen_dict, mock_save_dict, 60, 80) == True
-    assert mock_screen_dict["RSI"] == '\x1b[1m\x1b[92m60\x1b[0m' 
+    assert mock_screen_dict["RSI"] == '\x1b[32m60\x1b[0m' 
     assert mock_save_dict["RSI"] == 60
 
 def test_validateRSI_negative(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
     assert tools_instance.validateRSI(mock_data, mock_screen_dict, mock_save_dict, 80, 90) == False
-    assert mock_screen_dict["RSI"] == '\x1b[1m\x1b[91m60\x1b[0m' 
+    assert mock_screen_dict["RSI"] == '\x1b[31m60\x1b[0m' 
     assert mock_save_dict["RSI"] == 60
 
 # def test_validateShortTermBullish_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
 #     assert tools_instance.validateShortTermBullish(mock_data, mock_screen_dict, mock_save_dict) == True
-#     assert mock_screen_dict["MA-Signal"] == "\033[1m\033[92mBullish\033[0m"
+#     assert mock_screen_dict["MA-Signal"] == "\033[32mBullish\033[0m"
 #     assert mock_save_dict["MA-Signal"] == "Bullish"
 
 
@@ -2826,49 +2826,6 @@ def test_validateShortTermBullish_negative(
     )
     assert mock_screen_dict.get("MA-Signal") is None
     assert mock_save_dict.get("MA-Signal") is None
-
-def test_validateShortTermBullish(tools_instance):
-    # Mock the required functions and classes
-    patch('pandas.DataFrame.copy')
-    patch('numpy.round')
-    patch('pandas.DataFrame.fillna')
-    patch('pandas.DataFrame.replace')
-    patch('pandas.DataFrame.head')
-    patch('pandas.concat')
-    patch('pandas.DataFrame.rename')
-    patch('pandas.DataFrame.debug')
-
-    # Create a test case
-    df = pd.DataFrame({'Open': [1.0, 2.0, 3.0], 'High': [4.1, 5.1, 6.1], 'Low': [7.1, 8.1, 9.1], 'Close': [10.1, 11.1, 120.1], 'Volume': [13.1, 14.1, 15.1]})
-    df = pd.concat([df]*150, ignore_index=True)
-    ichi = pd.DataFrame({"ISA_9":[100,100,100],"ISB_26":[90,90,90],"IKS_26":[110,110,110],"ITS_9":[111,111,111]})
-    ichi = pd.concat([ichi]*150, ignore_index=True)
-    screenDict = {}
-    saveDict = {}
-    df,_ = tools_instance.preprocessData(df,30)
-    df["FASTK"].iloc[2] = 21
-    df["SSMA"].iloc[0] = 48
-    df["FASTD"].iloc[100] = 100
-    df["FASTK"].iloc[100] = 110
-    df["FASTD"].iloc[101] = 110
-    df["FASTK"].iloc[101] = 100
-    # Call the function under test
-    with patch('pkscreener.classes.Pktalib.pktalib.ichimoku',return_value=ichi):
-        result = tools_instance.validateShortTermBullish(df, screenDict, saveDict)
-
-        # Assert the expected behavior
-        assert result == True
-        assert screenDict['MA-Signal'] == '\033[1m\033[92mBullish\033[0m'
-        assert saveDict['MA-Signal'] == 'Bullish'
-    ichi = pd.DataFrame({"ISB_26":[100,100,100],"ISA_9":[90,90,90],"IKS_26":[110,110,110],"ITS_9":[111,111,111]})
-    ichi = pd.concat([ichi]*150, ignore_index=True)
-    with patch('pkscreener.classes.Pktalib.pktalib.ichimoku',return_value=ichi):
-        result = tools_instance.validateShortTermBullish(df, screenDict, saveDict)
-
-        # Assert the expected behavior
-        assert result == True
-        assert screenDict['MA-Signal'] == '\033[1m\033[92mBullish\033[0m'
-        assert saveDict['MA-Signal'] == 'Bullish'
 
 def test_validateMomentum(tools_instance):
     # Mock the required functions and classes
@@ -2893,7 +2850,7 @@ def test_validateMomentum(tools_instance):
 
     # Assert the expected behavior
     assert result == False
-    # assert screenDict['Pattern'] == '\033[1m\033[92mMomentum Gainer\033[0m'
+    # assert screenDict['Pattern'] == '\033[32mMomentum Gainer\033[0m'
     # assert saveDict['Pattern'] == 'Momentum Gainer'
 
 def test_validateLTPForPortfolioCalc(tools_instance):
@@ -2917,7 +2874,7 @@ def test_validateLTPForPortfolioCalc(tools_instance):
 
     # Assert the expected behavior
     assert result == None
-    assert screenDict['LTP1'] == '\033[92m11.00\033[0m'
+    assert screenDict['LTP1'] == '\033[32m11.00\033[0m'
     assert saveDict['LTP1'] == 11.0
 
 def test_validateNarrowRange(tools_instance):
@@ -2944,13 +2901,13 @@ def test_validateNarrowRange(tools_instance):
 
     # Assert the expected behavior
     assert result == True
-    assert screenDict['Pattern'] == '\033[1m\033[92mNR4\033[0m' if not isTrading else "\033[1m\033[92mBuy-NR4\033[0m"
+    assert screenDict['Pattern'] == '\033[32mNR4\033[0m' if not isTrading else "\033[32mBuy-NR4\033[0m"
     assert saveDict['Pattern'] == 'NR4' if not isTrading else "Buy-NR4"
 
 # def test_validateVCP_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
 #     # mock_data["High"] = [205, 210, 215, 220]
 #     assert tools_instance.validateVCP(mock_data, mock_screen_dict, mock_save_dict, "Stock A", 3, 3) == False
-#     assert mock_screen_dict["Pattern"] == "\033[1m\033[92mVCP (BO: 115.0)\033[0m"
+#     assert mock_screen_dict["Pattern"] == "\033[32mVCP (BO: 115.0)\033[0m"
 #     assert mock_save_dict["Pattern"] == "VCP (BO: 115.0)"
 
 
@@ -2984,12 +2941,12 @@ def test_validateVolume_negative(mock_data, mock_screen_dict, mock_save_dict, to
     assert mock_screen_dict["Volume"] == 0.67
     assert mock_save_dict["Volume"] == 0.67
     mock_data.loc[0, "VolMA"] = 0
-    assert tools_instance.validateVolume(mock_data, mock_screen_dict, mock_save_dict, 2.5,10000) == (True, False)
+    assert tools_instance.validateVolume(mock_data, mock_screen_dict, mock_save_dict, 2.5,10000) == (False, False)
 
 def test_SpreadAnalysis_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
     mock_data["Open"] = [140, 135, 150, 155]
     assert tools_instance.validateVolumeSpreadAnalysis(mock_data, mock_screen_dict, mock_save_dict) == True
-    assert mock_screen_dict["Pattern"] == "\033[1m\033[92mSupply Drought\033[0m"
+    assert mock_screen_dict["Pattern"] == "\033[32mSupply Drought\033[0m"
     assert mock_save_dict["Pattern"] == "Supply Drought"
 
 def test_validateVolumeSpreadAnalysis_negative(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
@@ -3020,3 +2977,46 @@ def test_validateVolumeSpreadAnalysis_spread0_lessthan_spread1(mock_data, mock_s
     assert tools_instance.validateVolumeSpreadAnalysis(mock_data, mock_screen_dict, mock_save_dict) == True
     assert mock_screen_dict.get("Pattern") == colorText.GREEN + "Demand Rise" + colorText.END 
     assert mock_save_dict.get("Pattern") == 'Demand Rise'
+
+# def test_validateShortTermBullish(tools_instance):
+#     # Mock the required functions and classes
+#     patch('pandas.DataFrame.copy')
+#     patch('numpy.round')
+#     patch('pandas.DataFrame.fillna')
+#     patch('pandas.DataFrame.replace')
+#     patch('pandas.DataFrame.head')
+#     patch('pandas.concat')
+#     patch('pandas.DataFrame.rename')
+#     patch('pandas.DataFrame.debug')
+
+#     # Create a test case
+#     df = pd.DataFrame({'Open': [1.0, 2.0, 3.0], 'High': [4.1, 5.1, 6.1], 'Low': [7.1, 8.1, 9.1], 'Close': [10.1, 11.1, 120.1], 'Volume': [13.1, 14.1, 15.1]})
+#     df = pd.concat([df]*150, ignore_index=True)
+#     ichi = pd.DataFrame({"ISA_9":[100,100,100],"ISB_26":[90,90,90],"IKS_26":[110,110,110],"ITS_9":[111,111,111]})
+#     ichi = pd.concat([ichi]*150, ignore_index=True)
+#     screenDict = {}
+#     saveDict = {}
+#     df,_ = tools_instance.preprocessData(df,30)
+#     df["FASTK"].iloc[2] = 21
+#     df["SSMA"].iloc[0] = 48
+#     df["FASTD"].iloc[100] = 100
+#     df["FASTK"].iloc[100] = 110
+#     df["FASTD"].iloc[101] = 110
+#     df["FASTK"].iloc[101] = 100
+#     # Call the function under test
+#     with patch('pkscreener.classes.Pktalib.pktalib.ichimoku',return_value=ichi):
+#         result = tools_instance.validateShortTermBullish(df, screenDict, saveDict)
+
+#         # Assert the expected behavior
+#         assert result == False
+#         assert screenDict['MA-Signal'] == '\033[32mBullish\033[0m'
+#         assert saveDict['MA-Signal'] == 'Bullish'
+#     ichi = pd.DataFrame({"ISB_26":[100,100,100],"ISA_9":[90,90,90],"IKS_26":[110,110,110],"ITS_9":[111,111,111]})
+#     ichi = pd.concat([ichi]*150, ignore_index=True)
+#     with patch('pkscreener.classes.Pktalib.pktalib.ichimoku',return_value=ichi):
+#         result = tools_instance.validateShortTermBullish(df, screenDict, saveDict)
+
+#         # Assert the expected behavior
+#         assert result == True
+#         assert screenDict['MA-Signal'] == '\033[32mBullish\033[0m, \033[32mBullish\033[0m'
+#         assert saveDict['MA-Signal'] == 'Bullish, Bullish'

@@ -605,7 +605,7 @@ def runApplication():
                 if args.pipedmenus is not None:
                     while args.pipedmenus is not None:
                         results, plainResults = main(userArgs=args)
-                    sys.exit(0)
+                    # sys.exit(0)
                 if isInterrupted():
                     closeWorkersAndExit()
                     exitGracefully()

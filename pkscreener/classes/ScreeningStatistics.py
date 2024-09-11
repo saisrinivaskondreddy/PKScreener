@@ -1526,7 +1526,7 @@ class ScreeningStatistics:
         if df is None or len(df) == 0:
             return False
         data = df.copy()
-        maRange = [9, 10, 20, 50, 200] if maLength in [9,10,20,50,100] else [9,10,20,50,100,maRange]
+        maRange = [9, 10, 20, 50, 200] if maLength in [9,10,20,50,100] else [9,10,20,50,100,maLength]
         results = []
         hasReversals = False
         data = data[::-1]
@@ -2514,7 +2514,7 @@ class ScreeningStatistics:
         data = data.replace([np.inf, -np.inf], 0)
         cci = int(data.head(1)["CCI"].iloc[0])
         saveDict["CCI"] = cci
-        if (cci >= minCCI and cci <= maxCCI):
+        if (cci >= minCCI and cci <= maxCCI) and "Trend" in saveDict.keys():
             if ("Up" in saveDict["Trend"]):
                 screenDict["CCI"] = (
                     (colorText.BOLD if ("Strong" in saveDict["Trend"]) else "") + colorText.GREEN + str(cci) + colorText.END
