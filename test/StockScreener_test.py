@@ -64,7 +64,7 @@ def test_screenStocks(stock_consumer):
         hostRef.screener.validateLowestVolume = MagicMock(return_value=bool_value)
         hostRef.screener.validateIpoBase = MagicMock(return_value=bool_value)
         hostRef.screener.validateConfluence = MagicMock(return_value=bool_value)
-        hostRef.screener.validateMovingAverages = MagicMock(return_value=1)
+        hostRef.screener.validateMovingAverages = MagicMock(return_value=(1,1,0))
         hostRef.screener.validateInsideBar = MagicMock(return_value=1)
         hostRef.screener.validateMomentum = MagicMock(return_value=bool_value)
         hostRef.screener.validateCCI = MagicMock(return_value=bool_value)
@@ -92,12 +92,16 @@ def test_screenStocks(stock_consumer):
 
         hostRef.screener.processingResultsCounter.value = 0
         executeOptions=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,23,24,25]
-        printCounter = False
+        menuOption = "X"
+        exchangeName = "INDIA"
+        userArgs = None
         newlyListedOnly = False
         respChartPattern = 3
         foundValues = 0
         for executeOption in executeOptions:
             result = stock_consumer.screenStocks(
+                menuOption = menuOption,
+                exchangeName = exchangeName,
                 executeOption=executeOption,
                 reversalOption=6,
                 maLength=10,
@@ -113,7 +117,7 @@ def test_screenStocks(stock_consumer):
                 downloadOnly=False,
                 volumeRatio=1,
                 testbuild=False,
-                printCounter=printCounter,
+                userArgs=userArgs,
                 backtestDuration=0,
                 backtestPeriodToLookback=30,
                 logLevel=logging.NOTSET,
@@ -146,14 +150,18 @@ def test_screenStocks(stock_consumer):
                     }
 
             if bool_value:
+                if result is None:
+                    print("Got none")
                 assert result[0] == {'Stock': '\x1b[97m\x1b]8;;https://in.tradingview.com/chart?symbol=NSE%3AAAPL\x1b\\AAPL\x1b]8;;\x1b\\\x1b[0m'}
                 assert result[1] == {'Stock': 'AAPL'}
-                pd.testing.assert_frame_equal(result[2],pd.DataFrame(data=[1, 2, 3], columns=['A'], index=[0, 1, 2]))
+                df = pd.DataFrame(data=[1, 2, 3], columns=['A'], index=[0, 1, 2])
+                df.index.name = "Date"
+                pd.testing.assert_frame_equal(result[2],df)
                 assert result[3] == 'AAPL'
                 assert result[4] == 0
                 
                 foundValues += 1
-                assert stock_consumer.setupLoggers.called == printCounter
+                assert stock_consumer.setupLoggers.called == False
                 assert hostRef.screener.validateNewlyListed.called == newlyListedOnly
                 assert stock_consumer.initResultDictionaries.called
                 assert hostRef.screener.validateLTP.called

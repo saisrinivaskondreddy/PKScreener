@@ -381,7 +381,7 @@ def test_promptReversalScreening():
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
             colorText.WARN
-            + "\n[+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default=9): "
+            + "\n[+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default=50): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
