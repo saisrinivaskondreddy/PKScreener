@@ -290,15 +290,17 @@ def test_loadStockData():
         mock_load.return_value = []
         with patch("pkscreener.classes.Utility.tools.afterMarketStockDataExists") as mock_data:
             with patch("pkscreener.classes.Utility.tools.downloadLatestData") as mock_downloadmethod:
-                mock_downloadmethod.return_value = {},[]
-                mock_data.return_value = True, "stock_data_2.pkl"
-                stockDict = {}
-                configManager = Mock()
-                downloadOnly = False
-                defaultAnswer = "Y"
-                tools.loadStockData(stockDict, configManager, downloadOnly, defaultAnswer)
-                # Assert that pickle.load() is called
-                mock_load.assert_called_once()
+                with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.isTradingTime") as mock_trading:
+                    mock_trading.return_value = False
+                    mock_downloadmethod.return_value = {},[]
+                    mock_data.return_value = True, "stock_data_2.pkl"
+                    stockDict = {}
+                    configManager = Mock()
+                    downloadOnly = False
+                    defaultAnswer = "Y"
+                    tools.loadStockData(stockDict, configManager, downloadOnly, defaultAnswer)
+                    # Assert that pickle.load() is called
+                    mock_load.assert_called_once()
     os.remove(os.path.join(Archiver.get_user_outputs_dir(), "stock_data_2.pkl"))
 
 
