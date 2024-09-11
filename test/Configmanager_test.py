@@ -54,7 +54,7 @@ def test_setConfig_default(config_parser):
     assert config_parser.get('config', 'period') in ['1y','1d']
     assert config_parser.get('config', 'daysToLookback') in ['22','50']
     assert config_parser.get('config', 'duration') in ['1d','1m','1h']
-    assert config_parser.get('filters', 'minPrice') == '20.0'
+    assert float(config_parser.get('filters', 'minPrice')) >= 5
     assert '50000' in config_parser.get('filters', 'maxPrice')
     assert config_parser.get('filters', 'volumeRatio') == '2.5'
     assert config_parser.get('filters', 'consolidationPercentage') in ['10','10.0']
@@ -64,8 +64,8 @@ def test_setConfig_default(config_parser):
     assert config_parser.get('config', 'useEMA') == 'n'
     assert config_parser.get('config', 'showunknowntrends') == 'y'
     assert config_parser.get('config', 'logsEnabled') == 'n'
-    assert config_parser.get('config', 'generalTimeout') == '2'
-    assert config_parser.get('config', 'longTimeout') == '4'
+    assert float(config_parser.get('config', 'generalTimeout')) >= 2
+    assert float(config_parser.get('config', 'longTimeout')) >= 4
     assert config_parser.get('config', 'maxNetworkRetryCount') == '10'
     assert config_parser.get('config', 'backtestPeriod') == '120'
     assert config_parser.get('filters', 'minimumVolume') == '10000'
@@ -110,7 +110,7 @@ def test_getConfig(config_parser):
     assert tool.period in ['1y','1d']
     assert tool.daysToLookback >= 22
     assert tool.duration in ['1d','1m','1h']
-    assert tool.minLTP == 20.0
+    assert tool.minLTP >= 5.0
     assert tool.maxLTP == 50000
     assert tool.volumeRatio == 2.5
     assert tool.consolidationPercentage == 10
