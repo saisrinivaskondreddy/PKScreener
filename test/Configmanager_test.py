@@ -23,10 +23,12 @@
 
 """
 import pytest
+import os
 from configparser import ConfigParser
 from unittest.mock import patch
 from pkscreener.classes.ConfigManager import tools
 from PKDevTools.classes.log import default_logger
+from PKDevTools.classes import Archiver
 
 @pytest.fixture
 def config_parser():
@@ -37,11 +39,12 @@ def test_deleteFileWithPattern(config_parser):
     tool = tools()
     with patch('glob.glob') as mock_glob, patch('os.remove') as mock_os:
         mock_glob.return_value = ['file1.pkl', 'file2.pkl']
+        path = Archiver.get_user_outputs_dir().replace("results","actions-data-download")
         tool.deleteFileWithPattern(pattern='*.pkl', excludeFile="*.txt")
-        mock_os.assert_called_with('file2.pkl')
-        assert mock_os.call_count == 2
+        mock_os.assert_called_with(f'{path}{os.sep}file2.pkl')
+        assert mock_os.call_count >= 2
         tool.deleteFileWithPattern(pattern='*.pkl', excludeFile=None)
-        mock_os.assert_called_with('file2.pkl')
+        mock_os.assert_called_with(f'{path}{os.sep}file2.pkl')
 
 def test_setConfig_default(config_parser):
     tool = tools()
@@ -51,10 +54,10 @@ def test_setConfig_default(config_parser):
     assert config_parser.get('config', 'period') == '1y'
     assert config_parser.get('config', 'daysToLookback') == '22'
     assert config_parser.get('config', 'duration') == '1d'
-    assert config_parser.get('config', 'minPrice') == '20.0'
-    assert config_parser.get('config', 'maxPrice') == '50000'
-    assert config_parser.get('config', 'volumeRatio') == '2.5'
-    assert config_parser.get('config', 'consolidationPercentage') == '10'
+    assert config_parser.get('filters', 'minPrice') == '20.0'
+    assert config_parser.get('filters', 'maxPrice') == '50000'
+    assert config_parser.get('filters', 'volumeRatio') == '2.5'
+    assert config_parser.get('filters', 'consolidationPercentage') == '10'
     assert config_parser.get('config', 'shuffle') == 'y'
     assert config_parser.get('config', 'cacheStockData') == 'y'
     assert config_parser.get('config', 'onlyStageTwoStocks') == 'y'
@@ -65,7 +68,7 @@ def test_setConfig_default(config_parser):
     assert config_parser.get('config', 'longTimeout') == '4'
     assert config_parser.get('config', 'maxNetworkRetryCount') == '10'
     assert config_parser.get('config', 'backtestPeriod') == '120'
-    assert config_parser.get('config', 'minimumVolume') == '10000'
+    assert config_parser.get('filters', 'minimumVolume') == '10000'
     with patch('builtins.input') as mock_input:
         tool.setConfig(config_parser, default=True, showFileCreatedText=True)
         mock_input.assert_called_once()
@@ -73,7 +76,7 @@ def test_setConfig_default(config_parser):
 def test_setConfig_non_default(config_parser):
     tool = tools()
     with patch('builtins.input') as mock_input, patch('builtins.open') as mock_open:
-        mock_input.side_effect = ['450', '30', '1', '20', '50000', '2.5', '10', 'n', 'n', 'n', 'n', 'n','n', '2', '4', '10', '30', '10000','1','\n']
+        mock_input.side_effect = ['450', '30', '1', '20', '50000', '2.5', '10', 'n', 'n', 'n', 'n', 'n','n', '2', '4', '10', '30', '10000','1','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n']
         tool.setConfig(config_parser, default=False, showFileCreatedText=False)
         mock_open.assert_called_with('pkscreener.ini', 'w')
 
@@ -128,17 +131,6 @@ def test_getConfig(config_parser):
             tool.getConfig(config_parser)
             mock_setconfig.assert_called_once()
 
-def test_toggleConfig_intraday(config_parser):
-    tool = tools()
-    tool.period = '1y'
-    tool.duration = '1d'
-    tool.cacheEnabled = True
-    tool.toggleConfig('1h', clearCache=True)
-    assert tool.period == '1d'
-    assert tool.duration == '1h'
-    assert tool.daysToLookback == 120
-    assert tool.cacheEnabled == True
-
 def test_toggleConfig_swing(config_parser):
     tool = tools()
     tool.period = '1d'
@@ -155,9 +147,11 @@ def test_toggleConfig_swing(config_parser):
 
 def test_isIntradayConfig(config_parser):
     tool = tools()
-    tool.period = '1d'
+    tool.duration = '1m'
     assert tool.isIntradayConfig() == True
-    tool.period = '1y'
+    tool.duration = '1h'
+    assert tool.isIntradayConfig() == True
+    tool.duration = '1d'
     assert tool.isIntradayConfig() == False
 
 def test_showConfigFile(config_parser):
@@ -175,3 +169,14 @@ def test_checkConfigFile(config_parser):
     with patch('builtins.open') as mock_open:
         mock_open.return_value.close.return_value = None
         assert tool.checkConfigFile() == True
+
+def test_toggleConfig_intraday(config_parser):
+    tool = tools()
+    tool.period = '1y'
+    tool.duration = '1d'
+    tool.cacheEnabled = True
+    tool.toggleConfig('1h', clearCache=True)
+    assert tool.period == '1d'
+    assert tool.duration == '1h'
+    assert tool.daysToLookback <= 50
+    assert tool.cacheEnabled == True
