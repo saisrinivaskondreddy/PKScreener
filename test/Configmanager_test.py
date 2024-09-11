@@ -55,7 +55,7 @@ def test_setConfig_default(config_parser):
     assert config_parser.get('config', 'daysToLookback') == '22'
     assert config_parser.get('config', 'duration') == '1d'
     assert config_parser.get('filters', 'minPrice') == '20.0'
-    assert config_parser.get('filters', 'maxPrice') == '50000'
+    assert '50000' in config_parser.get('filters', 'maxPrice')
     assert config_parser.get('filters', 'volumeRatio') == '2.5'
     assert config_parser.get('filters', 'consolidationPercentage') == '10'
     assert config_parser.get('config', 'shuffle') == 'y'

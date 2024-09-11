@@ -389,7 +389,7 @@ def test_cleanupData(savedResults):
         "RSI": ["50.0", "60.0", "70.0"],
         "Volume": ["100x", "200x", "300x"],
         "Consol.": ["Range: 10%", "Range: 20%", "Range: 30%"],
-        "Breakout(22Prds)": ["BO: 1.0 R: 2.0 (Potential)", "BO: 3.0 R: 4.0 (Potential)", "BO: 5.0 R: 6.0 (Potential)"],
+        f"Breakout({configManager.daysToLookback}Prds)": ["BO: 1.0 R: 2.0 (Potential)", "BO: 3.0 R: 4.0 (Potential)", "BO: 5.0 R: 6.0 (Potential)"],
         "52Wk-H": ["100.0", "200.0", "300.0"],
         "52Wk-L": ["50.0", "100.0", "150.0"],
         "CCI": ["80.0", "90.0", "100.0"]
@@ -678,51 +678,51 @@ def test_filterRSI68OrAbove(df):
     assert filterRSI68OrAbove(None) is None
 
 def test_filterTrendStrongUp(df):
-    df = pd.DataFrame({"Trend(22Prds)": ["Strong Up", "Weak Up", "Strong Up", "Weak Down"]})
+    df = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Up", "Weak Up", "Strong Up", "Weak Down"]})
     result = filterTrendStrongUp(df)
-    expected_result = pd.DataFrame({"Trend(22Prds)": ["Strong Up", "Strong Up"]})
+    expected_result = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Up", "Strong Up"]})
     pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_result.reset_index(drop=True))
     assert filterTrendStrongUp(None) is None
 
 def test_filterTrendWeakUp(df):
-    df = pd.DataFrame({"Trend(22Prds)": ["Weak Up", "Strong Up", "Weak Up", "Weak Down"]})
+    df = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Weak Up", "Strong Up", "Weak Up", "Weak Down"]})
     result = filterTrendWeakUp(df)
-    expected_result = pd.DataFrame({"Trend(22Prds)": ["Weak Up", "Weak Up"]})
+    expected_result = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Weak Up", "Weak Up"]})
     pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_result.reset_index(drop=True))
     assert filterTrendWeakUp(None) is None
 
 def test_filterTrendWeakDown(df):
-    df = pd.DataFrame({"Trend(22Prds)": ["Weak Down", "Strong Down", "Weak Down", "Weak Up"]})
+    df = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Weak Down", "Strong Down", "Weak Down", "Weak Up"]})
     result = filterTrendWeakDown(df)
-    expected_result = pd.DataFrame({"Trend(22Prds)": ["Weak Down", "Weak Down"]})
+    expected_result = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Weak Down", "Weak Down"]})
     pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_result.reset_index(drop=True))
     assert filterTrendWeakDown(None) is None
 
 def test_filterTrendStrongDown(df):
-    df = pd.DataFrame({"Trend(22Prds)": ["Strong Down", "Weak Down", "Strong Down", "Weak Up"]})
+    df = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Down", "Weak Down", "Strong Down", "Weak Up"]})
     result = filterTrendStrongDown(df)
-    expected_result = pd.DataFrame({"Trend(22Prds)": ["Strong Down", "Strong Down"]})
+    expected_result = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Down", "Strong Down"]})
     pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_result.reset_index(drop=True))
     assert filterTrendStrongDown(None) is None
 
 def test_filterTrendUp(df):
-    df = pd.DataFrame({"Trend(22Prds)": ["Strong Down", "Weak Down", "Strong Down", "Weak Up"]})
+    df = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Down", "Weak Down", "Strong Down", "Weak Up"]})
     result = filterTrendUp(df)
-    expected_result = pd.DataFrame({"Trend(22Prds)": ["Weak Up"]})
+    expected_result = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Weak Up"]})
     pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_result.reset_index(drop=True))
     assert filterTrendUp(None) is None
 
 def test_filterSideways(df):
-    df = pd.DataFrame({"Trend(22Prds)": ["Strong Down", "Weak Down", "Sideways", "Weak Up"]})
+    df = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Down", "Weak Down", "Sideways", "Weak Up"]})
     result = filterTrendSideways(df)
-    expected_result = pd.DataFrame({"Trend(22Prds)": ["Sideways"]})
+    expected_result = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Sideways"]})
     pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_result.reset_index(drop=True))
     assert filterTrendSideways(None) is None
 
 def test_filterTrendDown(df):
-    df = pd.DataFrame({"Trend(22Prds)": ["Strong Down", "Weak Down", "Strong Down", "Weak Up"]})
+    df = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Down", "Weak Down", "Strong Down", "Weak Up"]})
     result = filterTrendDown(df)
-    expected_result = pd.DataFrame({"Trend(22Prds)": ["Strong Down", "Weak Down", "Strong Down"]})
+    expected_result = pd.DataFrame({f"Trend({configManager.daysToLookback}Prds)": ["Strong Down", "Weak Down", "Strong Down"]})
     pd.testing.assert_frame_equal(result.reset_index(drop=True), expected_result.reset_index(drop=True))
     assert filterTrendDown(None) is None
 

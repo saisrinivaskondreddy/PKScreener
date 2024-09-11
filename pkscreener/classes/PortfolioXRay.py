@@ -442,21 +442,22 @@ def cleanupData(savedResults):
     except ValueError:
         # The truth value of a Series is ambiguous.
         pass
-    saveResults[["Breakout", "Resistance"]] = saveResults[
-            f"Breakout({configManager.daysToLookback}Prds)"
-        ].astype(str).str.split(" R: ", n=1, expand=True)
-    saveResults.loc[:, "Breakout"] = saveResults.loc[:, "Breakout"].apply(
-            lambda x: x.replace("BO: ", "").replace(" ", "")
-        )
-    saveResults.loc[:, "Resistance"] = saveResults.loc[
-            :, "Resistance"
-        ].apply(lambda x: x.replace("(Potential)", "") if x is not None else x)
+    if f"Breakout({configManager.daysToLookback}Prds)" in savedResults.columns:
+        saveResults[["Breakout", "Resistance"]] = saveResults[
+                f"Breakout({configManager.daysToLookback}Prds)"
+            ].astype(str).str.split(" R: ", n=1, expand=True)
+        saveResults.loc[:, "Breakout"] = saveResults.loc[:, "Breakout"].apply(
+                lambda x: x.replace("BO: ", "").replace(" ", "")
+            )
+        saveResults.loc[:, "Resistance"] = saveResults.loc[
+                :, "Resistance"
+            ].apply(lambda x: x.replace("(Potential)", "") if x is not None else x)
+        saveResults["Breakout"] = saveResults["Breakout"].astype(float).fillna(0.0)
+        saveResults["Resistance"] = saveResults["Resistance"].astype(float).fillna(0.0)
     saveResults["Volume"] = saveResults["Volume"].astype(float).fillna(0.0)
     saveResults[f"Consol."] = (
             saveResults[f"Consol."].astype(float).fillna(0.0)
         )
-    saveResults["Breakout"] = saveResults["Breakout"].astype(float).fillna(0.0)
-    saveResults["Resistance"] = saveResults["Resistance"].astype(float).fillna(0.0)
     saveResults["52Wk-H"] = saveResults["52Wk-H"].astype(float).fillna(0.0)
     saveResults["52Wk-L"] = saveResults["52Wk-L"].astype(float).fillna(0.0)
     saveResults["CCI"] = saveResults["CCI"].astype(float).fillna(0.0)
