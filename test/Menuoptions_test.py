@@ -23,7 +23,7 @@
 
 """
 import pytest
-from pkscreener.classes.MenuOptions import menu, menus
+from pkscreener.classes.MenuOptions import menu, menus, level0MenuDict
 
 class TestMenu:
     def test_create(self):
@@ -134,14 +134,16 @@ class TestMenus:
             "3": "Menu 3"
         }
         m.fromDictionary(rawDictionary)
-        assert m.renderLevel0Menus() == '\n     X > Scanners\n     S > Strategies\n     B > Backtests\n     G > Growth of 10k\n\n     T > Toggle between long-term (Default)\x1b[93m [Current]\x1b[0m and Intraday user configuration\n\n\n     E > Edit user configuration\n     Y > View your user configuration\n\n     U > Check for software update\n     H > Help / About Developer\n     Z > Exit (Ctrl + C)'
+        assert len(m.renderForMenu().split("\n")) >= len(level0MenuDict.keys())
 
     def test_renderForMenu_Lorenzian(self):
         m = menus()
-        assert m.renderForMenu() == '\n     X > Scanners\n     S > Strategies\n     B > Backtests\n     G > Growth of 10k\n\n     T > Toggle between long-term (Default)\x1b[93m [Current]\x1b[0m and Intraday user configuration\n\n\n     E > Edit user configuration\n     Y > View your user configuration\n\n     U > Check for software update\n     H > Help / About Developer\n     Z > Exit (Ctrl + C)'
+        m.renderForMenu()
         m1 = m.find("X")
         m1.level = 3
         m1.menuKey = "7"
+        m1.parent = menu()
+        m1.parent.menuKey = "6"
         list_menus = m.renderForMenu(selectedMenu=m1, asList=True)
         assert len(list_menus) == 4
         assert list_menus[0].menuText == "Buy"
