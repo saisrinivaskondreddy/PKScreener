@@ -28,6 +28,7 @@ from unittest.mock import patch
 import pytest
 
 from pkscreener.globals import *
+from pkscreener.classes.PKScanRunner import *
 
 # Positive test cases
 
@@ -118,10 +119,10 @@ def test_populateQueues_positive():
         # assert not tasks_queue.empty()
         pass
     else:
-        populateQueues(items, tasks_queue, exit=True)
+        PKScanRunner.populateQueues(items, tasks_queue, exit=True)
         # Raises NotImplementedError on Mac OSX because of broken sem_getvalue()
         assert tasks_queue.qsize() == len(items) + multiprocessing.cpu_count()
-        populateQueues(items, tasks_queue)
+        PKScanRunner.populateQueues(items, tasks_queue)
         # Raises NotImplementedError on Mac OSX because of broken sem_getvalue()
         assert tasks_queue.qsize() == 2 * len(items) + multiprocessing.cpu_count()
 

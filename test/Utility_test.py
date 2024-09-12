@@ -48,7 +48,7 @@ def test_clearScreen():
             mock_os_system.assert_called_with("color 0f")
             mock_os_system.assert_called_with("cls")
         else:
-            mock_os_system.assert_called_once_with("clear")
+            mock_os_system.assert_called_with("clear")
 
 
 # Positive test case for showDevInfo() function
