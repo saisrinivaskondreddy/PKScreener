@@ -1327,6 +1327,10 @@ def test_getCandleType_positive(tools_instance):
     assert tools_instance.getCandleType(dailyData) == True
 
 
+@pytest.mark.skipif(
+    "Windows" in platform.system(),
+    reason="Exception:UnicodeEncodeError: 'charmap' codec can't encode characters in position 18-37: character maps to <undefined>",
+)
 # PositiveNiftyPrediction function
 def test_getNiftyPrediction_positive(tools_instance):
     # Mocking the data

@@ -34,6 +34,14 @@ from PKDevTools.classes import Archiver
 from PKDevTools.classes.SuppressOutput import SuppressOutput
 from PKDevTools.classes.log import default_logger
 
+# This code defines a MarketMonitor class that manages the monitoring of stock market data. 
+# It utilizes the Singleton design pattern to ensure only one instance of the class exists. 
+# The class initializes with a list of monitors and various configuration parameters, 
+# and provides methods for updating and displaying stock data, handling alerts, 
+# and formatting output for a console or Telegram integration. 
+# Key functionalities include refreshing the monitor data, saving results, 
+# and managing display options based on user-defined settings.
+
 class MarketMonitor(SingletonMixin, metaclass=SingletonType):
     def __init__(self,monitors=[], maxNumResultsPerRow=3,maxNumColsInEachResult=6,maxNumRowsInEachResult=10,maxNumResultRowsInMonitor=2,pinnedIntervalWaitSeconds=30,alertOptions=[]):
         super(MarketMonitor, self).__init__()
@@ -266,6 +274,8 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
 
     def getScanOptionName(self, screenOptions):
         from pkscreener.classes.MenuOptions import PREDEFINED_SCAN_MENU_VALUES
+        if screenOptions is None:
+            return ""
         choices = f"--systemlaunched -a y -e -o '{screenOptions.replace('C:','X:').replace('D:','')}'"
         indexNum = -1
         try:
