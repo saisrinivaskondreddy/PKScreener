@@ -26,6 +26,7 @@ import warnings
 from unittest.mock import ANY, MagicMock, patch, PropertyMock
 
 import numpy as np
+import platform
 
 warnings.simplefilter("ignore", DeprecationWarning)
 warnings.simplefilter("ignore", FutureWarning)
