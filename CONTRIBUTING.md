@@ -1,6 +1,6 @@
 [code-of-conduct]: CODE_OF_CONDUCT.md
-[fork]: /fork
-[pr]: /compare
+[fork]: https://github.com/pkjmesra/PKScreener/fork
+[pr]: https://github.com/pkjmesra/PKScreener/compare
 
 # Contributing
 
