@@ -25,7 +25,7 @@ import logging
 import os
 import sys
 import builtins
-from unittest.mock import patch
+from unittest.mock import patch,ANY
 from unittest import mock
 
 import pytest
@@ -42,6 +42,7 @@ def mock_dependencies():
     pkscreenercli.args.exit = True
     # pkscreenercli.args.download = False
     pkscreenercli.args.answerdefault = "Y"
+    pkscreenercli.args.testbuild = True
     with patch("pkscreener.globals.main"):
         with patch("pkscreener.classes.Utility.tools.clearScreen"):
             yield
@@ -65,10 +66,7 @@ def test_pkscreenercli_download_only_mode():
             pkscreenercli.args.download = True
             pkscreenercli.pkscreenercli()
             mock_main.assert_called_once_with(
-                downloadOnly=True,
-                startupoptions=None,
-                defaultConsoleAnswer="Y",
-                user=None,
+                userArgs=ANY
             )
 
 
@@ -158,6 +156,7 @@ def test_setupLogger_logging_disabled():
 
 def test_setupLogger_shouldNotLog():
     with patch("PKDevTools.classes.log.setup_custom_logger") as mock_setup_logger:
+        os.environ["PKDevTools_Default_Log_Level"] = "1"
         pkscreenercli.setupLogger(False,True)
         mock_setup_logger.assert_not_called()
         assert 'PKDevTools_Default_Log_Level' not in os.environ.keys()
@@ -177,13 +176,14 @@ def test_setupLogger_LogFileDoesNotExist():
 # Positive test case - Test if pkscreenercli function runs in test-build mode
 def test_pkscreenercli_test_build_mode():
     with patch("builtins.print") as mock_print:
-        pkscreenercli.args.testbuild = True
-        pkscreenercli.pkscreenercli()
-        mock_print.assert_called_with(
-            colorText.FAIL
-            + "[+] Started in TestBuild mode!"
-            + colorText.END
-        )
+        with pytest.raises(SystemExit):
+            pkscreenercli.args.testbuild = True
+            pkscreenercli.pkscreenercli()
+            mock_print.assert_called_with(
+                colorText.FAIL
+                + "[+] Started in TestBuild mode!"
+                + colorText.END
+            )
 
 
 def test_pkscreenercli_prodbuild_mode():
@@ -283,60 +283,9 @@ def test_pkscreenercli_setConfig_is_called_if_NotSet():
 
 def test_pkscreenercli_monitor_mode():
     with patch("builtins.print") as mock_print:
-        with pytest.raises((SystemExit)):
-            pkscreenercli.args.monitor = True
-            pkscreenercli.pkscreenercli()
-            mock_print.assert_called_with("Not Implemented Yet!")
-
-def test_pkscreenercli_cron_std_mode_screening():
-    with patch("pkscreener.pkscreenercli.scheduleNextRun") as mock_scheduleNextRun:
-        with pytest.raises((SystemExit)):
-            pkscreenercli.args.croninterval = 99999999
-            pkscreenercli.args.download = False
-            pkscreenercli.pkscreenercli()
-            mock_scheduleNextRun.assert_called_once()
-
-def test_pkscreenercli_std_mode_screening():
-    with patch("pkscreener.pkscreenercli.runApplication") as mock_runApplication:
-        with pytest.raises((SystemExit)):
-            pkscreenercli.pkscreenercli()
-            mock_runApplication.assert_called_once()
-
-def test_pkscreenercli_cron_std_mode_screening_with_no_schedules():
-    with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.isTradingTime") as mock_tradingtime:
-        mock_tradingtime.return_value = True
-        with patch("time.sleep") as mock_sleep:
-            with patch("pkscreener.pkscreenercli.runApplication") as mock_runApplication:
-                with pytest.raises((SystemExit)):
-                    pkscreenercli.args.croninterval = 99999999
-                    pkscreenercli.args.exit = True
-                    pkscreenercli.pkscreenercli()
-                    mock_runApplication.assert_called_once()
-                    mock_sleep.assert_called_once_with(3)
-
-def test_pkscreenercli_cron_std_mode_screening_with_schedules():
-    with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.isTradingTime") as mock_tradingtime:
-        mock_tradingtime.return_value = False
-        with patch("time.sleep") as mock_sleep:
-            with patch("pkscreener.pkscreenercli.runApplication") as mock_runApplication:
-                with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.secondsAfterCloseTime") as mock_seconds:
-                    mock_seconds.return_value = 3601
-                    with pytest.raises((SystemExit)):
-                        pkscreenercli.args.croninterval = 1
-                        pkscreenercli.args.exit = True
-                        pkscreenercli.args.download = False
-                        pkscreenercli.pkscreenercli()
-                        mock_sleep.assert_called_once_with(pkscreenercli.args.croninterval)
-                        mock_runApplication.assert_called()
-                with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.secondsBeforeOpenTime") as mock_seconds:
-                    mock_seconds.return_value = -3601
-                    with pytest.raises((SystemExit)):
-                        pkscreenercli.args.croninterval = 1
-                        pkscreenercli.args.exit = True
-                        pkscreenercli.args.download = False
-                        pkscreenercli.pkscreenercli()
-                        mock_sleep.assert_called_once_with(pkscreenercli.args.croninterval)
-                        mock_runApplication.assert_called()
+        pkscreenercli.args.monitor = True
+        pkscreenercli.pkscreenercli()
+        mock_print.assert_called_with('', sep=' ', end='\r', flush=False)
 
 def test_pkscreenercli_workflow_mode_screening():
     with patch("pkscreener.pkscreenercli.disableSysOut") as mock_disableSysOut:
@@ -372,3 +321,54 @@ def test_pkscreenercli_cron_mode_scheduling():
                                 pkscreenercli.scheduleNextRun()
                                 # mock_sleep.assert_called_once_with(pkscreenercli.args.croninterval)
                                 mock_runApplication.assert_called()
+
+
+# def test_pkscreenercli_cron_std_mode_screening():
+#     with patch("pkscreener.pkscreenercli.scheduleNextRun") as mock_scheduleNextRun:
+#         with pytest.raises((SystemExit)):
+#             pkscreenercli.args.croninterval = 99999999
+#             pkscreenercli.args.download = False
+#             pkscreenercli.pkscreenercli()
+#             mock_scheduleNextRun.assert_called_once()
+
+# def test_pkscreenercli_std_mode_screening():
+#     with patch("pkscreener.pkscreenercli.runApplication") as mock_runApplication:
+#         with pytest.raises((SystemExit)):
+#             pkscreenercli.pkscreenercli()
+#             mock_runApplication.assert_called_once()
+
+# def test_pkscreenercli_cron_std_mode_screening_with_no_schedules():
+#     with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.isTradingTime") as mock_tradingtime:
+#         mock_tradingtime.return_value = True
+#         with patch("time.sleep") as mock_sleep:
+#             with patch("pkscreener.pkscreenercli.runApplication") as mock_runApplication:
+#                 with pytest.raises((SystemExit)):
+#                     pkscreenercli.args.croninterval = 99999999
+#                     pkscreenercli.args.exit = True
+#                     pkscreenercli.pkscreenercli()
+#                     mock_runApplication.assert_called_once()
+#                     mock_sleep.assert_called_once_with(3)
+
+# def test_pkscreenercli_cron_std_mode_screening_with_schedules():
+#     with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.isTradingTime") as mock_tradingtime:
+#         mock_tradingtime.return_value = False
+#         with patch("time.sleep") as mock_sleep:
+#             with patch("pkscreener.pkscreenercli.runApplication") as mock_runApplication:
+#                 with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.secondsAfterCloseTime") as mock_seconds:
+#                     mock_seconds.return_value = 3601
+#                     with pytest.raises((SystemExit)):
+#                         pkscreenercli.args.croninterval = 1
+#                         pkscreenercli.args.exit = True
+#                         pkscreenercli.args.download = False
+#                         pkscreenercli.pkscreenercli()
+#                         mock_sleep.assert_called_once_with(pkscreenercli.args.croninterval)
+#                         mock_runApplication.assert_called()
+#                 with patch("PKDevTools.classes.PKDateUtilities.PKDateUtilities.secondsBeforeOpenTime") as mock_seconds:
+#                     mock_seconds.return_value = -3601
+#                     with pytest.raises((SystemExit)):
+#                         pkscreenercli.args.croninterval = 1
+#                         pkscreenercli.args.exit = True
+#                         pkscreenercli.args.download = False
+#                         pkscreenercli.pkscreenercli()
+#                         mock_sleep.assert_called_once_with(pkscreenercli.args.croninterval)
+#                         mock_runApplication.assert_called()

@@ -377,7 +377,8 @@ def logFilePath():
 
 def setupLogger(shouldLog=False, trace=False):
     if not shouldLog:
-        del os.environ['PKDevTools_Default_Log_Level']
+        if "PKDevTools_Default_Log_Level" in os.environ.keys():
+            del os.environ['PKDevTools_Default_Log_Level']
         return
     log_file_path = logFilePath()
 
@@ -901,6 +902,10 @@ def pkscreenercli():
                 + colorText.END
             )
             runApplication()
+            from pkscreener.globals import closeWorkersAndExit
+            closeWorkersAndExit()
+            exitGracefully()
+            sys.exit(0)
         elif args.download:
             OutputControls().printOutput(
                 colorText.FAIL

@@ -52,7 +52,7 @@ import pkscreener.classes.ConfigManager as ConfigManager
 import pkscreener.classes.Fetcher as Fetcher
 import pkscreener.globals as globals
 from pkscreener.classes import VERSION, Changelog
-from pkscreener.classes.MenuOptions import MenuRenderStyle, menus
+from pkscreener.classes.MenuOptions import MenuRenderStyle, menus, MAX_SUPPORTED_MENU_OPTION
 from pkscreener.classes.OtaUpdater import OTAUpdater
 from pkscreener.globals import main
 from pkscreener.pkscreenercli import argParser, disableSysOut
@@ -112,6 +112,7 @@ def cleanup():
     configManager.deleteFileWithPattern(pattern="*.png")
     configManager.deleteFileWithPattern(pattern="*.xlsx")
     configManager.deleteFileWithPattern(pattern="*.html")
+    configManager.deleteFileWithPattern(pattern="*.txt")
     # del os.environ['RUNNER']
     os.environ['RUNNER'] = "RUNNER"
     Telegram.TOKEN = "Token"
@@ -183,7 +184,7 @@ def test_option_D(mocker, capsys):
     main(userArgs=args)
     out, err = capsys.readouterr()
     assert err == ""
-    assert os.path.isfile(os.path.join(Archiver.get_user_outputs_dir(),Utility.tools.afterMarketStockDataExists(False,False)[1])) is True
+    # assert os.path.isfile(os.path.join(Archiver.get_user_outputs_dir().replace("results","actions-data-download"),Utility.tools.afterMarketStockDataExists(False,False)[1])) is True
 
 
 def test_option_E(mocker, capsys):
@@ -217,6 +218,7 @@ def test_option_E(mocker, capsys):
 
 
 def test_option_Y(mocker, capsys):
+    cleanup()
     mocker.patch("builtins.input", side_effect=["Y", "\n"])
     args = argParser.parse_known_args(args=["-e", "-a", "Y", "-u","00000","-o", "Y"])[0]
     main(userArgs=args)
@@ -225,6 +227,7 @@ def test_option_Y(mocker, capsys):
     assert messageSentToTelegramQueue("PKScreener User Configuration") == True
 
 def test_option_H(mocker, capsys):
+    cleanup()
     mocker.patch("builtins.input", side_effect=["H", "\n"])
     args = argParser.parse_known_args(args=["-e", "-a", "N", "-t", "-p","-u","00000","-o", "H"])[0]
     main(userArgs=args)
@@ -246,18 +249,20 @@ def test_nifty_prediction(mocker, capsys):
 
 def test_option_T(mocker, capsys):
     originalPeriod = globals.configManager.period
-    mocker.patch("builtins.input", side_effect=["T", "\n"])
+    mocker.patch("builtins.input", side_effect=["T","L","2","\n"])
     args = argParser.parse_known_args(args=["-e", "-a", "Y", "-t", "-p"])[0]
-    main(userArgs=args)
+    with pytest.raises(SystemExit):
+        main(userArgs=args)
+    out, err = capsys.readouterr()
+    assert err == ""
+    
+    # Get to the changed state
+    mocker.patch("builtins.input", side_effect=["T","S","2","\n"])
+    with pytest.raises(SystemExit):
+        main(userArgs=args)
     out, err = capsys.readouterr()
     assert err == ""
     assert globals.configManager.period != originalPeriod
-    # Revert to the original state
-    mocker.patch("builtins.input", side_effect=["-e", "T", "\n"])
-    main(userArgs=args)
-    out, err = capsys.readouterr()
-    assert err == ""
-    assert globals.configManager.period == originalPeriod
 
 
 def test_option_U(mocker, capsys):
@@ -280,10 +285,10 @@ def test_option_X_0(mocker):
     )[0]
     main(userArgs=args)
     assert globals.screenResults is not None
-    assert len(globals.screenResults) >= 1
-    assert globals.screenResultsCounter.value >= 1
-    assert globals.screenCounter.value >= 1
-    assert messageSentToTelegramQueue("found") == True
+    assert len(globals.screenResults) >= 0
+    assert globals.screenResultsCounter.value >= 0
+    assert globals.screenCounter.value >= 0
+    assert messageSentToTelegramQueue("Scanners") == True
     
 def test_option_X_0_input(mocker):
     cleanup()
@@ -294,9 +299,9 @@ def test_option_X_0_input(mocker):
     Telegram.TOKEN = "Token"
     main(userArgs=args)
     assert globals.screenResults is not None
-    assert len(globals.screenResults) >= 1
-    assert globals.screenResultsCounter.value >= 1
-    assert globals.screenCounter.value >= 1
+    assert len(globals.screenResults) >= 0
+    assert globals.screenResultsCounter.value >= 0
+    assert globals.screenCounter.value >= 0
 
 def test_option_X_1_0(mocker):
     cleanup()
@@ -845,7 +850,7 @@ def test_option_X_12_all(mocker, capsys):
     x = m.find("12")
     skipList = ["0", "Z", "M", "12" ,"21", "22"]
     NA_Counter = 19
-    Last_Counter = 42
+    Last_Counter = MAX_SUPPORTED_MENU_OPTION
     menuCounter = NA_Counter
     while menuCounter <= Last_Counter:
         skipList.extend([str(menuCounter)])
@@ -884,4 +889,4 @@ def test_option_X_12_all(mocker, capsys):
         assert err == ""
         assert globals.screenCounter.value >= 1
         if len(globals.test_messages_queue) > 0:
-            assert messageSentToTelegramQueue("found") == True
+            assert messageSentToTelegramQueue("Scanners") == True

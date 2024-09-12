@@ -27,7 +27,7 @@ import logging
 import sys
 import time
 import warnings
-
+import datetime
 import numpy as np
 
 warnings.simplefilter("ignore", DeprecationWarning)
@@ -919,6 +919,10 @@ class StockScreener:
             ):
             if testData is not None:
                 data = testData
+                data.reset_index(inplace=True)
+                data["Date"] = pd.to_datetime(data['index'].astype(int)/1000,unit='s')
+                data.set_index("Date", inplace=True)
+                data.drop("index",axis=1,inplace=True)
             else:
                 data = fetcher.fetchStockData(
                         stock,

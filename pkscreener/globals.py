@@ -141,7 +141,7 @@ stockDictSecondary = None
 userPassedArgs = None
 elapsed_time = 0
 start_time = 0
-test_messages_queue = []
+test_messages_queue = None
 strategyFilter=[]
 listStockCodes = None
 tasks_queue = None
@@ -174,7 +174,7 @@ def finishScreening(
     user=None,
 ):
     global defaultAnswer, menuChoiceHierarchy, userPassedArgs, selectedChoice
-    if "RUNNER" not in os.environ.keys():
+    if "RUNNER" not in os.environ.keys() or downloadOnly:
         # There's no need to prompt the user to save xls report or to save data locally.
         # This scan must have been triggered by github workflow by a user or scheduled job
         saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount)
@@ -182,6 +182,7 @@ def finishScreening(
         saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
         )
+    if "RUNNER" in os.environ.keys() and not downloadOnly:
         sendMessageToTelegramChannel(mediagroup=True,user=userPassedArgs.user)
 
 def getDownloadChoices(defaultAnswer=None):
@@ -827,7 +828,7 @@ def closeWorkersAndExit():
         PKScanRunner.terminateAllWorkers(userPassedArgs=userPassedArgs,consumers=consumers, tasks_queue=tasks_queue, testing=userPassedArgs.testbuild)
 
 def main(userArgs=None,optionalFinalOutcome_df=None):
-    global show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
+    global test_messages_queue,show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
     elapsed_time = 0
     start_time = 0
@@ -841,6 +842,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     runOptionName = ""
     options = []
     strategyFilter=[]
+    test_messages_queue = []
     describeUser()
     if keyboardInterruptEventFired:
         return None, None
@@ -876,6 +878,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     backtestPeriod = 0
     reversalOption = None
     listStockCodes = None
+    cleanupLocalResults()
     if userPassedArgs.log:
         default_logger().debug(f"User Passed args: {userPassedArgs}")
     screenResults, saveResults = PKScanRunner.initDataframes()
@@ -3467,6 +3470,8 @@ def saveNotifyResultsFile(
     if userPassedArgs.monitor is None:
         needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
         pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0) if criteria_dateTime is None else criteria_dateTime
+        if userPassedArgs.triggertimestamp is None:
+            userPassedArgs.triggertimestamp = int(PKDateUtilities.currentDateTimestamp())
         OutputControls().printOutput(
             colorText.GREEN
             + f"[+] Screening Completed. Found {len(screenResults) if screenResults is not None else 0} results in {round(elapsed_time,2)} sec. for {colorText.END}{colorText.FAIL}{pastDate}{colorText.END}{colorText.GREEN}. Queue Wait Time:{int(PKDateUtilities.currentDateTimestamp()-userPassedArgs.triggertimestamp-round(elapsed_time,2))}s! Press Enter to Continue.."
@@ -3551,13 +3556,18 @@ def sendMessageToTelegramChannel(
             for attachment in attachments:
                 file_paths.append(attachment["FILEPATH"])
                 file_captions.append(attachment["CAPTION"].replace('&','n')[:1024])
+            if test_messages_queue is not None:
+                test_messages_queue.append(f"message:{file_captions[-1]}\ncaption:{file_captions[-1]}\nuser:{user}\ndocument:{file_paths[-1]}")
+                if len(test_messages_queue) >10:
+                    test_messages_queue.pop(0)
             if len(file_paths) > 0 and not userPassedArgs.monitor:
                 resp = send_media_group(user=userPassedArgs.user,
                                                 png_paths=[],
                                                 png_album_caption=None,
                                                 file_paths=file_paths,
                                                 file_captions=file_captions)
-                default_logger().debug(resp.text, exc_info=True)
+                if resp is not None:
+                    default_logger().debug(resp.text, exc_info=True)
             caption = f"{str(len(file_captions))} files sent!"
             message = media_group_dict["CAPTION"].replace('&','n').replace("<","*")[:1024] if "CAPTION" in media_group_dict.keys() else "-"
         for f in file_paths:
@@ -3761,3 +3771,17 @@ def userReportName(userMenuOptions):
         choices = choices[:-1]
     choices = f"{choices}{'_i' if userPassedArgs.intraday else ''}"
     return choices
+
+def cleanupLocalResults():
+    global userPassedArgs
+    launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
+    shouldPrompt = (launcher.endswith(".py\"") or launcher.endswith(".py")) and (userPassedArgs is None or userPassedArgs.answerdefault is None)
+    response = "y" if shouldPrompt else "n"
+    if shouldPrompt:
+        response = input(f"{colorText.WARN}Clean up local results folder (*.png, *.xlsx, *.html, *.txt) ?{colorText.END} {colorText.FAIL}[Default: Y]{colorText.END} :") or response
+    if "y" in response.lower():
+        configManager.deleteFileWithPattern(pattern="*.png")
+        configManager.deleteFileWithPattern(pattern="*.xlsx")
+        configManager.deleteFileWithPattern(pattern="*.html")
+        configManager.deleteFileWithPattern(pattern="*.txt")
+    Utility.tools.clearScreen(forceTop=True)
