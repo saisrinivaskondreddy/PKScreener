@@ -84,10 +84,16 @@ jobs:
         shell: bash
         run: test -z $(git rev-list  --after="7 days"  ${{ github.sha }} --max-count=1) && echo "::set-output name=should_run::false"
 
+  Test-Source:
+    uses: pkjmesra/PKScreener/.github/workflows/w11-workflow-test-coverage.yml@main
+    with:
+      branch-name: main
+    secrets: inherit
+      
   # Job for builing packages
   Build:
     name: Build Packages
-    needs: check_should_run
+    needs: [check_should_run, Test-Source]
     #needs: Create-Release
     runs-on: ${{ matrix.os }}
     permissions: write-all
@@ -358,3 +364,4 @@ jobs:
       buildBase: ${{ needs.Build.outputs.buildBase }}
       version: ${{ needs.Build.outputs.version }}
     secrets: inherit
+  
