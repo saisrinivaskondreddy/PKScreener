@@ -1516,7 +1516,7 @@ class tools:
 
     @Halo(text='', spinner='dots')
     def getNiftyModel(retrial=False):
-        if "Windows" in platform.system():
+        if "Windows" in platform.system() and not 'pytest' in sys.modules:
             sys.stdin.reconfigure(encoding='utf-8')
             sys.stdout.reconfigure(encoding='utf-8')
         files = [
@@ -1562,15 +1562,15 @@ class tools:
                             "wb"
                         )
                         dl = 0
-                        with alive_bar(
-                            filesize, bar=bar, spinner=spinner, manual=True
-                        ) as progressbar:
-                            for data in resp.iter_content(chunk_size=chunksize):
-                                dl += 1
-                                f.write(data)
-                                progressbar(dl / filesize)
-                                if dl >= filesize:
-                                    progressbar(1.0)
+                        # with alive_bar(
+                        #     filesize, bar=bar, spinner=spinner, manual=True
+                        # ) as progressbar:
+                        for data in resp.iter_content(chunk_size=chunksize):
+                            dl += 1
+                            f.write(data)
+                                # progressbar(dl / filesize)
+                                # if dl >= filesize:
+                                #     progressbar(1.0)
                         f.close()
                     except Exception as e:  # pragma: no cover
                         default_logger().debug(e, exc_info=True)
