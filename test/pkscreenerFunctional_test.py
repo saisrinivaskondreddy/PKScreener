@@ -184,7 +184,10 @@ def test_option_D(mocker, capsys):
     main(userArgs=args)
     out, err = capsys.readouterr()
     assert err == ""
-    # assert os.path.isfile(os.path.join(Archiver.get_user_outputs_dir().replace("results","actions-data-download"),Utility.tools.afterMarketStockDataExists(False,False)[1])) is True
+    _ , cache_file = Utility.tools.afterMarketStockDataExists(False,False)
+    file1 = os.path.join(Archiver.get_user_outputs_dir().replace("results","actions-data-download"),cache_file)
+    file2 = os.path.join(Archiver.get_user_outputs_dir().replace("results","actions-data-download"),f"intraday_{cache_file}")
+    assert (os.path.isfile(file1) or os.path.isfile(file2))
 
 
 def test_option_E(mocker, capsys):

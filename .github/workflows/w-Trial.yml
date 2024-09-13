@@ -178,7 +178,7 @@ jobs:
         run: bash .github/dependencies/build_tools/wheels/build_wheels.sh
 
       - name: Store artifacts
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v3
         with:
           path: dist/*.whl #wheelhouse/*.whl
 
@@ -223,7 +223,7 @@ jobs:
   #         CIBW_ARCHS: ${{ matrix.cibw_archs }}
   #       if: matrix.cibw_archs != 'aarch64'
   
-  #     - uses: actions/upload-artifact@v4.3.3
+  #     - uses: actions/upload-artifact@v3
   #       with:
   #         name: wheels
   #         path: ./wheelhouse/*.whl
@@ -265,7 +265,7 @@ jobs:
       #     SKLEARN_SKIP_NETWORK_TESTS: 1
 
       - name: Store artifacts
-        uses: actions/upload-artifact@v4.3.3
+        uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
 
