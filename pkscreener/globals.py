@@ -2577,8 +2577,11 @@ def saveScreenResultsEncoded(encodedText:None):
     os.makedirs(os.path.dirname(os.path.join(Archiver.get_user_outputs_dir(),f"DeleteThis{os.sep}")), exist_ok=True)
     toBeDeletedFolder = os.path.join(Archiver.get_user_outputs_dir(),"DeleteThis")
     fileName = os.path.join(toBeDeletedFolder, uuidFileName)
-    with open(fileName, 'w') as f:
-        f.write(encodedText)
+    try:
+        with open(fileName, 'w', encoding="utf-8") as f:
+            f.write(encodedText)
+    except:
+        pass
     return f'{uuidFileName}~{PKDateUtilities.currentDateTime().strftime("%Y-%m-%d %H:%M:%S.%f%z").replace(" ","~")}'
 
 def readScreenResultsDecoded(fileName=None):
@@ -2586,8 +2589,11 @@ def readScreenResultsDecoded(fileName=None):
     toBeDeletedFolder = os.path.join(Archiver.get_user_outputs_dir(),"DeleteThis")
     filePath = os.path.join(toBeDeletedFolder, fileName)
     contents = None
-    with open(filePath, 'r') as f:
-        contents = f.read()
+    try:
+        with open(filePath, 'r', encoding="utf-8") as f:
+            contents = f.read()
+    except:
+        pass
     return contents
 
 def printNotifySaveScreenedResults(
@@ -2728,18 +2734,19 @@ def printNotifySaveScreenedResults(
             ).encode("utf-8").decode(STD_ENCODING)
             OutputControls().printOutput(f"\n[+] {colorText.WARN}These were common between the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}{colorText.WARN} and the current results at {colorText.END}{colorText.GREEN}{criteria_dateTime}{colorText.END}{colorText.WARN}):\n{colorText.END}{tabulated_common_df}\n", enableMultipleLineOutput=True)
         if len(addedList) > 0:
-            reportLines = resultsContentsDecoded.splitlines(keepends=True)
-            filteredReportLines = reportLines[:3]
-            shouldKeep = False
-            for line in reportLines[3:]:
-                if line.startswith("|"):
-                    item = line.split("|")[1].strip()
-                    if len(item) > 0:
-                        shouldKeep = item in addedList
-                if shouldKeep:
-                    filteredReportLines.append(line)
-            resultsContentsDecoded = "".join(filteredReportLines)
-            OutputControls().printOutput(f"\n[+] {colorText.WARN}These may have been newly added in the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}{colorText.WARN} and were not found in the current results at {colorText.END}{colorText.GREEN}{criteria_dateTime}{colorText.END}{colorText.WARN}):\n{colorText.END}{resultsContentsDecoded}\n", enableMultipleLineOutput=True)
+            if resultsContentsDecoded is not None:
+                reportLines = resultsContentsDecoded.splitlines(keepends=True)
+                filteredReportLines = reportLines[:3]
+                shouldKeep = False
+                for line in reportLines[3:]:
+                    if line.startswith("|"):
+                        item = line.split("|")[1].strip()
+                        if len(item) > 0:
+                            shouldKeep = item in addedList
+                    if shouldKeep:
+                        filteredReportLines.append(line)
+                resultsContentsDecoded = "".join(filteredReportLines)
+                OutputControls().printOutput(f"\n[+] {colorText.WARN}These may have been newly added in the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}{colorText.WARN} and were not found in the current results at {colorText.END}{colorText.GREEN}{criteria_dateTime}{colorText.END}{colorText.WARN}):\n{colorText.END}{resultsContentsDecoded}\n", enableMultipleLineOutput=True)
         else:
             OutputControls().printOutput(f"\n[+] {colorText.WARN}No new stock may have been added in the previous results at {colorText.END}{colorText.FAIL}{lastReportDateTime}{colorText.END}", enableMultipleLineOutput=True)
     

@@ -857,7 +857,7 @@ class tools:
                 OutputControls().printOutput(colorText.GREEN + f"=> {cache_file}" + colorText.END)
         return cache_file
 
-    @Halo(text='', spinner='dots')
+    @Halo(text='[+] Downloading fresh data from Data Providers...', spinner='dots')
     def downloadLatestData(stockDict,configManager,stockCodes=[],exchangeSuffix=".NS",downloadOnly=False):
         numStocksPerIteration = (int(len(stockCodes)/int(len(stockCodes)/10)) if len(stockCodes) >= 10 else len(stockCodes)) + 1
         queueCounter = 0
@@ -896,7 +896,6 @@ class tools:
         default_logger().debug(f"Attempted fresh download of {len(stockCodes)} stocks and downloaded {len(processedStocks)} stocks. {len(leftOutStocks)} stocks remaining.")
         return stockDict, leftOutStocks
 
-    @Halo(text='', spinner='dots')
     def loadStockData(
         stockDict,
         configManager,
@@ -967,6 +966,7 @@ class tools:
             tools.saveStockData(stockDict,configManager,initialLoadCount,isIntraday,downloadOnly, forceSave=stockDataLoaded)
         return stockDict
 
+    @Halo(text='[+] Loading data from local cache...', spinner='dots')
     def loadDataFromLocalPickle(stockDict, configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading):
         stockDataLoaded = False
         srcFilePath = os.path.join(Archiver.get_user_outputs_dir(), cache_file)
@@ -976,7 +976,7 @@ class tools:
                 if not downloadOnly:
                     OutputControls().printOutput(
                             colorText.GREEN
-                            + f"[+] Automatically Using Cached Stock Data {'due to After-Market hours' if not PKDateUtilities.isTradingTime() else ''}!"
+                            + f"\n[+] Automatically Using Cached Stock Data {'due to After-Market hours' if not PKDateUtilities.isTradingTime() else ''}!"
                             + colorText.END
                         )
                 if stockData is not None and len(stockData) > 0:
@@ -1043,8 +1043,8 @@ class tools:
                     configManager.deleteFileWithPattern()
         return stockDict, stockDataLoaded
 
-    def downloadSavedDataFromServer(stockDict, configManager, downloadOnly, defaultAnswer, retrial, forceLoad, stockCodes, exchangeSuffix, isIntraday, forceRedownload, cache_file, isTrading):
-        stockDataLoaded = False
+    @Halo(text='[+] Loading data from server...', spinner='dots')
+    def tryFetchFromServer(cache_file):
         OutputControls().printOutput(
                     colorText.FAIL
                     + "[+] Market Stock Data is not cached, or forced to redownload .."
@@ -1052,7 +1052,7 @@ class tools:
                 )
         OutputControls().printOutput(
                 colorText.GREEN
-                + f"[+] Downloading {'Intraday' if configManager.isIntradayConfig() else 'Daily'} cache from server for faster processing, Please Wait.."
+                + f"[+] Downloading {colorText.END}{colorText.FAIL}{'Intraday' if configManager.isIntradayConfig() else 'Daily'}{colorText.END}{colorText.GREEN} cache from server for faster processing, Please Wait.."
                 + colorText.END
             )
         cache_url = (
@@ -1075,6 +1075,11 @@ class tools:
                     #'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
             }
         resp = fetcher.fetchURL(cache_url, headers=headers, stream=True)
+        return resp
+
+    def downloadSavedDataFromServer(stockDict, configManager, downloadOnly, defaultAnswer, retrial, forceLoad, stockCodes, exchangeSuffix, isIntraday, forceRedownload, cache_file, isTrading):
+        stockDataLoaded = False
+        resp = tools.tryFetchFromServer(cache_file)
         if resp is not None:
             default_logger().debug(
                     f"Stock data cache file:{cache_file} request status ->{resp.status_code}"

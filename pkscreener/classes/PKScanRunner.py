@@ -301,7 +301,7 @@ class PKScanRunner:
         return screenResults, saveResults,backtest_df,tasks_queue, results_queue, consumers, logging_queue
 
     @exit_after(180) # Should not remain stuck starting the multiprocessing clients beyond this time
-    @Halo(text='', spinner='dots')
+    @Halo(text='[+] Creating multiple processes for faster processing...', spinner='dots')
     def prepareToRunScan(menuOption,keyboardInterruptEvent, screenCounter, screenResultsCounter, stockDictPrimary,stockDictSecondary, items, executeOption,userPassedArgs):
         tasks_queue, results_queue, totalConsumers, logging_queue = PKScanRunner.initQueues(len(items),userPassedArgs)
         scr = ScreeningStatistics.ScreeningStatistics(PKScanRunner.configManager, default_logger())
