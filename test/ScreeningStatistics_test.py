@@ -2383,8 +2383,8 @@ def test_findUptrend_uptrend(tools_instance):
 
     # Assert that the function returns False and sets the appropriate screenDict and saveDict values
     assert result == (True,ANY,0)
-    assert "T:▲" in saveDict["Trend"]
-    assert "T:▲" in screenDict["Trend"]
+    assert f"T:{colorText.UPARROW}" in saveDict["Trend"]
+    assert f"T:{colorText.DOWNARROW}" in screenDict["Trend"]
 
 def test_findUptrend_empty_input(tools_instance):
     # Create an empty DataFrame for testing

@@ -1840,8 +1840,8 @@ class ScreeningStatistics:
             except Exception:  # pragma: no cover
                 # self.default_logger.debug(e, exc_info=True)
                 pass
-        decision = 'T:▲' if isUptrend else ('T:▼' if isDowntrend else '')
-        dma50decision = 't:▲' if is50DMAUptrend else ('t:▼' if is50DMADowntrend else '')
+        decision = f'T:{colorText.UPARROW}' if isUptrend else (f'T:{colorText.DOWNARROW}' if isDowntrend else '')
+        dma50decision = f't:{colorText.UPARROW}' if is50DMAUptrend else (f't:{colorText.DOWNARROW}' if is50DMADowntrend else '')
         mf_inst_ownershipChange = 0
         change_millions =""
         mf = ""
@@ -1875,10 +1875,10 @@ class ScreeningStatistics:
                 pass
             
             if mf_inst_ownershipChange > 0:
-                mf = f"MFI:▲ {change_millions}"
+                mf = f"MFI:{colorText.UPARROW} {change_millions}"
                 mfs = colorText.GREEN + mf + colorText.END
             elif mf_inst_ownershipChange < 0:
-                mf = f"MFI:▼ {change_millions}"
+                mf = f"MFI:{colorText.DOWNARROW} {change_millions}"
                 mfs = colorText.FAIL + mf + colorText.END
 
         saved = self.findCurrentSavedValue(screenDict,saveDict,"Trend")
