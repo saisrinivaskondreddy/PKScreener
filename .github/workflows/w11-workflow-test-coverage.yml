@@ -25,6 +25,18 @@
 name: 11. pkscreener Test Coverage
 
 on:
+  schedule:
+    #   # Nightly at 1:32 A.M. UTC
+    - cron: "32 1 */1 * *"
+  push:
+    branches:
+      - main
+      # Release branches of the format 0.45.20240910.554 
+      - "[0-9]+.[0-9]+.[0-9]+.[0-9]"
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+.[0-9]+.[0-9]"
   workflow_dispatch:
     inputs:
       branch-name:
@@ -142,7 +154,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch-name }}
+          ref: ${{ inputs.branch-name || github.head_ref || github.ref }}
 
       - name: Declare env variables
         id: vars
