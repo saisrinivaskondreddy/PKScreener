@@ -2369,8 +2369,8 @@ def test_findUptrend_valid_input_downtrend(tools_instance):
     saveDict = {"Trend":""}
     result = tools_instance.findUptrend(df, screenDict, saveDict, testing=False,stock="SBIN")
     assert result == (False,ANY,0)
-    assert "T:▼" in saveDict["Trend"]
-    assert "T:▼" in screenDict["Trend"]
+    assert f"T:{colorText.DOWNARROW}" in saveDict["Trend"]
+    assert f"T:{colorText.DOWNARROW}" in screenDict["Trend"]
 
 def test_findUptrend_uptrend(tools_instance):
     # Create a sample DataFrame with a downtrend
