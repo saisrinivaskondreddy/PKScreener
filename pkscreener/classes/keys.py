@@ -148,7 +148,7 @@ def getKeyBoardArrowInput(message="Use Left / Right arrow keys to slide (going b
         click.echo(message, nl=False)
     c = click.getchar()
     # click.echo()
-    supportedDirections = {'\x1b[A':'UP','\x1b[B':'DOWN','\x1b[C':'RIGHT','\x1b[D':'LEFT','àK':'LEFT', '0x0d':'RETURN','\r':'RETURN','\n':'RETURN','c':'CANCEL','C':'CANCEL'}
+    supportedDirections = {'\x1b[A':'UP','\x1b[B':'DOWN','\x1b[C':'RIGHT','\x1b[D':'LEFT','àK':'LEFT','àH':'UP','àP':'DOWN','àM':'RIGHT','0x0d':'RETURN','\r':'RETURN','\n':'RETURN','c':'CANCEL','C':'CANCEL'}
     if c in supportedDirections.keys():
         # click.echo('Invalid input :(')
         # click.echo('You pressed: "' + ''.join([ '\\'+hex(ord(i))[1:] if i not in printable else i for i in c ]) +'"' )
