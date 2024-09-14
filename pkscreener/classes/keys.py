@@ -24,6 +24,7 @@
 
 """
 import click
+import platform
 # # SOURCE: https://docs.python.org/2/library/curses.html
 # # SOURCE: https://docs.python.org/3/howto/curses.html
 
@@ -153,4 +154,15 @@ def getKeyBoardArrowInput(message="Use Left / Right arrow keys to slide (going b
         # click.echo('Invalid input :(')
         # click.echo('You pressed: "' + ''.join([ '\\'+hex(ord(i))[1:] if i not in printable else i for i in c ]) +'"' )
         direction = supportedDirections.get(c)
+    else:
+        if len(c) >= 2: # Windows/Mac may return 2 character key for arrow
+            if "Windows" in platform.system():
+                supportedWinDirections = {"K":"LEFT", "H": "UP", "P" : "DOWN", "M": "RIGHT"}
+                if c[-1] in supportedWinDirections.keys():
+                    direction = supportedWinDirections.get(c[-1])
+            else:
+                supportedOthDirections = {"D":"LEFT", "A": "UP", "B" : "DOWN", "C": "RIGHT"}
+                if c[-1] in supportedOthDirections.keys():
+                    direction = supportedOthDirections.get(c[-1])
+
     return direction
