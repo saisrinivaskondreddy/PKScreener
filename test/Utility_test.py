@@ -77,7 +77,7 @@ def test_setLastScreenedResults():
             # Assert that pd.DataFrame.to_pickle() is called with the correct argument
             mock_to_pickle.assert_called_once_with(
                 os.path.join(
-                    Archiver.get_user_outputs_dir(), "last_screened_results.pkl"
+                    Archiver.get_user_data_dir(), "last_screened_results.pkl"
                 )
             )
 
@@ -91,7 +91,7 @@ def test_getLastScreenedResults():
             # Assert that pd.read_pickle() is called with the correct argument
             mock_read_pickle.assert_called_once_with(
                 os.path.join(
-                    Archiver.get_user_outputs_dir(), "last_screened_results.pkl"
+                    Archiver.get_user_data_dir(), "last_screened_results.pkl"
                 )
             )
 
@@ -264,7 +264,7 @@ def test_saveStockData():
     configManager = Mock()
     loadCount = 2
     try:
-        os.remove(os.path.join(Archiver.get_user_outputs_dir(), "stock_data_1.pkl"))
+        os.remove(os.path.join(Archiver.get_user_data_dir(), "stock_data_1.pkl"))
     except Exception:# pragma: no cover
         pass
     with patch(
@@ -276,7 +276,7 @@ def test_saveStockData():
             tools.saveStockData(stockDict, configManager, loadCount)
             # Assert that pickle.dump() is called with the correct arguments
             mock_dump.assert_called_once()
-    os.remove(os.path.join(Archiver.get_user_outputs_dir(), "stock_data_1.pkl"))
+    os.remove(os.path.join(Archiver.get_user_data_dir(), "stock_data_1.pkl"))
 
 
 # Positive test case for loadStockData() function
@@ -284,7 +284,7 @@ def test_loadStockData():
     # Mocking the pickle.load() function
     mock_pickle = Mock()
     pd.DataFrame().to_pickle(
-        os.path.join(Archiver.get_user_outputs_dir(), "stock_data_2.pkl")
+        os.path.join(Archiver.get_user_data_dir(), "stock_data_2.pkl")
     )
     with patch("pickle.load", mock_pickle) as mock_load:
         mock_load.return_value = []
@@ -301,7 +301,7 @@ def test_loadStockData():
                     tools.loadStockData(stockDict, configManager, downloadOnly, defaultAnswer)
                     # Assert that pickle.load() is called
                     mock_load.assert_called_once()
-    os.remove(os.path.join(Archiver.get_user_outputs_dir(), "stock_data_2.pkl"))
+    os.remove(os.path.join(Archiver.get_user_data_dir(), "stock_data_2.pkl"))
 
 
 # Positive test case for promptSaveResults() function
@@ -489,11 +489,11 @@ def test_getNiftyModel():
         mock_load_model = Mock()
         m1 = str(mock_load_model)
         f = open(
-            os.path.join(Archiver.get_user_outputs_dir(), "nifty_model_v2.h5"), "wb"
+            os.path.join(Archiver.get_user_data_dir(), "nifty_model_v2.h5"), "wb"
         )
         f.close()
         pd.DataFrame().to_pickle(
-            os.path.join(Archiver.get_user_outputs_dir(), "nifty_model_v2.pkl")
+            os.path.join(Archiver.get_user_data_dir(), "nifty_model_v2.pkl")
         )
         with patch(
             "keras.models.load_model", return_value=mock_load_model
@@ -507,15 +507,15 @@ def test_getNiftyModel():
                 result = tools.getNiftyModel(retrial=True)
                 # Assert that os.path.isfile called twice with the correct argument
                 mock_isfile.assert_called_with(
-                    os.path.join(Archiver.get_user_outputs_dir(), "nifty_model_v2.pkl")
+                    os.path.join(Archiver.get_user_data_dir(), "nifty_model_v2.pkl")
                 )
                 # Assert that keras.models.load_model() is called with the correct argument
                 mock_keras_load_model.assert_called_with(
-                    os.path.join(Archiver.get_user_outputs_dir(), "nifty_model_v2.h5")
+                    os.path.join(Archiver.get_user_data_dir(), "nifty_model_v2.h5")
                 )
                 # Assert that joblib.load() is called with the correct argument
                 mock_joblib_load.assert_called_with(
-                    os.path.join(Archiver.get_user_outputs_dir(), "nifty_model_v2.pkl")
+                    os.path.join(Archiver.get_user_data_dir(), "nifty_model_v2.pkl")
                 )
                 # Assert that the result is the correct tuple
                 assert (str(result[0]), str(result[1])) == (m1, m2)

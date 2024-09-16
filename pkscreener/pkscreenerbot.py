@@ -264,7 +264,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
 def removeMonitorFile():
     from PKDevTools.classes import Archiver
     configManager.getConfig(ConfigManager.parser)
-    filePath = os.path.join(Archiver.get_user_outputs_dir(), "monitor_outputs")
+    filePath = os.path.join(Archiver.get_user_data_dir(), "monitor_outputs")
     index = 0
     while index < configManager.maxDashboardWidgetsPerRow*configManager.maxNumResultRowsInMonitor:
         try:
@@ -278,7 +278,7 @@ def launchIntradayMonitor():
     global int_timer
     if int_timer is not None:
         int_timer.cancel()
-    filePath = os.path.join(Archiver.get_user_outputs_dir(), "monitor_outputs")
+    filePath = os.path.join(Archiver.get_user_data_dir(), "monitor_outputs")
     result_outputs = ""
     if (PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday()[0]) or ("PKDevTools_Default_Log_Level" in os.environ.keys() or sys.argv[0].endswith(".py")):
         result_outputs = "Starting up the monitor for this hour. Please try again after 30-40 seconds."

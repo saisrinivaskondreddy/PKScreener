@@ -243,8 +243,8 @@ jobs:
         git remote update
         git fetch
         git add actions-data-download/*.pkl --force
-        git add results/*.pkl --force
-        git add results/*.csv --force
+        git add results/data/*.pkl --force
+        git add results/Indices/*.csv --force
         git commit -m "GitHub-Action-Workflow-Market-Data-Download-(Default-Config)"
         git push -v -u origin +actions-data-download
         
@@ -369,8 +369,8 @@ jobs:
       if: ${{ inputs.skipDownload == '' && startsWith(runner.os, 'Linux' ) }}
       shell: bash
       run: |
-        gh run list --status success --limit 500 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
-        gh run list --status cancelled --limit 500 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
+        gh run list --status success --limit 1000 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
+        gh run list --status cancelled --limit 1000 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
       env:
         GH_TOKEN : ${{secrets.GITHUB_TOKEN}}
   # || '--reScanForZeroSize --scans --local --scanDaysInPast 3 -s2 0,22,29,42,50,M,Z -s0 S,T,E,U,Z,H,Y,B,G,C,M,D,I,L,P -s1 W,N,E,M,Z,S,0,2,3,4,6,7,9,10,13,14,15 -s3 "0" -s4 "0" --branchname actions-data-download -f' }}

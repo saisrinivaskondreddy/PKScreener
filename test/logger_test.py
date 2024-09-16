@@ -48,7 +48,7 @@ def test_setupLogger_negative_shouldLogFalse():
 
 # Positive test case - should log to specified log file path
 def test_setupLogger_positive_logFilePath():
-    log_file_paths = [os.path.join(Archiver.get_user_outputs_dir(), "pkscreener-logs.txt"),
+    log_file_paths = [os.path.join(Archiver.get_user_data_dir(), "pkscreener-logs.txt"),
                       os.path.join(tempfile.gettempdir(), "pkscreener-logs.txt")]
     with patch("PKDevTools.classes.log.setup_custom_logger") as mock_logger:
         setupLogger(shouldLog=True)

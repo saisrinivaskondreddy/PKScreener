@@ -64,8 +64,8 @@ from PKDevTools.classes import Telegram
 from pkscreener import pkscreenercli
 
 session = CachedSession(
-    cache_name=f"{Archiver.get_user_outputs_dir().split(os.sep)[-1]}{os.sep}PKDevTools_cache",
-    db_path=os.path.join(Archiver.get_user_outputs_dir(), "PKDevTools_cache.sqlite"),
+    cache_name=f"{Archiver.get_user_data_dir().split(os.sep)[-1]}{os.sep}PKDevTools_cache",
+    db_path=os.path.join(Archiver.get_user_data_dir(), "PKDevTools_cache.sqlite"),
     cache_control=True,
 )
 last_release = 0
@@ -211,8 +211,8 @@ def test_option_D(mocker, capsys):
     out, err = capsys.readouterr()
     assert err == ""
     _ , cache_file = Utility.tools.afterMarketStockDataExists(False,False)
-    file1 = os.path.join(Archiver.get_user_outputs_dir().replace("results","actions-data-download"),cache_file)
-    file2 = os.path.join(Archiver.get_user_outputs_dir().replace("results","actions-data-download"),f"intraday_{cache_file}")
+    file1 = os.path.join(Archiver.get_user_data_dir().replace(f"results{os.sep}Data","actions-data-download"),cache_file)
+    file2 = os.path.join(Archiver.get_user_data_dir().replace(f"results{os.sep}Data","actions-data-download"),f"intraday_{cache_file}")
     assert (os.path.isfile(file1) or os.path.isfile(file2))
 
 

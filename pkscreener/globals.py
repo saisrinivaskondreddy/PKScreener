@@ -157,6 +157,7 @@ criteria_dateTime = None
 saved_screen_results = None
 show_saved_diff_results = False
 resultsContentsEncoded = None
+runCleanUp = False
 
 def startMarketMonitor(mp_dict,keyboardevent):
     from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
@@ -525,7 +526,7 @@ def initExecution(menuOption=None):
         if menuOption is None:
             if "PKDevTools_Default_Log_Level" in os.environ.keys():
                 from PKDevTools.classes import Archiver
-                log_file_path = os.path.join(Archiver.get_user_outputs_dir(), "pkscreener-logs.txt")
+                log_file_path = os.path.join(Archiver.get_user_data_dir(), "pkscreener-logs.txt")
                 OutputControls().printOutput(colorText.FAIL + "\n    [+] Logs will be written to:"+colorText.END)
                 OutputControls().printOutput(colorText.GREEN + f"    [+] {log_file_path}"+colorText.END)
                 OutputControls().printOutput(colorText.FAIL + "    [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at https://github.com/pkjmesra/PKScreener/issues .\n" + colorText.END)
@@ -828,7 +829,7 @@ def closeWorkersAndExit():
         PKScanRunner.terminateAllWorkers(userPassedArgs=userPassedArgs,consumers=consumers, tasks_queue=tasks_queue, testing=userPassedArgs.testbuild)
 
 def main(userArgs=None,optionalFinalOutcome_df=None):
-    global test_messages_queue,show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
+    global runCleanUp,test_messages_queue,show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
     elapsed_time = 0
     start_time = 0
@@ -878,7 +879,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     backtestPeriod = 0
     reversalOption = None
     listStockCodes = None
-    cleanupLocalResults()
+    if not runCleanUp:
+        cleanupLocalResults()
     if userPassedArgs.log:
         default_logger().debug(f"User Passed args: {userPassedArgs}")
     screenResults, saveResults = PKScanRunner.initDataframes()
@@ -923,7 +925,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     + PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")
                     + ".csv"
                 )
-                filePath = os.path.join(Archiver.get_user_outputs_dir(), filename)
+                filePath = os.path.join(Archiver.get_user_indices_dir(), filename)
                 if selDownloadOption.upper() == "15":
                     nasdaq = PKNasdaqIndexFetcher(configManager)
                     _,nasdaq_df = nasdaq.fetchNasdaqIndexConstituents()
@@ -959,7 +961,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     + PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")
                     + ".csv"
                 )
-                filePath = os.path.join(Archiver.get_user_outputs_dir(), filename)
+                filePath = os.path.join(Archiver.get_user_reports_dir(), filename)
                 if selDownloadOption.upper() == "M":
                     return None, None
                 else:
@@ -2647,6 +2649,10 @@ def printNotifySaveScreenedResults(
             saveResults.drop_duplicates(keep="first", inplace=True)
     
     reportTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs is not None and userPassedArgs.pipedtitle is not None else ""
+    runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+    if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+        runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1].strip()
+    reportTitle = f"{runOptionName} | {reportTitle}" if runOptionName is not None else reportTitle
     OutputControls().printOutput(
         colorText.FAIL
         + f"[+] You chose: {reportTitle}{menuChoiceHierarchy}[{len(screenResults) if screenResults is not None and not screenResults.empty else 0}]"
@@ -2654,9 +2660,6 @@ def printNotifySaveScreenedResults(
         + colorText.END
         , enableMultipleLineOutput=True
     )
-    runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-    if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
-        runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("[+] ")[1].strip()
     pngName = f'PKS_{runOptionName}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
     pngExtension = ".png"
     eligible = is_token_telegram_configured()
@@ -2924,7 +2927,7 @@ def printNotifySaveScreenedResults(
         Utility.tools.setLastScreenedResults(screenResults, saveResults, f"{runOptionName}_{recordDate if recordDate is not None else ''}")
 
 def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user):
-    kite_file_path = os.path.join(Archiver.get_user_outputs_dir(), f"{runOptionName}_Kite_Basket.html")
+    kite_file_path = os.path.join(Archiver.get_user_data_dir(), f"{runOptionName}_Kite_Basket.html")
     kite_caption=f"Review Kite(Zerodha) Basket order for {runOptionName}  - {caption}"
     global userPassedArgs
     if PKDateUtilities.isTradingTime() or userPassedArgs.log: # Only during market hours
@@ -3420,7 +3423,7 @@ def saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, l
             if cacheFileSize < 1024*1024*40:
                 try:
                     from PKDevTools.classes import Archiver
-                    log_file_path = os.path.join(Archiver.get_user_outputs_dir(), "pkscreener-logs.txt")
+                    log_file_path = os.path.join(Archiver.get_user_data_dir(), "pkscreener-logs.txt")
                     message=f"{cache_file} has size: {cacheFileSize}! Something is wrong!"
                     if os.path.exists(log_file_path):
                         sendMessageToTelegramChannel(caption=message,document_filePath=log_file_path, user=DEV_CHANNEL_ID)
@@ -3780,15 +3783,19 @@ def userReportName(userMenuOptions):
     return choices
 
 def cleanupLocalResults():
-    global userPassedArgs
+    global userPassedArgs, runCleanUp
+    runCleanUp = True
     launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
     shouldPrompt = (launcher.endswith(".py\"") or launcher.endswith(".py")) and (userPassedArgs is None or userPassedArgs.answerdefault is None)
     response = "y" if shouldPrompt else "n"
     if shouldPrompt:
-        response = input(f"{colorText.WARN}Clean up local results folder (*.png, *.xlsx, *.html, *.txt) ?{colorText.END} {colorText.FAIL}[Default: Y]{colorText.END} :") or response
+        response = input(f"[+] {colorText.WARN}Clean up local non-essential system generated data?{colorText.END}{colorText.FAIL}[Default: Y]{colorText.END}\n    (User generated reports won't be deleted.)        :") or response
     if "y" in response.lower():
-        configManager.deleteFileWithPattern(pattern="*.png")
-        configManager.deleteFileWithPattern(pattern="*.xlsx")
-        configManager.deleteFileWithPattern(pattern="*.html")
-        configManager.deleteFileWithPattern(pattern="*.txt")
+        dirs = [Archiver.get_user_data_dir(), Archiver.get_user_cookies_dir(), 
+                Archiver.get_user_temp_dir(), Archiver.get_user_indices_dir()]
+        for dir in dirs:
+            configManager.deleteFileWithPattern(rootDir=dir, pattern="*")
+        response = input(f"\n[+] {colorText.WARN}Clean up local user generated reports as well?{colorText.END} {colorText.FAIL}[Default: N]{colorText.END} :") or "n"
+        if "y" in response.lower():
+            configManager.deleteFileWithPattern(rootDir=Archiver.get_user_reports_dir(), pattern="*.*")
     Utility.tools.clearScreen(forceTop=True)

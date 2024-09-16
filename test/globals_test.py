@@ -141,13 +141,10 @@ def test_initPostLevel0Execution_negative():
     menuOption = "X"
     indexOption = "15"
     executeOption = "0"
-    with patch("builtins.print") as mock_print:
+    with patch("pkscreener.classes.MarketStatus.MarketStatus.getMarketStatus") as mock_mktStatus:
         initPostLevel0Execution(menuOption, indexOption, executeOption)
-        mock_print.assert_called_with(
-            colorText.FAIL
-            + "[+] You chose: Scanners"
-            + colorText.END,
-             sep=' ', end='\n', flush=False
+        mock_mktStatus.assert_called_with(
+            exchangeSymbol="^IXIC"
         )
 
 

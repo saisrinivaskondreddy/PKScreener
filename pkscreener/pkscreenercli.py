@@ -334,7 +334,7 @@ def exitGracefully():
         from pkscreener.globals import resetConfigToDefault
         filePath = None
         try:
-            filePath = os.path.join(Archiver.get_user_outputs_dir(), "monitor_outputs")
+            filePath = os.path.join(Archiver.get_user_data_dir(), "monitor_outputs")
         except:
             pass
         if filePath is None:
@@ -365,7 +365,7 @@ def logFilePath():
     try:
         from PKDevTools.classes import Archiver
 
-        filePath = os.path.join(Archiver.get_user_outputs_dir(), "pkscreener-logs.txt")
+        filePath = os.path.join(Archiver.get_user_data_dir(), "pkscreener-logs.txt")
         f = open(filePath, "w")
         if f is not None:
             f.write("Logger file for pkscreener!")
@@ -864,7 +864,7 @@ def pkscreenercli():
             # Launched by bot for intraday monitor?
             if (PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday()[0]) or ("PKDevTools_Default_Log_Level" in os.environ.keys()):
                 from PKDevTools.classes import Archiver
-                filePath = os.path.join(Archiver.get_user_outputs_dir(), "monitor_outputs_1.txt")
+                filePath = os.path.join(Archiver.get_user_data_dir(), "monitor_outputs_1.txt")
                 if os.path.exists(filePath):
                     default_logger().info("monitor_outputs_1.txt already exists! This means an instance may already be running. Exiting now...")
                     # Since the file exists, it means, there is another instance running

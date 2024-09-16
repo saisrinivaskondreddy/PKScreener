@@ -39,7 +39,7 @@ def test_deleteFileWithPattern(config_parser):
     tool = tools()
     with patch('glob.glob') as mock_glob, patch('os.remove') as mock_os:
         mock_glob.return_value = ['file1.pkl', 'file2.pkl']
-        path = Archiver.get_user_outputs_dir().replace("results","actions-data-download")
+        path = Archiver.get_user_data_dir().replace(f"results{os.sep}Data","actions-data-download")
         tool.deleteFileWithPattern(pattern='*.pkl', excludeFile="*.txt")
         mock_os.assert_called_with(f'{path}{os.sep}file2.pkl')
         assert mock_os.call_count >= 2
