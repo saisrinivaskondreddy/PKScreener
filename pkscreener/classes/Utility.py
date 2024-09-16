@@ -1522,8 +1522,11 @@ class tools:
     @Halo(text='', spinner='dots')
     def getNiftyModel(retrial=False):
         if "Windows" in platform.system() and not 'pytest' in sys.modules:
-            sys.stdin.reconfigure(encoding='utf-8')
-            sys.stdout.reconfigure(encoding='utf-8')
+            try:
+                sys.stdin.reconfigure(encoding='utf-8')
+                sys.stdout.reconfigure(encoding='utf-8')
+            except:
+                pass
         files = [
             os.path.join(Archiver.get_user_data_dir(), "nifty_model_v2.h5"),
             os.path.join(Archiver.get_user_data_dir(), "nifty_model_v2.pkl"),
