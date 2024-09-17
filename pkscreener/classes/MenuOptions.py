@@ -105,6 +105,7 @@ level1_P_MenuDict = {
     "1": "Predefined Piped Scanners",
     "2": "Define my custom Piped Scanner",
     "3": "Run Piped Scans Saved So Far",
+    "4": "Predefined Piped Scanners for My Watchlist",
     "M": "Back to the Top/Main menu",
 }
 LEVEL_1_DATA_DOWNLOADS = {
@@ -987,7 +988,7 @@ class menus:
     ):
         menuText = self.fromDictionary(
             level1_P_MenuDict,
-            renderExceptionKeys=["M"],
+            renderExceptionKeys=["M","4"],
             renderStyle=renderStyle
             if renderStyle is not None
             else MenuRenderStyle.STANDALONE,

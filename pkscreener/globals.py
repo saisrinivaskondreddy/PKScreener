@@ -1003,9 +1003,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         if predefinedOption is None:
             predefinedOption = input(colorText.FAIL + f"{pastDate}  [+] Select option: ") or "1"
         OutputControls().printOutput(colorText.END, end="")
-        if predefinedOption not in ["1","2","3"]:
+        if predefinedOption not in ["1","2","3","4"]:
             return None, None
-        if predefinedOption == "1":
+        if predefinedOption in ["1", "4"]:
             updateMenuChoiceHierarchy()
             selectedMenu = m1.find(predefinedOption)
             m2.renderForMenu(selectedMenu=selectedMenu)
@@ -1014,6 +1014,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().printOutput(colorText.END, end="")
             if selPredefinedOption in PREDEFINED_SCAN_MENU_KEYS:
                 scannerOption = PIPED_SCANNERS[selPredefinedOption]
+                if predefinedOption == "4": # Watchlist
+                    scannerOption = scannerOption.replace("-o 'X:12:","-o 'X:W:")
                 if userPassedArgs is not None:
                     userPassedArgs.usertag = PREDEFINED_SCAN_MENU_TEXTS[int(selPredefinedOption)-1]
                 updateMenuChoiceHierarchy()
