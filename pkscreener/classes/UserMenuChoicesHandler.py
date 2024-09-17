@@ -100,7 +100,7 @@ class UserMenuChoicesHandler:
         if executeOption == "Z":
             input(
                 colorText.FAIL
-                + "[+] Press <Enter> to Exit!"
+                + "  [+] Press <Enter> to Exit!"
                 + colorText.END
             )
             sys.exit(0)

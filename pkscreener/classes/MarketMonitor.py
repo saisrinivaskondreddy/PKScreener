@@ -177,7 +177,7 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
 
         self.monitor_df = self.monitor_df.replace(np.nan, "-", regex=True)
         # self.monitorNames[screenOptions] = f"(Dashboard) > {chosenMenu}"
-        latestScanMenuOption = f"[+] {dbTimestamp} (Dashboard) > " + f"{chosenMenu} [{screenOptions}]"
+        latestScanMenuOption = f"  [+] {dbTimestamp} (Dashboard) > " + f"{chosenMenu} [{screenOptions}]"
         OutputControls().printOutput(
             colorText.FAIL
             + latestScanMenuOption[:200]

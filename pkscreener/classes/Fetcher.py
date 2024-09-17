@@ -233,7 +233,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL
-                + f"[+] watchlist.xlsx not found in {os.getcwd()}"
+                + f"  [+] watchlist.xlsx not found in {os.getcwd()}"
                 + colorText.END
             )
             createTemplate = True
@@ -244,7 +244,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL
-                + '[+] Bad Watchlist Format: First Column (A1) should have Header named "Stock Code"'
+                + '  [+] Bad Watchlist Format: First Column (A1) should have Header named "Stock Code"'
                 + colorText.END
             )
             createTemplate = True
@@ -254,7 +254,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             sample_data.to_excel("watchlist_template.xlsx", index=False, header=True)
             OutputControls().printOutput(
                 colorText.BLUE
-                + f"[+] watchlist_template.xlsx created in {os.getcwd()} as a referance template."
+                + f"  [+] watchlist_template.xlsx created in {os.getcwd()} as a referance template."
                 + colorText.END
             )
             return None

@@ -2145,7 +2145,7 @@ class ScreeningStatistics:
         OutputControls().printOutput(
             colorText.BLUE
             + "\n"
-            + "[+] Nifty AI Prediction -> "
+            + "  [+] Nifty AI Prediction -> "
             + colorText.END
             + predictionText
             + colorText.END
@@ -2153,7 +2153,7 @@ class ScreeningStatistics:
         OutputControls().printOutput(
             colorText.BLUE
             + "\n"
-            + "[+] Nifty AI Prediction -> "
+            + "  [+] Nifty AI Prediction -> "
             + colorText.END
             + strengthText
         )

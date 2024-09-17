@@ -223,7 +223,7 @@ def test_checkForUpdate_exception():
                         assert not mock_updateForPlatform.called
                         mock_print.assert_called_with(
                             colorText.FAIL
-                            + "[+] Failure while checking update!"
+                            + "  [+] Failure while checking update!"
                             + colorText.END,
                             sep=' ', end='\n', flush=False
                         )

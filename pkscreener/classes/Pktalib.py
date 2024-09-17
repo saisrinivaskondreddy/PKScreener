@@ -41,20 +41,20 @@ if Imports["talib"]:
     except:
         OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] 'TA-Lib' library is not installed. For best results, please install 'TA-Lib'! You may wish to follow instructions from\n[+] https://github.com/pkjmesra/PKScreener/"
+                + "  [+] 'TA-Lib' library is not installed. For best results, please install 'TA-Lib'! You may wish to follow instructions from\n  [+] https://github.com/pkjmesra/PKScreener/"
                 + colorText.END
             )
         try:
             import pandas_ta as talib
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] TA-Lib is not installed. Falling back on pandas_ta.\n[+] For full coverage(candle patterns), you may wish to follow instructions from\n[+] https://github.com/ta-lib/ta-lib-python"
+                + "  [+] TA-Lib is not installed. Falling back on pandas_ta.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
                 + colorText.END
             )
         except:
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] pandas_ta is not installed. Falling back on pandas_ta also failed.\n[+] For full coverage(candle patterns), you may wish to follow instructions from\n[+] https://github.com/ta-lib/ta-lib-python"
+                + "  [+] pandas_ta is not installed. Falling back on pandas_ta also failed.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
                 + colorText.END
             )
             pass
@@ -64,7 +64,7 @@ else:
         import pandas_ta as talib
         OutputControls().printOutput(
             colorText.FAIL
-            + "[+] TA-Lib is not installed. Falling back on pandas_ta.\n[+] For full coverage(candle patterns), you may wish to follow instructions from\n[+] https://github.com/ta-lib/ta-lib-python"
+            + "  [+] TA-Lib is not installed. Falling back on pandas_ta.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
             + colorText.END
         )
         sleep(3)

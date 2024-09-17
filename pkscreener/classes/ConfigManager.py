@@ -272,7 +272,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 if showFileCreatedText:
                     OutputControls().printOutput(
                         colorText.GREEN
-                        + "[+] Default configuration generated as user configuration is not found!"
+                        + "  [+] Default configuration generated as user configuration is not found!"
                         + colorText.END
                     )
                     input("Press <Enter> to continue...")
@@ -281,7 +281,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.default_logger.debug(e, exc_info=True)
                 OutputControls().printOutput(
                     colorText.FAIL
-                    + "[+] Failed to save user config. Exiting.."
+                    + "  [+] Failed to save user config. Exiting.."
                     + colorText.END
                 )
                 input("Press <Enter> to continue...")
@@ -293,169 +293,169 @@ class tools(SingletonMixin, metaclass=SingletonType):
             OutputControls().printOutput("")
             OutputControls().printOutput(
                 colorText.GREEN
-                + "[+] PKScreener User Configuration:"
+                + "  [+] PKScreener User Configuration:"
                 + colorText.END
             )
             try:
                 self.period = input(
-                    f"[+] Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max\n[+] Enter number of days for which stock data to be downloaded (Days).({colorText.GREEN}Optimal = 1y{colorText.END}, Current: {colorText.FAIL}{self.period}{colorText.END}): "
+                    f"  [+] Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max\n  [+] Enter number of days for which stock data to be downloaded (Days).({colorText.GREEN}Optimal = 1y{colorText.END}, Current: {colorText.FAIL}{self.period}{colorText.END}): "
                 ) or self.period
                 self.daysToLookback = input(
-                    f"[+] Number of recent trading periods (TimeFrame) to screen for Breakout/Consolidation (Days)({colorText.GREEN}Optimal = 22{colorText.END}, Current: {colorText.FAIL}{self.daysToLookback}{colorText.END}): "
+                    f"  [+] Number of recent trading periods (TimeFrame) to screen for Breakout/Consolidation (Days)({colorText.GREEN}Optimal = 22{colorText.END}, Current: {colorText.FAIL}{self.daysToLookback}{colorText.END}): "
                 ) or self.daysToLookback
                 self.duration = input(
-                    f"[+] Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo\n[+] Enter Duration of each candle (Days)({colorText.GREEN}Optimal = 1{colorText.END}, Current: {colorText.FAIL}{self.duration}{colorText.END}): "
+                    f"  [+] Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo\n  [+] Enter Duration of each candle (Days)({colorText.GREEN}Optimal = 1{colorText.END}, Current: {colorText.FAIL}{self.duration}{colorText.END}): "
                 ) or self.duration
                 self.minLTP = input(
-                    f"[+] Minimum Price of Stock to Buy (in RS)({colorText.GREEN}Optimal = 20{colorText.END}, Current: {colorText.FAIL}{self.minLTP}{colorText.END}): "
+                    f"  [+] Minimum Price of Stock to Buy (in RS)({colorText.GREEN}Optimal = 20{colorText.END}, Current: {colorText.FAIL}{self.minLTP}{colorText.END}): "
                 ) or self.minLTP
                 self.maxLTP = input(
-                    f"[+] Maximum Price of Stock to Buy (in RS)({colorText.GREEN}Optimal = 50000{colorText.END}, Current: {colorText.FAIL}{self.maxLTP}{colorText.END}): "
+                    f"  [+] Maximum Price of Stock to Buy (in RS)({colorText.GREEN}Optimal = 50000{colorText.END}, Current: {colorText.FAIL}{self.maxLTP}{colorText.END}): "
                 ) or self.maxLTP
                 self.volumeRatio = input(
-                    f"[+] How many times the volume should be more than average for the breakout? (Number)({colorText.GREEN}Optimal = 2.5{colorText.END}, Current: {colorText.FAIL}{self.volumeRatio}{colorText.END}): "
+                    f"  [+] How many times the volume should be more than average for the breakout? (Number)({colorText.GREEN}Optimal = 2.5{colorText.END}, Current: {colorText.FAIL}{self.volumeRatio}{colorText.END}): "
                 ) or self.volumeRatio
                 self.consolidationPercentage = input(
-                    f"[+] How much % the price should be in range, to consider it as consolidation? (Number)({colorText.GREEN}Optimal = 10{colorText.END}, Current: {colorText.FAIL}{self.consolidationPercentage}{colorText.END}): "
+                    f"  [+] How much % the price should be in range, to consider it as consolidation? (Number)({colorText.GREEN}Optimal = 10{colorText.END}, Current: {colorText.FAIL}{self.consolidationPercentage}{colorText.END}): "
                 ) or self.consolidationPercentage
                 self.shuffle = str(
                     input(
-                        f"[+] Shuffle stocks rather than screening alphabetically? (Y/N, Current: {colorText.FAIL}{'y' if self.shuffleEnabled else 'n'}{colorText.END}): "
+                        f"  [+] Shuffle stocks rather than screening alphabetically? (Y/N, Current: {colorText.FAIL}{'y' if self.shuffleEnabled else 'n'}{colorText.END}): "
                     ) or ('y' if self.shuffleEnabled else 'n')
                 ).lower()
                 self.cacheStockData = str(
                     input(
-                        f"[+] Enable High-Performance and Data-Saver mode? (This uses little bit more CPU but performs High Performance Screening) (Y/N, Current: {colorText.FAIL}{('y' if self.cacheEnabled else 'n')}{colorText.END}): "
+                        f"  [+] Enable High-Performance and Data-Saver mode? (This uses little bit more CPU but performs High Performance Screening) (Y/N, Current: {colorText.FAIL}{('y' if self.cacheEnabled else 'n')}{colorText.END}): "
                     ) or ('y' if self.cacheEnabled else 'n')
                 ).lower()
                 self.stageTwoPrompt = str(
                     input(
-                        f"[+] Screen only for Stage-2 stocks?\n     (What are the stages? => https://www.investopedia.com/articles/trading/08/stock-cycle-trend-price.asp)\n     (Y/N, Current: {colorText.FAIL}{'y' if self.stageTwo else 'n'}{colorText.END}): "
+                        f"  [+] Screen only for Stage-2 stocks?\n     (What are the stages? => https://www.investopedia.com/articles/trading/08/stock-cycle-trend-price.asp)\n     (Y/N, Current: {colorText.FAIL}{'y' if self.stageTwo else 'n'}{colorText.END}): "
                     ) or ('y' if self.stageTwo else 'n')
                 ).lower()
                 self.useEmaPrompt = str(
                     input(
-                        f"[+] Use EMA instead of SMA? (EMA is good for Short-term & SMA for Mid/Long-term trades)[Y/N, Current: {colorText.FAIL}{'y' if self.useEMA else 'n'}{colorText.END}]: "
+                        f"  [+] Use EMA instead of SMA? (EMA is good for Short-term & SMA for Mid/Long-term trades)[Y/N, Current: {colorText.FAIL}{'y' if self.useEMA else 'n'}{colorText.END}]: "
                     ) or ('y' if self.useEMA else 'n')
                 ).lower()
                 self.showunknowntrendsPrompt = str(
                     input(
-                        f"[+] Show even those results where trends are not known[Y/N] ({colorText.GREEN}Recommended Y{colorText.END}, Current: {colorText.FAIL}{'y' if self.showunknowntrends else 'n'}{colorText.END}): "
+                        f"  [+] Show even those results where trends are not known[Y/N] ({colorText.GREEN}Recommended Y{colorText.END}, Current: {colorText.FAIL}{'y' if self.showunknowntrends else 'n'}{colorText.END}): "
                     ) or ('y' if self.showunknowntrends else 'n')
                 ).lower()
                 self.logsEnabledPrompt = str(
                     input(
-                        f"[+] Enable Viewing logs? You can enable if you are having problems.[Y/N, Current: {colorText.FAIL}{'y' if self.logsEnabled else 'n'}{colorText.END}]: "
+                        f"  [+] Enable Viewing logs? You can enable if you are having problems.[Y/N, Current: {colorText.FAIL}{'y' if self.logsEnabled else 'n'}{colorText.END}]: "
                     ) or ('y' if self.logsEnabled else 'n')
                 ).lower()
                 self.enablePortfolioCalculations = str(
                     input(
-                        f"[+] Enable calculating portfolio values? [Y/N, Current: {colorText.FAIL}{'y' if self.enablePortfolioCalculations else 'n'}{colorText.END}]: "
+                        f"  [+] Enable calculating portfolio values? [Y/N, Current: {colorText.FAIL}{'y' if self.enablePortfolioCalculations else 'n'}{colorText.END}]: "
                     ) or ('y' if self.enablePortfolioCalculations else 'n')
                 ).lower()
                 self.showPastStrategyData = str(
                     input(
-                        f"[+] Enable showing past strategy data? [Y/N, Current: {colorText.FAIL}{'y' if self.showPastStrategyData else 'n'}{colorText.END}]: "
+                        f"  [+] Enable showing past strategy data? [Y/N, Current: {colorText.FAIL}{'y' if self.showPastStrategyData else 'n'}{colorText.END}]: "
                     ) or ('y' if self.showPastStrategyData else 'n')
                 ).lower()
                 self.showPinnedMenuEvenForNoResult = str(
                     input(
-                        f"[+] Enable showing pinned menu even when there is no result? [Y/N, Current: {colorText.FAIL}{'y' if self.showPinnedMenuEvenForNoResult else 'n'}{colorText.END}]: "
+                        f"  [+] Enable showing pinned menu even when there is no result? [Y/N, Current: {colorText.FAIL}{'y' if self.showPinnedMenuEvenForNoResult else 'n'}{colorText.END}]: "
                     ) or ('y' if self.showPinnedMenuEvenForNoResult else 'n')
                 ).lower()
                 self.calculatersiintraday = str(
                     input(
-                        f"[+] Calculate intraday RSI during trading hours? [Y/N, Current: {colorText.FAIL}{'y' if self.calculatersiintraday else 'n'}{colorText.END}]: "
+                        f"  [+] Calculate intraday RSI during trading hours? [Y/N, Current: {colorText.FAIL}{'y' if self.calculatersiintraday else 'n'}{colorText.END}]: "
                     ) or ('y' if self.calculatersiintraday else 'n')
                 ).lower()
                 self.generalTimeout = input(
-                    f"[+] General network timeout (in seconds)({colorText.GREEN}Optimal = 2 for good networks{colorText.END}, Current: {colorText.FAIL}{self.generalTimeout}{colorText.END}): "
+                    f"  [+] General network timeout (in seconds)({colorText.GREEN}Optimal = 2 for good networks{colorText.END}, Current: {colorText.FAIL}{self.generalTimeout}{colorText.END}): "
                 ) or self.generalTimeout
                 self.longTimeout = input(
-                    f"[+] Long network timeout for heavier downloads(in seconds)({colorText.GREEN}Optimal = 4 for good networks{colorText.END}, Current: {colorText.FAIL}{self.longTimeout}{colorText.END}): "
+                    f"  [+] Long network timeout for heavier downloads(in seconds)({colorText.GREEN}Optimal = 4 for good networks{colorText.END}, Current: {colorText.FAIL}{self.longTimeout}{colorText.END}): "
                 ) or self.longTimeout
                 self.marketOpen = input(
-                    f"[+] Market Open time({colorText.GREEN}Optimal = 09:15{colorText.END}, Current: {colorText.FAIL}{self.marketOpen}{colorText.END}): "
+                    f"  [+] Market Open time({colorText.GREEN}Optimal = 09:15{colorText.END}, Current: {colorText.FAIL}{self.marketOpen}{colorText.END}): "
                 ) or self.marketOpen
                 self.marketClose = input(
-                    f"[+] Market Close time({colorText.GREEN}Optimal = 15:30{colorText.END}, Current: {colorText.FAIL}{self.marketClose}{colorText.END}): "
+                    f"  [+] Market Close time({colorText.GREEN}Optimal = 15:30{colorText.END}, Current: {colorText.FAIL}{self.marketClose}{colorText.END}): "
                 ) or self.marketClose
                 self.maxdisplayresults = input(
-                    f"[+] Maximum number of display results(number)({colorText.GREEN}Optimal = 100{colorText.END}, Current: {colorText.FAIL}{self.maxdisplayresults}{colorText.END}): "
+                    f"  [+] Maximum number of display results(number)({colorText.GREEN}Optimal = 100{colorText.END}, Current: {colorText.FAIL}{self.maxdisplayresults}{colorText.END}): "
                 ) or self.maxdisplayresults
                 self.maxNetworkRetryCount = input(
-                    f"[+] Maximum number of retries in case of network timeout(in seconds)({colorText.GREEN}Optimal = 10 for slow networks{colorText.END}, Current: {colorText.FAIL}{self.maxNetworkRetryCount}{colorText.END}): "
+                    f"  [+] Maximum number of retries in case of network timeout(in seconds)({colorText.GREEN}Optimal = 10 for slow networks{colorText.END}, Current: {colorText.FAIL}{self.maxNetworkRetryCount}{colorText.END}): "
                 ) or self.maxNetworkRetryCount
                 self.defaultIndex = input(
-                    f"[+] Default Index({colorText.GREEN}NSE=12, NASDAQ=15{colorText.END}, Current: {colorText.FAIL}{self.defaultIndex}{colorText.END}): "
+                    f"  [+] Default Index({colorText.GREEN}NSE=12, NASDAQ=15{colorText.END}, Current: {colorText.FAIL}{self.defaultIndex}{colorText.END}): "
                 ) or self.defaultIndex
                 self.backtestPeriod = input(
-                    f"[+] Number of days in the past for backtesting(in days)({colorText.GREEN}Optimal = 30{colorText.END}, Current: {colorText.FAIL}{self.backtestPeriod}{colorText.END}): "
+                    f"  [+] Number of days in the past for backtesting(in days)({colorText.GREEN}Optimal = 30{colorText.END}, Current: {colorText.FAIL}{self.backtestPeriod}{colorText.END}): "
                 ) or self.backtestPeriod
                 self.maxBacktestWindow = input(
-                    f"[+] Number of days to show the results for backtesting(in days)({colorText.GREEN}Optimal = 1 to 30{colorText.END}, Current: {colorText.FAIL}{self.maxBacktestWindow}{colorText.END}): "
+                    f"  [+] Number of days to show the results for backtesting(in days)({colorText.GREEN}Optimal = 1 to 30{colorText.END}, Current: {colorText.FAIL}{self.maxBacktestWindow}{colorText.END}): "
                 ) or self.maxBacktestWindow
                 self.morninganalysiscandlenumber = input(
-                    f"[+] Candle number since the market open time({colorText.GREEN}Optimal = 15 to 60{colorText.END}, Current: {colorText.FAIL}{self.morninganalysiscandlenumber}{colorText.END}): "
+                    f"  [+] Candle number since the market open time({colorText.GREEN}Optimal = 15 to 60{colorText.END}, Current: {colorText.FAIL}{self.morninganalysiscandlenumber}{colorText.END}): "
                 ) or self.morninganalysiscandlenumber
                 self.morninganalysiscandleduration = input(
-                    f"[+] Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo\n[+] Enter Duration of each candle (minutes)({colorText.GREEN}Optimal = 1 to 5{colorText.END}, Current: {colorText.FAIL}{self.morninganalysiscandleduration}{colorText.END}): "
+                    f"  [+] Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo\n  [+] Enter Duration of each candle (minutes)({colorText.GREEN}Optimal = 1 to 5{colorText.END}, Current: {colorText.FAIL}{self.morninganalysiscandleduration}{colorText.END}): "
                 ) or self.morninganalysiscandleduration
                 self.minVolume = input(
-                    f"[+] Minimum per day traded volume of any stock (number)({colorText.GREEN}Optimal = 100000{colorText.END}, Current: {colorText.FAIL}{self.minVolume}{colorText.END}): "
+                    f"  [+] Minimum per day traded volume of any stock (number)({colorText.GREEN}Optimal = 100000{colorText.END}, Current: {colorText.FAIL}{self.minVolume}{colorText.END}): "
                 ) or self.minVolume
                 self.pinnedMonitorSleepIntervalSeconds = input(
-                    f"[+] Minimum number of seconds to wait before refreshing the data again when in pinned monitor mode (seconds)({colorText.GREEN}Optimal = 30{colorText.END}, Current: {colorText.FAIL}{self.pinnedMonitorSleepIntervalSeconds}{colorText.END}): "
+                    f"  [+] Minimum number of seconds to wait before refreshing the data again when in pinned monitor mode (seconds)({colorText.GREEN}Optimal = 30{colorText.END}, Current: {colorText.FAIL}{self.pinnedMonitorSleepIntervalSeconds}{colorText.END}): "
                 ) or self.pinnedMonitorSleepIntervalSeconds
                 self.backtestPeriodFactor = input(
-                    f"[+] Factor for backtest periods. If you choose 5, 1-Pd would mean 5-Pd returns. (number)({colorText.GREEN}Optimal = 1{colorText.END}, Current: {colorText.FAIL}{self.backtestPeriodFactor}{colorText.END}): "
+                    f"  [+] Factor for backtest periods. If you choose 5, 1-Pd would mean 5-Pd returns. (number)({colorText.GREEN}Optimal = 1{colorText.END}, Current: {colorText.FAIL}{self.backtestPeriodFactor}{colorText.END}): "
                 ) or self.backtestPeriodFactor
                 self.minimumChangePercentage = input(
-                    f"[+] Minimun change in stock price (in percentage). (number)({colorText.GREEN}Optimal = 0{colorText.END}, Current: {colorText.FAIL}{self.minimumChangePercentage}{colorText.END}): "
+                    f"  [+] Minimun change in stock price (in percentage). (number)({colorText.GREEN}Optimal = 0{colorText.END}, Current: {colorText.FAIL}{self.minimumChangePercentage}{colorText.END}): "
                 ) or self.minimumChangePercentage
                 self.atrTrailingStopPeriod = input(
-                    f"[+] ATR Trailing Stop Periods. (number)({colorText.GREEN}Optimal = 10{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopPeriod}{colorText.END}): "
+                    f"  [+] ATR Trailing Stop Periods. (number)({colorText.GREEN}Optimal = 10{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopPeriod}{colorText.END}): "
                 ) or self.atrTrailingStopPeriod
                 self.atrTrailingStopSensitivity = input(
-                    f"[+] ATR Trailing Stop Sensitivity. (number)({colorText.GREEN}Optimal = 1{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopSensitivity}{colorText.END}): "
+                    f"  [+] ATR Trailing Stop Sensitivity. (number)({colorText.GREEN}Optimal = 1{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopSensitivity}{colorText.END}): "
                 ) or self.atrTrailingStopSensitivity
                 self.atrTrailingStopEMAPeriod = input(
-                    f"[+] ATR Trailing Stop EMA Period. (number)({colorText.GREEN}Optimal = 1 to 200{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopEMAPeriod}{colorText.END}): "
+                    f"  [+] ATR Trailing Stop EMA Period. (number)({colorText.GREEN}Optimal = 1 to 200{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopEMAPeriod}{colorText.END}): "
                 ) or self.atrTrailingStopEMAPeriod
                 self.vcpLegsToCheckForConsolidation = input(
-                    f"[+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END}, Current: {colorText.FAIL}{self.vcpLegsToCheckForConsolidation}{colorText.END}): "
+                    f"  [+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END}, Current: {colorText.FAIL}{self.vcpLegsToCheckForConsolidation}{colorText.END}): "
                 ) or self.vcpLegsToCheckForConsolidation
                 self.vcpRangePercentageFromTop = input(
-                    f"[+] Range percentage from the highest high(top) for VCP. (number)({colorText.GREEN}Optimal = 20 to 60{colorText.END}, Current: {colorText.FAIL}{self.vcpRangePercentageFromTop}{colorText.END}): "
+                    f"  [+] Range percentage from the highest high(top) for VCP. (number)({colorText.GREEN}Optimal = 20 to 60{colorText.END}, Current: {colorText.FAIL}{self.vcpRangePercentageFromTop}{colorText.END}): "
                 ) or self.vcpRangePercentageFromTop
                 self.vcpVolumeContractionRatio = input(
-                    f"[+] Ratio of volume of recent largest to pullback candles for VCP. (number)({colorText.GREEN}Optimal = 0.4{colorText.END}, Current: {colorText.FAIL}{self.vcpVolumeContractionRatio}{colorText.END}): "
+                    f"  [+] Ratio of volume of recent largest to pullback candles for VCP. (number)({colorText.GREEN}Optimal = 0.4{colorText.END}, Current: {colorText.FAIL}{self.vcpVolumeContractionRatio}{colorText.END}): "
                 ) or self.vcpVolumeContractionRatio
                 self.enableAdditionalVCPFilters = str(
                     input(
-                        f"[+] Enable additional VCP filters like range and consolidation? [Y/N, Current: {colorText.FAIL}{'y' if self.enableAdditionalVCPFilters else 'n'}{colorText.END}]: "
+                        f"  [+] Enable additional VCP filters like range and consolidation? [Y/N, Current: {colorText.FAIL}{'y' if self.enableAdditionalVCPFilters else 'n'}{colorText.END}]: "
                     ) or ('y' if self.enableAdditionalVCPFilters else 'n')
                 ).lower()
                 self.enableAdditionalVCPEMAFilters = str(
                     input(
-                        f"[+] Enable additional 20/50-EMA filters? [Y/N, Current: {colorText.FAIL}{'y' if self.enableAdditionalVCPEMAFilters else 'n'}{colorText.END}]: "
+                        f"  [+] Enable additional 20/50-EMA filters? [Y/N, Current: {colorText.FAIL}{'y' if self.enableAdditionalVCPEMAFilters else 'n'}{colorText.END}]: "
                     ) or ('y' if self.enableAdditionalVCPEMAFilters else 'n')
                 ).lower()
                 
                 self.enableUsageAnalytics = str(
                     input(
-                        f"[+] Enable usage analytics to be captured? [Y/N, Current: {colorText.FAIL}{'y' if self.enableUsageAnalytics else 'n'}{colorText.END}]: "
+                        f"  [+] Enable usage analytics to be captured? [Y/N, Current: {colorText.FAIL}{'y' if self.enableUsageAnalytics else 'n'}{colorText.END}]: "
                     ) or ('y' if self.enableUsageAnalytics else 'n')
                 ).lower()
                 self.superConfluenceEMAPeriods = input(
-                    f"[+] Comma separated EMA periods for super-confluence-checks. (numbers)({colorText.GREEN}Optimal = 8,21,55{colorText.END}, Current: {colorText.FAIL}{self.superConfluenceEMAPeriods}{colorText.END}): "
+                    f"  [+] Comma separated EMA periods for super-confluence-checks. (numbers)({colorText.GREEN}Optimal = 8,21,55{colorText.END}, Current: {colorText.FAIL}{self.superConfluenceEMAPeriods}{colorText.END}): "
                 ) or self.superConfluenceEMAPeriods
                 self.superConfluenceMaxReviewDays = input(
-                    f"[+] Max number of review days for super-confluence-checks. (number)({colorText.GREEN}Optimal = 3{colorText.END}, Current: {colorText.FAIL}{self.superConfluenceMaxReviewDays}{colorText.END}): "
+                    f"  [+] Max number of review days for super-confluence-checks. (number)({colorText.GREEN}Optimal = 3{colorText.END}, Current: {colorText.FAIL}{self.superConfluenceMaxReviewDays}{colorText.END}): "
                 ) or self.superConfluenceMaxReviewDays
                 self.superConfluenceEnforce200SMA = str(
                     input(
-                        f"[+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if self.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
+                        f"  [+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if self.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
                     ) or ('y' if self.superConfluenceEnforce200SMA else 'n')
                 ).lower()
             except Exception as e:
@@ -542,7 +542,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             self.deleteFileWithPattern()
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] Cached Stock Data Deleted."
+                + "  [+] Cached Stock Data Deleted."
                 + colorText.END
             )
 
@@ -553,7 +553,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.getConfig(parser=parser)
                 OutputControls().printOutput(
                     colorText.GREEN
-                    + "[+] User configuration saved."
+                    + "  [+] User configuration saved."
                     + colorText.END
                 )
                 input("Press <Enter> to continue...")
@@ -562,7 +562,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.default_logger.debug(e, exc_info=True)
                 OutputControls().printOutput(
                     colorText.FAIL
-                    + "[+] Failed to save user config. Exiting.."
+                    + "  [+] Failed to save user config. Exiting.."
                     + colorText.END
                 )
                 input("Press <Enter> to continue...")
@@ -691,14 +691,14 @@ class tools(SingletonMixin, metaclass=SingletonType):
             except configparser.NoOptionError as e:# pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
                 # input(colorText.FAIL +
-                #       '[+] pkscreener requires user configuration again. Press enter to continue..' + colorText.END)
+                #       '  [+] pkscreener requires user configuration again. Press enter to continue..' + colorText.END)
                 parser.remove_section("config")
                 parser.remove_section("filters")
                 self.setConfig(parser, default=True, showFileCreatedText=False)
             except Exception as e:  # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
                 # input(colorText.FAIL +
-                #       '[+] pkscreener requires user configuration again. Press enter to continue..' + colorText.END)
+                #       '  [+] pkscreener requires user configuration again. Press enter to continue..' + colorText.END)
                 parser.remove_section("config")
                 parser.remove_section("filters")
                 self.setConfig(parser, default=True, showFileCreatedText=False)
@@ -752,7 +752,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
     # Print config file
     def showConfigFile(self, defaultAnswer=None):
         try:
-            prompt = "[+] PKScreener User Configuration:"
+            prompt = "  [+] PKScreener User Configuration:"
             f = open("pkscreener.ini", "r")
             OutputControls().printOutput(colorText.GREEN + prompt + colorText.END)
             configData = f.read()
@@ -765,12 +765,12 @@ class tools(SingletonMixin, metaclass=SingletonType):
             self.default_logger.debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] User Configuration not found!"
+                + "  [+] User Configuration not found!"
                 + colorText.END
             )
             OutputControls().printOutput(
                 colorText.WARN
-                + "[+] Configure the limits to continue."
+                + "  [+] Configure the limits to continue."
                 + colorText.END
             )
             self.setConfig(parser, default=True, showFileCreatedText=False)

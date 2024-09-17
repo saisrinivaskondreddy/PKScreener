@@ -188,7 +188,7 @@ class tools:
         if defaultAnswer is None:
             input(
                 colorText.FAIL
-                + "[+] Press <Enter> to continue!"
+                + "  [+] Press <Enter> to continue!"
                 + colorText.END
             )
         return f"\n{Changelog.changelog()}\n\n{devInfo}\n{versionInfo}\n\n{downloadsInfo}\n{homePage}\n{issuesInfo}\n{communityInfo}\n{latestInfo}\n{donationInfo}"
@@ -232,7 +232,7 @@ class tools:
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL
-                + f"{e}\n[+] Failed to save recently screened result table on disk! Skipping.."
+                + f"{e}\n  [+] Failed to save recently screened result table on disk! Skipping.."
                 + colorText.END
             )
         except Exception as e:# pragma: no cover
@@ -246,7 +246,7 @@ class tools:
             if df is not None and len(df) > 0:
                 OutputControls().printOutput(
                     colorText.GREEN
-                    + "\n[+] Showing recently screened results..\n"
+                    + "\n  [+] Showing recently screened results..\n"
                     + colorText.END
                 )
                 df.sort_values(by=["Volume"], ascending=False, inplace=True)
@@ -258,7 +258,7 @@ class tools:
                 )
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Note: Trend calculation is based on number of recent days to screen as per your configuration."
+                    + "  [+] Note: Trend calculation is based on number of recent days to screen as per your configuration."
                     + colorText.END
                 )
             else:
@@ -267,13 +267,13 @@ class tools:
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] Failed to load recently screened result table from disk! Skipping.."
+                + "  [+] Failed to load recently screened result table from disk! Skipping.."
                 + colorText.END
             )
         if defaultAnswer is None:
             input(
                 colorText.GREEN
-                + "[+] Press <Enter> to continue.."
+                + "  [+] Press <Enter> to continue.."
                 + colorText.END
             )
 
@@ -496,11 +496,11 @@ class tools:
 
         dfs_to_print = [styledTable, backtestSummary, backtestDetail]
         unstyled_dfs = [table, backtestSummary, backtestDetail]
-        reportTitle = f"[+] As of {PKDateUtilities.currentDateTime().strftime('%d-%m-%y %H.%M.%S')} IST > You chose {label}"
+        reportTitle = f"  [+] As of {PKDateUtilities.currentDateTime().strftime('%d-%m-%y %H.%M.%S')} IST > You chose {label}"
         titleLabels = [
-            f"[+] Scan results for {label} :",
-            summaryLabel if summaryLabel is not None else "[+] For chosen scan, summary of correctness from past: [Example, 70% of (100) under 1-Pd, means out of 100 stocks that were in the scan result in the past, 70% of them gained next day.)",
-            detailLabel if detailLabel is not None else "[+] 1 to 30 period gain/loss % for matching stocks on respective date from earlier predictions:[Example, 5% under 1-Pd, means the stock price actually gained 5% the next day from given date.]",
+            f"  [+] Scan results for {label} :",
+            summaryLabel if summaryLabel is not None else "  [+] For chosen scan, summary of correctness from past: [Example, 70% of (100) under 1-Pd, means out of 100 stocks that were in the scan result in the past, 70% of them gained next day.)",
+            detailLabel if detailLabel is not None else "  [+] 1 to 30 period gain/loss % for matching stocks on respective date from earlier predictions:[Example, 5% under 1-Pd, means the stock price actually gained 5% the next day from given date.]",
         ]
 
         artfont_arttext_width, artfont_arttext_height = artfont.getsize_multiline(artText+ f" | {marketStatus()}")
@@ -781,7 +781,7 @@ class tools:
         repoText = f"Source: https://GitHub.com/pkjmesra/pkscreener/  | © {datetime.date.today().year} pkjmesra | Telegram: https://t.me/PKScreener |"
         disclaimer = f"The author is NOT a financial advisor and is NOT SEBI registered. This report is for learning/analysis purposes ONLY. Author assumes no responsibility or liability for any errors or omissions in this report or repository, or gain/loss bearing out of this analysis. The user MUST take advise ONLY from registered SEBI financial advisors only."
         repoText = f"{repoText}\n{tools.wrapFitLegendText(table,backtestSummary,disclaimer)}"
-        repoText = f"{repoText}\n[+] Understanding this report:\n\n"
+        repoText = f"{repoText}\n  [+] Understanding this report:\n\n"
         return repoText
 
     def set_github_output(name, value):
@@ -857,7 +857,7 @@ class tools:
                 OutputControls().printOutput(colorText.GREEN + f"=> {cache_file}" + colorText.END)
         return cache_file
 
-    @Halo(text='[+] Downloading fresh data from Data Providers...', spinner='dots')
+    @Halo(text='  [+] Downloading fresh data from Data Providers...', spinner='dots')
     def downloadLatestData(stockDict,configManager,stockCodes=[],exchangeSuffix=".NS",downloadOnly=False):
         numStocksPerIteration = (int(len(stockCodes)/int(len(stockCodes)/10)) if len(stockCodes) >= 10 else len(stockCodes)) + 1
         queueCounter = 0
@@ -955,7 +955,7 @@ class tools:
         if not stockDataLoaded:
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] Cache unavailable on pkscreener server, Continuing.."
+                + "  [+] Cache unavailable on pkscreener server, Continuing.."
                 + colorText.END
             )
         if not stockDataLoaded and not recentDownloadFromOriginAttempted:
@@ -966,7 +966,7 @@ class tools:
             tools.saveStockData(stockDict,configManager,initialLoadCount,isIntraday,downloadOnly, forceSave=stockDataLoaded)
         return stockDict
 
-    @Halo(text='[+] Loading data from local cache...', spinner='dots')
+    @Halo(text='  [+] Loading data from local cache...', spinner='dots')
     def loadDataFromLocalPickle(stockDict, configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading):
         stockDataLoaded = False
         srcFilePath = os.path.join(Archiver.get_user_data_dir(), cache_file)
@@ -976,7 +976,7 @@ class tools:
                 if not downloadOnly:
                     OutputControls().printOutput(
                             colorText.GREEN
-                            + f"\n[+] Automatically Using Cached Stock Data {'due to After-Market hours' if not PKDateUtilities.isTradingTime() else ''}!"
+                            + f"\n  [+] Automatically Using Cached Stock Data {'due to After-Market hours' if not PKDateUtilities.isTradingTime() else ''}!"
                             + colorText.END
                         )
                 if stockData is not None and len(stockData) > 0:
@@ -1026,7 +1026,7 @@ class tools:
                 f.close()
                 OutputControls().printOutput(
                         colorText.FAIL
-                        + "[+] Error while Reading Stock Cache."
+                        + "  [+] Error while Reading Stock Cache. Press <Enter> to continue..."
                         + colorText.END
                     )
                 if tools.promptFileExists(defaultAnswer=defaultAnswer) == "Y":
@@ -1036,7 +1036,7 @@ class tools:
                 f.close()
                 OutputControls().printOutput(
                         colorText.FAIL
-                        + "[+] Stock Cache Corrupted."
+                        + "  [+] Stock Cache Corrupted."
                         + colorText.END
                     )
                 if tools.promptFileExists(defaultAnswer=defaultAnswer) == "Y":
@@ -1047,12 +1047,12 @@ class tools:
     def tryFetchFromServer(cache_file):
         OutputControls().printOutput(
                     colorText.FAIL
-                    + "[+] Loading data from server. Market Stock Data is not cached, or forced to redownload .."
+                    + "  [+] Loading data from server. Market Stock Data is not cached, or forced to redownload .."
                     + colorText.END
                 )
         OutputControls().printOutput(
                 colorText.GREEN
-                + f"[+] Downloading {colorText.END}{colorText.FAIL}{'Intraday' if configManager.isIntradayConfig() else 'Daily'}{colorText.END}{colorText.GREEN} cache from server for faster processing, Please Wait.."
+                + f"  [+] Downloading {colorText.END}{colorText.FAIL}{'Intraday' if configManager.isIntradayConfig() else 'Daily'}{colorText.END}{colorText.GREEN} cache from server for faster processing, Please Wait.."
                 + colorText.END
             )
         cache_url = (
@@ -1236,7 +1236,7 @@ class tools:
                 OutputControls().printOutput(
                     colorText.FAIL
                     + (
-                        "[+] Error saving file at %s"
+                        "  [+] Error saving file at %s"
                         % filePath
                     )
                     + colorText.END
@@ -1255,7 +1255,7 @@ class tools:
                     OutputControls().printOutput(
                         colorText.FAIL
                         + (
-                            "[+] Error saving file at %s"
+                            "  [+] Error saving file at %s"
                             % filePath
                         )
                         + colorText.END
@@ -1270,7 +1270,7 @@ class tools:
                     isSaved = True
             OutputControls().printOutput(
                 (colorText.GREEN if isSaved else colorText.FAIL)
-                + (("[+] Results saved to %s" % filePath) if isSaved else "[+] Failed saving results into Excel file!")
+                + (("  [+] Results saved to %s" % filePath) if isSaved else "  [+] Failed saving results into Excel file!")
                 + colorText.END
             )
             return filePath
@@ -1301,13 +1301,13 @@ class tools:
             minRSI, maxRSI = int(
                 input(
                     colorText.WARN
-                    + "\n[+] Enter Min RSI value (Default=55): "
+                    + "\n  [+] Enter Min RSI value (Default=55): "
                     + colorText.END
                 ) or 55
             ), int(
                 input(
                     colorText.WARN
-                    + "[+] Enter Max RSI value (Default=68): "
+                    + "  [+] Enter Max RSI value (Default=68): "
                     + colorText.END
                 ) or "68"
             )
@@ -1331,13 +1331,13 @@ class tools:
             minCCI, maxCCI = int(
                 input(
                     colorText.WARN
-                    + "\n[+] Enter Min CCI value (Default=110): "
+                    + "\n  [+] Enter Min CCI value (Default=110): "
                     + colorText.END
                 ) or "110"
             ), int(
                 input(
                     colorText.WARN
-                    + "[+] Enter Max CCI value (Default=300): "
+                    + "  [+] Enter Max CCI value (Default=300): "
                     + colorText.END
                 ) or "300"
             )
@@ -1357,7 +1357,7 @@ class tools:
             volumeRatio = float(
                 input(
                     colorText.WARN
-                    + "\n[+] Enter Min Volume ratio value (Default = 2.5): "
+                    + "\n  [+] Enter Min Volume ratio value (Default = 2.5): "
                     + colorText.END
                 ) or "2.5"
             )
@@ -1389,7 +1389,7 @@ class tools:
             resp = int(
                 input(
                     colorText.WARN
-                    + """[+] Select Option:"""
+                    + """  [+] Select Option:"""
                     + colorText.END
                 ) or defaultOption
             )
@@ -1400,7 +1400,7 @@ class tools:
             default_logger().debug(e, exc_info=True)
             input(
                 colorText.FAIL
-                + "\n[+] Invalid Option Selected. Press <Enter> to try again..."
+                + "\n  [+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
             )
             return None
@@ -1412,7 +1412,7 @@ class tools:
             resp = int(
                 input(
                     colorText.WARN
-                    + """[+] Select Option:"""
+                    + """  [+] Select Option:"""
                     + colorText.END
                 ) or "3"
             )
@@ -1423,7 +1423,7 @@ class tools:
                         maLength = int(
                             input(
                                 colorText.WARN
-                                + f"\n[+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default={defaultMALength}): "
+                                + f"\n  [+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default={defaultMALength}): "
                                 + colorText.END
                             ) or str(defaultMALength)
                         )
@@ -1441,7 +1441,7 @@ class tools:
                         maLength = int(
                             input(
                                 colorText.WARN
-                                + "\n[+] Enter NR timeframe [Integer Number] (E.g. 4, 7, etc.) (Default=4): "
+                                + "\n  [+] Enter NR timeframe [Integer Number] (E.g. 4, 7, etc.) (Default=4): "
                                 + colorText.END
                             ) or "4"
                         )
@@ -1465,7 +1465,7 @@ class tools:
             default_logger().debug(e, exc_info=True)
             input(
                 colorText.FAIL
-                + "\n[+] Invalid Option Selected. Press <Enter> to try again..."
+                + "\n  [+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
             )
             return None, None
@@ -1477,7 +1477,7 @@ class tools:
             resp = int(
                 input(
                     colorText.WARN
-                    + """[+] Select Option:"""
+                    + """  [+] Select Option:"""
                     + colorText.END
                 ) or "3"
             )
@@ -1485,7 +1485,7 @@ class tools:
                 candles = int(
                     input(
                         colorText.WARN
-                        + "\n[+] How many candles (TimeFrame) to look back Inside Bar formation? (Default=3): "
+                        + "\n  [+] How many candles (TimeFrame) to look back Inside Bar formation? (Default=3): "
                         + colorText.END
                     ) or "3"
                 )
@@ -1494,7 +1494,7 @@ class tools:
                 percent = float(
                     input(
                         colorText.WARN
-                        + "\n[+] Enter Percentage within which all MA/EMAs should be (Ideal: 0.1-2%)? (Default=0.8): "
+                        + "\n  [+] Enter Percentage within which all MA/EMAs should be (Ideal: 0.1-2%)? (Default=0.8): "
                         + colorText.END
                     ) or "0.8"
                 )
@@ -1506,7 +1506,7 @@ class tools:
             default_logger().debug(e, exc_info=True)
             input(
                 colorText.FAIL
-                + "\n[+] Invalid Option Selected. Press <Enter> to try again..."
+                + "\n  [+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
             )
             return (None, None)
@@ -1553,7 +1553,7 @@ class tools:
                 if resp is not None and resp.status_code == 200:
                     OutputControls().printOutput(
                         colorText.GREEN
-                        + "[+] Downloading AI model (v2) for Nifty predictions, Please Wait.."
+                        + "  [+] Downloading AI model (v2) for Nifty predictions, Please Wait.."
                         + colorText.END
                     )
                     try:
@@ -1594,7 +1594,7 @@ class tools:
                         OutputControls().printOutput("This installation might not work well, especially for NIFTY prediction. Please install 'keras' library on your machine!")
                         OutputControls().printOutput(
                                 colorText.FAIL
-                                + "[+] 'Keras' library is not installed. You may wish to follow instructions from\n[+] https://github.com/pkjmesra/PKScreener/"
+                                + "  [+] 'Keras' library is not installed. You may wish to follow instructions from\n  [+] https://github.com/pkjmesra/PKScreener/"
                                 + colorText.END
                             )
                         pass
@@ -1608,7 +1608,7 @@ class tools:
         if model is None:
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] 'Keras' library is not installed. Prediction failed! You may wish to follow instructions from\n[+] https://github.com/pkjmesra/PKScreener/"
+                + "  [+] 'Keras' library is not installed. Prediction failed! You may wish to follow instructions from\n  [+] https://github.com/pkjmesra/PKScreener/"
                 + colorText.END
             )
         return model, pkl

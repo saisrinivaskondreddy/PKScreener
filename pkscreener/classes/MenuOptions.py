@@ -840,7 +840,7 @@ class menus:
                 return None
         return None
 
-    def renderMenuFromDictionary(self, dict={},exceptionKeys=[],coloredValues=[], optionText="[+] Select a menu option:", defaultMenu="0", asList=False, renderStyle=None, parent=None, skip=None, substitutes=[],checkUpdate=False):
+    def renderMenuFromDictionary(self, dict={},exceptionKeys=[],coloredValues=[], optionText="  [+] Select a menu option:", defaultMenu="0", asList=False, renderStyle=None, parent=None, skip=None, substitutes=[],checkUpdate=False):
         menuText = self.fromDictionary(
             dict,
             renderExceptionKeys=exceptionKeys,
@@ -894,7 +894,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a menu option:"
+                    + "  [+] Select a menu option:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -936,7 +936,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a Strategy for Screening:"
+                    + "  [+] Select a Strategy for Screening:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -967,7 +967,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a configuration period for Screening:"
+                    + "  [+] Select a configuration period for Screening:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1000,7 +1000,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option:"
+                    + "  [+] Select an option:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1033,7 +1033,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a scanner:"
+                    + "  [+] Select a scanner:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1067,7 +1067,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a sectoral index:"
+                    + "  [+] Select a sectoral index:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1100,7 +1100,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an Index for Screening:"
+                    + "  [+] Select an Index for Screening:"
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1133,7 +1133,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a config period/candle-duration combination: "
+                    + "  [+] Select a config period/candle-duration combination: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1166,7 +1166,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a config period/candle-duration combination: "
+                    + "  [+] Select a config period/candle-duration combination: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1199,7 +1199,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select a Criterion for Stock Screening: "
+                    + "  [+] Select a Criterion for Stock Screening: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1231,7 +1231,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1263,7 +1263,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1295,7 +1295,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1327,7 +1327,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1359,7 +1359,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1392,7 +1392,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1424,7 +1424,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(
@@ -1456,7 +1456,7 @@ class menus:
             if OutputControls().enableMultipleLineOutput:
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] Select an option: "
+                    + "  [+] Select an option: "
                     + colorText.END
                 )
                 OutputControls().printOutput(

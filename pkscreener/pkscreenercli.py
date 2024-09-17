@@ -387,9 +387,9 @@ def setupLogger(shouldLog=False, trace=False):
             os.remove(log_file_path)
         except Exception:# pragma: no cover
             pass
-    OutputControls().printOutput(colorText.FAIL + "\n[+] Logs will be written to:"+colorText.END)
-    OutputControls().printOutput(colorText.GREEN + f"[+] {log_file_path}"+colorText.END)
-    OutputControls().printOutput(colorText.FAIL + "[+] If you need to share, open this folder, copy and zip the log file to share.\n" + colorText.END)
+    OutputControls().printOutput(colorText.FAIL + "\n  [+] Logs will be written to:"+colorText.END)
+    OutputControls().printOutput(colorText.GREEN + f"  [+] {log_file_path}"+colorText.END)
+    OutputControls().printOutput(colorText.FAIL + "  [+] If you need to share, open this folder, copy and zip the log file to share.\n" + colorText.END)
     # logger = multiprocessing.log_to_stderr(log.logging.DEBUG)
     log.setup_custom_logger(
         "pkscreener",
@@ -404,21 +404,21 @@ def warnAboutDependencies():
     if not Imports["talib"]:
         OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] TA-Lib is not installed. Looking for pandas_ta."
+                + "  [+] TA-Lib is not installed. Looking for pandas_ta."
                 + colorText.END
             )
         sleep(1)
         if Imports["pandas_ta"]:
             OutputControls().printOutput(
                 colorText.GREEN
-                + "[+] Found and falling back on pandas_ta.\n[+] For full coverage(candle patterns), you may wish to read the README file in PKScreener repo : https://github.com/pkjmesra/PKScreener \n[+] or follow instructions from\n[+] https://github.com/ta-lib/ta-lib-python"
+                + "  [+] Found and falling back on pandas_ta.\n  [+] For full coverage(candle patterns), you may wish to read the README file in PKScreener repo : https://github.com/pkjmesra/PKScreener \n  [+] or follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
                 + colorText.END
             )
             sleep(1)
         else:
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] Neither ta-lib nor pandas_ta was located. You need at least one of them to continue! \n[+] Please follow instructions from README file under PKScreener repo: https://github.com/pkjmesra/PKScreener"
+                + "  [+] Neither ta-lib nor pandas_ta was located. You need at least one of them to continue! \n  [+] Please follow instructions from README file under PKScreener repo: https://github.com/pkjmesra/PKScreener"
                 + colorText.END
             )
             input("Press any key to try anyway...")
@@ -469,7 +469,7 @@ def runApplication():
                 choices = f"--systemlaunched -a y -e -o '{args.options.replace('C:','X:').replace('D:','')}'"
                 indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
                 choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
-                args.progressstatus = f"[+] {choices} => Running {choices}"
+                args.progressstatus = f"  [+] {choices} => Running {choices}"
                 args.usertag = PREDEFINED_SCAN_MENU_TEXTS[indexNum]
                 args.maxdisplayresults = 2000
         except:
@@ -500,10 +500,10 @@ def runApplication():
             try:
                 runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:').replace('D:','')}'"
                 indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
-                runOptionName = f"{'[+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
+                runOptionName = f"{'  [+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
             except Exception as e:
                 default_logger().debug(e,exc_info=True)
-                runOptionName = f"[+] {runOption.replace('D:','').replace(':D','').replace(':','_').replace('_D','').replace('C_','X_')}"
+                runOptionName = f"  [+] {runOption.replace('D:','').replace(':D','').replace(':','_').replace('_D','').replace('C_','X_')}"
                 pass
             args.progressstatus = f"{runOptionName} => Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
             analysisOptions = runOption.split("|")
@@ -620,7 +620,7 @@ def runApplication():
                         if args is not None and args.pipedtitle is not None and "|" in args.pipedtitle:
                             OutputControls().printOutput(
                                     colorText.WARN
-                                    + f"[+] Pipe Results Found: {args.pipedtitle}. {'Reduce number of piped scans if no stocks could be found.' if '[0]' in args.pipedtitle else ''}"
+                                    + f"  [+] Pipe Results Found: {args.pipedtitle}. {'Reduce number of piped scans if no stocks could be found.' if '[0]' in args.pipedtitle else ''}"
                                     + colorText.END
                                 )
                             if args.answerdefault is None:
@@ -775,7 +775,7 @@ def pkscreenercli():
         except RuntimeError as e:# pragma: no cover
             if "RUNNER" not in os.environ.keys() and ('PKDevTools_Default_Log_Level' in os.environ.keys() and os.environ["PKDevTools_Default_Log_Level"] != str(log.logging.NOTSET)):
                 OutputControls().printOutput(
-                    "[+] RuntimeError with 'multiprocessing'.\n[+] Please contact the Developer, if this does not work!"
+                    "  [+] RuntimeError with 'multiprocessing'.\n  [+] Please contact the Developer, if this does not work!"
                 )
                 OutputControls().printOutput(e)
                 traceback.print_exc()
@@ -898,7 +898,7 @@ def pkscreenercli():
         if args.testbuild and not args.prodbuild:
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] Started in TestBuild mode!"
+                + "  [+] Started in TestBuild mode!"
                 + colorText.END
             )
             runApplication()
@@ -909,7 +909,7 @@ def pkscreenercli():
         elif args.download:
             OutputControls().printOutput(
                 colorText.FAIL
-                + "[+] Download ONLY mode! Stocks will not be screened!"
+                + "  [+] Download ONLY mode! Stocks will not be screened!"
                 + colorText.END
             )
             configManager.restartRequestsCache()
@@ -925,7 +925,7 @@ def pkscreenercli():
     except Exception as e:
         if "RUNNER" not in os.environ.keys() and ('PKDevTools_Default_Log_Level' in os.environ.keys() and os.environ["PKDevTools_Default_Log_Level"] != str(log.logging.NOTSET)):
                 OutputControls().printOutput(
-                    "[+] RuntimeError with 'multiprocessing'.\n[+] Please contact the Developer, if this does not work!"
+                    "  [+] RuntimeError with 'multiprocessing'.\n  [+] Please contact the Developer, if this does not work!"
                 )
                 OutputControls().printOutput(e)
                 traceback.print_exc()
@@ -962,7 +962,7 @@ def runApplicationForScreening():
         if args.prodbuild:
             disableSysOut(disable=False)
         OutputControls().printOutput(
-            f"{e}\n[+] An error occurred! Please run with '-l' option to collect the logs.\n[+] For example, 'pkscreener -l' and then contact the developer!"
+            f"{e}\n  [+] An error occurred! Please run with '-l' option to collect the logs.\n  [+] For example, 'pkscreener -l' and then contact the developer!"
         )
         if "RUNNER" in os.environ.keys() or ('PKDevTools_Default_Log_Level' in os.environ.keys() and os.environ["PKDevTools_Default_Log_Level"] != str(log.logging.NOTSET)):
             traceback.print_exc()

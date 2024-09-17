@@ -52,14 +52,14 @@ class OTAUpdater:
         batFile = (
             """@echo off
 color a
-echo [+] pkscreener Software Updater!
-echo [+] Downloading Software Update...
-echo [+] This may take some time as per your Internet Speed, Please Wait...
+echo   [+] pkscreener Software Updater!
+echo   [+] Downloading Software Update...
+echo   [+] This may take some time as per your Internet Speed, Please Wait...
 curl -o pkscreenercli.exe -L """
             + url
             + """
-echo [+] Newly downloaded file saved in %cd%
-echo [+] Software Update Completed! Run'pkscreenercli.exe' again as usual to continue..
+echo   [+] Newly downloaded file saved in %cd%
+echo   [+] Software Update Completed! Run'pkscreenercli.exe' again as usual to continue..
 pause
 del updater.bat & exit
         """
@@ -77,17 +77,17 @@ del updater.bat & exit
         bashFile = (
             """#!/bin/bash
 echo ""
-echo "[+] Starting PKScreener updater, Please Wait..."
+echo "  [+] Starting PKScreener updater, Please Wait..."
 sleep 3
-echo "[+] pkscreener Software Updater!"
-echo "[+] Downloading Software Update..."
-echo "[+] This may take some time as per your Internet Speed, Please Wait..."
+echo "  [+] pkscreener Software Updater!"
+echo "  [+] Downloading Software Update..."
+echo "  [+] This may take some time as per your Internet Speed, Please Wait..."
 wget -q """
             + url
             + """ -O pkscreenercli.bin
-echo "[+] Newly downloaded file saved in $(pwd)"
+echo "  [+] Newly downloaded file saved in $(pwd)"
 chmod +x pkscreenercli.bin
-echo "[+] Update Completed! Run 'pkscreenercli.bin' again as usual to continue.."
+echo "  [+] Update Completed! Run 'pkscreenercli.bin' again as usual to continue.."
 rm updater.sh
         """
         )
@@ -105,17 +105,17 @@ rm updater.sh
         bashFile = (
             """#!/bin/bash
 echo ""
-echo "[+] Starting PKScreener updater, Please Wait..."
+echo "  [+] Starting PKScreener updater, Please Wait..."
 sleep 3
-echo "[+] pkscreener Software Updater!"
-echo "[+] Downloading Software Update..."
-echo "[+] This may take some time as per your Internet Speed, Please Wait..."
+echo "  [+] pkscreener Software Updater!"
+echo "  [+] Downloading Software Update..."
+echo "  [+] This may take some time as per your Internet Speed, Please Wait..."
 curl -o pkscreenercli.run -L """
             + url
             + """
-echo "[+] Newly downloaded file saved in $(pwd)"
+echo "  [+] Newly downloaded file saved in $(pwd)"
 chmod +x pkscreenercli.run
-echo "[+] Update Completed! Run 'pkscreenercli.run' again as usual to continue.."
+echo "  [+] Update Completed! Run 'pkscreenercli.run' again as usual to continue.."
 rm updater.sh
         """
         )
@@ -193,13 +193,13 @@ rm updater.sh
                 if skipDownload:
                     OutputControls().printOutput(
                         colorText.GREEN
-                        + f"    [+] A {updateType} software update (v{tag} [{size} MB]) is available. Check out with the menu option U."
+                        + f"      [+] A {updateType} software update (v{tag} [{size} MB]) is available. Check out with the menu option U."
                         + colorText.END
                     )
                     return
                 OutputControls().printOutput(
                     colorText.WARN
-                    + "[+] What's New in this Update?\n"
+                    + "  [+] What's New in this Update?\n"
                     + colorText.END
                     + colorText.GREEN
                     + OTAUpdater.showWhatsNew()
@@ -209,7 +209,7 @@ rm updater.sh
                     action = input(
                             colorText.FAIL
                             + (
-                                f"\n[+] New {updateType} Software update (v%s) available. Download Now (Size: %dMB)? [Y/N]: "
+                                f"\n  [+] New {updateType} Software update (v%s) available. Download Now (Size: %dMB)? [Y/N]: "
                                 % (str(tag), size)
                             )
                         ) or "y"
@@ -220,7 +220,7 @@ rm updater.sh
                     if inContainer:
                         OutputControls().printOutput(
                                 colorText.WARN
-                                + f"[+] You are running in docker. Please use\n[+]{colorText.END} {colorText.GREEN}docker pull pkjmesra/pkscreener:latest{colorText.END} {colorText.WARN}to pull the latest image, followed by\n[+]{colorText.END} {colorText.GREEN}docker run -it pkjmesra/pkscreener:latest{colorText.END} {colorText.WARN}to run in the container.{colorText.END}"
+                                + f"  [+] You are running in docker. Please use\n  [+]{colorText.END} {colorText.GREEN}docker pull pkjmesra/pkscreener:latest{colorText.END} {colorText.WARN}to pull the latest image, followed by\n  [+]{colorText.END} {colorText.GREEN}docker run -it pkjmesra/pkscreener:latest{colorText.END} {colorText.WARN}to run in the container.{colorText.END}"
                             )
                         from time import sleep
                         sleep(5)
@@ -237,7 +237,7 @@ rm updater.sh
                             default_logger().debug(e, exc_info=True)
                             OutputControls().printOutput(
                                 colorText.WARN
-                                + "[+] Error occured while updating!"
+                                + "  [+] Error occured while updating!"
                                 + colorText.END
                             )
                             raise (e)
@@ -246,7 +246,7 @@ rm updater.sh
                     OutputControls().printOutput(
                         colorText.GREEN
                         + (
-                            "[+] No new update available. You have the latest version (v%s) !"
+                            "  [+] No new update available. You have the latest version (v%s) !"
                             % VERSION
                         )
                         + colorText.END
@@ -258,7 +258,7 @@ rm updater.sh
                         float(now_components[3]) > float(version_components[3]):
                         OutputControls().printOutput(
                             colorText.FAIL
-                            + (f"[+] This version (v{VERSION}) is in Development! Thanks for trying out!")
+                            + (f"  [+] This version (v{VERSION}) is in Development! Thanks for trying out!")
                             + colorText.END
                         )
                         return OTAUpdater.developmentVersion
@@ -266,7 +266,7 @@ rm updater.sh
                         OutputControls().printOutput(
                         colorText.GREEN
                         + (
-                            "[+] No new update available. You have the latest version (v%s) !"
+                            "  [+] No new update available. You have the latest version (v%s) !"
                             % VERSION
                         )
                         + colorText.END
@@ -278,14 +278,14 @@ rm updater.sh
                 OutputControls().printOutput(
                     colorText.BLUE
                     + (
-                        "[+] Download update manually from %s\n"
+                        "  [+] Download update manually from %s\n"
                         % OTAUpdater.checkForUpdate.url
                     )
                     + colorText.END
                 )
             else:
                 OTAUpdater.checkForUpdate.url = (
-                    "[+] No exe/bin/run file as an update available!"
+                    "  [+] No exe/bin/run file as an update available!"
                 )
             if resp is not None and resp.json()["message"] == "Not Found":
                 OutputControls().printOutput(
@@ -297,7 +297,7 @@ rm updater.sh
                 OutputControls().printOutput(e)
                 OutputControls().printOutput(
                     colorText.FAIL
-                    + "[+] Failure while checking update!"
+                    + "  [+] Failure while checking update!"
                     + colorText.END,
                 )
         return

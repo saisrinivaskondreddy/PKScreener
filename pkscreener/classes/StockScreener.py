@@ -731,7 +731,7 @@ class StockScreener:
                 OutputControls().printOutput(
                     colorText.FAIL
                     + (
-                        "\n[+] Exception Occured while Screening %s! Skipping this stock.."
+                        "\n  [+] Exception Occured while Screening %s! Skipping this stock.."
                         % stock
                     )
                     + colorText.END

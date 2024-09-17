@@ -159,9 +159,9 @@ def test_showConfigFile(config_parser):
     with patch('builtins.input') as mock_input, patch('builtins.open') as mock_open:
         mock_input.side_effect = ['\n']
         mock_open.return_value.read.return_value = 'config data'
-        assert tool.showConfigFile(defaultAnswer='Y') == '[+] PKScreener User Configuration:\nconfig data'
+        assert tool.showConfigFile(defaultAnswer='Y') == '  [+] PKScreener User Configuration:\nconfig data'
         mock_input.assert_not_called()
-        assert tool.showConfigFile(defaultAnswer=None) == '[+] PKScreener User Configuration:\nconfig data'
+        assert tool.showConfigFile(defaultAnswer=None) == '  [+] PKScreener User Configuration:\nconfig data'
         mock_input.assert_called()
 
 def test_checkConfigFile(config_parser):
