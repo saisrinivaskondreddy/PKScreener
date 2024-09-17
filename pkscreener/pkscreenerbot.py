@@ -67,7 +67,6 @@ from PKDevTools.classes.ColorText import colorText
 from PKDevTools.classes.MarketHours import MarketHours
 from pkscreener.classes.MenuOptions import MenuRenderStyle, menu, menus,MAX_MENU_OPTION
 from pkscreener.classes.WorkflowManager import run_workflow
-from pkscreener.globals import showSendConfigInfo, showSendHelpInfo
 import pkscreener.classes.ConfigManager as ConfigManager
 
 monitor_proc = None
@@ -154,13 +153,14 @@ def initializeIntradayTimer():
         if (not PKDateUtilities.isTodayHoliday()[0]):
             now = PKDateUtilities.currentDateTime()
             marketStartTime = PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().openHour,minute=MarketHours().openMinute-1)
+            marketCloseTime = PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute)
             marketOpenAnHourandHalfPrior = PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().openHour-2,minute=MarketHours().openMinute+30)
             if now < marketStartTime and now >= marketOpenAnHourandHalfPrior: # Telegram bot might keep running beyond an hour. So let's start watching around 7:45AM
                 difference = (marketStartTime - now).total_seconds() + 1
                 global int_timer
                 int_timer = threading.Timer(difference, launchIntradayMonitor, args=[])
                 int_timer.start()
-            elif now >= marketStartTime:
+            elif now >= marketStartTime and now <= marketCloseTime:
                 launchIntradayMonitor()
     except:
         launchIntradayMonitor()
@@ -482,7 +482,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
             )
             mns.append(menu().create("P1", "More Options", 2))
             mns.append(menu().create("H", "Home", 2))
-        elif selection[1] == "P1":
+        elif selection[1] in ["P1", "N"]:
             selection.extend(["", ""])
     elif len(selection) == 3:
         if selection[2] == "P1":
@@ -625,7 +625,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
             f"{selection[0]} > {selection[1]} > {selection[2]} > {selection[3]}"
         )
         expectedTime = f"{'10 to 15' if '> 15' in optionChoices else '1 to 2'}"
-        menuText = f"Thank you for choosing {optionChoices}. You will receive the notification/results in about {expectedTime} minutes. It generally takes 1-2 minutes for NSE (2000+) stocks and 10-15 minutes for NASDAQ (7300+).\n\nPKScreener is free and will always remain so for everyone. Consider donating to help cover the basic server costs:\n\nUPI (India): 8007162973@APL \n\nor\nhttps://github.com/sponsors/pkjmesra?frequency=one-time&sponsor=pkjmesra"
+        menuText = f"Thank you for choosing {optionChoices.replace(' >  > ','')}. You will receive the notification/results in about {expectedTime} minutes. It generally takes 1-2 minutes for NSE (2000+) stocks and 10-15 minutes for NASDAQ (7300+).\n\nPKScreener is free and will always remain so for everyone. Consider donating to help cover the basic server costs:\n\nUPI (India): 8007162973@APL \n\nor\nhttps://github.com/sponsors/pkjmesra?frequency=one-time&sponsor=pkjmesra"
 
         reply_markup = default_markup(inlineMenus)
         options = ":".join(selection)
@@ -1157,6 +1157,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
             return START_ROUTES
     if cmd == "y" or cmd == "h":
         shareUpdateWithChannel(update=update, context=context)
+        from pkscreener.globals import showSendConfigInfo, showSendHelpInfo
         if cmd == "y":
             showSendConfigInfo(defaultAnswer='Y',user=str(update.message.from_user.id))
         elif cmd == "h":
