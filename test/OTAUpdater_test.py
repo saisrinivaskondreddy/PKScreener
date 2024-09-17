@@ -372,7 +372,7 @@ def test_checkForUpdate_prod_update_1(mocker):
         "message": "Something interesting"
     }
     mocker.patch.object(OTAUpdater, "get_latest_release_info", return_value=(mock_resp, 1024))
-
+    mocker.patch.object(OTAUpdater, "showWhatsNew", return_value="Some exciting new features!")
     # Mock the platform.system() function
     mocker.patch.object(platform, "system", return_value="Windows")
 

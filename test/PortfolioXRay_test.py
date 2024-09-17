@@ -204,32 +204,36 @@ def test_getUpdatedBacktestPeriod_with_calcForDate():
     backtestPeriods = 10
     saveResults = pd.DataFrame({"Date": ["2021-12-31", "2022-01-01", "2022-01-02"]})
     with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.currentDateTime', return_value=PKDateUtilities.dateFromYmdString(saveResults["Date"].iloc[0])):
-        result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
-        assert result == 10
+        with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.holidayList', return_value=("",[])):
+            result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
+            assert result == 10
 
 def test_getUpdatedBacktestPeriod_without_calcForDate():
     calcForDate = None
     backtestPeriods = 10
     saveResults = pd.DataFrame({"Date": ["2021-12-20", "2022-01-01", "2022-01-02"]})
     with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.currentDateTime', return_value=PKDateUtilities.dateFromYmdString("2022-01-04")):
-        result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
-        assert result == 11
+        with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.holidayList', return_value=("",[])):
+            result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
+            assert result == 11
 
 def test_getUpdatedBacktestPeriod_gap_greater_than_backtestPeriods():
     calcForDate = "2022-01-01"
     backtestPeriods = 2
     saveResults = pd.DataFrame({"Date": ["2021-12-31", "2022-01-01", "2022-01-02"]})
     with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.currentDateTime', return_value=PKDateUtilities.dateFromYmdString("2022-01-06")):
-        result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
-        assert result == 3
+        with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.holidayList', return_value=("",[])):
+            result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
+            assert result == 3
 
 def test_getUpdatedBacktestPeriod_gap_less_than_backtestPeriods():
     calcForDate = "2022-01-01"
     backtestPeriods = 10
     saveResults = pd.DataFrame({"Date": ["2022-01-01", "2022-01-02", "2022-01-03"]})
     with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.currentDateTime', return_value=PKDateUtilities.dateFromYmdString("2022-01-06")):
-        result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
-        assert result == 10
+        with patch('PKDevTools.classes.PKDateUtilities.PKDateUtilities.holidayList', return_value=("",[])):
+            result = getUpdatedBacktestPeriod(calcForDate, backtestPeriods, saveResults)
+            assert result == 10
 
 def test_xRaySummary_no_savedResults():
     result = xRaySummary(savedResults=None)

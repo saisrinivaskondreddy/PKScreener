@@ -28,6 +28,9 @@ import platform
 import warnings
 from unittest.mock import ANY, Mock, patch
 
+import pkscreener.classes
+import pkscreener.classes.OtaUpdater
+
 warnings.simplefilter("ignore", DeprecationWarning)
 warnings.simplefilter("ignore", FutureWarning)
 import pandas as pd
@@ -55,15 +58,16 @@ def test_clearScreen():
 def test_showDevInfo():
     # Mocking the input() function
     with patch("builtins.input", return_value="Y") as mock_input:
-        result = tools.showDevInfo()
-        # Assert that input() is called with the correct argument
-        mock_input.assert_called_once_with(
-            colorText.FAIL
-            + "[+] Press <Enter> to continue!"
-            + colorText.END
-        )
-        # Assert that the result is not None
-        assert result is not None
+        with patch("pkscreener.classes.OtaUpdater.OTAUpdater.showWhatsNew", return_value="Some exciting new features!"):
+            result = tools.showDevInfo()
+            # Assert that input() is called with the correct argument
+            mock_input.assert_called_once_with(
+                colorText.FAIL
+                + "[+] Press <Enter> to continue!"
+                + colorText.END
+            )
+            # Assert that the result is not None
+            assert result is not None
 
 
 # Positive test case for setLastScreenedResults() function
@@ -378,12 +382,14 @@ def test_promptVolumeMultiplier():
 # Positive test case for promptReversalScreening() function
 def test_promptReversalScreening():
     # Mocking the input() function
+    from pkscreener.classes.Utility import configManager
+    defaultMALength = 9 if configManager.duration.endswith("m") else 50
     with patch("builtins.input", side_effect=["4", "50"]) as mock_input:
-        result = tools.promptReversalScreening()
         # Assert that input() is called with the correct argument
+        result = tools.promptReversalScreening()
         mock_input.assert_called_with(
             colorText.WARN
-            + "\n[+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default=50): "
+            + f"\n[+] Enter MA Length (E.g. 9,10,20,50 or 200) (Default={defaultMALength}): "
             + colorText.END
         )
         # Assert that the result is the correct tuple
