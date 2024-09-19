@@ -1204,6 +1204,9 @@ class tools:
         try:
             data = data.fillna(0)
             data = data.replace([np.inf, -np.inf], 0)
+        except:
+            pass
+        try:
             data.reset_index(inplace=True)
             with pd.option_context('mode.chained_assignment', None):
                 data["Stock"] = data['Stock'].apply(tools.make_hyperlink)
