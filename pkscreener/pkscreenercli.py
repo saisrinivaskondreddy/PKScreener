@@ -307,6 +307,9 @@ def get_debug_args():
             args = list(args)
         return args
     except NameError as e:
+        # args = sys.argv[1:]
+        # if isinstance(args,list) and len(args) > 0:
+        #     return args[0].split(" ")
         return None
     except TypeError as e: # NameSpace object is not iterable
         return args
@@ -477,72 +480,7 @@ def runApplication():
             pass
         
     if args.runintradayanalysis:
-        maxdisplayresults = configManager.maxdisplayresults
-        configManager.maxdisplayresults = 2000
-        configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
-        runOptions = []
-        otherMenus = []
-        if len(args.options.split(":")) >= 4:
-            runOptions = [args.options]
-        else:
-            runOptions = PREDEFINED_PIPED_MENU_OPTIONS
-            # otherMenus =  menus.allMenus(topLevel="C", index=12)
-            if len(otherMenus) > 0:
-                runOptions.extend(otherMenus)
-        import pandas as pd
-        optionalFinalOutcome_df = pd.DataFrame()
-        import pkscreener.classes.Utility as Utility
-        import pandas as pd
-        # Delete any existing data from the previous run.
-        configManager.deleteFileWithPattern(pattern="stock_data_*.pkl")
-        analysis_index = 1
-        for runOption in runOptions:
-            try:
-                runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:').replace('D:','')}'"
-                indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
-                runOptionName = f"{'  [+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
-            except Exception as e:
-                default_logger().debug(e,exc_info=True)
-                runOptionName = f"  [+] {runOption.replace('D:','').replace(':D','').replace(':','_').replace('_D','').replace('C_','X_')}"
-                pass
-            args.progressstatus = f"{runOptionName} => Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
-            analysisOptions = runOption.split("|")
-            analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
-            runOption = "|".join(analysisOptions)
-            args.options = runOption
-            try:
-                results,plainResults = main(userArgs=args,optionalFinalOutcome_df=optionalFinalOutcome_df)
-                if args.pipedmenus is not None:
-                    while args.pipedmenus is not None:
-                        results, plainResults = main(userArgs=args)
-                if isInterrupted():
-                    closeWorkersAndExit()
-                    exitGracefully()
-                    sys.exit(0)
-                runPipedScans = True
-                while runPipedScans:
-                    runPipedScans = pipeResults(plainResults,args)
-                    if runPipedScans:
-                        results, plainResults = main(userArgs=args,optionalFinalOutcome_df=optionalFinalOutcome_df)
-                if results is not None and len(results) >= len(optionalFinalOutcome_df):
-                    optionalFinalOutcome_df = results
-                if optionalFinalOutcome_df is not None and "EoDDiff" not in optionalFinalOutcome_df.columns:
-                    # Somehow the file must have been corrupted. Let's re-download
-                    configManager.deleteFileWithPattern(pattern="*stock_data_*.pkl")
-                    configManager.deleteFileWithPattern(pattern="*intraday_stock_data_*.pkl")
-                if isInterrupted():
-                    break
-            except Exception as e:
-                OutputControls().printOutput(e)
-                if args.log:
-                    traceback.print_exc()
-            resetUserMenuChoiceOptions()
-            analysis_index += 1
-            # saveSendFinalOutcomeDataframe(optionalFinalOutcome_df)
-
-        configManager.maxdisplayresults = maxdisplayresults
-        configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
-        saveSendFinalOutcomeDataframe(optionalFinalOutcome_df)
+        generateIntradayAnalysisReports(args)
     else:
         if args.barometer:
             sendGlobalMarketBarometer(userArgs=args)
@@ -653,6 +591,78 @@ def runApplication():
                     chosenMenu = args.pipedtitle if args.pipedtitle is not None else updateMenuChoiceHierarchy()
                     MarketMonitor().refresh(screen_df=results,screenOptions=monitorOption_org, chosenMenu=chosenMenu[:120],dbTimestamp=f"{dbTimestamp} | CycleTime:{elapsed_time}s",telegram=args.telegram)
 
+def generateIntradayAnalysisReports(args):
+    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions
+    from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
+    from PKDevTools.classes import Archiver
+    maxdisplayresults = configManager.maxdisplayresults
+    configManager.maxdisplayresults = 2000
+    configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
+    runOptions = []
+    otherMenus = []
+    if len(args.options.split(":")) >= 4:
+        runOptions = [args.options]
+    else:
+        runOptions = PREDEFINED_PIPED_MENU_OPTIONS
+            # otherMenus =  menus.allMenus(topLevel="C", index=12)
+        if len(otherMenus) > 0:
+            runOptions.extend(otherMenus)
+    import pandas as pd
+    optionalFinalOutcome_df = pd.DataFrame()
+    import pkscreener.classes.Utility as Utility
+    # Delete any existing data from the previous run.
+    configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(),pattern="stock_data_*.pkl")
+    analysis_index = 1
+    for runOption in runOptions:
+        try:
+            runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:').replace('D:','')}'"
+            indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
+            runOptionName = f"{'  [+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
+        except Exception as e:
+            default_logger().debug(e,exc_info=True)
+            runOptionName = f"  [+] {runOption.replace('D:','').replace(':D','').replace(':','_').replace('_D','').replace('C_','X_')}"
+            pass
+        args.progressstatus = f"{runOptionName} => Running Intraday Analysis: {analysis_index} of {len(runOptions)}..."
+        analysisOptions = runOption.split("|")
+        analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
+        runOption = "|".join(analysisOptions)
+        args.options = runOption
+        try:
+            results,plainResults = main(userArgs=args,optionalFinalOutcome_df=optionalFinalOutcome_df)
+            if args.pipedmenus is not None:
+                while args.pipedmenus is not None:
+                    results, plainResults = main(userArgs=args)
+            if isInterrupted():
+                closeWorkersAndExit()
+                exitGracefully()
+                sys.exit(0)
+            runPipedScans = True
+            while runPipedScans:
+                runPipedScans = pipeResults(plainResults,args)
+                if runPipedScans:
+                    results, plainResults = main(userArgs=args,optionalFinalOutcome_df=optionalFinalOutcome_df)
+            if results is not None and len(results) >= len(optionalFinalOutcome_df) and not results.empty and len(results.columns) > 5:
+                import numpy as np
+                if "%Chng" in results.columns and "EoDDiff" in results.columns:
+                    optionalFinalOutcome_df = results
+            if optionalFinalOutcome_df is not None and "EoDDiff" not in optionalFinalOutcome_df.columns:
+                # Somehow the file must have been corrupted. Let's re-download
+                configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(), pattern="*stock_data_*.pkl")
+                configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(), pattern="*intraday_stock_data_*.pkl")
+            if isInterrupted():
+                break
+        except Exception as e:
+            OutputControls().printOutput(e)
+            if args.log:
+                traceback.print_exc()
+        resetUserMenuChoiceOptions()
+        analysis_index += 1
+            # saveSendFinalOutcomeDataframe(optionalFinalOutcome_df)
+
+    configManager.maxdisplayresults = maxdisplayresults
+    configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
+    saveSendFinalOutcomeDataframe(optionalFinalOutcome_df)
+
 def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
     import pandas as pd
     from pkscreener.classes import Utility
@@ -666,14 +676,14 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
             for stock, df_group in df_grouped:
                 if stock == "BASKET":
                     if final_df is None:
-                        final_df = df_group[["Pattern","MA-Signal","Trend(22Prds)","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
+                        final_df = df_group[["Pattern","MA-Signal","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
                     else:
-                        final_df = pd.concat([final_df, df_group[["Pattern","MA-Signal","Trend(22Prds)","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
+                        final_df = pd.concat([final_df, df_group[["Pattern","MA-Signal","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
         except:
             pass
         if final_df is not None and not final_df.empty:
             with pd.option_context('mode.chained_assignment', None):
-                final_df = final_df[["Pattern","MA-Signal","Trend(22Prds)","LTP@Alert","LTP","EoDDiff","SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff"]]
+                final_df = final_df[["Pattern","MA-Signal","LTP@Alert","LTP","EoDDiff","SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff"]]
                 final_df.rename(
                         columns={
                             "Pattern": "Scan Name",
@@ -684,7 +694,7 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
                             },
                             inplace=True,
                         )
-                final_df.dropna(inplace=True)
+                # final_df.dropna(inplace=True)
             mark_down = colorText.miniTabulator().tabulate(
                                     final_df,
                                     headers="keys",

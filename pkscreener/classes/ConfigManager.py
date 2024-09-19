@@ -170,13 +170,13 @@ class tools(SingletonMixin, metaclass=SingletonType):
     def default_logger(self, logger):
         self.logger = logger
 
-    def deleteFileWithPattern(self, pattern=None, excludeFile=None, rootDir=None, recursive=False):
+    def deleteFileWithPattern(self, pattern=None, excludeFile=None, rootDir=None, recursive=True):
         if pattern is None:
             pattern = (
                 f"{'intraday_' if self.isIntradayConfig() else ''}stock_data_*.pkl"
             )
         if rootDir is None:
-            rootDir = [Archiver.get_user_outputs_dir(),Archiver.get_user_outputs_dir().replace("results","actions-data-download")]
+            rootDir = [Archiver.get_user_outputs_dir(),Archiver.get_user_data_dir(), Archiver.get_user_outputs_dir().replace("results","actions-data-download")]
         else:
             rootDir = [rootDir]
         for dir in rootDir:

@@ -141,6 +141,7 @@ stockDictSecondary = None
 userPassedArgs = None
 elapsed_time = 0
 start_time = 0
+scanCycleRunning = False
 test_messages_queue = None
 strategyFilter=[]
 listStockCodes = None
@@ -205,7 +206,7 @@ def getDownloadChoices(defaultAnswer=None):
             sys.exit(0)
         else:
             pattern = f"{'intraday_' if intraday else ''}stock_data_*.pkl"
-            configManager.deleteFileWithPattern(pattern)
+            configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(),pattern=pattern)
     return "X", 12, 0, {"0": "X", "1": "12", "2": "0"}
 
 
@@ -439,12 +440,12 @@ def handleSecondaryMenuChoices(
                     configManager.period = periodDurations[0]
                     configManager.duration = periodDurations[1]
                     configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
-                    configManager.deleteFileWithPattern(pattern="*stock_data_*.pkl*")
+                    configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(),pattern="*stock_data_*.pkl*")
                     input(colorText.FAIL+ "  [+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
                     sys.exit(0)
                 elif durationOption.upper() in ["5"]:
                     configManager.setConfig(ConfigManager.parser, default=False, showFileCreatedText=True)
-                    configManager.deleteFileWithPattern(pattern="*stock_data_*.pkl*")
+                    configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(),pattern="*stock_data_*.pkl*")
                     input(colorText.FAIL+ "  [+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
                     sys.exit(0)
                 return
@@ -820,7 +821,13 @@ def refreshStockData(startupoptions=None):
     if indexOption == 0:
         listStockCodes = handleRequestForSpecificStocks(options,indexOption=indexOption)
     listStockCodes = prepareStocksForScreening(testing=False, downloadOnly=False, listStockCodes=listStockCodes,indexOption=indexOption)
-    stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly=False, listStockCodes=listStockCodes, menuOption=menuOption,indexOption=indexOption)
+    try:
+        import tensorflow as tf
+        with tf.device("/device:GPU:0"):
+            stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly=False, listStockCodes=listStockCodes, menuOption=menuOption,indexOption=indexOption)
+    except:
+        stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly=False, listStockCodes=listStockCodes, menuOption=menuOption,indexOption=indexOption)
+        pass
     PKScanRunner.refreshDatabase(consumers,stockDictPrimary,stockDictSecondary)
 
 def closeWorkersAndExit():
@@ -829,10 +836,10 @@ def closeWorkersAndExit():
         PKScanRunner.terminateAllWorkers(userPassedArgs=userPassedArgs,consumers=consumers, tasks_queue=tasks_queue, testing=userPassedArgs.testbuild)
 
 def main(userArgs=None,optionalFinalOutcome_df=None):
-    global runCleanUp,test_messages_queue,show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
+    global scanCycleRunning,runCleanUp,test_messages_queue,show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
-    elapsed_time = 0
-    start_time = 0
+    elapsed_time = 0 if not scanCycleRunning else elapsed_time
+    start_time = 0 if not scanCycleRunning else start_time
     testing = False if userArgs is None else (userArgs.testbuild and userArgs.prodbuild)
     testBuild = False if userArgs is None else (userArgs.testbuild and not testing)
     downloadOnly = False if userArgs is None else userArgs.download
@@ -1679,7 +1686,13 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             and not loadedStockData
             and not testing
         ):
-            stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption)
+            try:
+                import tensorflow as tf
+                with tf.device("/device:GPU:0"):
+                    stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption)
+            except:
+                stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption)
+                pass
             
         loadCount = len(stockDictPrimary) if stockDictPrimary is not None else 0
 
@@ -2603,7 +2616,7 @@ def readScreenResultsDecoded(fileName=None):
 def printNotifySaveScreenedResults(
     screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None
 ):
-    global userPassedArgs, elapsed_time, media_group_dict, saved_screen_results, resultsContentsEncoded,criteria_dateTime
+    global scanCycleRunning,userPassedArgs, elapsed_time, media_group_dict, saved_screen_results, resultsContentsEncoded,criteria_dateTime
     diff_from_prev_scan = None
     onlyInCurrent_df = None
     common_df  = None
@@ -2927,6 +2940,7 @@ def printNotifySaveScreenedResults(
         if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
             runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
         Utility.tools.setLastScreenedResults(screenResults, saveResults, f"{runOptionName}_{recordDate if recordDate is not None else ''}")
+    scanCycleRunning = False
 
 def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user):
     kite_file_path = os.path.join(Archiver.get_user_data_dir(), f"{runOptionName}_Kite_Basket.html")
@@ -3214,7 +3228,7 @@ def runScanners(
     backtest_df,
     testing=False,
 ):
-    global selectedChoice, userPassedArgs, elapsed_time, start_time,userPassedArgs,criteria_dateTime
+    global scanCycleRunning,selectedChoice, userPassedArgs, elapsed_time, start_time,userPassedArgs,criteria_dateTime
     result = None
     backtest_df = None
     reviewDate = getReviewDate(userPassedArgs) if criteria_dateTime is None else criteria_dateTime
@@ -3246,7 +3260,8 @@ def runScanners(
             lstsave = []
             result = None
             backtest_df = None
-            start_time = time.time()
+            start_time = time.time() if not scanCycleRunning else start_time
+            scanCycleRunning = True
             def processResultsCallback(resultItem, processedCount,result_df, *otherArgs):
                 global userPassedArgs
                 (menuOption, backtestPeriod, result, lstscreen, lstsave) = otherArgs
@@ -3787,6 +3802,9 @@ def userReportName(userMenuOptions):
 def cleanupLocalResults():
     global userPassedArgs, runCleanUp
     runCleanUp = True
+    # No need to ask and show prompts if launched by system
+    if userPassedArgs.answerdefault is not None or userPassedArgs.systemlaunched:
+        return
     launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
     shouldPrompt = (launcher.endswith(".py\"") or launcher.endswith(".py")) and (userPassedArgs is None or userPassedArgs.answerdefault is None)
     response = "y" if shouldPrompt else "n"
