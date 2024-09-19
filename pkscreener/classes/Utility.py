@@ -1186,8 +1186,12 @@ class tools:
                 
         return stockDict,stockDataLoaded
 
+    def make_hyperlink(value):
+        url = "https://in.tradingview.com/chart?symbol=NSE:{}"
+        return '=HYPERLINK("%s", "%s")' % (url.format(value), value)
+
     # Save screened results to excel
-    def promptSaveResults(sheetName,df, defaultAnswer=None,pastDate=None):
+    def promptSaveResults(sheetName,df_save, defaultAnswer=None,pastDate=None):
         """
         Tries to save the dataframe output into an excel file.
 
@@ -1196,6 +1200,19 @@ class tools:
         If it fails to save, it will then try to save to Desktop and then eventually into
         a temporary directory.
         """
+        if df_save is None or len(df_save) == 0:
+            return None
+        data = df_save.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        try:
+            data.reset_index(inplace=True)
+            with pd.option_context('mode.chained_assignment', None):
+                data["Stock"] = data['Stock'].apply(tools.make_hyperlink)
+            data.set_index("Stock", inplace=True)
+        except:
+            pass
+        df = data
         isSaved = False
         try:
             if defaultAnswer is None:
