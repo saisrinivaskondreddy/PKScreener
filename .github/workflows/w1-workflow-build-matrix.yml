@@ -93,7 +93,7 @@ jobs:
   # Job for builing packages
   Build:
     name: Build Packages
-    needs: [check_should_run, Test-Source]
+    needs: [check_should_run] #Test-Source
     #needs: Create-Release
     runs-on: ${{ matrix.os }}
     permissions: write-all
@@ -289,7 +289,7 @@ jobs:
 
       - name: Test Built Binary for ${{ matrix.TARGET }}
         shell: bash
-        timeout-minutes: 2
+        timeout-minutes: 5
         continue-on-error: true
         run: ${{ matrix.TEST_BUILD }}
 

@@ -37,6 +37,7 @@ LINE_SEPARATOR = "\n"
 
 level0MenuDict = {
     "X": "Scanners",
+    "F": "Find a stock in scanners",
     "M": "Monitor Intraday",
     "S": "Strategies",
     "B": "Backtests",
@@ -49,7 +50,7 @@ level0MenuDict = {
     "Y": "View your user configuration",
     "U": "Check for software update",
     "L": "Collect Logs for Debugging",
-    "H": "Help / About Developer",
+    "H": "About PKScreener",
     "Z": "Exit (Ctrl + C)",
 }
 level1_index_options_sectoral= {
@@ -642,8 +643,8 @@ class menus:
         if selectedMenu is None and self.level == 0:
             # Top level Application Main menu
             return self.renderMenuFromDictionary(dict=level0MenuDict,
-                                                 exceptionKeys=["X", "T", "E", "U", "Z", "L", "D"],
-                                                 coloredValues=(["P"] if not asList else []),
+                                                 exceptionKeys=["T", "E", "U", "Z", "L", "D", "M", "P"],
+                                                 coloredValues=(["P","F","X"] if not asList else []),
                                                  defaultMenu="P",
                                                  skip=skip, 
                                                  asList=asList, 

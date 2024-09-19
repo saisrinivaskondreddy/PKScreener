@@ -545,7 +545,7 @@ def initExecution(menuOption=None):
                     + colorText.END
                 )
                 sys.exit(0)
-            elif selectedMenu.menuKey in ["B", "C", "G", "H", "U", "T", "S", "E", "X", "Y", "M", "D", "I", "L"]:
+            elif selectedMenu.menuKey in ["B", "C", "G", "H", "U", "T", "S", "E", "X", "Y", "M", "D", "I", "L","F"]:
                 Utility.tools.clearScreen(forceTop=True)
                 selectedChoice["0"] = selectedMenu.menuKey
                 return selectedMenu
@@ -897,7 +897,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     # Print Level 1 menu options
     selectedMenu = initExecution(menuOption=menuOption)
     menuOption = selectedMenu.menuKey
-    if menuOption in ["M", "D", "I", "L"]:
+    if menuOption in ["M", "D", "I", "L", "F"]:
         launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
         launcher = f"python3.11 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
         if menuOption in ["M"]:
@@ -994,6 +994,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to collect logs. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -l{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
             sleep(2)
             os.system(f"{launcher} -a Y -l")
+        elif menuOption in ["F"]:
+            OutputControls().printOutput(f"  [+] {colorText.GREEN}Wow! So eagerly waiting for 'Which scan got this stock?' :-){colorText.END}\n  [+] It is still under development! Please try again in a few days!")
+            input("Press <Enter> to continue...")
         Utility.tools.clearScreen(clearAlways=True,forceTop=True)
         return None, None
     if menuOption in ["P"]:
@@ -1955,7 +1958,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             (userPassedArgs is not None and 
                 (userPassedArgs.user is None or 
                     str(userPassedArgs.user) == DEV_CHANNEL_ID) and 
-                (userPassedArgs.answerdefault is None or userPassedArgs.systemlaunched)))):
+                (userPassedArgs.answerdefault is None or userPassedArgs.systemlaunched))) and
+                    not userPassedArgs.testbuild):
         prevOutput_results = saveResults.index if (saveResults is not None and not saveResults.empty) else []
         isNotPiped = (("|" not in userPassedArgs.options) if (userPassedArgs is not None and userPassedArgs.options is not None) else True)
         hasFoundStocks = len(prevOutput_results) > 0 and isNotPiped
@@ -3803,7 +3807,7 @@ def cleanupLocalResults():
     global userPassedArgs, runCleanUp
     runCleanUp = True
     # No need to ask and show prompts if launched by system
-    if userPassedArgs.answerdefault is not None or userPassedArgs.systemlaunched:
+    if userPassedArgs.answerdefault is not None or userPassedArgs.systemlaunched or userPassedArgs.testbuild:
         return
     launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
     shouldPrompt = (launcher.endswith(".py\"") or launcher.endswith(".py")) and (userPassedArgs is None or userPassedArgs.answerdefault is None)
