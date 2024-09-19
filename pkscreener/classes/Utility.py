@@ -1201,9 +1201,9 @@ class tools:
         a temporary directory.
         """
         data = df_save.copy()
-        data = data.fillna(0)
-        data = data.replace([np.inf, -np.inf], 0)
         try:
+            data = data.fillna(0)
+            data = data.replace([np.inf, -np.inf], 0)
             data.reset_index(inplace=True)
             with pd.option_context('mode.chained_assignment', None):
                 data["Stock"] = data['Stock'].apply(tools.make_hyperlink)
