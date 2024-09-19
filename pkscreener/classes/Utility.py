@@ -1200,8 +1200,6 @@ class tools:
         If it fails to save, it will then try to save to Desktop and then eventually into
         a temporary directory.
         """
-        if df_save is None or len(df_save) == 0:
-            return None
         data = df_save.copy()
         data = data.fillna(0)
         data = data.replace([np.inf, -np.inf], 0)
