@@ -1047,7 +1047,7 @@ class tools:
     def tryFetchFromServer(cache_file):
         OutputControls().printOutput(
                     colorText.FAIL
-                    + "  [+] Loading data from server. Market Stock Data is not cached, or forced to redownload .."
+                    + "[+] Loading data from server. Market Stock Data is not cached, or forced to redownload .."
                     + colorText.END
                 )
         OutputControls().printOutput(

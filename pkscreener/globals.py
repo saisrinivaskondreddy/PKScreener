@@ -2582,9 +2582,15 @@ def updateMenuChoiceHierarchy():
     Utility.tools.clearScreen(forceTop=True)
     needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
     pastDate = f"[ {PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0)} ]" if needsCalc else ""
+    reportTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs is not None and userPassedArgs.pipedtitle is not None else ""
+    runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+    if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+        runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
+    reportTitle = f"{runOptionName} | {reportTitle}" if runOptionName is not None else reportTitle
+
     OutputControls().printOutput(
         colorText.FAIL
-        + "  [+] You chose: "
+        + f"  [+] You chose: {reportTitle} "
         + menuChoiceHierarchy
         + (f" (Piped Scan Mode) [{userPassedArgs.pipedmenus}] {pastDate}" if (userPassedArgs is not None and userPassedArgs.pipedmenus is not None) else "")
         + colorText.END
@@ -3520,7 +3526,7 @@ def sendGlobalMarketBarometer(userArgs=None):
         if gmbPath is not None:
             from PKDevTools.classes.Telegram import get_secrets
             Channel_Id, _, _, _ = get_secrets()
-            user = userArgs.user if userArgs is not None else (Channel_Id if Channel_Id is not None and len(Channel_Id) > 0 else None)
+            user = userArgs.user if userArgs is not None else (int(f"-{Channel_Id}") if Channel_Id is not None and len(str(Channel_Id)) > 0 else None)
             gmbFileSize = os.stat(gmbPath).st_size if os.path.exists(gmbPath) else 0
             OutputControls().printOutput(f"Barometer report created with size {gmbFileSize} @ {gmbPath}")
             sendMessageToTelegramChannel(

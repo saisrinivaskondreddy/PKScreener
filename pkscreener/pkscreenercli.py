@@ -307,9 +307,12 @@ def get_debug_args():
             args = list(args)
         return args
     except NameError as e:
-        # args = sys.argv[1:]
-        # if isinstance(args,list) and len(args) > 0:
-        #     return args[0].split(" ")
+        args = sys.argv[1:]
+        if isinstance(args,list):
+            if len(args) == 1:
+                return args[0].split(" ")
+            else:
+                return args
         return None
     except TypeError as e: # NameSpace object is not iterable
         return args
@@ -694,7 +697,7 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
                             },
                             inplace=True,
                         )
-                # final_df.dropna(inplace=True)
+                final_df.dropna(inplace=True)
             mark_down = colorText.miniTabulator().tabulate(
                                     final_df,
                                     headers="keys",

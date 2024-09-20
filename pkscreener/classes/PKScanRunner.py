@@ -132,6 +132,33 @@ class PKScanRunner:
         actualHistoricalDuration = (samplingDuration - fillerPlaceHolder)
         return samplingDuration,fillerPlaceHolder,actualHistoricalDuration
 
+    def defaultParamsForExecuteOption(executeOption,executeLevel1Option):
+        defaultOptionsDict = {"daysForLowestVolume":5, "exchangeName":"INDIA",
+                              "volumeRatio": PKScanRunner.configManager.volumeRatio,
+                              "minRSI":60,"maxRSI": 75,}
+        match executeOption:
+            case 6:
+                reversalOption = executeLevel1Option
+                match reversalOption:
+                    case 4,6,7,10:
+                        maLength = 50 if reversalOption == 4 else (3 if reversalOption in [7] else (2 if reversalOption in [10] else 7))
+                        defaultOptionsDict.update({"maLength":maLength, "reversalOption":reversalOption})
+            case 7:
+                respChartPattern = executeLevel1Option
+                match respChartPattern:
+                    case 1,2,3:
+                        maLength = 4 if respChartPattern in [3] else 0
+                        insideBarToLookback = 7 if respChartPattern in [1, 2] else (0.008 if (maLength == 4 and respChartPattern ==3) else 0.02)
+                        defaultOptionsDict.update({"maLength":maLength, "respChartPattern":respChartPattern,"insideBarToLookback":insideBarToLookback})
+                    case 0, 4, 5, 6, 7, 8, 9:
+                        insideBarToLookback = 0
+                        maLength = 4 if respChartPattern == 6 else 6 # Bollinger Bands Squeeze- Any/All or MA-Support
+                        defaultOptionsDict.update({"maLength":maLength, "respChartPattern":respChartPattern,"insideBarToLookback":insideBarToLookback})
+            # If an exact match is not confirmed, this last case will be used if provided
+            # case _:
+            #     return
+        return defaultOptionsDict
+    
     def addStocksToItemList(userArgs, testing, testBuild, newlyListedOnly, downloadOnly, minRSI, maxRSI, insideBarToLookback, respChartPattern, daysForLowestVolume, backtestPeriod, reversalOption, maLength, listStockCodes, menuOption, exchangeName,executeOption, volumeRatio, items, daysInPast):
         moreItems = [
                         (
