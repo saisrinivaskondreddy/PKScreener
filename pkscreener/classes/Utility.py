@@ -833,13 +833,20 @@ class tools:
                     pickle.dump(stockDict.copy(), f, protocol=pickle.HIGHEST_PROTOCOL)
                     OutputControls().printOutput(colorText.GREEN + "=> Done." + colorText.END)
                 if downloadOnly:
-                    OutputControls().printOutput(colorText.GREEN + f"=> {cache_file}" + colorText.END)
-                    Committer.execOSCommand(f"git add {cache_file} -f >/dev/null 2>&1")
                     if "RUNNER" not in os.environ.keys():
                         copyFilePath = os.path.join(Archiver.get_user_data_dir(), f"copy_{fileName}")
                         cacheFileSize = os.stat(cache_file).st_size if os.path.exists(cache_file) else 0
                         if os.path.exists(cache_file) and cacheFileSize >= 1024*1024*40:
                             shutil.copy(cache_file,copyFilePath) # copy is the saved source of truth
+
+                    rootDirs = [Archiver.get_user_data_dir(),Archiver.get_user_indices_dir(),outputFolder]
+                    patterns = ["*.csv","*.pkl"]
+                    for dir in rootDirs:
+                        for pattern in patterns:
+                            for f in glob.glob(pattern, root_dir=dir, recursive=True):
+                                OutputControls().printOutput(colorText.GREEN + f"=> {f}" + colorText.END)
+                                Committer.execOSCommand(f"git add {f} -f >/dev/null 2>&1")
+
             except pickle.PicklingError as e:  # pragma: no cover
                 default_logger().debug(e, exc_info=True)
                 OutputControls().printOutput(

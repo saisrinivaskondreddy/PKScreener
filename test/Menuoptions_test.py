@@ -152,10 +152,17 @@ class TestMenus:
     
     def test_renderLevel_X(self):
         m = menus()
-        assert m.renderLevel1_X_Menus() is not None
-        assert m.renderLevel2_X_Menus() is not None
-        assert m.renderLevel3_X_Reversal_Menus() is not None
-        assert m.renderLevel3_X_ChartPattern_Menus() is not None
-        assert m.renderLevel3_X_PopularStocks_Menus() is not None
-        assert m.renderLevel3_X_StockPerformance_Menus() is not None
-        assert m.renderLevel4_X_Lorenzian_Menus() is not None
+        m1 = menu()
+        assert m.renderForMenu() is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=m1,level=0)) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=m1,level=1)) is not None
+        keys = ["6","7","21","22","30","32","33","40"]
+        for key in keys:
+            assert m.renderForMenu(selectedMenu=menu(parent=m1,level=2,menuKey=key)) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=menu(menuKey="6"),level=3,menuKey="7")) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=menu(menuKey="6"),level=3,menuKey="10")) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=menu(menuKey="7"),level=3,menuKey="3")) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=menu(menuKey="7"),level=3,menuKey="6")) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=menu(menuKey="7"),level=3,menuKey="9")) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=menu(menuKey="40"),level=3,menuKey="1")) is not None
+        assert m.renderForMenu(selectedMenu=menu(parent=menu(menuKey="40"),level=3,menuKey="2")) is not None

@@ -698,6 +698,7 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
                             inplace=True,
                         )
                 final_df.dropna(inplace=True)
+                final_df.dropna(how= "all", axis=1, inplace=True)
             mark_down = colorText.miniTabulator().tabulate(
                                     final_df,
                                     headers="keys",

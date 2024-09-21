@@ -282,6 +282,8 @@ def test_option_T(mocker, capsys):
     args = argParser.parse_known_args(args=["-e", "-a", "Y", "-t", "-p"])[0]
     with pytest.raises(SystemExit):
         main(userArgs=args)
+    globals.configManager.getConfig(ConfigManager.parser)
+    assert globals.configManager != originalPeriod
     out, err = capsys.readouterr()
     assert err == ""
     

@@ -1799,7 +1799,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     #         pass
                     #     numShares.append(saveResults.loc[ticker, 'MCapWt%'])
                     # screenResults["MCapWt%"] = numShares
-                if not newlyListedOnly and not configManager.showunknowntrends and screenResults is not None and len(screenResults) > 0:
+                if not newlyListedOnly and not configManager.showunknowntrends and screenResults is not None and len(screenResults) > 0 and not userPassedArgs.runintradayanalysis:
                     screenResults, saveResults = removeUnknowns(screenResults, saveResults)
                     OutputControls().printOutput(colorText.FAIL + f"  [+] Configuration to remove unknown cell values resulted into removing all rows!" + colorText.END)
                 if len(strategyFilter) > 0 and saveResults is not None and len(saveResults) > 0:
@@ -2708,10 +2708,16 @@ def printNotifySaveScreenedResults(
         ).encode("utf-8").decode(STD_ENCODING)
         copyScreenResults = screenResults.copy()
         hiddenColumns = configManager.alwaysHiddenDisplayColumns.split(",")
-        if userPassedArgs.runintradayanalysis or ("VCP" in menuChoiceHierarchy) or ("Patterns" in menuChoiceHierarchy) or ("Reversal" in menuChoiceHierarchy):
-            hiddenColumns.remove("Pattern")
-        if executeOption in [33]:
-            hiddenColumns.remove("52Wk-L")
+        try:
+            if userPassedArgs.runintradayanalysis or ("VCP" in menuChoiceHierarchy) or ("Patterns" in menuChoiceHierarchy) or ("Reversal" in menuChoiceHierarchy):
+                hiddenColumns.remove("Pattern")
+            if executeOption in [33]:
+                hiddenColumns.remove("52Wk-L")
+            if executeOption in [30]:
+                hiddenColumns.remove("RSI")
+                hiddenColumns.remove("CCI")
+        except:
+            pass
         for col in screenResults.columns:
             if col in hiddenColumns:
                 copyScreenResults.drop(col, axis=1, inplace=True, errors="ignore")
