@@ -679,14 +679,14 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
             for stock, df_group in df_grouped:
                 if stock == "BASKET":
                     if final_df is None:
-                        final_df = df_group[["Pattern","MA-Signal","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
+                        final_df = df_group[["Pattern","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
                     else:
-                        final_df = pd.concat([final_df, df_group[["Pattern","MA-Signal","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
+                        final_df = pd.concat([final_df, df_group[["Pattern","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
         except:
             pass
         if final_df is not None and not final_df.empty:
             with pd.option_context('mode.chained_assignment', None):
-                final_df = final_df[["Pattern","MA-Signal","LTP@Alert","LTP","EoDDiff","SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff"]]
+                final_df = final_df[["Pattern","LTP@Alert","LTP","EoDDiff","SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff"]]
                 final_df.rename(
                         columns={
                             "Pattern": "Scan Name",
