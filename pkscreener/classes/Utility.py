@@ -1084,6 +1084,30 @@ class tools:
         resp = fetcher.fetchURL(cache_url, headers=headers, stream=True)
         return resp
 
+    @Halo(text='', spinner='dots')
+    def downloadSavedDefaultsFromServer(cache_file):
+        fileDownloaded = False
+        resp = tools.tryFetchFromServer(cache_file)
+        if resp is not None:
+            default_logger().debug(
+                    f"Stock data cache file:{cache_file} request status ->{resp.status_code}"
+                )
+        if resp is not None and resp.status_code == 200:
+            contentLength = resp.headers.get("content-length")
+            serverBytes = int(contentLength) if contentLength is not None else 0
+            KB = 1024
+            MB = KB * 1024
+            chunksize = MB if serverBytes >= MB else (KB if serverBytes >= KB else 1)
+            filesize = int( serverBytes / chunksize)
+            if filesize > 40: #Something definitely went wrong. It should be upward of 40bytes
+                try:
+                    with open(os.path.join(Archiver.get_user_data_dir(), cache_file),"w+",) as f: # .split(os.sep)[-1]
+                        f.write(resp.text)
+                    fileDownloaded = True
+                except:
+                    pass
+        return fileDownloaded
+
     def downloadSavedDataFromServer(stockDict, configManager, downloadOnly, defaultAnswer, retrial, forceLoad, stockCodes, exchangeSuffix, isIntraday, forceRedownload, cache_file, isTrading):
         stockDataLoaded = False
         resp = tools.tryFetchFromServer(cache_file)

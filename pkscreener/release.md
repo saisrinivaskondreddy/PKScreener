@@ -2,6 +2,9 @@
 
 ## What's New?
 1. [v0.45.20240919.577] release
+* Find a stock in scanners. You can now look-up a stock and find out which all basic standard scanners gave out that stock in result.
+* GPU enabled for running scans on computers where GPU device(s) is available
+* Excel hyperlinks enabled for stocks when the results are saved/exported to excel.
 * Added support for time-window-slider. It's still an experimental feature. So use wth care. It may be buggy and may not work for all period/duration combinations. If you want to try this experimental feature, choose option 3 to go back in time and run the scan again to come up with a diff of stocks between now and then, when presented with options after the scan finishes. Please report various bugs under https://github.com/pkjmesra/PKScreener/issues
 * Added more profitable setups. Try X > 12 > 33. Added Bullish Today for Previous Day Open/Close (PDO/PDC) with 1M Volume (Try X > 12 > 33 > 2) and moved the previous option under X > 12 > 33 > 1
 * Added the ability to run VCP using additional filters. By default these filters are turned on but you can turn it off when running locally as well. Try X > 12 > 7 > 4

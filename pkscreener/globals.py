@@ -753,6 +753,8 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
             default_logger().debug(e, exc_info=True)
             pass
         columnsToBeDeleted = ["MFI","FVDiff","ConfDMADifference","bbands_ulr_ratio_max5", "RSIi"]
+        if menuOption not in ["F"]:
+            columnsToBeDeleted.extend(["ScanOption"])
         if "EoDDiff" in saveResults.columns:
             columnsToBeDeleted.extend(["Trend","Breakout"])
         if "SuperConfSort" in saveResults.columns:
@@ -2536,7 +2538,9 @@ def handleMenu_XBG(menuOption, indexOption, executeOption):
 def updateMenuChoiceHierarchy():
     global userPassedArgs, selectedChoice, menuChoiceHierarchy
     try:
-        menuChoiceHierarchy = f'{level0MenuDict[selectedChoice["0"]].strip()}>{level1_X_MenuDict[selectedChoice["1"]].strip()}>{level2_X_MenuDict[selectedChoice["2"]].strip()}'
+        menuChoiceHierarchy = f'{level0MenuDict[selectedChoice["0"]].strip()}'
+        menuChoiceHierarchy = f'{menuChoiceHierarchy}>{level1_X_MenuDict[selectedChoice["1"]].strip()}'
+        menuChoiceHierarchy = f'{menuChoiceHierarchy}>{level2_X_MenuDict[selectedChoice["2"]].strip()}'
         if selectedChoice["2"] == "6":
             menuChoiceHierarchy = (
                 menuChoiceHierarchy

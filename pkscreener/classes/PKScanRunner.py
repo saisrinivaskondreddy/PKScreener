@@ -135,7 +135,12 @@ class PKScanRunner:
     def addScansWithDefaultParams(userArgs, testing, testBuild, newlyListedOnly, downloadOnly, backtestPeriod, listStockCodes, menuOption, exchangeName,executeOption, volumeRatio, items, daysInPast,runOption=""):
         import json
         defaultOptionsDict = {}
-        with open("defaults.json","r") as f:
+        filePath = os.path.join(Archiver.get_user_data_dir(),"defaults.json")
+        if not os.path.exists(filePath):
+            fileDownloaded = Utility.tools.downloadSavedDefaultsFromServer("defaults.json")
+        if not os.path.exists(filePath):
+            return items
+        with open(filePath,"r") as f:
             defaultOptionsDict = json.loads(f.read())
         for scanOption in defaultOptionsDict.keys():
             items = PKScanRunner.addStocksToItemList(userArgs=userArgs,
