@@ -98,8 +98,9 @@ class StockScreener:
         start_time = time.time()
         self.isTradingTime = False if menuOption in "B" else self.isTradingTime
         runOptionKey = runOption.split("=>")[0].split(":D:")[0].strip().replace(":0:",":12:")
-        screeningDictionary["ScanOption"] = runOptionKey
-        saveDictionary["ScanOption"] = runOptionKey
+        if menuOption in ["F"]:
+            screeningDictionary["ScanOption"] = runOptionKey
+            saveDictionary["ScanOption"] = runOptionKey
         # hostRef.default_logger.debug(f"runOption:{runOption}\nStock:{stock}\nmenuOption:{menuOption},\nexecuteOption:{executeOption},\nreversalOption:{reversalOption},\nmaLength:{maLength},\ndaysForLowestVolume:{daysForLowestVolume},\nminRSI:{minRSI},\nmaxRSI:{maxRSI},\nrespChartPattern:{respChartPattern},\ninsideBarToLookback:{insideBarToLookback}")
         # defaultsParentDict = {}
         # defaultsDict = {}
