@@ -2648,6 +2648,66 @@ def readScreenResultsDecoded(fileName=None):
         pass
     return contents
 
+def findPipedScannerOptionFromStdScanOptions(screenResults, saveResults,menuOption="X"):
+    if menuOption not in ["F"] or "ScanOption" not in saveResults.columns:
+        return screenResults, saveResults
+    resultScanOptions = list(saveResults["ScanOption"])
+    items = []
+    for item in list(screenResults["MA-Signal"]):
+        items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
+    maSignalsScr = sorted(list(filter(None,list(set(items)))))
+    items = []
+    for item in list(saveResults["MA-Signal"]):
+        items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
+    maSignals = sorted(list(filter(None,list(set(items)))))
+    from pkscreener.classes.MenuOptions import PREDEFINED_PIPED_MENU_OPTIONS
+    predefinedKeys = PREDEFINED_PIPED_MENU_OPTIONS.keys()
+    matchingKeys = []
+    for key in predefinedKeys:
+        predefinedScanOptions = PREDEFINED_PIPED_MENU_OPTIONS[key]
+        hasMatchingKeyCount = 0
+        resultIndices = []
+        resultIndex = 0
+        for scanOption in resultScanOptions:
+            for predefinedScanOption in predefinedScanOptions:
+                if f"{scanOption}:" in predefinedScanOption:
+                    hasMatchingKeyCount += 1
+                    resultIndices.append(resultIndex)
+            resultIndex += 1
+        if hasMatchingKeyCount == len(predefinedScanOptions):
+            matchingKeys.append(key)
+            for index in resultIndices:
+                try:
+                    with pd.option_context('mode.chained_assignment', None):
+                        saveResults["ScanOption"].iloc[index] = f'{saveResults["ScanOption"].iloc[index]}, {key}'
+                        screenResults["ScanOption"].iloc[index] = f'{screenResults["ScanOption"].iloc[index]}, {key}'
+                except:
+                    pass
+    items = []
+    for item in list(screenResults["ScanOption"]):
+        items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
+    items = sorted(list(filter(None,list(set(items)))))
+    try:
+        with pd.option_context('mode.chained_assignment', None):
+            saveResults["ScanOption"].iloc[0] = " ,".join(items)
+            screenResults["ScanOption"].iloc[0] = " ,".join(items)
+            saveResults["MA-Signal"].iloc[0] = " ,".join(maSignals)
+            screenResults["MA-Signal"].iloc[0] = " ,".join(maSignalsScr)
+            saveResults.reset_index(inplace=True)
+            screenResults.reset_index(inplace=True)
+            saveResults = saveResults.drop(saveResults.index.to_list()[1:], axis=0)
+            screenResults = screenResults.drop(screenResults.index.to_list()[1:], axis=0)
+            saveResults.set_index("Stock", inplace=True)
+            screenResults.set_index("Stock", inplace=True)
+            # Reorder the columns so that the column max-size can be effectve.
+            # For some reason, last column is not wrapped if it's large
+            columns = ["ScanOption"].extend(list(screenResults.columns[1:-2]))
+            screenResults = screenResults[columns]
+            saveResults = saveResults[columns]
+    except:
+        pass
+    return screenResults, saveResults
+
 def printNotifySaveScreenedResults(
     screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None,menuOption=None
 ):
@@ -2660,6 +2720,7 @@ def printNotifySaveScreenedResults(
     lastReportDateTime = "Unknown"
     if userPassedArgs.monitor is not None:
         return
+    screenResults, saveResults = findPipedScannerOptionFromStdScanOptions(screenResults, saveResults,menuOption)
     if userPassedArgs.stocklist is not None and saved_screen_results is not None and show_saved_diff_results:
         diff_from_prev_scan = pd.concat([saved_screen_results, screenResults])
         diff_from_prev_scan = diff_from_prev_scan.reset_index()
@@ -3849,9 +3910,9 @@ def cleanupLocalResults():
         return
     launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
     shouldPrompt = (launcher.endswith(".py\"") or launcher.endswith(".py")) and (userPassedArgs is None or userPassedArgs.answerdefault is None)
-    response = "y" if shouldPrompt else "n"
+    response = "N"
     if shouldPrompt:
-        response = input(f"  [+] {colorText.WARN}Clean up local non-essential system generated data?{colorText.END}{colorText.FAIL}[Default: Y]{colorText.END}\n    (User generated reports won't be deleted.)        :") or response
+        response = input(f"  [+] {colorText.WARN}Clean up local non-essential system generated data?{colorText.END}{colorText.FAIL}[Default: {response}]{colorText.END}\n    (User generated reports won't be deleted.)        :") or response
     if "y" in response.lower():
         dirs = [Archiver.get_user_data_dir(), Archiver.get_user_cookies_dir(), 
                 Archiver.get_user_temp_dir(), Archiver.get_user_indices_dir()]

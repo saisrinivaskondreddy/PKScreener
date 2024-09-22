@@ -190,13 +190,28 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:7:3:0.008:4:'",            # 30
     "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:7:4:'",                   # 31
 ]
-PREDEFINED_PIPED_MENU_OPTIONS = []
+PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS = []
+PREDEFINED_PIPED_MENU_OPTIONS = {}
+pipedIndex = 0
 for option in PREDEFINED_SCAN_MENU_VALUES:
+    pipedOptions = []
     argOptions = option.split("-o ")[-1]
     analysisOptions = argOptions.split("|")
+    for analysisOption in analysisOptions:
+        analysisOption = analysisOption.replace(">","").replace("X:0:","X:12:").replace("'","").replace("\"","")
+        if "." in analysisOption:
+            inputOptions = analysisOption.split(":")
+            inputOptionsCopy = inputOptions
+            for inputOption in inputOptions:
+                if "." in inputOption:
+                    inputOptionsCopy.remove(inputOption)
+            analysisOption = ":".join(inputOptionsCopy)
+        pipedOptions.append(analysisOption)
+    PREDEFINED_PIPED_MENU_OPTIONS[f"P_1_{PREDEFINED_SCAN_MENU_KEYS[pipedIndex]}"] = pipedOptions
+    pipedIndex += 1
     analysisOptions[-1] = analysisOptions[-1].replace("X:","C:")
     argOptions = "|".join(analysisOptions)
-    PREDEFINED_PIPED_MENU_OPTIONS.append(argOptions.replace("'","").replace("\"",""))
+    PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS.append(argOptions.replace("'","").replace("\"",""))
 
 PIPED_SCANNERS = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:

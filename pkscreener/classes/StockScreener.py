@@ -502,7 +502,7 @@ class StockScreener:
                                 onlyMF=(executeOption == 21 and reversalOption in [5,6]),
                                 hostData=data,
                                 exchangeName=exchangeName,
-                                refreshMFAndFV=(menuOption in ["X", "C"]),
+                                refreshMFAndFV=(menuOption in ["X", "C", "F"]),
                                 downloadOnly=True
                             )
                             hostRef.objectDictionaryPrimary[stock] = data.to_dict("split")

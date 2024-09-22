@@ -1681,7 +1681,7 @@ class tools:
     
     def getMaxColumnWidths(df):
         columnWidths = [None]
-        addnlColumnWidths = [40 if (x in ["Trend(22Prds)"] or "-Pd" in x) else (20 if (x in ["Pattern"]) else ((25 if (x in ["MA-Signal"]) else None))) for x in df.columns]
+        addnlColumnWidths = [40 if (x in ["Trend(22Prds)"] or "-Pd" in x) else (20 if (x in ["Pattern"]) else ((25 if (x in ["MA-Signal"] or "ScanOption" in x) else None))) for x in df.columns]
         columnWidths.extend(addnlColumnWidths)
         columnWidths = columnWidths[:-1]
         return columnWidths

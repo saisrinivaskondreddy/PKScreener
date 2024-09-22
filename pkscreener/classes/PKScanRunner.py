@@ -157,7 +157,7 @@ class PKScanRunner:
                                                      reversalOption=defaultOptionsDict[scanOption]["reversalOption"],
                                                      maLength=defaultOptionsDict[scanOption]["maLength"],
                                                      listStockCodes=listStockCodes,
-                                                     menuOption="X",
+                                                     menuOption=menuOption,
                                                      exchangeName=exchangeName,
                                                      executeOption=int(scanOption.split(":")[2]), 
                                                      volumeRatio=volumeRatio,
@@ -195,7 +195,7 @@ class PKScanRunner:
                                 else PKScanRunner.configManager.effectiveDaysToLookback
                             ),
                             default_logger().level,
-                            (menuOption in ["B", "G", "X", "S","C"])
+                            (menuOption in ["B", "G", "X", "S","C", "F"])
                             or (userArgs.backtestdaysago is not None),
                             # assumption is that fetcher.fetchStockData would be
                             # mocked to avoid calling yf.download again and again

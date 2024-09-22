@@ -445,7 +445,7 @@ def runApplication():
     except:
         pass
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time,argParser
-    from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
+    from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     args = get_debug_args()
     
     if not isinstance(args,argparse.Namespace):
@@ -609,7 +609,7 @@ def runApplication():
 
 def generateIntradayAnalysisReports(args):
     from pkscreener.globals import main, isInterrupted, closeWorkersAndExit, resetUserMenuChoiceOptions
-    from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
+    from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     from PKDevTools.classes import Archiver
     maxdisplayresults = configManager.maxdisplayresults
     configManager.maxdisplayresults = 2000
@@ -619,7 +619,7 @@ def generateIntradayAnalysisReports(args):
     if len(args.options.split(":")) >= 4:
         runOptions = [args.options]
     else:
-        runOptions = PREDEFINED_PIPED_MENU_OPTIONS
+        runOptions = PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS
             # otherMenus =  menus.allMenus(topLevel="C", index=12)
         if len(otherMenus) > 0:
             runOptions.extend(otherMenus)
