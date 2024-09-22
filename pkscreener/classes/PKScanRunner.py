@@ -132,36 +132,39 @@ class PKScanRunner:
         actualHistoricalDuration = (samplingDuration - fillerPlaceHolder)
         return samplingDuration,fillerPlaceHolder,actualHistoricalDuration
 
-    def defaultParamsForExecuteOption(executeOption,executeLevel1Option):
-        defaultOptionsDict = {"daysForLowestVolume":5, "exchangeName":"INDIA",
-                              "volumeRatio": PKScanRunner.configManager.volumeRatio,
-                              "minRSI":60,"maxRSI": 75,}
-        match executeOption:
-            case 6:
-                reversalOption = executeLevel1Option
-                match reversalOption:
-                    case 4,6,7,10:
-                        maLength = 50 if reversalOption == 4 else (3 if reversalOption in [7] else (2 if reversalOption in [10] else 7))
-                        defaultOptionsDict.update({"maLength":maLength, "reversalOption":reversalOption})
-            case 7:
-                respChartPattern = executeLevel1Option
-                match respChartPattern:
-                    case 1,2,3:
-                        maLength = 4 if respChartPattern in [3] else 0
-                        insideBarToLookback = 7 if respChartPattern in [1, 2] else (0.008 if (maLength == 4 and respChartPattern ==3) else 0.02)
-                        defaultOptionsDict.update({"maLength":maLength, "respChartPattern":respChartPattern,"insideBarToLookback":insideBarToLookback})
-                    case 0, 4, 5, 6, 7, 8, 9:
-                        insideBarToLookback = 0
-                        maLength = 4 if respChartPattern == 6 else 6 # Bollinger Bands Squeeze- Any/All or MA-Support
-                        defaultOptionsDict.update({"maLength":maLength, "respChartPattern":respChartPattern,"insideBarToLookback":insideBarToLookback})
-            # If an exact match is not confirmed, this last case will be used if provided
-            # case _:
-            #     return
-        return defaultOptionsDict
+    def addScansWithDefaultParams(userArgs, testing, testBuild, newlyListedOnly, downloadOnly, backtestPeriod, listStockCodes, menuOption, exchangeName,executeOption, volumeRatio, items, daysInPast,runOption=""):
+        import json
+        defaultOptionsDict = {}
+        with open("defaults.json","r") as f:
+            defaultOptionsDict = json.loads(f.read())
+        for scanOption in defaultOptionsDict.keys():
+            items = PKScanRunner.addStocksToItemList(userArgs=userArgs,
+                                                     testing=testing,
+                                                     testBuild=testBuild,
+                                                     newlyListedOnly=newlyListedOnly,
+                                                     downloadOnly=downloadOnly,
+                                                     minRSI=defaultOptionsDict[scanOption]["minRSI"],
+                                                     maxRSI=defaultOptionsDict[scanOption]["maxRSI"],
+                                                     insideBarToLookback=defaultOptionsDict[scanOption]["insideBarToLookback"],
+                                                     respChartPattern=defaultOptionsDict[scanOption]["respChartPattern"],
+                                                     daysForLowestVolume=defaultOptionsDict[scanOption]["daysForLowestVolume"],
+                                                     backtestPeriod=backtestPeriod,
+                                                     reversalOption=defaultOptionsDict[scanOption]["reversalOption"],
+                                                     maLength=defaultOptionsDict[scanOption]["maLength"],
+                                                     listStockCodes=listStockCodes,
+                                                     menuOption="X",
+                                                     exchangeName=exchangeName,
+                                                     executeOption=int(scanOption.split(":")[2]), 
+                                                     volumeRatio=volumeRatio,
+                                                     items=items,
+                                                     daysInPast=daysInPast,
+                                                     runOption=scanOption)
+        return items
     
-    def addStocksToItemList(userArgs, testing, testBuild, newlyListedOnly, downloadOnly, minRSI, maxRSI, insideBarToLookback, respChartPattern, daysForLowestVolume, backtestPeriod, reversalOption, maLength, listStockCodes, menuOption, exchangeName,executeOption, volumeRatio, items, daysInPast):
+    def addStocksToItemList(userArgs, testing, testBuild, newlyListedOnly, downloadOnly, minRSI, maxRSI, insideBarToLookback, respChartPattern, daysForLowestVolume, backtestPeriod, reversalOption, maLength, listStockCodes, menuOption, exchangeName,executeOption, volumeRatio, items, daysInPast,runOption=""):
         moreItems = [
                         (
+                            runOption,
                             menuOption,
                             exchangeName,
                             executeOption,
@@ -196,6 +199,7 @@ class PKScanRunner:
                         for stock in listStockCodes
                     ]
         items.extend(moreItems)
+        return items
 
     def getStocksListForScan(userArgs, menuOption, totalStocksInReview, downloadedRecently, daysInPast):
         savedStocksCount = 0
@@ -322,7 +326,7 @@ class PKScanRunner:
                 )
 
         OutputControls().printOutput(colorText.END)
-        if userPassedArgs is not None and (userPassedArgs.monitor is None and "|" not in userPassedArgs.options) and not userPassedArgs.options.upper().startswith("C"):
+        if userPassedArgs is not None and not userPassedArgs.testalloptions and (userPassedArgs.monitor is None and "|" not in userPassedArgs.options) and not userPassedArgs.options.upper().startswith("C"):
             # Don't terminate the multiprocessing clients if we're 
             # going to pipe the results from an earlier run
             # or we're running in monitoring mode

@@ -693,7 +693,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
             return initPostLevel1Execution(indexOption, executeOption, retrial=True)
     return indexOption, executeOption
 
-def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,executeOption, reversalOption):
+def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,executeOption, reversalOption, menuOption):
     # Publish to gSheet with https://github.com/burnash/gspread
     global menuChoiceHierarchy, userPassedArgs
     if saveResults is None:
@@ -799,6 +799,8 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
         )
     except Exception as e:  # pragma: no cover
         default_logger().debug(e, exc_info=True)
+    screenResults.dropna(how= "all" if menuOption not in ["F"] else "any", axis=1, inplace=True)
+    saveResults.dropna(how= "all" if menuOption not in ["F"] else "any", axis=1, inplace=True)
     return screenResults, saveResults
 
 def isInterrupted():
@@ -994,11 +996,17 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to collect logs. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -l{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
             sleep(2)
             os.system(f"{launcher} -a Y -l")
-        elif menuOption in ["F"]:
-            OutputControls().printOutput(f"  [+] {colorText.GREEN}Wow! So eagerly waiting for 'Which scan got this stock?' :-){colorText.END}\n  [+] It is still under development! Please try again in a few days!")
-            input("Press <Enter> to continue...")
-        Utility.tools.clearScreen(clearAlways=True,forceTop=True)
-        return None, None
+        if menuOption in ["F"]:
+            indexOption = 0
+            selectedChoice["0"] = "F"
+            selectedChoice["1"] = "0"
+            shouldSuppress = not OutputControls().enableMultipleLineOutput
+            with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
+                listStockCodes = fetcher.fetchStockCodes(tickerOption=0, stockCode=None)
+            Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+        else:
+            Utility.tools.clearScreen(clearAlways=True,forceTop=True)
+            return None, None
     if menuOption in ["P"]:
         predefinedOption = None
         selPredefinedOption = None
@@ -1182,9 +1190,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         )
 
     else:
-        OutputControls().printOutput("Not implemented yet! Try selecting a different option.")
-        sleep(3)
-        return None, None
+        if menuOption not in ["F"]:
+            OutputControls().printOutput("Not implemented yet! Try selecting a different option.")
+            sleep(3)
+            return None, None
 
     handleMenu_XBG(menuOption, indexOption, executeOption)
     if indexOption == "M" or executeOption == "M":
@@ -1426,7 +1435,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     menuChoiceHierarchy,
                     False,
                     None,
-                    executeOption
+                    executeOption,
+                    menuOption
                 )
                 if defaultAnswer is None:
                     input("Press <Enter> to continue...")
@@ -1458,7 +1468,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 menuChoiceHierarchy,
                 False,
                 None,
-                executeOption
+                executeOption,
+                menuOption
             )
             if defaultAnswer is None:
                 input("Press <Enter> to continue...")
@@ -1681,7 +1692,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         if userPassedArgs.pipedmenus is not None:
             return addOrRunPipedMenus()
 
-        if (menuOption in ["X", "B", "G", "S"] and not loadedStockData) or (
+        if (menuOption in ["X", "B", "G", "S", "F"] and not loadedStockData) or (
             # not downloadOnly
             # and not PKDateUtilities.isTradingTime()
             # and 
@@ -1742,7 +1753,14 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 except Exception:
                     pass
                 exchangeName = "NASDAQ" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else "INDIA"
-                PKScanRunner.addStocksToItemList(userPassedArgs, testing, testBuild, newlyListedOnly, downloadOnly, minRSI, maxRSI, insideBarToLookback, respChartPattern, daysForLowestVolume, backtestPeriod, reversalOption, maLength, listStockCodes, menuOption,exchangeName,executeOption, volumeRatio, items, daysInPast)
+                runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+                if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+                    runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1]
+                if menuOption in ["F"]:
+                    listStockCodes.remove("^NSEI")
+                    items = PKScanRunner.addScansWithDefaultParams(userPassedArgs, testing, testBuild, newlyListedOnly, downloadOnly, backtestPeriod, listStockCodes, menuOption,exchangeName,executeOption, volumeRatio, items, daysInPast,runOption=f"{userPassedArgs.options} =>{runOptionName} => {menuChoiceHierarchy}")
+                else:
+                    PKScanRunner.addStocksToItemList(userPassedArgs, testing, testBuild, newlyListedOnly, downloadOnly, minRSI, maxRSI, insideBarToLookback, respChartPattern, daysForLowestVolume, backtestPeriod, reversalOption, maLength, listStockCodes, menuOption,exchangeName,executeOption, volumeRatio, items, daysInPast,runOption=f"{userPassedArgs.options} =>{runOptionName} => {menuChoiceHierarchy}")
                 if savedStocksCount > 0:
                     progressbar.text(
                         colorText.GREEN
@@ -1757,7 +1775,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         if not keyboardInterruptEventFired:
             global tasks_queue, results_queue, consumers, logging_queue
             screenResults, saveResults, backtest_df, tasks_queue, results_queue, consumers,logging_queue = PKScanRunner.runScanWithParams(userPassedArgs,keyboardInterruptEvent,screenCounter,screenResultsCounter,stockDictPrimary,stockDictSecondary,testing, backtestPeriod, menuOption,executeOption, samplingDuration, items,screenResults, saveResults, backtest_df,scanningCb=runScanners,tasks_queue=tasks_queue, results_queue=results_queue, consumers=consumers,logging_queue=logging_queue)
-            if userPassedArgs is not None and (userPassedArgs.monitor is None and "|" not in userPassedArgs.options and not userPassedArgs.options.upper().startswith("C")):
+            if userPassedArgs is not None and not userPassedArgs.testalloptions and (userPassedArgs.monitor is None and "|" not in userPassedArgs.options and not userPassedArgs.options.upper().startswith("C")):
                 tasks_queue = None
                 results_queue = None
                 consumers = None
@@ -1770,12 +1788,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if downloadOnly and menuOption in ["X"]:
                 screener.getFreshMFIStatus(stock="LatestCheckedOnDate")
                 screener.getFairValue(stock="LatestCheckedOnDate", force=True)
-            if not downloadOnly and menuOption in ["X", "G", "C"]:
+            if not downloadOnly and menuOption in ["X", "G", "C", "F"]:
                 if menuOption == "G":
                     userPassedArgs.backtestdaysago = backtestPeriod
                 if screenResults is not None and len(screenResults) > 0:
                     screenResults, saveResults = labelDataForPrinting(
-                        screenResults, saveResults, configManager, volumeRatio, executeOption, reversalOption or respChartPattern
+                        screenResults, saveResults, configManager, volumeRatio, executeOption, reversalOption or respChartPattern, menuOption
                     )
                     # ticker_list = list(saveResults.index)
                     # marketCaps = fetcher.fetchAdditionalTickerInfo(ticker_list)
@@ -1897,7 +1915,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             menuChoiceHierarchy,
                             testing,
                             user=user,
-                            executeOption=executeOption
+                            executeOption=executeOption,
+                            menuOption=menuOption
                         )
                     except Exception as e:
                         default_logger().debug(e, exc_info=True)
@@ -1905,7 +1924,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             import traceback
                             traceback.print_exc()
                         pass
-        if (menuOption in ["X","C"] and userPassedArgs.monitor is None) or ("|" not in userPassedArgs.options and menuOption not in ["B"]):
+        if (menuOption in ["X","C","F"] and userPassedArgs.monitor is None) or ("|" not in userPassedArgs.options and menuOption not in ["B"]):
             finishScreening(
                 downloadOnly,
                 testing,
@@ -1954,6 +1973,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         pass
     if ("RUNNER" not in os.environ.keys() and 
         not testing and 
+        menuOption not in ["F"] and
         (userPassedArgs is None or 
             (userPassedArgs is not None and 
                 (userPassedArgs.user is None or 
@@ -2126,7 +2146,7 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                     configManager,
                     downloadOnly=downloadOnly,
                     defaultAnswer=defaultAnswer,
-                    forceLoad=(menuOption in ["X", "B", "G", "S"]),
+                    forceLoad=(menuOption in ["X", "B", "G", "S", "F"]),
                     stockCodes = listStockCodes,
                     exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
                     userDownloadOption = menuOption
@@ -2141,7 +2161,7 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                         configManager,
                         downloadOnly=downloadOnly,
                         defaultAnswer=defaultAnswer,
-                        forceLoad=(menuOption in ["X", "B", "G", "S"]),
+                        forceLoad=(menuOption in ["X", "B", "G", "S", "F"]),
                         stockCodes = listStockCodes,
                         isIntraday=True,
                         exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
@@ -2624,7 +2644,7 @@ def readScreenResultsDecoded(fileName=None):
     return contents
 
 def printNotifySaveScreenedResults(
-    screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None
+    screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None,menuOption=None
 ):
     global scanCycleRunning,userPassedArgs, elapsed_time, media_group_dict, saved_screen_results, resultsContentsEncoded,criteria_dateTime
     diff_from_prev_scan = None
@@ -2665,7 +2685,7 @@ def printNotifySaveScreenedResults(
     if user is None and userPassedArgs.user is not None:
         user = userPassedArgs.user
     Utility.tools.clearScreen(forceTop=True)
-    if screenResults is not None and len(screenResults) > 0:
+    if screenResults is not None and len(screenResults) > 0 and menuOption not in ["F"]:
         screenResults = screenResults[~screenResults.index.duplicated(keep='first')]
         saveResults = saveResults[~saveResults.index.duplicated(keep='first')]
         if "Stock" in screenResults.columns:
@@ -2944,7 +2964,7 @@ def printNotifySaveScreenedResults(
             pastDate = pastDate if criteria_dateTime is None else criteria_dateTime
             OutputControls().printOutput(
                 colorText.GREEN
-                + f"  [+] Found {len(screenResults) if screenResults is not None else 0} Stocks in {str('{:.2f}'.format(elapsed_time))} sec for {pastDate}. Showing only stocks that met the filter criteria in the filters section of user configuration{(' with portfolio returns:' + summaryReturns) if (len(summaryReturns) > 0) else ''}"
+                + f"  [+] Found {len(screenResults) if screenResults is not None else 0} {'Scan Options' if menuOption in 'F' else 'Stocks'} in {str('{:.2f}'.format(elapsed_time))} sec for {pastDate}. Showing only {'Scan Options' if menuOption in 'F' else 'stocks'} that met the filter criteria in the filters section of user configuration{(' with portfolio returns:' + summaryReturns) if (len(summaryReturns) > 0) else ''}"
                 + colorText.END
             )
     elif user is not None and not str(user).startswith("-"):
@@ -3057,8 +3077,9 @@ def removedUnusedColumns(screenResults, saveResults, dropAdditionalColumns=[], u
             #               #round((sum(saveResults[f"LTP{period}"]) - sum(saveResults['LTP']))*100/sum(saveResults['LTP']),1)
             #     if pdReturn > -500:
             #         summaryReturns = f"{period}-Pd({pdReturn} %), {summaryReturns}"
-            saveResults.drop(f"LTP{period}", axis=1, inplace=True, errors="ignore")
-            saveResults.drop(f"Growth{period}", axis=1, inplace=True, errors="ignore")
+            with pd.option_context('mode.chained_assignment', None):
+                saveResults.drop(f"LTP{period}", axis=1, inplace=True, errors="ignore")
+                saveResults.drop(f"Growth{period}", axis=1, inplace=True, errors="ignore")
             # saveResults.drop(f"MCapWt%", axis=1, inplace=True, errors="ignore")
             # screenResults.drop(f"MCapWt%", axis=1, inplace=True, errors="ignore")
             if len(dropAdditionalColumns) > 0:
@@ -3259,7 +3280,7 @@ def runScanners(
         )
         if not userPassedArgs.download:
             OutputControls().printOutput(colorText.WARN
-                + f"  [+] Starting {'Stock' if menuOption not in ['C'] else 'Intraday'} {'Screening' if menuOption=='X' else ('Analysis' if menuOption == 'C' else 'Backtesting.')}. Press Ctrl+C to stop!"
+                + f"  [+] Starting {'Stock' if menuOption not in ['C'] else 'Intraday'} {'Screening' if menuOption=='X' else ('Analysis' if menuOption == 'C' else 'Look-up' if menuOption in ['F'] else 'Backtesting.')}. Press Ctrl+C to stop!"
                 + colorText.END
             )
             if userPassedArgs.progressstatus is not None:
@@ -3287,7 +3308,7 @@ def runScanners(
                 progressbar()
                 progressbar.text(
                     colorText.GREEN
-                    + f"{'Remaining' if userPassedArgs.download else ('Found' if menuOption in ['X'] else 'Analysed')} {len(lstscreen) if not userPassedArgs.download else processedCount} {'Stocks' if menuOption in ['X'] else 'Records'}"
+                    + f"{'Remaining' if userPassedArgs.download else ('Found' if menuOption in ['X','F'] else 'Analysed')} {len(lstscreen) if not userPassedArgs.download else processedCount} {'Stocks' if menuOption in ['X'] else 'Records'}"
                     + colorText.END
                 )
                 if result is not None:
@@ -3319,7 +3340,7 @@ def runScanners(
         if len(lstscreen) == 0 and userPassedArgs is not None and userPassedArgs.monitor is None:
             OutputControls().printOutput("\x1b[2K") # Delete the progress bar line
         elapsed_time = time.time() - start_time
-        if menuOption in ["X", "G", "C"]:
+        if menuOption in ["X", "G", "C", "F"]:
             # create extension
             screenResults = pd.DataFrame(lstscreen)
             saveResults = pd.DataFrame(lstsave)

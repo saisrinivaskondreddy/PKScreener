@@ -298,6 +298,12 @@ argParser.add_argument(
     help="User defined tag value(s)",
     required=False,
 )
+argParser.add_argument(
+    "--testalloptions",
+    action="store_true",
+    help="runs and tests all options",
+    required=False,
+)
 
 def get_debug_args():
     global args
@@ -485,6 +491,13 @@ def runApplication():
     if args.runintradayanalysis:
         generateIntradayAnalysisReports(args)
     else:
+        if args.testalloptions:
+            allMenus = menus.allMenus(index=0)
+            for scanOption in allMenus:
+                 args.options = f"{scanOption}:SBIN,"
+                 _, _ = main(userArgs=args)
+            sys.exit(0)
+
         if args.barometer:
             sendGlobalMarketBarometer(userArgs=args)
         else:
@@ -595,7 +608,7 @@ def runApplication():
                     MarketMonitor().refresh(screen_df=results,screenOptions=monitorOption_org, chosenMenu=chosenMenu[:120],dbTimestamp=f"{dbTimestamp} | CycleTime:{elapsed_time}s",telegram=args.telegram)
 
 def generateIntradayAnalysisReports(args):
-    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions
+    from pkscreener.globals import main, isInterrupted, closeWorkersAndExit, resetUserMenuChoiceOptions
     from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     from PKDevTools.classes import Archiver
     maxdisplayresults = configManager.maxdisplayresults

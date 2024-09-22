@@ -54,6 +54,7 @@ class StockScreener:
     # @tracelog
     def screenStocks(
         self,
+        runOption,
         menuOption,
         exchangeName,
         executeOption,
@@ -82,6 +83,8 @@ class StockScreener:
         assert (
             hostRef is not None
         ), "hostRef argument must not be None. It should be an instance of PKMultiProcessorClient"
+        if stock is None or len(stock) == 0:
+            return None
         configManager = hostRef.configManager
         self.configManager = configManager
         screeningDictionary, saveDictionary = self.initResultDictionaries()
@@ -94,6 +97,28 @@ class StockScreener:
         userArgsLog = printCounter
         start_time = time.time()
         self.isTradingTime = False if menuOption in "B" else self.isTradingTime
+        runOptionKey = runOption.split("=>")[0].split(":D:")[0].strip().replace(":0:",":12:")
+        screeningDictionary["ScanOption"] = runOptionKey
+        saveDictionary["ScanOption"] = runOptionKey
+        # hostRef.default_logger.debug(f"runOption:{runOption}\nStock:{stock}\nmenuOption:{menuOption},\nexecuteOption:{executeOption},\nreversalOption:{reversalOption},\nmaLength:{maLength},\ndaysForLowestVolume:{daysForLowestVolume},\nminRSI:{minRSI},\nmaxRSI:{maxRSI},\nrespChartPattern:{respChartPattern},\ninsideBarToLookback:{insideBarToLookback}")
+        # defaultsParentDict = {}
+        # defaultsDict = {}
+        # import json
+        # with open("defaults.json","a+") as f:
+        #     try:
+        #         defaultsParentDict = json.loads(f.read())
+        #     except:
+        #         pass
+        #     defaultsDict["reversalOption"] = reversalOption
+        #     defaultsDict["maLength"] = maLength
+        #     defaultsDict["daysForLowestVolume"] = daysForLowestVolume
+        #     defaultsDict["minRSI"] = minRSI
+        #     defaultsDict["maxRSI"] = maxRSI
+        #     defaultsDict["respChartPattern"] = respChartPattern
+        #     defaultsDict["insideBarToLookback"] = insideBarToLookback
+        #     defaultsParentDict[runOption.split("=>")[0].replace(":SBIN,","").strip()] = defaultsDict
+        #     allDdefaults = json.dumps(defaultsParentDict)
+        #     f.write(allDdefaults)
         try:
             with hostRef.processingCounter.get_lock():
                 hostRef.processingCounter.value += 1
@@ -228,6 +253,7 @@ class StockScreener:
                             data,
                             stock,
                             backtestDuration,
+                            runOptionKey
                         )
             if newlyListedOnly:
                 if not screener.validateNewlyListed(fullData, period):
@@ -665,6 +691,7 @@ class StockScreener:
                             data,
                             stock,
                             backtestDuration,
+                            runOptionKey
                         )
 
         except KeyboardInterrupt: # pragma: no cover
