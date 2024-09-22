@@ -100,6 +100,7 @@ def test_screenStocks(stock_consumer):
         foundValues = 0
         for executeOption in executeOptions:
             result = stock_consumer.screenStocks(
+                runOption = "X:0:1:SBIN, =>SomeOption => someotherOption",
                 menuOption = menuOption,
                 exchangeName = exchangeName,
                 executeOption=executeOption,

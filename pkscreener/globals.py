@@ -1759,7 +1759,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
                     runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1]
                 if menuOption in ["F"]:
-                    listStockCodes.remove("^NSEI")
+                    if "^NSEI" in listStockCodes:
+                        listStockCodes.remove("^NSEI")
                     items = PKScanRunner.addScansWithDefaultParams(userPassedArgs, testing, testBuild, newlyListedOnly, downloadOnly, backtestPeriod, listStockCodes, menuOption,exchangeName,executeOption, volumeRatio, items, daysInPast,runOption=f"{userPassedArgs.options} =>{runOptionName} => {menuChoiceHierarchy}")
                 else:
                     PKScanRunner.addStocksToItemList(userPassedArgs, testing, testBuild, newlyListedOnly, downloadOnly, minRSI, maxRSI, insideBarToLookback, respChartPattern, daysForLowestVolume, backtestPeriod, reversalOption, maLength, listStockCodes, menuOption,exchangeName,executeOption, volumeRatio, items, daysInPast,runOption=f"{userPassedArgs.options} =>{runOptionName} => {menuChoiceHierarchy}")
