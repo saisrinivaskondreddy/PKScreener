@@ -2702,7 +2702,7 @@ def findPipedScannerOptionFromStdScanOptions(screenResults, saveResults,menuOpti
             # Reorder the columns so that the column max-size can be effectve.
             # For some reason, last column is not wrapped if it's large
             columns = ["ScanOption"]
-            columns.extend(list(screenResults.columns[1:-2]))
+            columns.extend(list(screenResults.columns[:-2]))
             screenResults = screenResults[columns]
             saveResults = saveResults[columns]
     except:
