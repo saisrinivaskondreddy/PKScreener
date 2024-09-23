@@ -215,6 +215,8 @@ jobs:
         rmdir /s /q results
         mkdir results
         pkscreenercli.exe -d -a Y
+      env:
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
             
     - name: Download Intraday Stock Data on Windows
       continue-on-error: true
@@ -223,6 +225,8 @@ jobs:
       id: intradaydownloader
       run: |
         pkscreenercli.exe -d -a Y -i 1m
+      env:
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
 
     - name: Copy Stock Data Pickles on Windows
       continue-on-error: true
@@ -247,6 +251,8 @@ jobs:
         git add results/Indices/*.csv --force
         git commit -m "GitHub-Action-Workflow-Market-Data-Download-(Default-Config)"
         git push -v -u origin +actions-data-download
+      env:
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
         
     - name: Squash Commits (Python)
       if: ${{ inputs.skipDownload == '' }}
@@ -257,6 +263,8 @@ jobs:
         git config user.email github-actions@github.com
         git fetch
         python3 .github/workflows/squash.py -b actions-data-download -m "GitHub-Action-Workflow-Market-Data-Download-(Default-Config)"
+      env:
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
 
     - name: Install Python Dependencies for clean up
       if: ${{ inputs.cleanuphistoricalscans == 'Y' || inputs.skipDownload == '' }}
@@ -281,8 +289,10 @@ jobs:
       continue-on-error: true
       env:
         RUNNER : "LOCAL_RUN_SCANNER"
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
       run: |
         python3 .github/workflows/workflowtriggers.py -f --cleanuphistoricalscans --scanDaysInPast 450 -s0 S,T,E,U,Z,F,H,Y,G,M,D,I,L -s1 "" -s2 "" -s3 "" -s4 "" --branchname actions-data-download
+
 
     - name: Setup Python environment for triggers on Ubuntu
       shell: bash
@@ -332,6 +342,7 @@ jobs:
         RUNNER : "LOCAL_RUN_SCANNER"
         GSHEET_SERVICE_ACCOUNT_DEV: ${{secrets.GSHEET_SERVICE_ACCOUNT_DEV}}
         GSHEET_VIEWONLY_LINK: ${{secrets.GSHEET_VIEWONLY_LINK}}
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
       if: ${{ inputs.cleanuphistoricalscans != 'Y' && startsWith(runner.os, 'Linux') }}
       run: |
         python3 .github/workflows/workflowtriggers.py ${{ inputs.scanOptions }}
@@ -344,6 +355,7 @@ jobs:
         RUNNER : "LOCAL_RUN_SCANNER"
         GSHEET_SERVICE_ACCOUNT_DEV: ${{secrets.GSHEET_SERVICE_ACCOUNT_DEV}}
         GSHEET_VIEWONLY_LINK: ${{secrets.GSHEET_VIEWONLY_LINK}}
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
       if: ${{ inputs.cleanuphistoricalscans != 'Y' && startsWith(runner.os, 'Windows') }}
       shell: cmd
       run: |
@@ -363,6 +375,8 @@ jobs:
         git add actions-data-scan/*.txt --force
         git commit -m "GitHub-Action-Workflow-Market-Data-Scan-Results-(Default-Config)"
         git push -v -u origin +actions-data-download
+      env:
+        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
 
     - name: Delete this workflow run
       continue-on-error: true
