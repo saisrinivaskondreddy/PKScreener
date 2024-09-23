@@ -43,3 +43,4 @@ results/*.pkl.lck
 results/*.csv
 *.txt
 *.whl
+results
