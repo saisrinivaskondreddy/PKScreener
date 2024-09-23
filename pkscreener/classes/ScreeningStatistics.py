@@ -2743,7 +2743,40 @@ class ScreeningStatistics:
             index += 1
         return True
 
-    
+    # - Stock must be trading above 2% on day
+    # - stock must be trading above previous day high 
+    # - stock must be above daily 50ma
+    # - stock must be above 200ma on 5min TF
+    def findPotentialProfitableEntriesForFnOTradesAbove50MAAbove200MA5Min(self, df_1min, full_df, saveDict, screenDict):
+        if df_1min is None or len(df_1min) == 0 or full_df is None or len(full_df) == 0:
+            return False
+        data = full_df.copy()
+        reversedData = data[::-1]  # Reverse the dataframe
+        recentClose = reversedData["Close"].tail(1).head(1).iloc[0]
+        prevClose = reversedData["Close"].tail(2).head(1).iloc[0]
+        tradingAbove2Percent = (recentClose-prevClose)*100/prevClose > 2
+        if tradingAbove2Percent:
+            prevHigh = reversedData["High"].tail(2).head(1).iloc[0]
+            tradingAbovePrevHighAnd50MA = (recentClose > prevHigh) and (recentClose > reversedData["SMA"].tail(1).head(1).iloc[0])
+            return tradingAbovePrevHighAnd50MA
+            # resampling 1-min data to 5 min for 200MA requires at least 5d data to
+            # be downloaded which is pretty huge (~460MB). So skipping this for now.
+            if tradingAbovePrevHighAnd50MA:
+                ohlc_dict = {
+                    'Open':'first',
+                    'High':'max',
+                    'Low':'min',
+                    'Close':'last',
+                    'Adj Close': 'last',
+                    'Volume':'sum'
+                }
+                data_5min = df_1min.copy()
+                reversedData_5min = data_5min[::-1]  # Reverse the dataframe
+                reversedData_5min = reversedData_5min.resample(f'5T', offset='15min').agg(ohlc_dict)
+                sma200_5min = pktalib.SMA(reversedData_5min["Close"],timeperiod=200)
+                return recentClose > sma200_5min
+        return False
+
     #@measure_time
     # Validate if share prices are consolidating
     def validateConsolidation(self, df, screenDict, saveDict, percentage=10):

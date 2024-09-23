@@ -109,6 +109,8 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                 # If we send start and end dates for intraday, it comes back with empty dataframe
             start = None
             end = None
+            # if duration == "1m" and period == "1d":
+            #     period = "5d" # Download 1m data for the last 5 days
         data = None
         with SuppressOutput(suppress_stdout=(not printCounter), suppress_stderr=(not printCounter)):
             try:

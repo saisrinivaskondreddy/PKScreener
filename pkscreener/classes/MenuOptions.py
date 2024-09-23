@@ -360,6 +360,7 @@ level3_X_Reversal_MenuDict = {
 level3_X_PotentialProfitable_MenuDict = {
     "1": "Frequent highs with bullish MAs",
     "2": "Bullish Today for Previous Day Open/Close (PDO/PDC) with 1M Volume",
+    "3": "FnO Trades > 2% /Above 50MA/200MA(5Min)",
 
     "0": "Cancel",
 }

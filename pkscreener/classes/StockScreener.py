@@ -130,7 +130,7 @@ class StockScreener:
             data = None
             intraday_data = None
             data = self.getRelevantDataForStock(totalSymbols, shouldCache, stock, downloadOnly, printCounter, backtestDuration, hostRef,hostRef.objectDictionaryPrimary, configManager, fetcher, period,None, testData,exchangeName)
-            if str(executeOption) in ["32","38"] or (not configManager.isIntradayConfig() and configManager.calculatersiintraday):
+            if str(executeOption) in ["32","38","33"] or (not configManager.isIntradayConfig() and configManager.calculatersiintraday):
                 # Daily data is already available in "data" above.
                 # We need the intraday data for 1-d RSI values when config is not for intraday
                 intraday_data = self.getRelevantDataForStock(totalSymbols, shouldCache, stock, downloadOnly, printCounter, backtestDuration, hostRef, hostRef.objectDictionarySecondary, configManager, fetcher, "1d",("1m" if configManager.duration.endswith("d") else configManager.duration), testData,exchangeName)
@@ -819,6 +819,8 @@ class StockScreener:
                 isValid = screener.findPotentialProfitableEntriesFrequentHighsBullishMAs(processedData,fullData, saveDictionary,screeningDictionary)
             elif subMenuOption == 2:
                 isValid = screener.findPotentialProfitableEntriesBullishTodayForPDOPDC(processedData,saveDictionary,screeningDictionary)
+            elif subMenuOption == 3:
+                isValid = screener.findPotentialProfitableEntriesForFnOTradesAbove50MAAbove200MA5Min(intraday_data,fullData,saveDictionary,screeningDictionary)
         elif executeOption == 34: # findBullishAVWAP
             isValid = screener.findBullishAVWAP(fullData,screeningDictionary,saveDictionary)
         elif executeOption == 35: # findPerfectShortSellsFutures
