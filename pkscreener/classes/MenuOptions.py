@@ -697,12 +697,13 @@ class menus:
                 menuText = menuText + m.render(coloredValues=([] if asList else coloredValues))
         return menuText
 
-    def renderPinnedMenu(self,substitutes=[]):
+    def renderPinnedMenu(self,substitutes=[],skip=[]):
         return self.renderMenuFromDictionary(dict=Pin_MenuDict,
                                                  exceptionKeys=["M"],
                                                  coloredValues=(["M"]),
                                                  defaultMenu="M",
-                                                 substitutes = substitutes)
+                                                 substitutes = substitutes,
+                                                 skip=skip)
     
     def renderForMenu(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
         if selectedMenu is None and self.level == 0:

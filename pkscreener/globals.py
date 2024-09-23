@@ -1002,9 +1002,15 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             indexOption = 0
             selectedChoice["0"] = "F"
             selectedChoice["1"] = "0"
+            executeOption = None
             shouldSuppress = not OutputControls().enableMultipleLineOutput
-            with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
-                listStockCodes = fetcher.fetchStockCodes(tickerOption=0, stockCode=None)
+            if userPassedArgs is not None and userPassedArgs.options is not None and len(userPassedArgs.options.split(":")) >= 3:
+                stockOptions = userPassedArgs.options.split(":")
+                stockOptions = userPassedArgs.options.split(":")[2 if len(stockOptions)<=3 else 3]
+                listStockCodes = stockOptions.replace(".",",").split(",")
+            if listStockCodes is None or len(listStockCodes) == 0:
+                with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
+                    listStockCodes = fetcher.fetchStockCodes(tickerOption=0, stockCode=None)
             Utility.tools.clearScreen(clearAlways=True,forceTop=True)
         else:
             Utility.tools.clearScreen(clearAlways=True,forceTop=True)
@@ -1976,7 +1982,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         pass
     if ("RUNNER" not in os.environ.keys() and 
         not testing and 
-        menuOption not in ["F"] and
+        #menuOption not in ["F"] and
         (userPassedArgs is None or 
             (userPassedArgs is not None and 
                 (userPassedArgs.user is None or 
@@ -1991,7 +1997,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if len(monitorOption) == 0:
                 for choice in selectedChoice.keys():
                     monitorOption = (f"{monitorOption}:" if len(monitorOption) > 0  else '') + f"{selectedChoice[choice]}"
-            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results),monitorOption])
+            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results),monitorOption],skip=(["1","2"] if menuOption in ["F"] else []))
             pinOption = input(
                     colorText.FAIL + "  [+] Select option: "
                 ) or 'M'
