@@ -133,7 +133,7 @@ class StockScreener:
             if str(executeOption) in ["32","38","33"] or (not configManager.isIntradayConfig() and configManager.calculatersiintraday):
                 # Daily data is already available in "data" above.
                 # We need the intraday data for 1-d RSI values when config is not for intraday
-                intraday_data = self.getRelevantDataForStock(totalSymbols, shouldCache, stock, downloadOnly, printCounter, backtestDuration, hostRef, hostRef.objectDictionarySecondary, configManager, fetcher, "1d",("1m" if configManager.duration.endswith("d") else configManager.duration), testData,exchangeName)
+                intraday_data = self.getRelevantDataForStock(totalSymbols, shouldCache, stock, downloadOnly, printCounter, backtestDuration, hostRef, hostRef.objectDictionarySecondary, configManager, fetcher, ("5d" if str(executeOption) in ["33"] else "1d"),"5m" if (str(executeOption) in ["33"] and maLength==3) else ("1m" if configManager.period.endswith("d") else configManager.duration), testData,exchangeName)
                 
             if data is not None:
                 if len(data) == 0 or data.empty or len(data) < backtestDuration:

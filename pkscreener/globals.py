@@ -2160,10 +2160,16 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                     exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
                     userDownloadOption = menuOption
             )
-    if menuOption not in ["C"] and (userPassedArgs.monitor is not None or "|" in userPassedArgs.options) :#not configManager.isIntradayConfig() and configManager.calculatersiintraday:
+    if menuOption not in ["C"] and (userPassedArgs.monitor is not None or "|" in userPassedArgs.options or (":33:3:" in userPassedArgs.options or ":32:" in userPassedArgs.options or ":38:" in userPassedArgs.options)) :#not configManager.isIntradayConfig() and configManager.calculatersiintraday:
         prevDuration = configManager.duration
+        prevPeriod = configManager.period
         candleDuration = (userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else ("1m" if configManager.duration.endswith("d") else configManager.duration))
         configManager.toggleConfig(candleDuration=candleDuration,clearCache=False)
+        if ":33:3:" in userPassedArgs.options:
+            configManager.deleteFileWithPattern(pattern="*intraday_stock_data_*.pkl",rootDir=Archiver.get_user_data_dir())
+            configManager.duration = "5m"
+            configManager.period = "5d"
+            configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
         # We also need to load the intraday data to be able to calculate intraday RSI
         stockDictSecondary = Utility.tools.loadStockData(
                         stockDictSecondary,
@@ -2176,7 +2182,9 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                         exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
                         userDownloadOption = menuOption
                 )
-        configManager.toggleConfig(candleDuration=prevDuration, clearCache=False)
+        configManager.duration = prevDuration
+        configManager.period = prevPeriod
+        configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
     loadedStockData = True
     return stockDictPrimary, stockDictSecondary
 

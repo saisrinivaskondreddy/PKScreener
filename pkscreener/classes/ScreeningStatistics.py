@@ -2747,8 +2747,8 @@ class ScreeningStatistics:
     # - stock must be trading above previous day high 
     # - stock must be above daily 50ma
     # - stock must be above 200ma on 5min TF
-    def findPotentialProfitableEntriesForFnOTradesAbove50MAAbove200MA5Min(self, df_1min, full_df, saveDict, screenDict):
-        if df_1min is None or len(df_1min) == 0 or full_df is None or len(full_df) == 0:
+    def findPotentialProfitableEntriesForFnOTradesAbove50MAAbove200MA5Min(self, df_5min, full_df, saveDict, screenDict):
+        if df_5min is None or len(df_5min) == 0 or full_df is None or len(full_df) == 0:
             return False
         data = full_df.copy()
         reversedData = data[::-1]  # Reverse the dataframe
@@ -2762,19 +2762,19 @@ class ScreeningStatistics:
             # resampling 1-min data to 5 min for 200MA requires at least 5d data to
             # be downloaded which is pretty huge (~460MB). So skipping this for now.
             if tradingAbovePrevHighAnd50MA:
-                ohlc_dict = {
-                    'Open':'first',
-                    'High':'max',
-                    'Low':'min',
-                    'Close':'last',
-                    'Adj Close': 'last',
-                    'Volume':'sum'
-                }
-                data_5min = df_1min.copy()
+                # ohlc_dict = {
+                #     'Open':'first',
+                #     'High':'max',
+                #     'Low':'min',
+                #     'Close':'last',
+                #     'Adj Close': 'last',
+                #     'Volume':'sum'
+                # }
+                data_5min = df_5min.copy()
                 reversedData_5min = data_5min[::-1]  # Reverse the dataframe
-                reversedData_5min = reversedData_5min.resample(f'5T', offset='15min').agg(ohlc_dict)
+                # reversedData_5min = reversedData_5min.resample(f'5T', offset='15min').agg(ohlc_dict)
                 sma200_5min = pktalib.SMA(reversedData_5min["Close"],timeperiod=200)
-                return recentClose > sma200_5min
+                return recentClose > sma200_5min.tail(1).head(1).iloc[0]
         return False
 
     #@measure_time
