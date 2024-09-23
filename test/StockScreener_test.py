@@ -151,8 +151,6 @@ def test_screenStocks(stock_consumer):
                     }
 
             if bool_value:
-                if result is None:
-                    print("Got none")
                 assert result[0] == {'Stock': '\x1b[97m\x1b]8;;https://in.tradingview.com/chart?symbol=NSE%3AAAPL\x1b\\AAPL\x1b]8;;\x1b\\\x1b[0m'}
                 assert result[1] == {'Stock': 'AAPL'}
                 df = pd.DataFrame(data=[1, 2, 3], columns=['A'], index=[0, 1, 2])

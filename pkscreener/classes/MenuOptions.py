@@ -145,7 +145,7 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "BullCross-VWAP | Volume Scanners",                                     # 24
     "BullCross-VWAP | ATR Cross | ATR Trailing Stop                     ",  # 25
     "Super-Confluence | ATR Trailing Stop                               ",  # 26
-    "BullCross-VWAP | Super-Confluence                                  ",  # 27
+    "BullCross-VWAP | Super-Confluence (BTST)                           ",  # 27
     "VCP | Volume-Breakout                                              ",  # 28
     "VCP | Volume-Breakout | Price Breakout                             ",  # 29
     "VCP | Super-Confluence                                             ",  # 30

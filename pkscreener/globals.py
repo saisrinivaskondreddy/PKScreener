@@ -2648,66 +2648,86 @@ def readScreenResultsDecoded(fileName=None):
         pass
     return contents
 
-def findPipedScannerOptionFromStdScanOptions(screenResults, saveResults,menuOption="X"):
-    if menuOption not in ["F"] or "ScanOption" not in saveResults.columns:
-        return screenResults, saveResults
-    resultScanOptions = list(saveResults["ScanOption"])
-    items = []
-    for item in list(screenResults["MA-Signal"]):
-        items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
-    maSignalsScr = sorted(list(filter(None,list(set(items)))))
-    items = []
-    for item in list(saveResults["MA-Signal"]):
-        items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
-    maSignals = sorted(list(filter(None,list(set(items)))))
-    from pkscreener.classes.MenuOptions import PREDEFINED_PIPED_MENU_OPTIONS
-    predefinedKeys = PREDEFINED_PIPED_MENU_OPTIONS.keys()
-    matchingKeys = []
-    for key in predefinedKeys:
-        predefinedScanOptions = PREDEFINED_PIPED_MENU_OPTIONS[key]
-        hasMatchingKeyCount = 0
-        resultIndices = []
-        resultIndex = 0
-        for scanOption in resultScanOptions:
-            for predefinedScanOption in predefinedScanOptions:
-                if f"{scanOption}:" in predefinedScanOption:
-                    hasMatchingKeyCount += 1
-                    resultIndices.append(resultIndex)
-            resultIndex += 1
-        if hasMatchingKeyCount == len(predefinedScanOptions):
-            matchingKeys.append(key)
-            for index in resultIndices:
-                try:
-                    with pd.option_context('mode.chained_assignment', None):
-                        saveResults["ScanOption"].iloc[index] = f'{saveResults["ScanOption"].iloc[index]}, {key}'
-                        screenResults["ScanOption"].iloc[index] = f'{screenResults["ScanOption"].iloc[index]}, {key}'
-                except:
-                    pass
-    items = []
-    for item in list(screenResults["ScanOption"]):
-        items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
-    items = sorted(list(filter(None,list(set(items)))))
-    try:
-        with pd.option_context('mode.chained_assignment', None):
-            saveResults["ScanOption"].iloc[0] = " ,".join(items)
-            screenResults["ScanOption"].iloc[0] = " ,".join(items)
-            saveResults["MA-Signal"].iloc[0] = " ,".join(maSignals)
-            screenResults["MA-Signal"].iloc[0] = " ,".join(maSignalsScr)
-            saveResults.reset_index(inplace=True)
-            screenResults.reset_index(inplace=True)
-            saveResults = saveResults.drop(saveResults.index.to_list()[1:], axis=0)
-            screenResults = screenResults.drop(screenResults.index.to_list()[1:], axis=0)
-            saveResults.set_index("Stock", inplace=True)
-            screenResults.set_index("Stock", inplace=True)
-            # Reorder the columns so that the column max-size can be effectve.
-            # For some reason, last column is not wrapped if it's large
-            columns = ["ScanOption"]
-            columns.extend(list(screenResults.columns[:-2]))
-            screenResults = screenResults[columns]
-            saveResults = saveResults[columns]
-    except:
-        pass
-    return screenResults, saveResults
+def findPipedScannerOptionFromStdScanOptions(df_scr, df_sr,menuOption="X"):
+    if menuOption not in ["F"] or "ScanOption" not in df_sr.columns:
+        return df_scr, df_sr
+    df_grouped_sr = df_sr.groupby("Stock")
+    df_grouped_scr = df_scr.groupby("Stock")
+    signalDictScr = {}
+    signalDict = {}
+    grp_scr = {}
+    grp_sr = {}
+    for stock_name, df_group in df_grouped_scr:
+        items = []
+        for item in list(df_group["MA-Signal"]):
+            items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
+        maSignalsScr = sorted(list(filter(None,list(set(items)))))
+        stockName = Utility.tools.stockNameFromDecoratedName(stock_name)
+        signalDictScr[stockName] = maSignalsScr
+        grp_scr[stockName] = df_group
+
+    for stock_name, df_group in df_grouped_sr:
+        items = []
+        grp_sr[stock_name] = df_group
+        saveResults = df_group
+        screenResults = grp_scr[stock_name]
+        for item in list(saveResults["MA-Signal"]):
+            items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
+        maSignals = sorted(list(filter(None,list(set(items)))))
+        signalDict[stock_name] = maSignals
+        from pkscreener.classes.MenuOptions import PREDEFINED_PIPED_MENU_OPTIONS
+        predefinedKeys = PREDEFINED_PIPED_MENU_OPTIONS.keys()
+        matchingKeys = []
+        resultScanOptions = list(saveResults["ScanOption"])
+        for key in predefinedKeys:
+            predefinedScanOptions = PREDEFINED_PIPED_MENU_OPTIONS[key]
+            hasMatchingKeyCount = 0
+            resultIndices = []
+            resultIndex = 0
+            for scanOption in resultScanOptions:
+                for predefinedScanOption in predefinedScanOptions:
+                    if f"{scanOption}:" in predefinedScanOption:
+                        hasMatchingKeyCount += 1
+                        resultIndices.append(resultIndex)
+                resultIndex += 1
+            if hasMatchingKeyCount == len(predefinedScanOptions):
+                matchingKeys.append(key)
+                for index in resultIndices:
+                    try:
+                        with pd.option_context('mode.chained_assignment', None):
+                            saveResults["ScanOption"].iloc[index] = f'{saveResults["ScanOption"].iloc[index]}, {key}'
+                            screenResults["ScanOption"].iloc[index] = f'{screenResults["ScanOption"].iloc[index]}, {key}'
+                    except:
+                        pass
+        items = []
+        for item in list(screenResults["ScanOption"]):
+            items.extend(item.replace("'","").replace("\"","").replace(" ","").split(","))
+        items = sorted(list(filter(None,list(set(items)))))
+        try:
+            with pd.option_context('mode.chained_assignment', None):
+                saveResults["ScanOption"].iloc[0] = " ,".join(items)
+                screenResults["ScanOption"].iloc[0] = " ,".join(items)
+                saveResults["MA-Signal"].iloc[0] = " ,".join(maSignals)
+                screenResults["MA-Signal"].iloc[0] = " ,".join(signalDictScr[stock_name])
+                saveResults.reset_index(inplace=True)
+                screenResults.reset_index(inplace=True)
+                saveResults = saveResults.drop(saveResults.index.to_list()[1:], axis=0)
+                screenResults = screenResults.drop(screenResults.index.to_list()[1:], axis=0)
+                saveResults.set_index("Stock", inplace=True)
+                screenResults.set_index("Stock", inplace=True)
+                # Reorder the columns so that the column max-size can be effectve.
+                # For some reason, last column is not wrapped if it's large
+                columns = ["ScanOption"]
+                columns.extend(list(screenResults.columns[:-2]))
+                screenResults = screenResults[columns]
+                saveResults = saveResults[columns]
+                grp_scr[stock_name] = screenResults
+                grp_sr[stock_name] = saveResults
+        except:
+            pass
+    df_scr = pd.concat([x for x in grp_scr.values()], axis=0)
+    df_sr = pd.concat([x for x in grp_sr.values()], axis=0)
+    return df_scr, df_sr
 
 def printNotifySaveScreenedResults(
     screenResults, saveResults, selectedChoice, menuChoiceHierarchy, testing, user=None,executeOption=None,menuOption=None
@@ -3342,7 +3362,7 @@ def runScanners(
         iterations, numStocksPerIteration = getIterationsAndStockCounts(numStocks, iterations)
         OutputControls().printOutput(
             colorText.GREEN
-            + f"  [+] For {reviewDate}, total Stocks under review: {numStocks} over {iterations} iterations..."
+            + f"  [+] For {reviewDate}, total {'Scanners' if menuOption in ['F'] else 'Stocks'} under review: {numStocks} over {iterations} iterations..."
             + colorText.END
         )
         if not userPassedArgs.download:

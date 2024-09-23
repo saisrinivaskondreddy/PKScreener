@@ -389,6 +389,14 @@ class tools:
             pass
         return roundValue
     
+    def stockNameFromDecoratedName(stockName):
+        cleanName = tools.removeAllColorStyles(stockName.replace("\x1B]8;;","")).split("\x1B\\")[1]
+        return cleanName
+    
+    def stockDecoratedName(stockName,exchangeName):
+        decoratedName = f"{colorText.WHITE}\x1B]8;;https://in.tradingview.com/chart?symbol={'NSE' if exchangeName=='INDIA' else 'NASDAQ'}%3A{stockName}\x1B\\{stockName}\x1B]8;;\x1B\\{colorText.END}"
+        return decoratedName
+
     def removeAllColorStyles(styledText):
         styles = [
             colorText.HEAD,
