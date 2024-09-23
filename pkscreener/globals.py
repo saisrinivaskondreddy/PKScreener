@@ -2718,7 +2718,9 @@ def findPipedScannerOptionFromStdScanOptions(df_scr, df_sr,menuOption="X"):
                 # Reorder the columns so that the column max-size can be effectve.
                 # For some reason, last column is not wrapped if it's large
                 columns = ["ScanOption"]
-                columns.extend(list(screenResults.columns[:-2]))
+                indexOfColumn = list(screenResults.columns).index("ScanOption")
+                columns.extend(list(screenResults.columns[:-(len(list(screenResults.columns))-indexOfColumn)]))
+                columns.extend(list(screenResults.columns[-(len(list(screenResults.columns))-indexOfColumn)+1:]))
                 screenResults = screenResults[columns]
                 saveResults = saveResults[columns]
                 grp_scr[stock_name] = screenResults
