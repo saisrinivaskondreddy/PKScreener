@@ -2758,21 +2758,22 @@ class ScreeningStatistics:
         if tradingAbove2Percent:
             prevHigh = reversedData["High"].tail(2).head(1).iloc[0]
             tradingAbovePrevHighAnd50MA = (recentClose > prevHigh) and (recentClose > reversedData["SMA"].tail(1).head(1).iloc[0])
-            return tradingAbovePrevHighAnd50MA
+            # return tradingAbovePrevHighAnd50MA
             # resampling 1-min data to 5 min for 200MA requires at least 5d data to
             # be downloaded which is pretty huge (~460MB). So skipping this for now.
             if tradingAbovePrevHighAnd50MA:
-                # ohlc_dict = {
-                #     'Open':'first',
-                #     'High':'max',
-                #     'Low':'min',
-                #     'Close':'last',
-                #     'Adj Close': 'last',
-                #     'Volume':'sum'
-                # }
+                ohlc_dict = {
+                    'Open':'first',
+                    'High':'max',
+                    'Low':'min',
+                    'Close':'last',
+                    'Adj Close': 'last',
+                    'Volume':'sum'
+                }
                 data_5min = df_5min.copy()
                 reversedData_5min = data_5min[::-1]  # Reverse the dataframe
-                # reversedData_5min = reversedData_5min.resample(f'5T', offset='15min').agg(ohlc_dict)
+                reversedData_5min = reversedData_5min.resample(f'5T', offset='15min').agg(ohlc_dict)
+                reversedData_5min.dropna(inplace=True)
                 sma200_5min = pktalib.SMA(reversedData_5min["Close"],timeperiod=200)
                 return recentClose > sma200_5min.tail(1).head(1).iloc[0]
         return False

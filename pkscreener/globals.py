@@ -2169,8 +2169,12 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
         candleDuration = (userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else ("1m" if configManager.duration.endswith("d") else configManager.duration))
         configManager.toggleConfig(candleDuration=candleDuration,clearCache=False)
         if ":33:3:" in userPassedArgs.options:
-            configManager.deleteFileWithPattern(pattern="*intraday_stock_data_*.pkl",rootDir=Archiver.get_user_data_dir())
-            configManager.duration = "5m"
+            exists, cache_file = Utility.tools.afterMarketStockDataExists(True, forceLoad=(menuOption in ["X", "B", "G", "S", "F"]))
+            cache_file = os.path.join(Archiver.get_user_data_dir(),cache_file)
+            cacheFileSize = os.stat(cache_file).st_size if os.path.exists(cache_file) else 0
+            if cacheFileSize < 1024*1024*100: # 1m data for 5d is at least 450MB
+                configManager.deleteFileWithPattern(pattern="*intraday_stock_data_*.pkl",rootDir=Archiver.get_user_data_dir())
+            configManager.duration = "1m"
             configManager.period = "5d"
             configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
         # We also need to load the intraday data to be able to calculate intraday RSI
