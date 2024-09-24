@@ -577,7 +577,7 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
             else:
                 break
     
-    runIntradayAnalysisScans(branch="main")
+    # runIntradayAnalysisScans(branch="main")
 
 def runIntradayAnalysisScans(branch="gh-pages"):
     # Trigger the intraday analysis only in the 2nd half after it gets trigerred anytime after 3 PM IST

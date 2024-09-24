@@ -365,7 +365,8 @@ jobs:
 
     - name: Push Historical scan Data
       shell: bash
-      if: ${{ inputs.cleanuphistoricalscans != 'Y' && ( steps.histRunnnerLinux.outputs.STAGED_COMMITS != 0 || steps.histRunnnerWindows.outputs.STAGED_COMMITS != 0 ) }}
+      if: ${{ inputs.cleanuphistoricalscans != 'Y' }}
+      # && ( steps.histRunnnerLinux.outputs.STAGED_COMMITS != 0 || steps.histRunnnerWindows.outputs.STAGED_COMMITS != 0 )
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
