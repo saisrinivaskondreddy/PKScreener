@@ -744,9 +744,13 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
 
 def checkIntradayComponent(args, monitorOption):
     lastComponent = monitorOption.split(":")[-1]
+    if "i" not in lastComponent:
+        possiblePositions = monitorOption.split(":i")
+        if len(possiblePositions) > 1:
+            lastComponent = f"i {possiblePositions[1]}"
                 # previousCandleDuration = configManager.duration
     if "i" in lastComponent:
-                    # We need to switch to intraday scan
+        # We need to switch to intraday scan
         monitorOption = monitorOption.replace(lastComponent,"")
         args.intraday = lastComponent.replace("i","").strip()
         configManager.toggleConfig(candleDuration=args.intraday, clearCache=False)

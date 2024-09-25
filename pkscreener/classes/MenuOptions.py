@@ -117,7 +117,7 @@ LEVEL_1_DATA_DOWNLOADS = {
     "M": "Back to the Top/Main menu",
 }
 PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27","28","29","30","31"]
-PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27","28","29","30","31"]
+PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27","28","29","30","31","32"]
 PREDEFINED_SCAN_MENU_TEXTS = [
     "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",  # 1
     "Volume Scanners | High Momentum | ATR Cross",                          # 2
@@ -150,6 +150,7 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "VCP | Volume-Breakout | Price Breakout                             ",  # 29
     "VCP | Super-Confluence                                             ",  # 30
     "Bullish Today x PDO/PDC | VCP                                      ",  # 31
+    "Intraday(15m) VCP | Breaking out now                               ",  # 32
 ]
 level2_P_MenuDict = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:
@@ -190,6 +191,7 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:9:2.5:>|X:0:27:'",         # 29
     "--systemlaunched -a y -e -o 'X:12:7:4:>|X:0:7:3:0.008:4:'",            # 30
     "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:7:4:'",                   # 31
+    "--systemlaunched -a y -e -o 'X:14:7:4:i 15m:>|X:0:23:i 15m:'",         # 32
 ]
 PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS = []
 PREDEFINED_PIPED_MENU_OPTIONS = {}

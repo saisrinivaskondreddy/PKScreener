@@ -130,8 +130,15 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                     for ticker in shared._ERRORS:
                         err = shared._ERRORS.get(ticker)
                         # Maybe this stock is recently listed. Let's try and fetch for the last month
-                        if "YFInvalidPeriodError" in err and "Period \'1mo\' is invalid" not in err:
-                            data = self.fetchStockData(stockCode=ticker,period='1mo',duration=duration,printCounter=printCounter, start=start,end=end)
+                        if "YFInvalidPeriodError" in err: #and "Period \'1mo\' is invalid" not in err:
+                            recommendedPeriod = period
+                            if isinstance(err,YFInvalidPeriodError):
+                                recommendedPeriod = err.valid_ranges[-1]
+                            else:
+                                recommendedPeriod = str(err).split("[")[1].split("]")[0].split(",")[-1].strip()
+                            recommendedPeriod = recommendedPeriod.replace("'","").replace("\"","")
+                            # default_logger().debug(f"Sending request again for {ticker} with period:{recommendedPeriod}")
+                            data = self.fetchStockData(stockCode=ticker,period=recommendedPeriod,duration=duration,printCounter=printCounter, start=start,end=end)
                             return data
             except (KeyError,YFPricesMissingError) as e:
                 default_logger().debug(e,exc_info=True)

@@ -1182,14 +1182,14 @@ class ScreeningStatistics:
         data = data[::-1]  # Reverse the dataframe so that its the oldest date first
         mfis = pktalib.MFI(data["High"],data["Low"],data["Close"],data["Volume"], 14)
         ccis = pktalib.CCI(data["High"],data["Low"],data["Close"], 14)
-        sma7 = pktalib.SMA(data["Close"], 7)
-        sma20 = pktalib.SMA(data["Close"], 20)
+        sma7 = pktalib.SMA(data["Close"], 7).tail(2)
+        sma20 = pktalib.SMA(data["Close"], 20).tail(2)
         recent = data.tail(2)
         percentChange = round((recent["Close"].iloc[1] - recent["Close"].iloc[0]) *100/recent["Close"].iloc[0],1)
         rsi = recent["RSI"].iloc[1]
         mfi = mfis.tail(1).iloc[0]
         cci = ccis.tail(1).iloc[0]
-        hasDeelMomentum = percentChange >= 1 and ((rsi>= 68 and mfi >= 68 and cci >= 110) or (rsi>= 50 and mfi >= 50 and recent["Close"].iloc[1] >= sma7 and recent["Close"].iloc[1] >= sma20))
+        hasDeelMomentum = percentChange >= 1 and ((rsi>= 68 and mfi >= 68 and cci >= 110) or (rsi>= 50 and mfi >= 50 and recent["Close"].iloc[1] >= sma7.iloc[1] and recent["Close"].iloc[1] >= sma20.iloc[1]))
         # if self.shouldLog:
         #     self.default_logger.debug(data.head(10))
         return hasDeelMomentum
