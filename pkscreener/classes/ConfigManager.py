@@ -430,10 +430,10 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     f"  [+] ATR Trailing Stop EMA Period. (number)({colorText.GREEN}Optimal = 1 to 200{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopEMAPeriod}{colorText.END}): "
                 ) or self.atrTrailingStopEMAPeriod
                 self.vcpLegsToCheckForConsolidation = input(
-                    f"  [+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END}, Current: {colorText.FAIL}{self.vcpLegsToCheckForConsolidation}{colorText.END}): "
+                    f"  [+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END},[Recommended: 3], Current: {colorText.FAIL}{self.vcpLegsToCheckForConsolidation}{colorText.END}): "
                 ) or self.vcpLegsToCheckForConsolidation
                 self.vcpRangePercentageFromTop = input(
-                    f"  [+] Range percentage from the highest high(top) for VCP. (number)({colorText.GREEN}Optimal = 20 to 60{colorText.END}, Current: {colorText.FAIL}{self.vcpRangePercentageFromTop}{colorText.END}): "
+                    f"  [+] Range percentage from the highest high(top) for VCP:[Recommended: 20] (number)({colorText.GREEN}Optimal = 20 to 60{colorText.END}, Current: {colorText.FAIL}{self.vcpRangePercentageFromTop}{colorText.END}): "
                 ) or self.vcpRangePercentageFromTop
                 self.vcpVolumeContractionRatio = input(
                     f"  [+] Ratio of volume of recent largest to pullback candles for VCP. (number)({colorText.GREEN}Optimal = 0.4{colorText.END}, Current: {colorText.FAIL}{self.vcpVolumeContractionRatio}{colorText.END}): "

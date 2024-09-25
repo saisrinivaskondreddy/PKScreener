@@ -420,7 +420,8 @@ class PKScanRunner:
             worker.start()
         OutputControls().printOutput(f"Started all workers in {round(time.time() - start_time,4)}s")
         if OutputControls().enableMultipleLineOutput:
-            sys.stdout.write("\x1b[1A") # Move cursor up to hide the starting times we printed above
+            # sys.stdout.write("\x1b[1A") # Move cursor up to hide the starting times we printed above
+            OutputControls().moveCursorUpLines(1)
 
     @Halo(text='', spinner='dots')
     def terminateAllWorkers(userPassedArgs,consumers, tasks_queue, testing=False):

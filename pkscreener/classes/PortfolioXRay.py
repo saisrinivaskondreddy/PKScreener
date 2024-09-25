@@ -56,7 +56,8 @@ def summariseAllStrategies(testing=False):
                 df_all = pd.concat([df_all, df], axis=0)
             else:
                 df_all = df
-        sys.stdout.write("\x1b[1A")
+        # sys.stdout.write("\x1b[1A")
+        OutputControls().moveCursorUpLines(1)
     if df_all is not None:
         df_all = df_all.replace(np.nan, "-", regex=True)
     return df_all

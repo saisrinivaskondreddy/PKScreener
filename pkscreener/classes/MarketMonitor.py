@@ -148,9 +148,7 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
         if monitorPosition is not None:
             startRowIndex, startColIndex = monitorPosition
             if not self.monitor_df.empty:
-                for _ in range(self.lines):
-                    sys.stdout.write("\x1b[1A")  # cursor up one line
-                    sys.stdout.write("\x1b[2K")  # delete the last line
+                OutputControls().moveCursorUpLines(self.lines)
             if not self.isPinnedSingleMonitorMode:
                 firstColIndex = startColIndex
                 rowIndex = 0
@@ -177,7 +175,13 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
                             self.monitor_df.loc[startRowIndex,[f"A{startColIndex+1}"]] = colorText.HEAD+(widgetHeader if startColIndex==firstColIndex else col)+colorText.END
                             highlightCols.append(startColIndex)
                         else:
-                            self.monitor_df.loc[startRowIndex, [f"A{startColIndex+1}"]] = screen_monitor_df.iloc[rowIndex-1,colIndex]
+                            if colIndex == 0:
+                                stockNameDecorated = screen_monitor_df.iloc[rowIndex-1,colIndex]
+                                stockName = Utility.tools.stockNameFromDecoratedName(stockNameDecorated)
+                                stockName = (f"{colorText.BOLD}{colorText.WHITE_FG_BRED_BG}{stockNameDecorated}{colorText.END}") if stockName in self.alertStocks else stockNameDecorated
+                                self.monitor_df.loc[startRowIndex, [f"A{startColIndex+1}"]] = stockName
+                            else:
+                                self.monitor_df.loc[startRowIndex, [f"A{startColIndex+1}"]] = screen_monitor_df.iloc[rowIndex-1,colIndex]
                             colIndex += 1
                         startColIndex += 1
                     _, startColIndex= monitorPosition
@@ -185,12 +189,19 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
                     colIndex = 0
                     highlightRows.append(startRowIndex+1)
                     startRowIndex += 1
+            else:
+                stocks = list(self.monitor_df.index)
+                updatedStocks = []
+                for stock in stocks:
+                    stockName = Utility.tools.stockNameFromDecoratedName(stock)
+                    stockName = (f"{colorText.BOLD}{colorText.WHITE_FG_BRED_BG}{stock}{colorText.END}") if stockName in self.alertStocks else stock
+                    updatedStocks.append(stockName)
+                self.monitor_df.reset_index(inplace=True)
+                self.monitor_df["Stock"] = updatedStocks
+                self.monitor_df.set_index("Stock",inplace=True)
 
         self.monitor_df = self.monitor_df.replace(np.nan, "-", regex=True)
-        for newlyAddedStock in self.alertStocks:
-            self.monitor_df = self.monitor_df.replace(newlyAddedStock, f"{colorText.UPARROW}{newlyAddedStock}", regex=True)
-        # self.monitorNames[screenOptions] = f"(Dashboard) > {chosenMenu}"
-        latestScanMenuOption = f"  [+] {dbTimestamp} (Dashboard) > " + f"{chosenMenu} [{screenOptions}]"
+        latestScanMenuOption = f"  [+] {dbTimestamp} (Dashboard) > " + f"{chosenMenu[:190]} [{screenOptions}]"
         OutputControls().printOutput(
             colorText.FAIL
             + latestScanMenuOption[:200]
@@ -221,14 +232,14 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
             except:
                 console_results = tabulated_results
         numRecords = len(tabulated_results.splitlines())
-        self.lines = numRecords + 1 # 1 for the progress bar at the bottom and 1 for the chosenMenu option
+        self.lines = numRecords #+ 1 #(1 if len(self.monitorResultStocks.keys()) <= self.maxNumColsInEachResult else 0) # 1 for the progress bar at the bottom and 1 for the chosenMenu option
         OutputControls().printOutput(tabulated_results if not self.isPinnedSingleMonitorMode else console_results, enableMultipleLineOutput=True)
         
+        if not telegram and ((screenOptions in self.alertOptions and numRecords > 1) or len(self.alertStocks) > 0): # Alert conditions met? Sound alert!
+            Utility.tools.alertSound(beeps=5)
         if not self.isPinnedSingleMonitorMode:
             if telegram:
                 self.updateIfRunningInTelegramBotMode(screenOptions, chosenMenu, dbTimestamp, telegram, telegram_df)
-            elif (screenOptions in self.alertOptions and numRecords > 1) or len(self.alertStocks) > 0: # Alert conditions met? Sound alert!
-                Utility.tools.alertSound(beeps=5)
         else:
             sleep(self.pinnedIntervalWaitSeconds)
 

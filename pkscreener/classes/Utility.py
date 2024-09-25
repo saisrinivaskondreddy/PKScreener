@@ -1198,8 +1198,7 @@ class tools:
                         if not os.path.exists(copyFilePath) and os.path.exists(srcFilePath): # Let's make a copy of the original one
                             shutil.copy(srcFilePath,copyFilePath)
                         # Remove the progress bar now!
-                        sys.stdout.write("\x1b[1A")  # cursor up one line
-                        sys.stdout.write("\x1b[2K")  # delete the last line
+                        OutputControls().moveCursorUpLines(1)
                 except Exception as e:  # pragma: no cover
                     default_logger().debug(e, exc_info=True)
                     f.close()

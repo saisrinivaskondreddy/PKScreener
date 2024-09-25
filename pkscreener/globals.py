@@ -764,7 +764,7 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
         if userPassedArgs is not None and userPassedArgs.options is not None and userPassedArgs.options.upper().startswith("C"):
             columnsToBeDeleted.append("FairValue")
         if executeOption == 27 and "ATR" in screenResults.columns: # ATR Cross
-            columnsToBeDeleted.append("Consol.")
+            # columnsToBeDeleted.append("Consol.")
             screenResults['ATR'] = screenResults['ATR'].astype(str)
             screenResults['ATR'] = colorText.GREEN + screenResults['ATR'] + colorText.END
         for column in columnsToBeDeleted:
@@ -1332,10 +1332,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 )
                 if configManager.enableAdditionalVCPFilters:
                     configManager.vcpRangePercentageFromTop = input(
-                        f"  [+] Range percentage from the highest high(top) for VCP.\n  [+] Press <Enter> for using default value. (number)({colorText.GREEN}Optimal = 20 to 60{colorText.END}, Current: {colorText.FAIL}{configManager.vcpRangePercentageFromTop}{colorText.END}): "
+                        f"  [+] Range percentage from the highest high(top) for VCP: [Recommended: 20]\n      Press <Enter> for using default value. (number)({colorText.GREEN}Optimal = 20 to 60{colorText.END}, Current: {colorText.FAIL}{configManager.vcpRangePercentageFromTop}{colorText.END}): "
                     ) or configManager.vcpRangePercentageFromTop
                     configManager.vcpLegsToCheckForConsolidation = input(
-                        f"  [+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END}, Current: {colorText.FAIL}{configManager.vcpLegsToCheckForConsolidation}{colorText.END}): "
+                        f"  [+] Number of consolidation legs to check for VCP (number)({colorText.GREEN}Optimal = 2{colorText.END}, [Recommended: 3], Current: {colorText.FAIL}{configManager.vcpLegsToCheckForConsolidation}{colorText.END}): "
                     ) or configManager.vcpLegsToCheckForConsolidation
                     userInput = str(
                         input(
@@ -1783,7 +1783,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 actualHistoricalDuration = samplingDuration - fillerPlaceHolder
                 if actualHistoricalDuration >= 0:
                     progressbar()
-        OutputControls().moveCursorUpLines(0 if userPassedArgs.monitor else 2)    #sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
+        OutputControls().moveCursorUpLines(1 if userPassedArgs.monitor else 2)    #sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
         if not keyboardInterruptEventFired:
             global tasks_queue, results_queue, consumers, logging_queue
             screenResults, saveResults, backtest_df, tasks_queue, results_queue, consumers,logging_queue = PKScanRunner.runScanWithParams(userPassedArgs,keyboardInterruptEvent,screenCounter,screenResultsCounter,stockDictPrimary,stockDictSecondary,testing, backtestPeriod, menuOption,executeOption, samplingDuration, items,screenResults, saveResults, backtest_df,scanningCb=runScanners,tasks_queue=tasks_queue, results_queue=results_queue, consumers=consumers,logging_queue=logging_queue)
@@ -3402,6 +3402,7 @@ def runScanners(
                 + colorText.END
             )
         bar, spinner = Utility.tools.getProgressbarStyle()
+        # OutputControls().moveCursorUpLines(1)
         with alive_bar(numStocks, bar=bar, spinner=spinner) as progressbar:
             lstscreen = []
             lstsave = []
@@ -3439,16 +3440,18 @@ def runScanners(
                         tableLength = 2*len(lstscreen)+5
                         OutputControls().printOutput('\n'+tabulated_results)
                         # Move the cursor up, back to the top because we want the progress bar to keep showing at the top
-                        sys.stdout.write(f"\x1b[{tableLength}A")  # cursor up one line
+                        # sys.stdout.write(f"\x1b[{tableLength}A")  # cursor up one line
+                        OutputControls().moveCursorUpLines(tableLength)
                 if keyboardInterruptEventFired:
                     return False, backtest_df
                 return not ((testing and len(lstscreen) >= 1) or len(lstscreen) >= max_allowed), backtest_df
             otherArgs = (menuOption, backtestPeriod, result, lstscreen, lstsave)
             backtest_df, result =PKScanRunner.runScan(userPassedArgs,testing,numStocks,iterations,items,numStocksPerIteration,tasks_queue,results_queue,originalNumberOfStocks,backtest_df,*otherArgs,resultsReceivedCb=processResultsCallback)
 
-        OutputControls().printOutput(f"\x1b[{3 if OutputControls().enableMultipleLineOutput else 1}A")
-        if len(lstscreen) == 0 and userPassedArgs is not None and userPassedArgs.monitor is None:
-            OutputControls().printOutput("\x1b[2K") # Delete the progress bar line
+        # OutputControls().printOutput(f"\x1b[{3 if OutputControls().enableMultipleLineOutput else 1}A")
+        # if len(lstscreen) == 0 and userPassedArgs is not None and userPassedArgs.monitor is None:
+        #     OutputControls().printOutput("\x1b[2K") # Delete the progress bar line
+        OutputControls().moveCursorUpLines(3 if OutputControls().enableMultipleLineOutput else 1)
         elapsed_time = time.time() - start_time
         if menuOption in ["X", "G", "C", "F"]:
             # create extension

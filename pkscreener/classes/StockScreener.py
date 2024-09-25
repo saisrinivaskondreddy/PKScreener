@@ -644,7 +644,7 @@ class StockScreener:
                                 daysToLookback=configManager.daysToLookback,
                                 alreadyBrokenout=(executeOption == 2),
                             )
-                        if isNotMonitoringDashboard and executeOption != 3:
+                        if (isNotMonitoringDashboard and executeOption != 3) or (self.configManager.alwaysExportToExcel):
                             screener.validateConsolidation(
                                 processedData,
                                 screeningDictionary,
