@@ -1256,12 +1256,15 @@ class tools:
         isSaved = False
         try:
             if defaultAnswer is None:
-                response = str(
-                    input(
-                        colorText.WARN
-                        + f"[>] Do you want to save the results in excel file? [Y/N](Default:{colorText.END}{colorText.FAIL}N{colorText.END}): "
-                    ) or "N"
-                ).upper()
+                if not configManager.alwaysExportToExcel:
+                    response = str(
+                        input(
+                            colorText.WARN
+                            + f"[>] Do you want to save the results in excel file? [Y/N](Default:{colorText.END}{colorText.FAIL}N{colorText.END}): "
+                        ) or "N"
+                    ).upper()
+                else:
+                    response = "Y"
             else:
                 response = defaultAnswer
         except ValueError as e:  # pragma: no cover

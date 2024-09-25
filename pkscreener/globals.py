@@ -180,7 +180,7 @@ def finishScreening(
         # There's no need to prompt the user to save xls report or to save data locally.
         # This scan must have been triggered by github workflow by a user or scheduled job
         saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount)
-    if not testBuild and not downloadOnly and not testing:
+    if not testBuild and not downloadOnly and not testing and ((userPassedArgs is not None and "|" not in userPassedArgs.options) or userPassedArgs is None):
         saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
         )
@@ -1783,7 +1783,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 actualHistoricalDuration = samplingDuration - fillerPlaceHolder
                 if actualHistoricalDuration >= 0:
                     progressbar()
-        OutputControls().moveCursorUpLines(1 if userPassedArgs.monitor else 2)    #sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
+        OutputControls().moveCursorUpLines(0 if userPassedArgs.monitor else 2)    #sys.stdout.write(f"\x1b[1A") # Replace the download progress bar and start writing on the same line
         if not keyboardInterruptEventFired:
             global tasks_queue, results_queue, consumers, logging_queue
             screenResults, saveResults, backtest_df, tasks_queue, results_queue, consumers,logging_queue = PKScanRunner.runScanWithParams(userPassedArgs,keyboardInterruptEvent,screenCounter,screenResultsCounter,stockDictPrimary,stockDictSecondary,testing, backtestPeriod, menuOption,executeOption, samplingDuration, items,screenResults, saveResults, backtest_df,scanningCb=runScanners,tasks_queue=tasks_queue, results_queue=results_queue, consumers=consumers,logging_queue=logging_queue)
@@ -1936,7 +1936,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             import traceback
                             traceback.print_exc()
                         pass
-        if (menuOption in ["X","C","F"] and userPassedArgs.monitor is None) or ("|" not in userPassedArgs.options and menuOption not in ["B"]):
+        if (menuOption in ["X","C","F"] and (userPassedArgs.monitor is None or configManager.alwaysExportToExcel)) or ("|" not in userPassedArgs.options and menuOption not in ["B"]):
             finishScreening(
                 downloadOnly,
                 testing,
@@ -3611,7 +3611,7 @@ def saveNotifyResultsFile(
     global userPassedArgs, elapsed_time, selectedChoice, media_group_dict,criteria_dateTime
     if user is None and userPassedArgs.user is not None:
         user = userPassedArgs.user
-    if ">|" in userPassedArgs.options:
+    if ">|" in userPassedArgs.options and not configManager.alwaysExportToExcel:
         # Let the final results be there. We're mid-way through the screening of some
         # piped scan. Do not save the intermediate results.
         return

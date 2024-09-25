@@ -476,17 +476,7 @@ def runApplication():
         args.options = args.options.replace("::",":").replace("\"","").replace("'","")
         if args.options.upper().startswith("C") or "C:" in args.options.upper():
             args.runintradayanalysis = True
-        try:
-            if args.systemlaunched:
-                choices = f"--systemlaunched -a y -e -o '{args.options.replace('C:','X:').replace('D:','')}'"
-                indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
-                choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
-                args.progressstatus = f"  [+] {choices} => Running {choices}"
-                args.usertag = PREDEFINED_SCAN_MENU_TEXTS[indexNum]
-                args.maxdisplayresults = 2000
-        except:
-            choices = ""
-            pass
+        args,choices = updateProgressStatus(args)
         
     if args.runintradayanalysis:
         generateIntradayAnalysisReports(args)
@@ -559,6 +549,7 @@ def runApplication():
                 results, plainResults = main(userArgs=args)
                 if args.pipedmenus is not None:
                     while args.pipedmenus is not None:
+                        args,_ = updateProgressStatus(args,monitorOptions=monitorOption)
                         results, plainResults = main(userArgs=args)
                     # sys.exit(0)
                 if isInterrupted():
@@ -569,6 +560,7 @@ def runApplication():
                 while runPipedScans:
                     runPipedScans = pipeResults(plainResults,args)
                     if runPipedScans:
+                        args,_ = updateProgressStatus(args,monitorOptions=monitorOption)
                         results, plainResults = main(userArgs=args)
                     else:
                         if args is not None and args.pipedtitle is not None and "|" in args.pipedtitle:
@@ -606,6 +598,23 @@ def runApplication():
                 if results is not None and len(monitorOption_org) > 0:
                     chosenMenu = args.pipedtitle if args.pipedtitle is not None else updateMenuChoiceHierarchy()
                     MarketMonitor().refresh(screen_df=results,screenOptions=monitorOption_org, chosenMenu=chosenMenu[:120],dbTimestamp=f"{dbTimestamp} | CycleTime:{elapsed_time}s",telegram=args.telegram)
+
+def updateProgressStatus(args,monitorOptions=None):
+    from pkscreener.classes.MenuOptions import PREDEFINED_SCAN_MENU_TEXTS,PREDEFINED_SCAN_MENU_VALUES
+    try:
+        choices = ""
+        if args.systemlaunched or monitorOptions is not None:
+            optionsToUse = args.options if monitorOptions is None else monitorOptions
+            choices = f"--systemlaunched -a y -e -o '{optionsToUse.replace('C:','X:').replace('D:','')}'"
+            indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
+            choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
+            args.progressstatus = f"  [+] {choices} => Running {choices}"
+            args.usertag = PREDEFINED_SCAN_MENU_TEXTS[indexNum]
+            args.maxdisplayresults = 2000 #if monitorOptions is None else 100
+    except:
+        choices = ""
+        pass
+    return args, choices
 
 def generateIntradayAnalysisReports(args):
     from pkscreener.globals import main, isInterrupted, closeWorkersAndExit, resetUserMenuChoiceOptions

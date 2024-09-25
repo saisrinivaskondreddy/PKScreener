@@ -53,6 +53,7 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
             self.monitorResultStocks = {}
             self.alertOptions = alertOptions
             self.hiddenColumns = ""
+            self.alertStocks = []
             self.pinnedIntervalWaitSeconds = pinnedIntervalWaitSeconds
             # self.monitorNames = {}
             # We are going to present the dataframes in a 3x3 matrix with limited set of columns
@@ -100,6 +101,16 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
             prevOutput_results = prevOutput_results.index
             # # Maybe the index is an int ?
             # prevOutput_results = [str(stock) for stock in prevOutput_results]
+            try:
+                lastSavedResults = self.monitorResultStocks[str(self.monitorIndex)]
+                if lastSavedResults is not None and len(lastSavedResults) > 0:
+                    lastSavedResults = lastSavedResults.split(",")
+                    s = set(lastSavedResults)
+                    self.alertStocks = [x for x in prevOutput_results if x not in s]
+                else:
+                    self.alertStocks = []
+            except:
+                pass
             prevOutput_results = ",".join(prevOutput_results)
         self.monitorResultStocks[str(self.monitorIndex)] = prevOutput_results
 
@@ -176,6 +187,8 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
                     startRowIndex += 1
 
         self.monitor_df = self.monitor_df.replace(np.nan, "-", regex=True)
+        for newlyAddedStock in self.alertStocks:
+            self.monitor_df = self.monitor_df.replace(newlyAddedStock, f"{colorText.UPARROW}{newlyAddedStock}", regex=True)
         # self.monitorNames[screenOptions] = f"(Dashboard) > {chosenMenu}"
         latestScanMenuOption = f"  [+] {dbTimestamp} (Dashboard) > " + f"{chosenMenu} [{screenOptions}]"
         OutputControls().printOutput(
@@ -214,7 +227,7 @@ class MarketMonitor(SingletonMixin, metaclass=SingletonType):
         if not self.isPinnedSingleMonitorMode:
             if telegram:
                 self.updateIfRunningInTelegramBotMode(screenOptions, chosenMenu, dbTimestamp, telegram, telegram_df)
-            elif screenOptions in self.alertOptions and numRecords > 1: # RSI conditions met? Sound alert!
+            elif (screenOptions in self.alertOptions and numRecords > 1) or len(self.alertStocks) > 0: # Alert conditions met? Sound alert!
                 Utility.tools.alertSound(beeps=5)
         else:
             sleep(self.pinnedIntervalWaitSeconds)

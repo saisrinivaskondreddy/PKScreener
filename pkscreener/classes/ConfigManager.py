@@ -59,6 +59,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.period = "1y"
         self.duration = "1d"
         self.shuffleEnabled = True
+        self.alwaysExportToExcel = False
         self.cacheEnabled = True
         self.stageTwo = True
         self.useEMA = False
@@ -207,6 +208,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 pass
             parser.add_section("config")
             parser.add_section("filters")
+            parser.set("config", "alwaysExportToExcel", "y" if self.alwaysExportToExcel else "n")
             parser.set("config", "alwaysHiddenDisplayColumns", str(self.alwaysHiddenDisplayColumns))
             parser.set("config", "anchoredAVWAPPercentage", str(self.anchoredAVWAPPercentage))
             parser.set("config", "atrtrailingstopemaperiod", str(self.atrTrailingStopEMAPeriod))
@@ -322,6 +324,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     input(
                         f"  [+] Shuffle stocks rather than screening alphabetically? (Y/N, Current: {colorText.FAIL}{'y' if self.shuffleEnabled else 'n'}{colorText.END}): "
                     ) or ('y' if self.shuffleEnabled else 'n')
+                ).lower()
+                self.cacheStockData = str(
+                    input(
+                        f"  [+] Enable always exporting to Excel? (Y/N, Current: {colorText.FAIL}{('y' if self.alwaysExportToExcel else 'n')}{colorText.END}): "
+                    ) or ('y' if self.alwaysExportToExcel else 'n')
                 ).lower()
                 self.cacheStockData = str(
                     input(
@@ -586,6 +593,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.shuffleEnabled = (
                     True
                     if "n" not in str(parser.get("config", "shuffle")).lower()
+                    else False
+                )
+                self.alwaysExportToExcel = (
+                    True
+                    if "n" not in str(parser.get("config", "alwaysExportToExcel")).lower()
                     else False
                 )
                 self.cacheEnabled = (
