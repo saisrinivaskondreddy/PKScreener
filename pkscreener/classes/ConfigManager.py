@@ -101,6 +101,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.maxNumResultRowsInMonitor = 3
         self.calculatersiintraday = False
         self.defaultMonitorOptions = "X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:~X:12:9:2.5:>|X:0:31:>|X:0:27:~X:12:9:2.5:>|X:0:31:~X:12:9:2.5:>|X:0:27:~X:12:9:2.5:>|X:0:29:~X:12:9:2.5:>|X:0:27:>|X:12:30:1:~X:12:9:2.5:>|X:12:30:1:~X:12:31:>|X:0:27:~X:12:31:>|X:0:30:1:~X:12:27:>|X:0:30:1:~X:12:7:8:>|X:12:7:9:1:1:~X:12:7:4:>|X:12:7:9:1:1:~X:12:2:>|X:12:7:8:>|X:12:7:9:1:1:~X:12:30:1:>|X:12:7:8:~X:12:7:9:5:>|X:12:21:8:~X:12:7:4:~X:12:7:9:7:>|X:0:9:2.5:~X:12:7:9:7:>|X:0:31:>|X:0:30:1:~X:12:7:3:0.008:4:>|X:0:30:1:~X:12:7:3:0.008:4:>|X:12:7:9:7:>|X:0:7:3:0.008:4:~X:12:9:2.5~X:12:23~X:12:28~X:12:31~|{1}X:0:23:>|X:0:27:>|X:0:31:~|{2}X:0:31:~|{3}X:0:27:~X:12:7:3:.01:1~|{5}X:0:5:0:35:~X:12:7:6:1~X:12:11:~X:12:12:i 5m~X:12:17~X:12:24~X:12:6:7:1~X:12:6:3~X:12:6:8~X:12:6:9~X:12:2:>|X:12:7:8:>|X:12:7:9:1:1:~X:12:6:10:1~X:12:7:4:>|X:12:30:1:~X:12:7:3:.02:1~X:12:13:i 1m~X:12:2~|{1}X:0:29:"
+        self.myMonitorOptions = ""
         self.minimumChangePercentage = 0
         self.daysToLookback = 22 * self.backtestPeriodFactor  # 1 month
         self.periods = [1,2,3,4,5,10,15,22,30]
@@ -239,6 +240,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "maxNumResultRowsInMonitor", str(self.maxNumResultRowsInMonitor))
             parser.set("config", "morninganalysiscandlenumber", str(self.morninganalysiscandlenumber))
             parser.set("config", "morninganalysiscandleduration", self.morninganalysiscandleduration)
+            parser.set("config", "myMonitorOptions", str(self.myMonitorOptions))
             parser.set("config", "onlyStageTwoStocks", "y" if self.stageTwo else "n")
             parser.set("config", "period", self.period)
             parser.set("config", "pinnedMonitorSleepIntervalSeconds", str(self.pinnedMonitorSleepIntervalSeconds))
@@ -508,6 +510,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     endMDuration = "d" if endMDuration not in ["m","h","d","k","o"] else ""
                 parser.set("config", "morninganalysiscandleduration", str(self.morninganalysiscandleduration + endMDuration))
                 parser.set("config", "morninganalysiscandlenumber", str(self.morninganalysiscandlenumber))
+                parser.set("config", "myMonitorOptions", str(self.myMonitorOptions))
                 parser.set("config", "onlyStageTwoStocks", str(self.stageTwoPrompt))
                 if self.period:
                     endPeriod = str(self.period)[-1].lower()
@@ -681,6 +684,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.marketClose = str(parser.get("config", "marketClose"))
                 self.maxDashboardWidgetsPerRow = int(parser.get("config", "maxDashboardWidgetsPerRow"))
                 self.maxNumResultRowsInMonitor = int(parser.get("config", "maxNumResultRowsInMonitor"))
+                self.myMonitorOptions = str(parser.get("config", "myMonitorOptions"))
                 self.vcpLegsToCheckForConsolidation = int(parser.get("config", "vcpLegsToCheckForConsolidation"))
                 self.vcpVolumeContractionRatio = float(parser.get("config", "vcpVolumeContractionRatio"))
                 self.vcpRangePercentageFromTop = float(parser.get("config", "vcpRangePercentageFromTop"))

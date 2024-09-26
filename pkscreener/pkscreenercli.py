@@ -841,7 +841,7 @@ def pkscreenercli():
         # args.monitor = configManager.defaultMonitorOptions
         if args.monitor is not None:
             from pkscreener.classes.MenuOptions import NA_NON_MARKET_HOURS
-            configuredMonitorOptions = configManager.defaultMonitorOptions.split("~")
+            configuredMonitorOptions = configManager.defaultMonitorOptions.split("~") if len(configManager.myMonitorOptions) < 1 else configManager.myMonitorOptions.split("~")
             for monitorOption in NA_NON_MARKET_HOURS:
                 if monitorOption in configuredMonitorOptions and not PKDateUtilities.isTradingTime():
                     # These can't be run in non-market hours

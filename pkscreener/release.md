@@ -2,6 +2,7 @@
 
 ## What's New?
 1. [v0.45.20240925.588] release
+* My monitoring options added. Now you can add any scan to your own monitoring list and run it from -m or M > menu option.
 * Find a stock in scanners. You can now look-up a stock and find out which all basic standard scanners gave out that stock in result.
 * GPU enabled for running scans on computers where GPU device(s) is available
 * Excel hyperlinks enabled for stocks when the results are saved/exported to excel.

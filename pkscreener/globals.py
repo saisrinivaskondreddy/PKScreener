@@ -2000,7 +2000,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if len(monitorOption) == 0:
                 for choice in selectedChoice.keys():
                     monitorOption = (f"{monitorOption}:" if len(monitorOption) > 0  else '') + f"{selectedChoice[choice]}"
-            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results),monitorOption],skip=(["1","2"] if menuOption in ["F"] else []))
+            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results),monitorOption,monitorOption],skip=(["1","2","4"] if menuOption in ["F"] else []))
             pinOption = input(
                     colorText.FAIL + "  [+] Select option: "
                 ) or 'M'
@@ -2017,7 +2017,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with pinned scan option. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -m {scannerOptionQuoted}{colorText.END}")
                 sleep(2)
                 os.system(f"{launcher} -a Y -m {scannerOptionQuoted}")
-            elif pinOption in ["3","4"]:
+            elif pinOption in ["3"]:
                 from pkscreener.classes.keys import getKeyBoardArrowInput
                 message = f"\n  [+] {colorText.FAIL}Please use {colorText.END}{colorText.GREEN}Left / Right arrow keys{colorText.END} to slide through the {colorText.WARN}time-window by every 1 minute.{colorText.END}\n  [+] Use {colorText.GREEN}Up / Down arrow keys{colorText.END} to jump {colorText.GREEN}forward / backwards{colorText.END} by {colorText.WARN}{configManager.duration}{colorText.END}\n  [+] {colorText.FAIL}Press any oher key to cancel.{colorText.END}"
                 currentTime = PKDateUtilities.currentDateTime()
@@ -2084,7 +2084,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     OutputControls().printOutput(f"{colorText.WARN}Launching into the selected time-window!{colorText.END}{colorText.GREEN} Brace yourself for the time-travel!{colorText.END}")
                     sleep(5)
                     return main(userArgs=userPassedArgs, optionalFinalOutcome_df=optionalFinalOutcome_df)
-
+            elif pinOption in ["4"]:
+                prevMonitorOption = f"{configManager.myMonitorOptions}~" if len(configManager.myMonitorOptions) > 0 else ""
+                configManager.myMonitorOptions = f"{prevMonitorOption}{monitorOption}"
+                configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
+                OutputControls().printOutput(f"[+] {colorText.GREEN} Your monitoring options have been updated:{colorText.END}\n     {colorText.WARN}{configManager.myMonitorOptions}{colorText.END}\n[+] {colorText.GREEN}You can run it using the option menu {colorText.END}{colorText.FAIL}-m{colorText.END} {colorText.GREEN}or using the main launch option {colorText.END}{colorText.FAIL}M >{colorText.END}")
+                sleep(5)
             show_saved_diff_results = False
             return None, None
 
