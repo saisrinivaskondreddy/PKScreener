@@ -285,7 +285,7 @@ def test_pkscreenercli_monitor_mode():
     with patch("builtins.print") as mock_print:
         pkscreenercli.args.monitor = True
         pkscreenercli.pkscreenercli()
-        mock_print.assert_called_with('', sep=' ', end='\r', flush=False)
+        mock_print.assert_called_with('\x1b[32mBy using this Software and passing a value for [answerdefault=Y], you agree to\n[+] having read through the Disclaimer\x1b[0m (\x1b[97m\x1b]8;;https://pkjmesra.github.io/PKScreener/Disclaimer.txt\x1b\\https://pkjmesra.github.io/PKScreener/Disclaimer.txt\x1b]8;;\x1b\\\x1b[0m)\n[+]\x1b[32m and accept Terms Of Service \x1b[0m(\x1b[97m\x1b]8;;https://pkjmesra.github.io/PKScreener/tos.txt\x1b\\https://pkjmesra.github.io/PKScreener/tos.txt\x1b]8;;\x1b\\\x1b[0m)\x1b[32m of PKScreener. \x1b[0m\n[+] \x1b[33mIf that is not the case, you MUST immediately terminate PKScreener by pressing Ctrl+C now!\x1b[0m', sep=' ', end='\n', flush=False)
 
 def test_pkscreenercli_workflow_mode_screening():
     with patch("pkscreener.pkscreenercli.disableSysOut") as mock_disableSysOut:
