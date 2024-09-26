@@ -837,7 +837,7 @@ def pkscreenercli():
                 OutputControls().printOutput(f"{colorText.GREEN}By using this Software and passing a value for [{argKey}={arg}], you agree to\n[+] having read through the Disclaimer{colorText.END} ({disclaimerLink})\n[+]{colorText.GREEN} and accept Terms Of Service {colorText.END}({tosLink}){colorText.GREEN} of PKScreener. {colorText.END}\n[+] {colorText.WARN}If that is not the case, you MUST immediately terminate PKScreener by pressing Ctrl+C now!{colorText.END}")
                 sleep(2)
                 break
-        if not userAcceptance and (args is not None and args.answerdefault is not None and str(args.answerdefault).lower() != "y") or (args is not None and args.answerdefault is None):
+        if not userAcceptance and ((args is not None and args.answerdefault is not None and str(args.answerdefault).lower() != "y") or (args is not None and args.answerdefault is None)):
             userAcceptance = input(f"{colorText.WARN}By using this Software, you agree to\n[+] having read through the Disclaimer {colorText.END}({disclaimerLink}){colorText.WARN}\n[+] and accept Terms Of Service {colorText.END}({tosLink}){colorText.WARN} of PKScreener ? {colorText.END}(Y/N){colorText.GREEN}[Default: Y] :{colorText.END}") or "Y"
             if str(userAcceptance).lower() != "y":
                 OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and not accepted Terms Of Service of PKScreener. {colorText.END}{colorText.WARN}Exiting now!{colorText.END}")
