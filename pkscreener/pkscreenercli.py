@@ -822,6 +822,28 @@ def pkscreenercli():
             pass
     try:
         OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis)).printOutput("",end="\r")
+        if (args is not None and args.answerdefault is not None and str(args.answerdefault).lower() == "n"):
+            OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and Terms Of Service of PKScreener by passing in {colorText.END}{colorText.WARN}--answerdefault N or -a N{colorText.END}. Exiting now!")
+            sleep(5)
+            sys.exit(0)
+        allArgs = args.__dict__
+        userAcceptance = False
+        disclaimerLink = '\x1b[97m\x1b]8;;https://pkjmesra.github.io/PKScreener/Disclaimer.txt\x1b\\https://pkjmesra.github.io/PKScreener/Disclaimer.txt\x1b]8;;\x1b\\\x1b[0m'
+        tosLink = '\x1b[97m\x1b]8;;https://pkjmesra.github.io/PKScreener/tos.txt\x1b\\https://pkjmesra.github.io/PKScreener/tos.txt\x1b]8;;\x1b\\\x1b[0m'
+        for argKey in allArgs.keys():
+            arg = allArgs[argKey]
+            if arg is not None and arg:
+                userAcceptance = True
+                OutputControls().printOutput(f"{colorText.GREEN}By using this Software and passing a value for [{argKey}={arg}], you agree to\n[+] having read through the Disclaimer{colorText.END} ({disclaimerLink})\n[+]{colorText.GREEN} and accept Terms Of Service {colorText.END}({tosLink}){colorText.GREEN} of PKScreener. {colorText.END}\n[+] {colorText.WARN}If that is not the case, you MUST immediately terminate PKScreener by pressing Ctrl+C now!{colorText.END}")
+                sleep(2)
+                break
+        if not userAcceptance and (args is not None and args.answerdefault is not None and str(args.answerdefault).lower() != "y") or (args is not None and args.answerdefault is None):
+            userAcceptance = input(f"{colorText.WARN}By using this Software, you agree to\n[+] having read through the Disclaimer {colorText.END}({disclaimerLink}){colorText.WARN}\n[+] and accept Terms Of Service {colorText.END}({tosLink}){colorText.WARN} of PKScreener ? {colorText.END}(Y/N){colorText.GREEN}[Default: Y] :{colorText.END}") or "Y"
+            if str(userAcceptance).lower() != "y":
+                OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and not accepted Terms Of Service of PKScreener. {colorText.END}{colorText.WARN}Exiting now!{colorText.END}")
+                sleep(5)
+                sys.exit(0)
+
         configManager.getConfig(ConfigManager.parser)
         try:
             # Reset logging. If the user indeed passed the --log flag, it will be enabled later anyways
