@@ -807,6 +807,17 @@ def pipeResults(prevOutput,args):
         return True and hasFoundStocks
     return False
 
+def removeOldInstances():
+    import glob
+    pattern = "pkscreenercli*"
+    thisInstance = sys.argv[0]
+    for f in glob.glob(pattern, root_dir=os.getcwd(), recursive=True):
+        if not f.endswith(thisInstance):
+            try:
+                os.remove(f if os.sep in f else os.path.join(os.getcwd(),f))
+            except:
+                pass
+        
 def pkscreenercli():
     global originalStdOut, args
     if sys.platform.startswith("darwin"):
@@ -821,6 +832,7 @@ def pkscreenercli():
                 traceback.print_exc()
             pass
     try:
+        removeOldInstances()
         OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis)).printOutput("",end="\r")
         if (args is not None and args.answerdefault is not None and str(args.answerdefault).lower() == "n"):
             OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and Terms Of Service of PKScreener by passing in {colorText.END}{colorText.WARN}--answerdefault N or -a N{colorText.END}. Exiting now!")
