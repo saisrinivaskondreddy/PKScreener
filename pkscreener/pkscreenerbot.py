@@ -68,7 +68,10 @@ from PKDevTools.classes.MarketHours import MarketHours
 from pkscreener.classes.MenuOptions import MenuRenderStyle, menu, menus,MAX_MENU_OPTION
 from pkscreener.classes.WorkflowManager import run_workflow
 import pkscreener.classes.ConfigManager as ConfigManager
-from pkscreener.classes.DBManager import DBManager
+try:
+    from pkscreener.classes.DBManager import DBManager
+except:
+    pass
 
 monitor_proc = None
 configManager = ConfigManager.tools()

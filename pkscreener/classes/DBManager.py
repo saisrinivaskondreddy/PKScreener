@@ -22,8 +22,10 @@
     SOFTWARE.
 
 """
-
-import libsql_experimental as libsql
+try:
+    import libsql_experimental as libsql
+except:
+    pass
 import pyotp
 
 from PKDevTools.classes.log import default_logger
@@ -62,6 +64,15 @@ class DBManager:
             self.url = None
             self.token = None
         self.conn = None
+    
+    def shouldSkipLoading(self):
+        skipLoading = False
+        try:
+            import libsql_experimental as libsql
+        except:
+            skipLoading = True
+            pass
+        return skipLoading
     
     def connection(self):
         try:

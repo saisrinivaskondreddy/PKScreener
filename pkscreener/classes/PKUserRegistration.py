@@ -34,7 +34,11 @@ from PKDevTools.classes.log import default_logger
 
 class PKUserRegistration:
     def login():
-        if "RUNNER" in os.environ.keys():
+        try:
+            dbManager = DBManager()
+            if "RUNNER" in os.environ.keys() or dbManager.shouldSkipLoading():
+                return True
+        except:
             return True
         from pkscreener.classes import Utility
         Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
@@ -62,7 +66,6 @@ class PKUserRegistration:
             OutputControls().printOutput(f"{colorText.WARN}[+] Please enter a valid OTP!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
             sleep(3)
             return PKUserRegistration.login()
-        dbManager = DBManager()
         try:
             if dbManager.validateOTP(username,int(otp)):
                 configManager.userID = username
