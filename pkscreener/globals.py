@@ -1642,10 +1642,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         warningText = f"{warningText}\n\nMarket will be closed on {nextWeekday.strftime('%Y-%m-%d')} due to {tomorrowOccassion}."
                 except:
                     pass
-                sendMessageToTelegramChannel(
-                    message=f"{Utility.tools.removeAllColorStyles(Utility.marketStatus())}\nNifty AI prediction for the Next Day: {pText}. {sText}.{warningText}",
-                    user=user,
-                )
+                messageToUser = "Nifty AI prediction NOT available right now! Please try again later. Please let @itsonlypk know about this!"
+                if prediction != 0:
+                    messageToUser = f"{Utility.tools.removeAllColorStyles(Utility.marketStatus())}\nNifty AI prediction for the Next Day: {pText}. {sText}.{warningText}"
+                else:
+                    OutputControls().printOutput(messageToUser)
+                sendMessageToTelegramChannel(message=messageToUser,user=user)
                 if defaultAnswer is None:
                     input("\nPress <Enter> to Continue...\n")
                 return None, None
