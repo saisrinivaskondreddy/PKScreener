@@ -68,6 +68,7 @@ from PKDevTools.classes.MarketHours import MarketHours
 from pkscreener.classes.MenuOptions import MenuRenderStyle, menu, menus,MAX_MENU_OPTION
 from pkscreener.classes.WorkflowManager import run_workflow
 import pkscreener.classes.ConfigManager as ConfigManager
+from pkscreener.classes.DBManager import DBManager
 
 monitor_proc = None
 configManager = ConfigManager.tools()
@@ -172,6 +173,49 @@ def sanitiseTexts(text):
         return text[:MAX_MSG_LENGTH]
     return text
 
+def otp(update: Update, context: CallbackContext) -> str:
+    global bot_available
+    updateCarrier = None
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
+    logger.info("User %s started the conversation.", user.first_name)
+    if not bot_available:
+        # Sometimes, either the payment does not go through or 
+        # it takes time to process the last month's payment if
+        # done in the past 24 hours while the last date was today.
+        # If that happens, we won't be able to run bots or scanners
+        # without incurring heavy charges. Let's run in the 
+        # unavailable mode instead until this gets fixed.
+        updatedResults = APOLOGY_TEXT
+    
+    if bot_available:
+        try:
+            otpValue = 0
+            dbManager = DBManager()
+            otpValue = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
+        except Exception as e:
+            pass
+        userText = ""
+        if len(str(user.username)) >= 1:
+            userText = f"\nusername: {user.username} or \nuserID: {user.id}"
+        else:
+            userText = f"\nuserID: {user.id}"
+        if otpValue == 0:
+            updatedResults = f"We are having difficulty generating OTP for your {userText}. Please try again later."
+        else:
+            updatedResults = f"Use your {userText} \nwith the following OTP to login to PKScreener:\n{otpValue}\n\nValid only for 30 seconds."
+    update.message.reply_text(sanitiseTexts(updatedResults))
+    return START_ROUTES
+    
 def start(update: Update, context: CallbackContext, updatedResults=None, monitorIndex=0,chosenBotMenuOption="") -> str:
     """Send message on `/start`."""
     global bot_available
@@ -229,7 +273,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
         reply_markup = None
 
     if updatedResults is None:
-        cmdText = ""
+        cmdText = "\n/otp to generate an OTP to login to PKScreener desktop console"
         for cmd in cmds:
             cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
         tosDisclaimerText = "By using this Software, you agree to\n[+] having read through the Disclaimer (https://pkjmesra.github.io/PKScreener/Disclaimer.txt)\n[+] and accept Terms Of Service (https://pkjmesra.github.io/PKScreener/tos.txt) of PKScreener.\n\n[+] If that is not the case, you MUST immediately terminate using PKScreener and exit now!\n\n"
@@ -259,6 +303,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
             text=f"Name: {user.first_name}, Username:@{user.username} with ID: {str(user.id)} started using the bot!\n{chosenBotMenuOption}",
             parse_mode="HTML",
         )
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
     # Tell ConversationHandler that we're in state `FIRST` now
     return START_ROUTES
 
@@ -357,6 +402,18 @@ def XDevModeHandler(update: Update, context: CallbackContext) -> str:
 
 def XScanners(update: Update, context: CallbackContext) -> str:
     """Show new choice of buttons"""
+    updateCarrier = None
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
     query = update.callback_query
     if query is None:
         start(update, context)
@@ -433,6 +490,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
         menuText = f"{PKDateUtilities.currentDateTime()}:\n{menuText}"
     menuText = f"{menuText}\n\nClick /start if you want to restart the session."
     query.edit_message_text(text=menuText, reply_markup=reply_markup)
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
     return START_ROUTES
 
 
@@ -441,6 +499,19 @@ def Level2(update: Update, context: CallbackContext) -> str:
     inlineMenus = []
     menuText = "Hmm...It looks like you caught us taking a break! Try again later :-)"
     mns = []
+    updateCarrier = None
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
+
     query = update.callback_query
     query.answer()
     preSelection = (
@@ -651,6 +722,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
         sendUpdatedMenu(
             menuText=menuText, update=update, context=context, reply_markup=reply_markup
         )
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
     return START_ROUTES
 
 def default_markup(inlineMenus):
@@ -745,6 +817,18 @@ def launchScreener(options, user, context, optionChoices, update):
 
 def BBacktests(update: Update, context: CallbackContext) -> str:
     """Show new choice of buttons"""
+    updateCarrier = None
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
     query = update.callback_query
     query.answer()
     keyboard = [
@@ -760,6 +844,7 @@ def BBacktests(update: Update, context: CallbackContext) -> str:
         text=responseText,
         reply_markup=reply_markup,
     )
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
     return START_ROUTES
 
 
@@ -1201,6 +1286,19 @@ def help_command(update: Update, context: CallbackContext) -> None:
     if not bot_available:
         start(update, context)
         return START_ROUTES
+    updateCarrier = None
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
+
     cmds = m0.renderForMenu(
         selectedMenu=None,
         skip=TOP_LEVEL_SCANNER_SKIP_MENUS[:len(TOP_LEVEL_SCANNER_SKIP_MENUS)-1],
@@ -1223,6 +1321,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
             context.bot.send_message(
                 chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
             )
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
 
 
 def _shouldAvoidResponse(update):
@@ -1390,7 +1489,7 @@ def runpkscreenerbot(availability=True) -> None:
     # $ means "end of line/string"
     # So ^ABC$ will only allow 'ABC'
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[CommandHandler("start", start),CommandHandler("otp", otp)],
         states={
             START_ROUTES: [
                 CallbackQueryHandler(XScanners, pattern="^" + str("CX") + "$"),
@@ -1409,6 +1508,7 @@ def runpkscreenerbot(availability=True) -> None:
         },
         fallbacks=[CommandHandler("start", start)],
     )
+    dispatcher.add_handler(CommandHandler("otp", otp))
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(
         MessageHandler(Filters.text & ~Filters.command, help_command)

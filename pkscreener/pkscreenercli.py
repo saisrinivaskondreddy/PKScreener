@@ -65,6 +65,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["AUTOGRAPH_VERBOSITY"] = "0"
 
 printenabled=False
+LoggedIn = False
 originalStdOut=None
 original__stdout=None
 cron_runs=0
@@ -465,7 +466,7 @@ def runApplication():
         args.triggertimestamp = int(PKDateUtilities.currentDateTimestamp())
     else:
         args.triggertimestamp = int(args.triggertimestamp)
-    if args.systemlaunched:
+    if args.systemlaunched and args.options is not None:
         args.systemlaunched = args.options
     
     # if sys.argv[0].endswith(".py"):
@@ -941,7 +942,7 @@ def pkscreenercli():
             configManager.setConfig(
                 ConfigManager.parser, default=True, showFileCreatedText=False
             )
-        if args.systemlaunched:
+        if args.systemlaunched and args.options is not None:
             args.systemlaunched = args.options
             
         if args.telegram:
@@ -979,6 +980,12 @@ def pkscreenercli():
         if args.minprice:
             configManager.minLTP = args.minprice
             configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
+        global LoggedIn
+        if not LoggedIn and not args.telegram and not args.bot and not args.systemlaunched:
+            from pkscreener.classes.PKUserRegistration import PKUserRegistration
+            if not PKUserRegistration.login():
+                sys.exit(0)
+            LoggedIn = True
         if args.testbuild and not args.prodbuild:
             OutputControls().printOutput(
                 colorText.FAIL

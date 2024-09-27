@@ -8,6 +8,7 @@ gspread_pandas
 Halo
 joblib
 keras
+libsql-experimental
 lxml==4.9.4 # 5.0.0 or above causes problems.
 numpy
 openpyxl
@@ -17,6 +18,7 @@ Pillow==9.5.0 # Keep at this version because getsize_multiline is deprecated/rem
 PKDevTools
 PKNSETools
 Pyarrow
+pyotp
 pyppeteer
 pytz
 python-telegram-bot>=13.4,<20.0

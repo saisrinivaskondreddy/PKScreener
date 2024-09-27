@@ -50,6 +50,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
     def __init__(self):
         super(tools, self).__init__()
         self.appVersion = None
+        self.userID = None
         self.alwaysHiddenDisplayColumns = ",52Wk-L,RSI,22-Pd,Consol.,Pattern,CCI"
         self.consolidationPercentage = 10
         self.telegramImageFormat = "JPEG"
@@ -263,6 +264,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
             parser.set("config", "tosAccepted", "y" if self.tosAccepted else "n")
             parser.set("config", "useEMA", "y" if self.useEMA else "n")
+            parser.set("config", "userID", str(self.userID) if self.userID is not None and len(self.userID) >=1 else "")
             parser.set("config", "vcpLegsToCheckForConsolidation", str(self.vcpLegsToCheckForConsolidation))
             parser.set("config", "vcpRangePercentageFromTop", str(self.vcpRangePercentageFromTop))
             parser.set("config", "vcpVolumeContractionRatio", str(self.vcpVolumeContractionRatio))
@@ -537,6 +539,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
                 parser.set("config", "tosAccepted", str(self.tosAccepted))
                 parser.set("config", "useEMA", str(self.useEmaPrompt))
+                parser.set("config", "userID", str(self.userID) if self.userID is not None and len(self.userID) >=1 else "")
                 parser.set("config", "vcpLegsToCheckForConsolidation", str(self.vcpLegsToCheckForConsolidation))
                 parser.set("config", "vcpVolumeContractionRatio", str(self.vcpVolumeContractionRatio))
                 parser.set("config", "vcpRangePercentageFromTop", str(self.vcpRangePercentageFromTop))
@@ -594,6 +597,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 except:
                     pass
                 self.tosAccepted = self.appVersion == VERSION
+                self.userID = parser.get("config", "userID")
                 self.alwaysHiddenDisplayColumns = parser.get("config", "alwaysHiddenDisplayColumns")
                 self.duration = parser.get("config", "duration")
                 self.period = parser.get("config", "period")

@@ -2,6 +2,7 @@
 
 ## What's New?
 1. [v0.45.20240927.595] release
+* Telegram userID/username + OTP based auth for PKScreener added.
 * My monitoring options added. Now you can add any scan to your own monitoring list and run it from -m or M > menu option.
 * Find a stock in scanners. You can now look-up a stock and find out which all basic standard scanners gave out that stock in result.
 * GPU enabled for running scans on computers where GPU device(s) is available

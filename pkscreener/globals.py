@@ -905,9 +905,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
         launcher = f"python3.11 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
         if menuOption in ["M"]:
-            OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in monitoring mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -m 'X'{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit monitoring mode.{colorText.END}")
+            OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in monitoring mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --systemlaunched -a Y -m 'X'{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit monitoring mode.{colorText.END}")
             sleep(2)
-            os.system(f"{launcher} -a Y -m 'X'")
+            os.system(f"{launcher} --systemlaunched -a Y -m 'X'")
         elif menuOption in ["D"]:
             selectedMenu = m0.find(menuOption)
             Utility.tools.clearScreen(forceTop=True)
@@ -2016,9 +2016,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 launcher = f"python3.11 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
                 monitorOption = f'"{monitorOption}"'
                 scannerOptionQuoted = monitorOption.replace("'",'"')
-                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with pinned scan option. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -m {scannerOptionQuoted}{colorText.END}")
+                OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with pinned scan option. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --systemlaunched -a Y -m {scannerOptionQuoted}{colorText.END}")
                 sleep(2)
-                os.system(f"{launcher} -a Y -m {scannerOptionQuoted}")
+                os.system(f"{launcher} --systemlaunched -a Y -m {scannerOptionQuoted}")
             elif pinOption in ["3"]:
                 from pkscreener.classes.keys import getKeyBoardArrowInput
                 message = f"\n  [+] {colorText.FAIL}Please use {colorText.END}{colorText.GREEN}Left / Right arrow keys{colorText.END} to slide through the {colorText.WARN}time-window by every 1 minute.{colorText.END}\n  [+] Use {colorText.GREEN}Up / Down arrow keys{colorText.END} to jump {colorText.GREEN}forward / backwards{colorText.END} by {colorText.WARN}{configManager.duration}{colorText.END}\n  [+] {colorText.FAIL}Press any oher key to cancel.{colorText.END}"
