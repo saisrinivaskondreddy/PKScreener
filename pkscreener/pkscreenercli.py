@@ -832,7 +832,7 @@ def pkscreenercli():
                 traceback.print_exc()
             pass
     try:
-        removeOldInstances()
+        # removeOldInstances()
         OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis)).printOutput("",end="\r")
         if (args is not None and args.answerdefault is not None and str(args.answerdefault).lower() == "n"):
             OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and Terms Of Service of PKScreener by passing in {colorText.END}{colorText.WARN}--answerdefault N or -a N{colorText.END}. Exiting now!")
