@@ -812,9 +812,10 @@ def removeOldInstances():
     pattern = "pkscreenercli*"
     thisInstance = sys.argv[0]
     for f in glob.glob(pattern, root_dir=os.getcwd(), recursive=True):
-        if not f.endswith(thisInstance):
+        fileToDelete = f if (os.sep in f and f.startswith(thisInstance[:10])) else os.path.join(os.getcwd(),f)
+        if not fileToDelete.endswith(thisInstance):
             try:
-                os.remove(f if os.sep in f else os.path.join(os.getcwd(),f))
+                os.remove(fileToDelete)
             except:
                 pass
         
@@ -832,7 +833,7 @@ def pkscreenercli():
                 traceback.print_exc()
             pass
     try:
-        # removeOldInstances()
+        removeOldInstances()
         OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis)).printOutput("",end="\r")
         if (args is not None and args.answerdefault is not None and str(args.answerdefault).lower() == "n"):
             OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and Terms Of Service of PKScreener by passing in {colorText.END}{colorText.WARN}--answerdefault N or -a N{colorText.END}. Exiting now!")
