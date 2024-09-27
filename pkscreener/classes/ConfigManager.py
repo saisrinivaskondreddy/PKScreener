@@ -34,6 +34,7 @@ from PKDevTools.classes.log import default_logger
 from PKDevTools.classes.Singleton import SingletonType, SingletonMixin
 from PKDevTools.classes.OutputControls import OutputControls
 from PKDevTools.classes.MarketHours import MarketHours
+from pkscreener.classes import VERSION
 import re
 
 parser = configparser.ConfigParser(strict=False)
@@ -48,6 +49,7 @@ default_timeout = 2
 class tools(SingletonMixin, metaclass=SingletonType):
     def __init__(self):
         super(tools, self).__init__()
+        self.appVersion = None
         self.alwaysHiddenDisplayColumns = ",52Wk-L,RSI,22-Pd,Consol.,Pattern,CCI"
         self.consolidationPercentage = 10
         self.telegramImageFormat = "JPEG"
@@ -66,6 +68,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.showunknowntrends = True
         self.enablePortfolioCalculations = False
         self.logsEnabled = False
+        self.tosAccepted = False
         self.generalTimeout = 2
         self.defaultIndex = 12
         self.longTimeout = 4
@@ -212,6 +215,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "alwaysExportToExcel", "y" if self.alwaysExportToExcel else "n")
             parser.set("config", "alwaysHiddenDisplayColumns", str(self.alwaysHiddenDisplayColumns))
             parser.set("config", "anchoredAVWAPPercentage", str(self.anchoredAVWAPPercentage))
+            parser.set("config", "appVersion", str(self.appVersion))
             parser.set("config", "atrtrailingstopemaperiod", str(self.atrTrailingStopEMAPeriod))
             parser.set("config", "atrtrailingstopperiod", str(self.atrTrailingStopPeriod))
             parser.set("config", "atrtrailingstopsensitivity", str(self.atrTrailingStopSensitivity))
@@ -257,6 +261,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
             parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
             parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
+            parser.set("config", "tosAccepted", "y" if self.tosAccepted else "n")
             parser.set("config", "useEMA", "y" if self.useEMA else "n")
             parser.set("config", "vcpLegsToCheckForConsolidation", str(self.vcpLegsToCheckForConsolidation))
             parser.set("config", "vcpRangePercentageFromTop", str(self.vcpRangePercentageFromTop))
@@ -476,6 +481,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             try:
                 parser.set("config", "alwaysHiddenDisplayColumns", str(self.alwaysHiddenDisplayColumns))
                 parser.set("config", "anchoredAVWAPPercentage", str(self.anchoredAVWAPPercentage))
+                parser.set("config", "appVersion", str(self.appVersion))
                 parser.set("config", "atrtrailingstopemaperiod", str(self.atrTrailingStopEMAPeriod))
                 parser.set("config", "atrtrailingstopperiod", str(self.atrTrailingStopPeriod))
                 parser.set("config", "atrtrailingstopsensitivity", str(self.atrTrailingStopSensitivity))
@@ -529,6 +535,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "telegramImageFormat", str(self.telegramImageFormat))
                 parser.set("config", "telegramImageQualityPercentage", str(self.telegramImageQualityPercentage))
                 parser.set("config", "telegramSampleNumberRows", str(self.telegramSampleNumberRows))
+                parser.set("config", "tosAccepted", str(self.tosAccepted))
                 parser.set("config", "useEMA", str(self.useEmaPrompt))
                 parser.set("config", "vcpLegsToCheckForConsolidation", str(self.vcpLegsToCheckForConsolidation))
                 parser.set("config", "vcpVolumeContractionRatio", str(self.vcpVolumeContractionRatio))
@@ -582,6 +589,11 @@ class tools(SingletonMixin, metaclass=SingletonType):
     def getConfig(self, parser):
         if len(parser.read("pkscreener.ini")):
             try:
+                try:
+                    self.appVersion = parser.get("config", "appVersion")
+                except:
+                    pass
+                self.tosAccepted = self.appVersion == VERSION
                 self.alwaysHiddenDisplayColumns = parser.get("config", "alwaysHiddenDisplayColumns")
                 self.duration = parser.get("config", "duration")
                 self.period = parser.get("config", "period")
