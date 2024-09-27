@@ -853,9 +853,9 @@ def pkscreenercli():
                     sleep(2)
                     break
         if not userAcceptance and ((args is not None and args.answerdefault is not None and str(args.answerdefault).lower() != "y") or (args is not None and args.answerdefault is None)):
-            userAcceptance = input(f"{colorText.WARN}By using this Software, you agree to\n[+] having read through the Disclaimer {colorText.END}({disclaimerLink}){colorText.WARN}\n[+] and accept Terms Of Service {colorText.END}({tosLink}){colorText.WARN} of PKScreener ? {colorText.END}(Y/N){colorText.GREEN} [Default: Y] :{colorText.END}") or "Y"
+            userAcceptance = input(f"{colorText.WARN}By using this Software, you agree to\n[+] having read through the Disclaimer {colorText.END}({disclaimerLink}){colorText.WARN}\n[+] and accept Terms Of Service {colorText.END}({tosLink}){colorText.WARN} of PKScreener ? {colorText.END}(Y/N){colorText.GREEN} [Default: {colorText.END}{colorText.FAIL}N{colorText.END}{colorText.GREEN}] :{colorText.END}") or "N"
             if str(userAcceptance).lower() != "y":
-                OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and not accepted Terms Of Service of PKScreener. {colorText.END}{colorText.WARN}Exiting now!{colorText.END}")
+                OutputControls().printOutput(f"\n{colorText.WARN}You seem to have\n    [+] passed disagreement to the Disclaimer and \n    [+] not accepted Terms Of Service of PKScreener.\n{colorText.END}{colorText.FAIL}[+] You MUST read and agree to the disclaimer and MUST accept the Terms of Service to use PKScreener.{colorText.END}\n\n{colorText.WARN}Exiting now!{colorText.END}")
                 sleep(5)
                 sys.exit(0)
         try:
