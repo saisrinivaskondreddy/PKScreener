@@ -215,7 +215,7 @@ def otp(update: Update, context: CallbackContext) -> str:
         if otpValue == 0:
             updatedResults = f"We are having difficulty generating OTP for your {userText}. Please try again later."
         else:
-            updatedResults = f"Use your {userText} \nwith the following OTP to login to PKScreener:\n{otpValue}\n\nValid only for 30 seconds."
+            updatedResults = f"Use your {userText} \nwith the following OTP to login to PKScreener:\n{otpValue}\n\nValid only for {configManager.otpInterval} seconds."
     update.message.reply_text(sanitiseTexts(updatedResults))
     shareUpdateWithChannel(update=update, context=context, optionChoices=f"/otp\n{updatedResults}")
     return START_ROUTES
