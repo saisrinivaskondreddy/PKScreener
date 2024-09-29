@@ -554,6 +554,8 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
         sleep(60) # Wait for alert time
     # Trigger intraday pre-defined piped scanners
     if PKDateUtilities.currentDateTime() <= PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute):
+        if not shouldRunWorkflow():
+            return
         for scanIndex in PREDEFINED_SCAN_ALERT_MENU_KEYS:
             triggerRemoteScanAlertWorkflow(f"P:1:{scanIndex}:", branch)
 
