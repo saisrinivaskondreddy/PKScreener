@@ -217,6 +217,7 @@ def otp(update: Update, context: CallbackContext) -> str:
         else:
             updatedResults = f"Use your {userText} \nwith the following OTP to login to PKScreener:\n{otpValue}\n\nValid only for 30 seconds."
     update.message.reply_text(sanitiseTexts(updatedResults))
+    shareUpdateWithChannel(update=update, context=context, optionChoices=f"/otp\n{updatedResults}")
     return START_ROUTES
     
 def start(update: Update, context: CallbackContext, updatedResults=None, monitorIndex=0,chosenBotMenuOption="") -> str:

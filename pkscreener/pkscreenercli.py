@@ -981,7 +981,7 @@ def pkscreenercli():
             configManager.minLTP = args.minprice
             configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
         global LoggedIn
-        if not LoggedIn and not args.telegram and not args.bot and not args.systemlaunched:
+        if not LoggedIn and not args.telegram and not args.bot and not args.systemlaunched and not args.testbuild:
             from pkscreener.classes.PKUserRegistration import PKUserRegistration
             if not PKUserRegistration.login():
                 sys.exit(0)

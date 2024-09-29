@@ -29,6 +29,7 @@ except:
 import pyotp
 
 from PKDevTools.classes.log import default_logger
+from pkscreener.classes.ConfigManager import tools, parser
 
 class PKUser:
     userid=0
@@ -53,6 +54,7 @@ class PKUser:
         return user
 
 class DBManager:
+    configManager = tools(parser)
     def __init__(self):
         from dotenv import dotenv_values
         try:
@@ -92,11 +94,14 @@ class DBManager:
             if len(dbUsers) > 0:
                 token = dbUsers[0].totptoken
                 if token is not None:
-                    otpValue = int(pyotp.TOTP(token).now())
+                    otpValue = str(pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).now())
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
-        return otpValue == int(otp) and otpValue > 0
+        isValid = otpValue == str(otp) and int(otpValue) > 0
+        if not isValid:
+            isValid = pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).verify(otp=otp,valid_window=60)
+        return isValid
 
     def getOTP(self,userID,username,name,retry=False):
         try:
@@ -106,7 +111,7 @@ class DBManager:
                 if len(dbUsers) > 0:
                     token = dbUsers[0].totptoken
                     if token is not None:
-                        otpValue = pyotp.TOTP(token).now()
+                        otpValue = str(pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).now())
                     else:
                         # Update user
                         user = PKUser.userFromDBRecord([userID,username.lower(),name,dbUsers[0].email,dbUsers[0].mobile,dbUsers[0].passkey,pyotp.random_base32(),dbUsers[0].licensekey])

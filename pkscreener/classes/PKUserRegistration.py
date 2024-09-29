@@ -57,7 +57,7 @@ class PKUserRegistration:
         otp = input(f"[+] OTP received on telegram from @nse_pkscreener_bot:")
         invalidOTP = False
         try:
-            otp = int(otp)
+            otpTest = int(otp)
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             invalidOTP = True
@@ -67,7 +67,15 @@ class PKUserRegistration:
             sleep(3)
             return PKUserRegistration.login()
         try:
-            if dbManager.validateOTP(username,int(otp)):
+            userUsedUserID = False
+            try:
+                usernameInt = int(username)
+                userUsedUserID = True
+            except:
+                userUsedUserID = False
+                pass
+
+            if dbManager.validateOTP(username,str(otp)):
                 configManager.userID = username
                 configManager.setConfig(parser,default=True,showFileCreatedText=False)
                 Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
@@ -75,6 +83,6 @@ class PKUserRegistration:
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
-        OutputControls().printOutput(f"{colorText.WARN}[+] Invalid userID/username or OTP!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
+        OutputControls().printOutput(f"{colorText.WARN}[+] Invalid userID/username or OTP!{colorText.END}\n{colorText.GREEN}[+] May be try entering the {'UserID instead of username?' if userUsedUserID else 'Username instead of userID?'} {colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
         sleep(3)
         return PKUserRegistration.login()

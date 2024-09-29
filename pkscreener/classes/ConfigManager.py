@@ -53,6 +53,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         self.userID = None
         self.alwaysHiddenDisplayColumns = ",52Wk-L,RSI,22-Pd,Consol.,Pattern,CCI"
         self.consolidationPercentage = 10
+        self.otpInterval = 120
         self.telegramImageFormat = "JPEG"
         self.telegramImageCompressionRatio = 0.6
         self.telegramImageQualityPercentage = 20
@@ -247,6 +248,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             parser.set("config", "morninganalysiscandleduration", self.morninganalysiscandleduration)
             parser.set("config", "myMonitorOptions", str(self.myMonitorOptions))
             parser.set("config", "onlyStageTwoStocks", "y" if self.stageTwo else "n")
+            parser.set("config", "otpInterval", str(self.otpInterval))
             parser.set("config", "period", self.period)
             parser.set("config", "pinnedMonitorSleepIntervalSeconds", str(self.pinnedMonitorSleepIntervalSeconds))
             parser.set("config", "showPastStrategyData", "y" if self.showPastStrategyData else "n")
@@ -438,6 +440,9 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 self.atrTrailingStopEMAPeriod = input(
                     f"  [+] ATR Trailing Stop EMA Period. (number)({colorText.GREEN}Optimal = 1 to 200{colorText.END}, Current: {colorText.FAIL}{self.atrTrailingStopEMAPeriod}{colorText.END}): "
                 ) or self.atrTrailingStopEMAPeriod
+                self.otpInterval = input(
+                    f"  [+] OTP validity in seconds (number)({colorText.GREEN}Optimal = 30 to 120{colorText.END}, Current: {colorText.FAIL}{self.otpInterval}{colorText.END}): "
+                ) or self.otpInterval
                 self.vcpLegsToCheckForConsolidation = input(
                     f"  [+] Number of consolidation legs to check for VCP. (number)({colorText.GREEN}Optimal = 2{colorText.END},[Recommended: 3], Current: {colorText.FAIL}{self.vcpLegsToCheckForConsolidation}{colorText.END}): "
                 ) or self.vcpLegsToCheckForConsolidation
@@ -520,6 +525,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("config", "morninganalysiscandlenumber", str(self.morninganalysiscandlenumber))
                 parser.set("config", "myMonitorOptions", str(self.myMonitorOptions))
                 parser.set("config", "onlyStageTwoStocks", str(self.stageTwoPrompt))
+                parser.set("config", "otpInterval", str(self.otpInterval))
                 if self.period:
                     endPeriod = str(self.period)[-1].lower()
                     endPeriod = "d" if endPeriod not in ["d","o","y","x"] else ""
@@ -666,6 +672,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     else True
                 )
                 self.atrTrailingStopEMAPeriod = int(parser.get("config", "atrtrailingstopemaperiod"))
+                self.otpInterval = int(parser.get("config", "otpInterval"))
                 self.atrTrailingStopPeriod = int(parser.get("config", "atrtrailingstopperiod"))
                 self.atrTrailingStopSensitivity = float(parser.get("config", "atrtrailingstopsensitivity"))
                 self.generalTimeout = float(parser.get("config", "generalTimeout"))
