@@ -8,7 +8,7 @@ gspread_pandas
 Halo
 joblib
 keras
-libsql-experimental
+# libsql-experimental
 lxml==4.9.4 # 5.0.0 or above causes problems.
 numpy
 openpyxl
