@@ -49,12 +49,12 @@ class PKUserRegistration:
         if configManager.userID is not None and len(configManager.userID) >= 1:
             username = input(f"[+] Your Username or UserID from telegram: (Default: {colorText.GREEN}{configManager.userID}{colorText.END}): ") or configManager.userID
         else:
-            username = input(f"[+] Your Username or UserID from telegram:")
+            username = input(f"[+] {colorText.GREEN}Your Username or UserID from telegram: {colorText.END}")
         if username is None or len(username) <= 0:
             OutputControls().printOutput(f"{colorText.WARN}[+] You MUST register or login to use PKScreener!{colorText.END}\n[+] {colorText.FAIL}Exiting now!{colorText.END}")
             sleep(5)
             sys.exit(0)
-        otp = input(f"[+] OTP received on telegram from @nse_pkscreener_bot:")
+        otp = input(f"[+] {colorText.WARN}OTP received on telegram from {colorText.END}{colorText.GREEN}@nse_pkscreener_bot (Use command /otp to get OTP): {colorText.END}")
         invalidOTP = False
         try:
             otpTest = int(otp)

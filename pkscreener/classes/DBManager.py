@@ -54,7 +54,9 @@ class PKUser:
         return user
 
 class DBManager:
-    configManager = tools(parser)
+    configManager = tools()
+    configManager.getConfig(parser)
+    
     def __init__(self):
         from dotenv import dotenv_values
         try:
