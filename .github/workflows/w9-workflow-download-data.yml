@@ -274,12 +274,22 @@ jobs:
         pip3 install -r requirements.txt
         pip3 install .
 
+    - name: Configure env.dev file
+      run: |
+        python3 -c "import os; file = open('.env.dev', 'w'); file.write('CHAT_ID='+os.environ['CHAT_ID_PROD']+'\n'); file.write('TOKEN='+os.environ['TOKEN_DEV']+'\n'); file.write('chat_idADMIN='+os.environ['CHAT_IDADMIN_DEV']+'\n'); file.close()"
+        python3 -c "import os; file = open('pkscreener/.env.dev', 'w'); file.write('CHAT_ID='+os.environ['CHAT_ID_PROD']+'\n'); file.write('TOKEN='+os.environ['TOKEN_DEV']+'\n'); file.write('chat_idADMIN='+os.environ['CHAT_IDADMIN_DEV']+'\n'); file.close()"
+      shell: bash
+      env:
+        CHAT_ID_PROD : ${{secrets.CHAT_ID_PROD}}
+        TOKEN_DEV : ${{secrets.TOKEN_DEV}}
+        CHAT_IDADMIN_DEV : ${{secrets.CHAT_IDADMIN_DEV}}
+        
     - name: Trigger miscellaneous tasks that are download-data dependent
       if: ${{ inputs.skipDownload == '' }}
       shell: bash
       continue-on-error: true
       run: |
-        python3 .github/workflows/workflowtriggers.py -f --misc --user "-1002097332564"
+        python3 .github/workflows/workflowtriggers.py -f --misc
       env:
         GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
 
