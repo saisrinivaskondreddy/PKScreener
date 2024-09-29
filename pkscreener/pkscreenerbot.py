@@ -1309,7 +1309,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
         asList=True,
         renderStyle=MenuRenderStyle.STANDALONE,
     )
-    cmdText = ""
+    cmdText = "\n/otp to generate an OTP to login to PKScreener desktop console"
     for cmd in cmds:
         cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
     reply_markup = default_markup([])
