@@ -76,7 +76,7 @@ def test_deleteFileWithPattern(config_parser):
 def test_setConfig_non_default(config_parser):
     tool = tools()
     with patch('builtins.input') as mock_input, patch('builtins.open') as mock_open:
-        mock_input.side_effect = ['450', '30', '1', '20', '50000', '2.5', '10', 'n', 'n', 'n', 'n', 'n','n', '2', '4', '10', '30', '10000','1','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n']
+        mock_input.side_effect = ['450', '30', '1', '20', '50000', '2.5', '10', 'n', 'n', 'n', 'n', 'n','n', '2', '4', '10', '30', '10000','1','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n','\n']
         tool.setConfig(config_parser, default=False, showFileCreatedText=False)
         mock_open.assert_called_with('pkscreener.ini', 'w')
 
