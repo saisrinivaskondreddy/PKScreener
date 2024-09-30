@@ -103,12 +103,12 @@ class DBManager:
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
-        isValid = otpValue == str(otp) and int(otpValue) > 0
+        isValid = (otpValue == str(otp)) and int(otpValue) > 0
         if not isValid:
             isValid = pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).verify(otp=otp,valid_window=60)
             default_logger().debug(f"User entered OTP: {otp} did not match machine generated OTP: {otpValue} while the DB OTP was: {lastOTP} with local config interval:{DBManager.configManager.otpInterval}")
-            if not isValid:
-                isValid = otpValue == str(lastOTP) and int(otpValue) > 0
+            if not isValid and len(str(lastOTP)) > 0 and len(str(otp)) > 0:
+                isValid = (str(otp) == str(lastOTP)) or (int(otp) == int(lastOTP))
         return isValid
 
     def getOTP(self,userID,username,name,retry=False):
