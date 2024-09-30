@@ -580,6 +580,7 @@ class menus:
             scanOptionKeys.remove(scanOption)
         scanOptions = scanOptionKeys
         runOptions = []
+        runKeyOptions = {}
         topMenu = menu(menuKey=topLevel,level=0)
         for menuOption in menuOptions:
             for indexOption in indexOptions:
@@ -593,6 +594,7 @@ class menus:
                     if level1ChildMenus is None:
                         runOption = f"{menuOption}:{indexOption}:{childMenu.menuKey}:D:D:D:D:D"
                         runOptions.append(runOption)
+                        runKeyOptions[runOption.replace(":D","")] = childMenu.menuText.strip()
                     else:
                         for level1ChildMenu in level1ChildMenus:
                             if level1ChildMenu.menuText in ["Any/All","Cancel"]:
@@ -601,6 +603,7 @@ class menus:
                             if level2ChildMenus is None:
                                 runOption = f"{menuOption}:{indexOption}:{childMenu.menuKey}:{level1ChildMenu.menuKey}:D:D:D:D:D"
                                 runOptions.append(runOption)
+                                runKeyOptions[runOption.replace(":D","")] = f"{childMenu.menuText.strip()}>{level1ChildMenu.menuText.strip()}"
                             else:
                                 for level2ChildMenu in level2ChildMenus:
                                     if level2ChildMenu.menuText in ["Any/All","Cancel"]:
@@ -609,6 +612,7 @@ class menus:
                                     if level3ChildMenus is None:
                                         runOption = f"{menuOption}:{indexOption}:{childMenu.menuKey}:{level1ChildMenu.menuKey}:{level2ChildMenu.menuKey}:D:D:D:D:D"
                                         runOptions.append(runOption)
+                                        runKeyOptions[runOption.replace(":D","")] = f"{childMenu.menuText.strip()}>{level1ChildMenu.menuText.strip()}>{level2ChildMenu.menuText.strip()}"
                                     else:
                                         for level3ChildMenu in level3ChildMenus:
                                             if level3ChildMenu.menuText in ["Any/All","Cancel"]:
@@ -617,6 +621,7 @@ class menus:
                                             if level4ChildMenus is None:
                                                 runOption = f"{menuOption}:{indexOption}:{childMenu.menuKey}:{level1ChildMenu.menuKey}:{level2ChildMenu.menuKey}:{level3ChildMenu.menuKey}:D:D:D:D:D"
                                                 runOptions.append(runOption)
+                                                runKeyOptions[runOption.replace(":D","")] = f"{childMenu.menuText.strip()}>{level1ChildMenu.menuText.strip()}>{level2ChildMenu.menuText.strip()}>{level3ChildMenu.menuText.strip()}"
                                             else:
                                                 for level4ChildMenu in level4ChildMenus:
                                                     if level4ChildMenu.menuText in ["Any/All","Cancel"]:
@@ -625,6 +630,7 @@ class menus:
                                                     if level5ChildMenus is None:
                                                         runOption = f"{menuOption}:{indexOption}:{childMenu.menuKey}:{level1ChildMenu.menuKey}:{level2ChildMenu.menuKey}:{level3ChildMenu.menuKey}:{level4ChildMenu.menuKey}:D:D:D:D:D"
                                                         runOptions.append(runOption)
+                                                        runKeyOptions[runOption.replace(":D","")] = f"{childMenu.menuText.strip()}>{level1ChildMenu.menuText.strip()}>{level2ChildMenu.menuText.strip()}>{level3ChildMenu.menuText.strip()}>{level4ChildMenu.menuText.strip()}"
                                                     else:
                                                         for level5ChildMenu in level5ChildMenus:
                                                             if level5ChildMenu.menuText in ["Any/All","Cancel"]:
@@ -633,7 +639,8 @@ class menus:
                                                             if level6ChildMenus is None:
                                                                 runOption = f"{menuOption}:{indexOption}:{childMenu.menuKey}:{level1ChildMenu.menuKey}:{level2ChildMenu.menuKey}:{level3ChildMenu.menuKey}:{level4ChildMenu.menuKey}:{level5ChildMenu.menuKey}:D:D:D:D:D"
                                                                 runOptions.append(runOption)
-        return runOptions
+                                                                runKeyOptions[runOption.replace(":D","")] = f"{childMenu.menuText.strip()}>{level1ChildMenu.menuText.strip()}>{level2ChildMenu.menuText.strip()}>{level3ChildMenu.menuText.strip()}>{level4ChildMenu.menuText.strip()}>{level5ChildMenu.menuText.strip()}"
+        return runOptions, runKeyOptions
 
     def __init__(self):
         self.level = 0
@@ -1038,4 +1045,4 @@ class menus:
 # Cash rich small caps
 # https://www.tickertape.in/screener/equity/prebuilt/SCR0017
 
-m = menus.allMenus()
+# m = menus.allMenus()

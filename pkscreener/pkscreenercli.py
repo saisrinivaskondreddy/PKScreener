@@ -485,7 +485,7 @@ def runApplication():
         generateIntradayAnalysisReports(args)
     else:
         if args.testalloptions:
-            allMenus = menus.allMenus(index=0)
+            allMenus,_ = menus.allMenus(index=0)
             for scanOption in allMenus:
                  args.options = f"{scanOption}:SBIN,"
                  _, _ = main(userArgs=args)

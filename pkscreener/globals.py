@@ -2687,6 +2687,7 @@ def findPipedScannerOptionFromStdScanOptions(df_scr, df_sr,menuOption="X"):
     signalDict = {}
     grp_scr = {}
     grp_sr = {}
+    _,scanDescriptions = menus.allMenus()
     for stock_name, df_group in df_grouped_scr:
         items = []
         for item in list(df_group["MA-Signal"]):
@@ -2735,10 +2736,18 @@ def findPipedScannerOptionFromStdScanOptions(df_scr, df_sr,menuOption="X"):
         items = sorted(list(filter(None,list(set(items)))))
         try:
             with pd.option_context('mode.chained_assignment', None):
-                saveResults["ScanOption"].iloc[0] = " ,".join(items)
-                screenResults["ScanOption"].iloc[0] = " ,".join(items)
+                saveResults["ScanOption"].iloc[0] = "\n".join(items)
+                screenResults["ScanOption"].iloc[0] = "\n".join(items)
                 saveResults["MA-Signal"].iloc[0] = " ,".join(maSignals)
                 screenResults["MA-Signal"].iloc[0] = " ,".join(signalDictScr[stock_name])
+                descs = []
+                for item in items:
+                    if item in scanDescriptions.keys():
+                        descs.append(scanDescriptions[item])
+                    elif str(item).startswith("P"):
+                        descs.append(PREDEFINED_SCAN_MENU_TEXTS[int(str(item).split("_")[-1])-1])
+                screenResults["ScanDescription"] = "\n".join(descs)
+                saveResults["ScanDescription"] = "\n".join(descs)
                 saveResults.reset_index(inplace=True)
                 screenResults.reset_index(inplace=True)
                 saveResults = saveResults.drop(saveResults.index.to_list()[1:], axis=0)
