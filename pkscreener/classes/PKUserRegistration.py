@@ -34,6 +34,7 @@ from PKDevTools.classes.log import default_logger
 
 class PKUserRegistration:
     def login():
+        return True
         try:
             dbManager = DBManager()
             if "RUNNER" in os.environ.keys() or dbManager.shouldSkipLoading():
