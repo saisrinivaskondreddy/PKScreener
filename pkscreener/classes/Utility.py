@@ -389,8 +389,11 @@ class tools:
             pass
         return roundValue
     
-    def stockNameFromDecoratedName(stockName):
-        cleanName = tools.removeAllColorStyles(stockName.replace("\x1B]8;;","")).split("\x1B\\")[1]
+    def stockNameFromDecoratedName(stockName): 
+        cleanName = tools.removeAllColorStyles(stockName.replace("\x1B]8;;",""))
+        decoratedParts = cleanName.split("\x1B\\")
+        if len(decoratedParts) > 1:
+            cleanName = decoratedParts[1]
         return cleanName
     
     def stockDecoratedName(stockName,exchangeName):

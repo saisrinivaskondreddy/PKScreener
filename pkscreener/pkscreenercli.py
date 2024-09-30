@@ -437,7 +437,7 @@ def warnAboutDependencies():
             input("Press any key to try anyway...")
     
 def runApplication():
-    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions
+    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions,menuChoiceHierarchy
     # From a previous call to main with args, it may have been mutated.
     # Let's stock to the original args passed by user
     try:
@@ -453,7 +453,9 @@ def runApplication():
         argsv = argParser.parse_known_args(args=args)
         # argsv = argParser.parse_known_args()
         args = argsv[0]
-    if args is not None and not args.exit:
+    # During the previous run, we may have made several changes to the original args variable.
+    # We need to re-load the original args
+    if args is not None and not args.exit and not args.monitor:
         argsv = argParser.parse_known_args()
         args = argsv[0]
     # args.slicewindow = "2024-09-06 10:55:12.481253+05:30"
@@ -599,6 +601,8 @@ def runApplication():
                 if results is not None and len(monitorOption_org) > 0:
                     chosenMenu = args.pipedtitle if args.pipedtitle is not None else updateMenuChoiceHierarchy()
                     MarketMonitor().refresh(screen_df=results,screenOptions=monitorOption_org, chosenMenu=chosenMenu[:120],dbTimestamp=f"{dbTimestamp} | CycleTime:{elapsed_time}s",telegram=args.telegram)
+                    menuChoiceHierarchy = ""
+                    args.pipedtitle = ""
 
 def updateProgressStatus(args,monitorOptions=None):
     from pkscreener.classes.MenuOptions import PREDEFINED_SCAN_MENU_TEXTS,PREDEFINED_SCAN_MENU_VALUES

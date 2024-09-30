@@ -512,7 +512,7 @@ def showSendHelpInfo(defaultAnswer=None, user=None):
 
 def initExecution(menuOption=None):
     global selectedChoice, userPassedArgs
-    Utility.tools.clearScreen()
+    Utility.tools.clearScreen(forceTop=True)
     if (userPassedArgs is not None and userPassedArgs.pipedmenus is not None):
         OutputControls().printOutput(
         colorText.FAIL
@@ -566,7 +566,7 @@ def initPostLevel0Execution(
     menuOption=None, indexOption=None, executeOption=None, skip=[], retrial=False
 ):
     global newlyListedOnly, selectedChoice, userPassedArgs
-    Utility.tools.clearScreen()
+    Utility.tools.clearScreen(forceTop=True)
     if menuOption is None:
         OutputControls().printOutput('You must choose an option from the previous menu! Defaulting to "X"...')
         menuOption = "X"
@@ -619,7 +619,7 @@ def initPostLevel0Execution(
         )
         if not retrial:
             sleep(2)
-            Utility.tools.clearScreen()
+            Utility.tools.clearScreen(forceTop=True)
             return initPostLevel0Execution(retrial=True)
     return indexOption, executeOption
 
@@ -629,7 +629,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
     listStockCodes = [] if listStockCodes is None or len(listStockCodes) == 0 else listStockCodes
     if executeOption is None:
         if indexOption is not None and indexOption != "W":
-            Utility.tools.clearScreen()
+            Utility.tools.clearScreen(forceTop=True)
             OutputControls().printOutput(
                 colorText.FAIL
                 + "  [+] You chose: "
@@ -656,7 +656,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
                 else:
                     listStockCodes = [level1_index_options_sectoral[str(stockIndexCode)].split("(")[1].split(")")[0]]
                 selectedMenu.menuKey = "0" # Reset because user must have selected specific index menu with single stock
-                Utility.tools.clearScreen()
+                Utility.tools.clearScreen(forceTop=True)
                 m2.renderForMenu(selectedMenu=selectedMenu, skip=skip)
     try:
         needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
@@ -689,7 +689,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
         )
         if not retrial:
             sleep(2)
-            Utility.tools.clearScreen()
+            Utility.tools.clearScreen(forceTop=True)
             return initPostLevel1Execution(indexOption, executeOption, retrial=True)
     return indexOption, executeOption
 
@@ -816,7 +816,8 @@ def resetUserMenuChoiceOptions():
 
 @Halo(text='', spinner='dots')
 def refreshStockData(startupoptions=None):
-    global consumers,stockDictPrimary, loadedStockData, listStockCodes, stockDictSecondary
+    global consumers,stockDictPrimary, loadedStockData, listStockCodes, stockDictSecondary, menuChoiceHierarchy
+    menuChoiceHierarchy = ""
     options = startupoptions.replace("|","").split(" ")[0].replace(":i","")
     loadedStockData = False
     options, menuOption, indexOption, executeOption = getTopLevelMenuChoices(
@@ -890,7 +891,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     backtestPeriod = 0
     reversalOption = None
     listStockCodes = None
-    if not runCleanUp:
+    if not runCleanUp and not userPassedArgs.systemlaunched:
         cleanupLocalResults()
     if userPassedArgs.log:
         default_logger().debug(f"User Passed args: {userPassedArgs}")
@@ -1224,7 +1225,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if str(options[3]).isnumeric():
                 minRSI = int(options[3])
                 maxRSI = int(options[4])
-            elif str(options[3]).upper() == "D":
+            elif str(options[3]).upper() == "D" or userPassedArgs.systemlaunched:
                 # Use a default value
                 minRSI = 60
                 maxRSI = 75
@@ -1246,7 +1247,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 if len(options) >= 5:
                     if str(options[4]).isnumeric():
                         maLength = int(options[4])
-                    elif str(options[4]).upper() == "D":
+                    elif str(options[4]).upper() == "D" or userPassedArgs.systemlaunched:
                         maLength = 50 if reversalOption == 4 else (3 if reversalOption in [7] else (2 if reversalOption in [10] else 7))
                 elif defaultAnswer == "Y" and user is not None:
                     # bot mode
@@ -1275,12 +1276,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 if len(options) >= 5:
                     if "".join(str(options[4]).split(".")).isdecimal():
                         insideBarToLookback = float(options[4])
-                    elif str(options[4]).upper() == "D":
+                    elif str(options[4]).upper() == "D" or userPassedArgs.systemlaunched:
                         insideBarToLookback = 7 if respChartPattern in [1, 2] else 0.02
                     if len(options) >= 6:
                         if str(options[5]).isnumeric():
                             maLength = int(options[5])
-                        elif str(options[5]).upper() == "D":
+                        elif str(options[5]).upper() == "D" or userPassedArgs.systemlaunched:
                             maLength = 4 # Super Conf. up
                 elif defaultAnswer == "Y" and user is not None:
                     if maLength == 0:
@@ -1303,7 +1304,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     if len(options) >= 5:
                         if str(options[4]).isnumeric():
                             maLength = int(options[4])
-                        elif str(options[4]).upper() == "D":
+                        elif str(options[4]).upper() == "D" or userPassedArgs.systemlaunched:
                             maLength = 1 if respChartPattern == 6 else 6 # Bollinger Bands Squeeze-Buy or MA-Support
                     elif defaultAnswer == "Y" and user is not None:
                         # bot mode
@@ -1319,7 +1320,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             respChartPattern, insideBarToLookback = Utility.tools.promptChartPatterns(
                 selectedMenu
             )
-            if respChartPattern in [4]:
+            if respChartPattern in [4] and not userPassedArgs.systemlaunched:
                 userInput = str(
                     input(
                         f"  [+] Enable additional VCP filters like range and consolidation? [Y/N, Current: {colorText.FAIL}{'y' if configManager.enableAdditionalVCPFilters else 'n'}{colorText.END}]: "
@@ -1354,7 +1355,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 elif respChartPattern in [1, 2]:
                     maLength = 1
             if maLength == 4 and respChartPattern == 3: # Super-confluence setup
-                if len(options) <= 5:
+                if len(options) <= 5 and not userPassedArgs.systemlaunched:
                     configManager.superConfluenceMaxReviewDays = input(
                         f"  [+] Max number of review days for super-confluence-checks. (number)({colorText.GREEN}Optimal = 3-7{colorText.END}, Current: {colorText.FAIL}{configManager.superConfluenceMaxReviewDays}{colorText.END}): "
                     ) or configManager.superConfluenceMaxReviewDays
@@ -1993,7 +1994,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 (userPassedArgs.user is None or 
                     str(userPassedArgs.user) == DEV_CHANNEL_ID) and 
                 (userPassedArgs.answerdefault is None or userPassedArgs.systemlaunched))) and
-                    not userPassedArgs.testbuild):
+                    not userPassedArgs.testbuild and 
+                    userPassedArgs.monitor is None):
         prevOutput_results = saveResults.index if (saveResults is not None and not saveResults.empty) else []
         isNotPiped = (("|" not in userPassedArgs.options) if (userPassedArgs is not None and userPassedArgs.options is not None) else True)
         hasFoundStocks = len(prevOutput_results) > 0 and isNotPiped
@@ -2398,7 +2400,7 @@ def showSortedBacktestData(backtest_df, summary_df, sortKeys):
                     )
         OutputControls().printOutput(colorText.END, end="")
         if choice.upper() in sortKeys.keys():
-            Utility.tools.clearScreen()
+            Utility.tools.clearScreen(forceTop=True)
             showBacktestResults(backtest_df, sortKeys[choice.upper()])
             showBacktestResults(summary_df, optionalName="Summary")
         else:
@@ -2477,7 +2479,7 @@ def handleMonitorFiveEMA():
                 )
     try:
         while True:
-            Utility.tools.clearScreen()
+            Utility.tools.clearScreen(forceTop=True)
             last_result_len = len(result_df)
             try:
                 result_df = screener.monitorFiveEma(
@@ -3889,7 +3891,7 @@ def showOptionErrorMessage():
         + colorText.END
     )
     sleep(2)
-    Utility.tools.clearScreen()
+    Utility.tools.clearScreen(forceTop=True)
 
 def takeBacktestInputs(
     menuOption=None, indexOption=None, executeOption=None, backtestPeriod=0
