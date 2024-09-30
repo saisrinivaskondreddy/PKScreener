@@ -27,6 +27,7 @@ try:
 except:
     pass
 import pyotp
+from time import sleep
 
 from PKDevTools.classes.log import default_logger
 from pkscreener.classes.ConfigManager import tools, parser
@@ -95,16 +96,19 @@ class DBManager:
         try:
             otpValue = 0
             dbUsers = self.getUserByIDorUsername(userIDOrName)
+            token = ""
             if len(dbUsers) > 0:
                 token = dbUsers[0].totptoken
                 lastOTP = dbUsers[0].lastotp
                 if token is not None:
                     otpValue = str(pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).now())
+            else:
+                print(f"Could not locate user: {userIDOrName}")
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
         isValid = (otpValue == str(otp)) and int(otpValue) > 0
-        if not isValid:
+        if not isValid and len(token) > 0:
             isValid = pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).verify(otp=otp,valid_window=60)
             default_logger().debug(f"User entered OTP: {otp} did not match machine generated OTP: {otpValue} while the DB OTP was: {lastOTP} with local config interval:{DBManager.configManager.otpInterval}")
             if not isValid and len(str(lastOTP)) > 0 and len(str(otp)) > 0:
@@ -148,6 +152,9 @@ class DBManager:
             for row in records.rows:
                 users.append(PKUser.userFromDBRecord(row))
             # cursor.close()
+            if len(records.columns) > 0 and len(records.rows) <= 0:
+                # Let's tell the user
+                default_logger().debug(f"User: {userID} not found! Probably needs registration?")
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
@@ -166,12 +173,17 @@ class DBManager:
             except:
                 userID = 0
                 pass
-            records = cursor.execute(f"SELECT * FROM users WHERE userid={self.sanitisedIntValue(userID)} or username={self.sanitisedStrValue(userIDOrusername.lower())}") #.fetchall()
+            if userID == 0:
+                records = cursor.execute(f"SELECT * FROM users WHERE username={self.sanitisedStrValue(userIDOrusername.lower())}") #.fetchall()
+            else:
+                records = cursor.execute(f"SELECT * FROM users WHERE userid={self.sanitisedIntValue(userID)}") #.fetchall()
             for row in records.rows:
                 users.append(PKUser.userFromDBRecord(row))
             if len(records.columns) > 0 and len(records.rows) <= 0:
                 # Let's tell the user
                 default_logger().debug(f"User: {userIDOrusername} not found! Probably needs registration?")
+                print(f"Could not locate user: {userIDOrusername}. Please reach out to the developer!")
+                sleep(3)
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
