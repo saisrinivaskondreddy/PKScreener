@@ -174,6 +174,7 @@ args = argsv[0]
 originalStdOut = sys.stdout
 original__stdout = sys.__stdout__
 
+# args.barometer = True
 # args.force = True
 # args.misc = True
 # args.scans = True
@@ -615,7 +616,7 @@ def triggerRemoteScanAlertWorkflow(scanOptions, branch):
         alertTrigger = 'Y'
     else:
         alertTrigger = 'N'
-    if args.user is None or len(args.user) == 0:
+    if args.user is None or len(str(args.user)) == 0:
         args.user = ""
         postdata = (
                     '{"ref":"'
