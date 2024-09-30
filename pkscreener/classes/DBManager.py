@@ -40,6 +40,7 @@ class PKUser:
     passkey=""
     totptoken=""
     licensekey=""
+    lastotp=""
 
     def userFromDBRecord(row):
         user = PKUser()
@@ -51,6 +52,7 @@ class PKUser:
         user.passkey= row[5]
         user.totptoken= row[6]
         user.licensekey= row[7]
+        user.lastotp= row[8]
         return user
 
 class DBManager:
@@ -95,6 +97,7 @@ class DBManager:
             dbUsers = self.getUserByIDorUsername(userIDOrName)
             if len(dbUsers) > 0:
                 token = dbUsers[0].totptoken
+                lastOTP = dbUsers[0].lastotp
                 if token is not None:
                     otpValue = str(pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).now())
         except Exception as e:
@@ -103,6 +106,9 @@ class DBManager:
         isValid = otpValue == str(otp) and int(otpValue) > 0
         if not isValid:
             isValid = pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).verify(otp=otp,valid_window=60)
+            default_logger().debug(f"User entered OTP: {otp} did not match machine generated OTP: {otpValue} while the DB OTP was: {lastOTP} with local config interval:{DBManager.configManager.otpInterval}")
+            if not isValid:
+                isValid = otpValue == str(lastOTP) and int(otpValue) > 0
         return isValid
 
     def getOTP(self,userID,username,name,retry=False):
@@ -116,7 +122,7 @@ class DBManager:
                         otpValue = str(pyotp.TOTP(token,interval=int(DBManager.configManager.otpInterval)).now())
                     else:
                         # Update user
-                        user = PKUser.userFromDBRecord([userID,username.lower(),name,dbUsers[0].email,dbUsers[0].mobile,dbUsers[0].passkey,pyotp.random_base32(),dbUsers[0].licensekey])
+                        user = PKUser.userFromDBRecord([userID,username.lower(),name,dbUsers[0].email,dbUsers[0].mobile,dbUsers[0].passkey,pyotp.random_base32(),dbUsers[0].licensekey,dbUsers[0].lastotp])
                         self.updateUser(user)
                         return self.getOTP(userID,username,name,retry=True)
                 else:
@@ -127,13 +133,18 @@ class DBManager:
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
+        try:
+            self.updateOTP(userID,otpValue)
+        except Exception as e:
+            default_logger().debug(e, exc_info=True)
+            pass
         return otpValue
 
     def getUserByID(self,userID):
         try:
             users = []
             cursor = self.connection() #.cursor()
-            records = cursor.execute(f"SELECT * FROM users WHERE userid=?",(self.sanitisedIntValue(userID),)) #.fetchall()
+            records = cursor.execute(f"SELECT * FROM users WHERE userid={self.sanitisedIntValue(userID)}") #.fetchall()
             for row in records.rows:
                 users.append(PKUser.userFromDBRecord(row))
             # cursor.close()
@@ -193,9 +204,22 @@ class DBManager:
 
     def updateUser(self,user:PKUser):
         try:
-            result = self.connection().execute(f"UPDATE users SET username={self.sanitisedStrValue(user.username.lower())},name={self.sanitisedStrValue(user.name)},email={self.sanitisedStrValue(user.email)},mobile={self.sanitisedIntValue(user.mobile)},passkey={self.sanitisedStrValue(user.passkey)},totptoken={self.sanitisedStrValue(user.totptoken)},licensekey={self.sanitisedStrValue(user.licensekey)} WHERE userid={self.sanitisedIntValue(user.userid)}")
+            result = self.connection().execute(f"UPDATE users SET username={self.sanitisedStrValue(user.username.lower())},name={self.sanitisedStrValue(user.name)},email={self.sanitisedStrValue(user.email)},mobile={self.sanitisedIntValue(user.mobile)},passkey={self.sanitisedStrValue(user.passkey)},totptoken={self.sanitisedStrValue(user.totptoken)},licensekey={self.sanitisedStrValue(user.licensekey)},lastotp={self.sanitisedStrValue(user.lastotp)} WHERE userid={self.sanitisedIntValue(user.userid)}")
             if result.rows_affected > 0:
                 default_logger().debug(f"User: {user.userid} updated!")
+        except Exception as e:
+            default_logger().debug(e, exc_info=True)
+            pass
+        finally:
+            if self.conn is not None:
+                self.conn.close()
+                self.conn = None
+
+    def updateOTP(self,userID,otp):
+        try:
+            result = self.connection().execute(f"UPDATE users SET lastotp={self.sanitisedStrValue(otp)} WHERE userid={self.sanitisedIntValue(userID)}")
+            if result.rows_affected > 0:
+                default_logger().debug(f"User: {userID} updated with otp: {otp}!")
         except Exception as e:
             default_logger().debug(e, exc_info=True)
             pass
