@@ -415,10 +415,23 @@ class tools:
             colorText.BRIGHTRED,
             colorText.WHITE,
         ]
-        cleanedUpStyledValue = str(styledText)
-        for style in styles:
-            cleanedUpStyledValue = cleanedUpStyledValue.replace(style, "")
-        return cleanedUpStyledValue
+        if isinstance(styledText,pd.DataFrame):
+            styledTextCopy = styledText.copy()
+            with pd.option_context('mode.chained_assignment', None):
+                for col in styledTextCopy.columns:
+                    for style in styles:
+                        try:
+                            styledTextCopy[col] = styledTextCopy[col].astype(str).str.replace(style,"")
+                        except:
+                            pass
+            return styledTextCopy
+        elif isinstance(styledText,str):
+            cleanedUpStyledValue = str(styledText)
+            for style in styles:
+                cleanedUpStyledValue = cleanedUpStyledValue.replace(style, "")
+            return cleanedUpStyledValue
+        else:
+            return styledText
 
     def getCellColors(cellStyledValue="", defaultCellFillColor="black"):
         otherStyles = [colorText.HEAD, colorText.BOLD, colorText.UNDR]
@@ -1229,7 +1242,7 @@ class tools:
 
     def make_hyperlink(value):
         url = "https://in.tradingview.com/chart?symbol=NSE:{}"
-        return '=HYPERLINK("%s", "%s")' % (url.format(value), value)
+        return '=HYPERLINK("%s", "%s")' % (url.format(tools.stockNameFromDecoratedName(value)), value)
 
     # Save screened results to excel
     def promptSaveResults(sheetName,df_save, defaultAnswer=None,pastDate=None):
@@ -1245,7 +1258,9 @@ class tools:
         try:
             data = data.fillna(0)
             data = data.replace([np.inf, -np.inf], 0)
-        except:
+            data = tools.removeAllColorStyles(data)
+        except Exception as e:
+            default_logger().debug(e,exc_info=True)
             pass
         try:
             data.reset_index(inplace=True)
@@ -1289,7 +1304,7 @@ class tools:
                 # Create a Pandas Excel writer using XlsxWriter as the engine.
                 writer = pd.ExcelWriter(filePath, engine='xlsxwriter') # openpyxl throws an error exporting % sign.
                 # Convert the dataframe to an XlsxWriter Excel object.
-                df.to_excel(writer, sheet_name=sheetName)
+                df.to_excel(writer, sheet_name=sheetName[-31:1]) # sheetname cannot be beyond 31 character
                 # Close the Pandas Excel writer and output the Excel file.
                 writer.close()
                 isSaved = True

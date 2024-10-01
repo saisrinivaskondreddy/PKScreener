@@ -3862,7 +3862,13 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
         with open(filename, "w") as f:
             f.write(colored_text)
         Committer.execOSCommand(f"git add {filename} -f >/dev/null 2>&1")
-
+    try:
+        # Save in excel file as well if the config is set to do so
+        if configManager.alwaysExportToExcel:
+            excelSheetname = filename.split(os.sep)[-1].replace("PKScreener_","").replace(".html","")
+            Utility.tools.promptSaveResults(sheetName=excelSheetname,df_save=backtest_df,defaultAnswer=userPassedArgs.answerdefault,pastDate=None)
+    except:
+        pass
     if lastSummaryRow is not None:
         oneline_text = lastSummaryRow.to_html(header=False, index=False)
         oneline_text = reformatTable(
