@@ -1304,7 +1304,7 @@ class tools:
                 # Create a Pandas Excel writer using XlsxWriter as the engine.
                 writer = pd.ExcelWriter(filePath, engine='xlsxwriter') # openpyxl throws an error exporting % sign.
                 # Convert the dataframe to an XlsxWriter Excel object.
-                df.to_excel(writer, sheet_name=sheetName[-31:1]) # sheetname cannot be beyond 31 character
+                df.to_excel(writer, sheet_name=sheetName[-31:]) # sheetname cannot be beyond 31 character
                 # Close the Pandas Excel writer and output the Excel file.
                 writer.close()
                 isSaved = True
