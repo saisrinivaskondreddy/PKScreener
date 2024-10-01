@@ -131,7 +131,7 @@ class DBManager:
                         return self.getOTP(userID,username,name,retry=True)
                 else:
                     # Insert user
-                    user = PKUser.userFromDBRecord([userID,username.lower(),name,None,None,None,pyotp.random_base32(),None])
+                    user = PKUser.userFromDBRecord([userID,username.lower(),name,None,None,None,pyotp.random_base32(),None,None])
                     self.insertUser(user)
                     return self.getOTP(userID,username,name,retry=True)
         except Exception as e:
