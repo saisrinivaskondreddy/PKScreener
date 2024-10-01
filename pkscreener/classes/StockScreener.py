@@ -143,7 +143,7 @@ class StockScreener:
             
             bidGreaterThanAsk = False
             bidAskRatio = 0
-            if executeOption == 29:
+            if executeOption == 29: # Bid vs Ask 
                 hostRef.intradayNSEFetcher.symbol = stock.upper()
                 priceData = hostRef.intradayNSEFetcher.price_order_info()
                 if priceData is not None:

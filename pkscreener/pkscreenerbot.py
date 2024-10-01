@@ -148,7 +148,7 @@ SCANNER_SUBMENUS_CHILDLEVEL_SUPPORT = {"6":[ "7","10"], "7":[ "3","6","9"],}
 
 INDEX_COMMANDS_SKIP_MENUS_SCANNER = ["W", "E", "M", "Z", "S"]
 INDEX_COMMANDS_SKIP_MENUS_BACKTEST = ["W", "E", "M", "Z", "S", "N", "0", "15"]
-PIPED_SCAN_SKIP_COMMAND_MENUS =["2", "3", "M", "0"]
+PIPED_SCAN_SKIP_COMMAND_MENUS =["2", "3", "M", "0", "4"]
 UNSUPPORTED_COMMAND_MENUS =["22","42","M","Z","0",str(MAX_MENU_OPTION)]
 SUPPORTED_COMMAND_MENUS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"]
 
@@ -784,13 +784,6 @@ def launchScreener(options, user, context, optionChoices, update):
                 update=update, context=context, optionChoices=optionChoices
             )
             # run_workflow(optionChoices, str(user.id), str(options.upper()))
-        elif str(optionChoices.upper()).startswith("X") or str(optionChoices.upper()).startswith("P"):
-            optionChoices = optionChoices.replace(" ", "").replace(">", "_")
-            while optionChoices.endswith("_"):
-                optionChoices = optionChoices[:-1]
-            run_workflow(
-                optionChoices, str(user.id), str(options.upper().replace(":7:3:4",":7:3:0.008:4")), workflowType="X"
-            )
         elif str(optionChoices.upper()).startswith("G"):
             optionChoices = optionChoices.replace(" ", "").replace(">", "_")
             while optionChoices.endswith("_"):
@@ -798,6 +791,13 @@ def launchScreener(options, user, context, optionChoices, update):
             options = options.upper().replace("G", "G:3").replace("::", ":D:D:D")
             run_workflow(
                 optionChoices, str(user.id), str(options.upper()), workflowType="G"
+            )
+        else: #str(optionChoices.upper()).startswith("X") or str(optionChoices.upper()).startswith("P"):
+            optionChoices = optionChoices.replace(" ", "").replace(">", "_")
+            while optionChoices.endswith("_"):
+                optionChoices = optionChoices[:-1]
+            run_workflow(
+                optionChoices, str(user.id), str(options.upper().replace(":7:3:4",":7:3:0.008:4")), workflowType="X"
             )
             # Popen(
             #     [
@@ -975,6 +975,11 @@ def command_handler(update: Update, context: CallbackContext) -> None:
     if cmd == "help":
         help_command(update=update, context=context)
         return START_ROUTES
+    cmdText = ""
+    cmdText = f"{cmdText}\n/X_0 STOCK_CODE_HERE To get the stock analysis of an individual Stock"
+    cmdText = f"{cmdText}\n/X_0 STOCK_CODE1,STOCK_CODE2 To get the stock analysis of multiple individual Stocks"
+    cmdText = f"{cmdText}\n/F_0 STOCK_CODE1,STOCK_CODE2 To find which all scanners had these stock codes(Reverse look up)"
+
     if cmd.upper() in TOP_LEVEL_SCANNER_MENUS:
         shareUpdateWithChannel(update=update, context=context)
         m0.renderForMenu(
@@ -984,7 +989,6 @@ def command_handler(update: Update, context: CallbackContext) -> None:
             renderStyle=MenuRenderStyle.STANDALONE,
         )
         selectedMenu = m0.find(cmd.upper())
-        cmdText = ""
         cmds = m1.renderForMenu(
             selectedMenu=selectedMenu,
             skip=(INDEX_COMMANDS_SKIP_MENUS_SCANNER  if cmd in ["x"] else (INDEX_COMMANDS_SKIP_MENUS_BACKTEST if cmd in ["b"] else PIPED_SCAN_SKIP_COMMAND_MENUS)),
@@ -1007,7 +1011,8 @@ def command_handler(update: Update, context: CallbackContext) -> None:
     if update.message is None:
         help_command(update=update, context=context)
         return START_ROUTES
-    if "x_0" in cmd or "x_0_0" in cmd or "b_0" in cmd or "g_0" in cmd:
+
+    if "x_0" in cmd or "x_0_0" in cmd or "b_0" in cmd or "g_0" in cmd or "f_0" in cmd:
         shareUpdateWithChannel(update=update, context=context)
         shouldScan = False
         if len(args) > 0:
@@ -1061,7 +1066,6 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                 asList=True,
                 renderStyle=MenuRenderStyle.STANDALONE,
             )
-            cmdText = ""
             for cmd in cmds:
                 cmdText = (
                     f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
@@ -1128,7 +1132,6 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                 asList=True,
                 renderStyle=MenuRenderStyle.STANDALONE,
             )
-            cmdText = ""
             for cmd in cmds:
                 cmdText = (
                     f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
@@ -1169,7 +1172,6 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                     renderStyle=MenuRenderStyle.STANDALONE,
                     skip=["0"],
                 )
-                cmdText = ""
                 for cmd in cmds:
                     cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
                 cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
@@ -1228,7 +1230,6 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                             renderStyle=MenuRenderStyle.STANDALONE,
                             skip=["0"],
                         )
-                        cmdText = ""
                         for cmd in cmds:
                             cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
                         cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
@@ -1361,6 +1362,10 @@ def _shouldAvoidResponse(update):
 
 
 def addCommandsForMenuItems(application):
+    # Add commands for x_0, x_0_0 and f_0
+    application.add_handler(CommandHandler("X_0", command_handler))
+    application.add_handler(CommandHandler("X_0_0", command_handler))
+    application.add_handler(CommandHandler("F_0", command_handler))
     cmds0 = m0.renderForMenu(
         selectedMenu=None,
         skip=TOP_LEVEL_SCANNER_SKIP_MENUS[:len(TOP_LEVEL_SCANNER_SKIP_MENUS)-1],
