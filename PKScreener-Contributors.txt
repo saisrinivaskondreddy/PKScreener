@@ -1,2 +1,3 @@
-Name,           ContributionAmount, ContributionDate,   TelegramID,                 TransactionID,  Mode,   MessageFromMember,
-Vivek Pra,      ₹ 2000,             2024-10-01,         <Your Telegram ID Here>,    427536035732,   UPI,    <Your Message to PKScreener Here>,
+Name,           ContributionAmount, ContributionDate,   TelegramID,                 TransactionID,  Mode,           Frequency,          MessageFromMember,
+Vivek Pra,      ₹ 2000,             2024-10-01,         <Your Telegram ID Here>,    427536035732,   UPI,            OneTime,            <Your Message to PKScreener Here>,
+Sandeep Kumar,  $ 5 (₹419.74),      2024-10-05,         @sandykools,                NA,             GitHubSponsor,  Monthly,            <Your Message to PKScreener Here>,
