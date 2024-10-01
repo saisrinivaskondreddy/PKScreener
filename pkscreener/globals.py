@@ -184,7 +184,7 @@ def finishScreening(
         saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
         )
-    if "RUNNER" in os.environ.keys() and not downloadOnly:
+    if ("RUNNER" in os.environ.keys() and not downloadOnly) or userPassedArgs.log:
         sendMessageToTelegramChannel(mediagroup=True,user=userPassedArgs.user)
 
 def getDownloadChoices(defaultAnswer=None):
@@ -1447,6 +1447,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     executeOption,
                     menuOption
                 )
+                finishScreening(downloadOnly=downloadOnly,testing=testing,stockDictPrimary=stockDictPrimary,configManager=configManager,loadCount=0,testBuild=testBuild,screenResults=screenResults,saveResults=saveResults,user=userPassedArgs.user)
                 if defaultAnswer is None:
                     input("Press <Enter> to continue...")
                 return None, None
@@ -3115,7 +3116,7 @@ def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,us
         try:
             with pd.option_context('mode.chained_assignment', None):
                 kite_basket_df = pd.DataFrame(columns=["product","exchange","tradingsymbol","quantity","transaction_type","order_type","price"], index=saveResultsTrimmed.index)
-                kite_basket_df["price"] = saveResultsTrimmed["LTP"]
+                kite_basket_df["price"] = saveResultsTrimmed["LTP"] if "LTP" in saveResultsTrimmed.columns else 0
                 kite_basket_df["quantity"] = 1
                 kite_basket_df["product"] = "MIS"
                 kite_basket_df["exchange"] = "NSE"
@@ -3750,7 +3751,10 @@ def sendMessageToTelegramChannel(
                 media_group_dict["ATTACHMENTS"] = []
             for attachment in attachments:
                 file_paths.append(attachment["FILEPATH"])
-                file_captions.append(attachment["CAPTION"].replace('&','n')[:1024])
+                cleanCaption = attachment["CAPTION"].replace('&','n')[:1024]
+                if "<pre>" in cleanCaption and "</pre>" not in cleanCaption:
+                    cleanCaption = f"{cleanCaption[:1018]}</pre>"
+                file_captions.append(cleanCaption)
             if test_messages_queue is not None:
                 test_messages_queue.append(f"message:{file_captions[-1]}\ncaption:{file_captions[-1]}\nuser:{user}\ndocument:{file_paths[-1]}")
                 if len(test_messages_queue) >10:
