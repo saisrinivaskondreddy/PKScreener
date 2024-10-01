@@ -35,6 +35,8 @@ import traceback
 import datetime
 # Keep module imports prior to classes
 import os
+import csv
+import re
 import sys
 import tempfile
 os.environ["PYTHONWARNINGS"]="ignore::UserWarning"
@@ -306,6 +308,16 @@ argParser.add_argument(
     required=False,
 )
 
+def csv_split(s):
+    return list(csv.reader([s], delimiter=' '))[0]
+
+def re_split(s):
+    def strip_quotes(s):
+        if s and (s[0] == '"' or s[0] == "'") and s[0] == s[-1]:
+            return s[1:-1]
+        return s
+    return [strip_quotes(p).replace('\\"', '"').replace("\\'", "'") for p in re.findall(r'(?:[^"\s]*"(?:\\.|[^"])*"[^"\s]*)+|(?:[^\'\s]*\'(?:\\.|[^\'])*\'[^\'\s]*)+|[^\s]+', s)]
+
 def get_debug_args():
     global args
     try:
@@ -317,7 +329,10 @@ def get_debug_args():
         args = sys.argv[1:]
         if isinstance(args,list):
             if len(args) == 1:
-                return args[0].split(" ")
+                # re.findall(r'[^"\s]\S*|".+?"', line)
+                # list(csv.reader([line], delimiter=" "))
+                # pieces = [p for p in re.split("( |\\\".*?\\\"|'.*?')", test) if p.strip()]
+                return re_split(args[0]) #args[0].split(" ")
             else:
                 return args
         return None
@@ -549,6 +564,10 @@ def runApplication():
                 results = None
                 plainResults = None
                 resultStocks = None
+                if args is not None and ((args.options is not None and "|" in args.options) or args.systemlaunched):
+                    args.maxdisplayresults = 2000
+                updateConfigDurations(args=args)
+                updateConfig(args=args)
                 results, plainResults = main(userArgs=args)
                 if args.pipedmenus is not None:
                     while args.pipedmenus is not None:
@@ -766,18 +785,43 @@ def checkIntradayComponent(args, monitorOption):
         configManager.toggleConfig(candleDuration='1d', clearCache=False)
     return monitorOption
 
+def updateConfigDurations(args):
+    if args is None or args.options is None:
+        return
+    nextOnes = args.options.split(">")
+    if len(nextOnes) > 1:
+        monitorOption = nextOnes[0]
+        if len(monitorOption) == 0:
+            return
+        lastComponent = ":".join(monitorOption.split(":")[-2:])
+        if "i" in lastComponent and "," not in lastComponent and " " in lastComponent:
+            if "i" in lastComponent.split(":")[-2]:
+                lastComponent = lastComponent.split(":")[-2]
+            else:
+                lastComponent = lastComponent.split(":")[-1]
+            # We need to switch to intraday scan
+            args.intraday = lastComponent.replace("i","").strip()
+            configManager.toggleConfig(candleDuration=args.intraday, clearCache=False)
+        else:
+            # We need to switch to daily scan
+            args.intraday = None
+            configManager.toggleConfig(candleDuration='1d', clearCache=False)
 
 def pipeResults(prevOutput,args):
     if args is None or args.options is None:
         return False
-    nextOnes = args.options.split(">")
     hasFoundStocks = False
+    nextOnes = args.options.split(">")
     if len(nextOnes) > 1:
         monitorOption = nextOnes[1]
         if len(monitorOption) == 0:
             return False
-        lastComponent = monitorOption.split(":")[-1]
-        if "i" in lastComponent:
+        lastComponent = ":".join(monitorOption.split(":")[-2:])
+        if "i" in lastComponent and "," not in lastComponent and " " in lastComponent:
+            if "i" in lastComponent.split(":")[-2]:
+                lastComponent = lastComponent.split(":")[-2]
+            else:
+                lastComponent = lastComponent.split(":")[-1]
             # We need to switch to intraday scan
             monitorOption = monitorOption.replace(lastComponent,"")
             args.intraday = lastComponent.replace("i","").strip()
@@ -823,7 +867,21 @@ def removeOldInstances():
                 os.remove(fileToDelete)
             except:
                 pass
-        
+
+def updateConfig(args):
+    if args is None:
+        return
+    if args.intraday:
+        configManager.toggleConfig(candleDuration=args.intraday, clearCache=False)
+        if configManager.candlePeriodFrequency not in ["d","mo"] or configManager.candleDurationFrequency not in ["m"]:
+            configManager.period = "1d"
+            configManager.duration = args.intraday
+            configManager.setConfig(ConfigManager.parser,default=True, showFileCreatedText=False)
+    elif configManager.candlePeriodFrequency not in ["y","max","mo"] or configManager.candleDurationFrequency not in ["d","wk","mo","h"]:
+        configManager.period = "1y"
+        configManager.duration = "1d"
+        configManager.setConfig(ConfigManager.parser,default=True, showFileCreatedText=False)
+
 def pkscreenercli():
     global originalStdOut, args
     if sys.platform.startswith("darwin"):
@@ -967,11 +1025,7 @@ def pkscreenercli():
             from pkscreener import pkscreenerbot
             pkscreenerbot.runpkscreenerbot(availability=args.botavailable)
             return
-        
-        if args.intraday:
-            configManager.toggleConfig(candleDuration=args.intraday, clearCache=False)
-        # else:
-        #     configManager.toggleConfig(candleDuration='1d', clearCache=False)
+        updateConfig(args)
         if args.options is not None:
             if str(args.options) == "0":
                 # Must be from unit tests to be able to break out of loops via eventing

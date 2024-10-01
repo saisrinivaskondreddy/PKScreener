@@ -168,9 +168,9 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:31:>|X:0:27:'",                      # 8
     "--systemlaunched -a y -e -o 'X:12:31:>|X:0:30:1:'",                    # 9
     "--systemlaunched -a y -e -o 'X:12:27:>|X:0:30:1:'",                    # 10
-    "--systemlaunched -a y -e -o 'X:12:7:6:1:>|X:0:5:0:54:'",               # 11
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:>|X:0:5:0:54:'", # 12
-    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:>|X:0:5:0:54:'",      # 13
+    "--systemlaunched -a y -e -o 'X:12:7:6:1:>|X:0:5:0:54: i 1m'",               # 11
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:>|X:0:5:0:54:i 1m'", # 12
+    "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:>|X:0:5:0:54:i 1m'",      # 13
     "--systemlaunched -a y -e -o 'X:12:7:8:>|X:12:7:9:1:1:'",               # 14
     "--systemlaunched -a y -e -o 'X:12:7:4:>|X:12:7:9:1:1:'",               # 15
     "--systemlaunched -a y -e -o 'X:12:2:>|X:12:7:8:>|X:12:7:9:1:1:'",      # 16
@@ -233,7 +233,7 @@ level2_T_MenuDict_L = {
     "1": "Daily (1y, 1d)",
     "2": "Weekly (5y, 1wk)",
     "3": "Monthly (max, 1mo)",
-    "4": "Hourly (3mo, 1h)",
+    "4": "Hourly (4mo, 1h)",
     "5": "Custom",
 
     "M": "Back to the Top/Main menu",
@@ -242,11 +242,23 @@ level2_T_MenuDict_S = {
     "1": "1m (1d, 1m)",
     "2": "5m (5d, 5m)",
     "3": "15m (1mo, 15m)",
-    "4": "30m (1mo, 30m)",
+    "4": "30m (2mo, 30m)",
     "5": "Custom",
 
     "M": "Back to the Top/Main menu",
 }
+CANDLE_PERIOD_DICT={}
+CANDLE_DURATION_DICT={}
+frequencyDicts = [level2_T_MenuDict_L,level2_T_MenuDict_S]
+for frequencyDict in frequencyDicts:
+    for candlePeriodKey in frequencyDict.keys():
+        if frequencyDict[candlePeriodKey] != "Custom" and candlePeriodKey != "M":
+            periodDurationTuple = frequencyDict[candlePeriodKey].split("(")[1].split(")")[0]
+            period = periodDurationTuple.split(",")[0].strip()
+            duration = periodDurationTuple.split(",")[1].strip()
+            CANDLE_PERIOD_DICT[period] = duration
+            CANDLE_DURATION_DICT[duration] = period
+
 level1_S_MenuDict = {
     "S": "Summary",
 
@@ -446,6 +458,7 @@ Pin_MenuDict = {
     "2": "Pin these {0} stocks in the scan results (Just keep tracking only these {0} stocks)",
     "3": "Use Sliding-Window-Timeframe to run this scan category or piped scan {0}",
     "4": "Add {0} to my monitoring options",
+    "5": "Pipe outputs of {0} into another scanner",
 
     "M": "Back to the Top/Main menu",
 }
@@ -667,7 +680,8 @@ class menus:
             m = menu()
             menuText = rawDictionary[key]
             if "{0}" in menuText and len(substitutes) > 0:
-                if substitutes[substituteIndex] == 0:
+                if isinstance(substitutes[substituteIndex],int) and substitutes[substituteIndex] == 0:
+                    substituteIndex += 1
                     continue
                 menuText = menuText.format(f"{colorText.WARN}{substitutes[substituteIndex]}{colorText.END}")
                 substituteIndex += 1

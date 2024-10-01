@@ -746,17 +746,22 @@ class tools(SingletonMixin, metaclass=SingletonType):
 
     # Toggle the duration and period for use in intraday and swing trading
     def toggleConfig(self, candleDuration, clearCache=True):
+        from pkscreener.classes.MenuOptions import CANDLE_PERIOD_DICT, CANDLE_DURATION_DICT
         if candleDuration is None:
             candleDuration = self.duration.lower()
         self.getConfig(parser)
-        if candleDuration[-1] in ["d"]:
-            self.period = "1y"
+        if candleDuration in CANDLE_DURATION_DICT.keys():
             self.duration = candleDuration
-            self.cacheEnabled = True
-        if candleDuration[-1] in ["m", "h"]:
-            self.period = "1d"
-            self.duration = candleDuration
-            self.cacheEnabled = True
+            self.period = CANDLE_DURATION_DICT[candleDuration]
+        else:
+            if candleDuration[-1] in ["d"]:
+                self.period = "1y"
+                self.duration = candleDuration
+                self.cacheEnabled = True
+            if candleDuration[-1] in ["m", "h"]:
+                self.period = "1d"
+                self.duration = candleDuration
+                self.cacheEnabled = True
         if self.isIntradayConfig():
             self.duration = candleDuration if candleDuration[-1] in ["m", "h"] else "1m"
             candleType = candleDuration.replace("m","").replace("h","")
@@ -767,7 +772,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 lookback = (int(24/int(candleType)) + 1 )*2 #  at least 24 hours
             self.daysToLookback = lookback  # At least the past 6 to 24 hours
         else:
-            self.duration = candleDuration if candleDuration[-1] in ["d","h","m"] else "1d"
+            self.duration = candleDuration if candleDuration[-1] in ["d","h","wk","mo"] else "1d"
             self.daysToLookback = 22  # At least the past 1.5 month
         self.setConfig(parser, default=True, showFileCreatedText=False)
         if clearCache:

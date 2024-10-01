@@ -2854,7 +2854,10 @@ class ScreeningStatistics:
             top2 = dfc["tops"].iloc[index+2]
             top = max(top1,top2)
             bot = dfc["bots"].iloc[index+1]
-            legConsolidation = int(round((top-bot)*100/bot,0))
+            if bot != 0 and not np.isnan(top) and not np.isnan(bot):
+                legConsolidation = int(round((top-bot)*100/bot,0))
+            else:
+                legConsolidation = 0
             consolidationPercentages.append(legConsolidation)
             if len(consolidationPercentages) >= relativeLegsTocheck:
                 break
@@ -2868,9 +2871,9 @@ class ScreeningStatistics:
                 index = 0
                 while (index+1) < legsToCheck:
                     # prev one < new one.
-                    if consolidationPercentages[index] <= consolidationPercentages[index+1]:
+                    if len(consolidationPercentages) >= index+2 and consolidationPercentages[index] <= consolidationPercentages[index+1]:
                         return False, consolidationPercentages[:relativeLegsTocheck], devScore
-                    if index < relativeLegsTocheck:
+                    if index < relativeLegsTocheck and len(consolidationPercentages) >= index+2:
                         devScore += 2-(consolidationPercentages[index]/consolidationPercentages[index+1])
                     index += 1
         

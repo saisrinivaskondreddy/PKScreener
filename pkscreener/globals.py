@@ -145,6 +145,7 @@ scanCycleRunning = False
 test_messages_queue = None
 strategyFilter=[]
 listStockCodes = None
+lastScanOutputStockCodes = None
 tasks_queue = None
 results_queue = None
 consumers = None
@@ -344,7 +345,7 @@ def getTestBuildChoices(indexOption=None, executeOption=None, menuOption=None):
 
 
 def getTopLevelMenuChoices(startupoptions, testBuild, downloadOnly, defaultAnswer=None):
-    global selectedChoice, userPassedArgs
+    global selectedChoice, userPassedArgs, lastScanOutputStockCodes
     executeOption = None
     menuOption = None
     indexOption = None
@@ -368,6 +369,7 @@ def getTopLevelMenuChoices(startupoptions, testBuild, downloadOnly, defaultAnswe
         filePrefix = "INTRADAY_" if intraday else ""
         _, cache_file_name = Utility.tools.afterMarketStockDataExists(intraday)
         Utility.tools.set_github_output(f"{filePrefix}DOWNLOAD_CACHE_FILE_NAME",cache_file_name)
+    indexOption = 0 if lastScanOutputStockCodes is not None else indexOption
     return options, menuOption, indexOption, executeOption
 
 
@@ -441,13 +443,13 @@ def handleSecondaryMenuChoices(
                     configManager.duration = periodDurations[1]
                     configManager.setConfig(ConfigManager.parser, default=True, showFileCreatedText=False)
                     configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(),pattern="*stock_data_*.pkl*")
-                    input(colorText.FAIL+ "  [+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
-                    sys.exit(0)
+                    # input(colorText.FAIL+ "  [+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
+                    # sys.exit(0)
                 elif durationOption.upper() in ["5"]:
                     configManager.setConfig(ConfigManager.parser, default=False, showFileCreatedText=True)
                     configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(),pattern="*stock_data_*.pkl*")
-                    input(colorText.FAIL+ "  [+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
-                    sys.exit(0)
+                    # input(colorText.FAIL+ "  [+] PKScreener will need to restart. Press <Enter> to Exit!"+ colorText.END)
+                    # sys.exit(0)
                 return
             elif periodOption.upper() in ["B"]:
                 lastTradingDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(n=(22 if configManager.period == '1y' else 15))
@@ -841,7 +843,7 @@ def closeWorkersAndExit():
         PKScanRunner.terminateAllWorkers(userPassedArgs=userPassedArgs,consumers=consumers, tasks_queue=tasks_queue, testing=userPassedArgs.testbuild)
 
 def main(userArgs=None,optionalFinalOutcome_df=None):
-    global scanCycleRunning,runCleanUp,test_messages_queue,show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
+    global lastScanOutputStockCodes,scanCycleRunning,runCleanUp,test_messages_queue,show_saved_diff_results, criteria_dateTime, analysis_dict, mp_manager, listStockCodes, screenResults, selectedChoice, defaultAnswer, menuChoiceHierarchy, screenCounter, screenResultsCounter, stockDictPrimary, stockDictSecondary, userPassedArgs, loadedStockData, keyboardInterruptEvent, loadCount, maLength, newlyListedOnly, keyboardInterruptEventFired,strategyFilter, elapsed_time, start_time
     selectedChoice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
     elapsed_time = 0 if not scanCycleRunning else elapsed_time
     start_time = 0 if not scanCycleRunning else start_time
@@ -860,7 +862,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if keyboardInterruptEventFired:
         return None, None
     
-    if userPassedArgs.runintradayanalysis and "C:" in startupoptions and "|" in startupoptions:
+    if userPassedArgs is not None and userPassedArgs.runintradayanalysis and "C:" in startupoptions and "|" in startupoptions:
         firstScanKey = startupoptions.split(">|")[0]
         if firstScanKey.startswith("X:12:") and firstScanKey in analysis_dict.keys():
             savedAnalysisDict = analysis_dict.get(firstScanKey)
@@ -890,8 +892,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     daysForLowestVolume = 30
     backtestPeriod = 0
     reversalOption = None
-    listStockCodes = None
-    if not runCleanUp and not userPassedArgs.systemlaunched:
+    listStockCodes = None if lastScanOutputStockCodes is None else lastScanOutputStockCodes
+    lastScanOutputStockCodes = None
+    if not runCleanUp and userPassedArgs is not None and not userPassedArgs.systemlaunched:
         cleanupLocalResults()
     if userPassedArgs.log:
         default_logger().debug(f"User Passed args: {userPassedArgs}")
@@ -1053,6 +1056,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
                 launcher = f"python3.11 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
                 scannerOptionQuoted = scannerOption.replace("'",'"')
+                if listStockCodes is not None and len(listStockCodes) > 0:
+                    scannerOptionQuoted = scannerOptionQuoted.replace(":12:",":0:")
+                    scannerOptionQuotedParts = scannerOptionQuoted.split(">|")
+                    scannerOptionQuotedParts[0] = f"{scannerOptionQuotedParts[0]}{'' if scannerOptionQuotedParts[0].endswith(':') else ':'}{','.join(listStockCodes)}"
+                    scannerOptionQuoted = ">|".join(scannerOptionQuotedParts)
                 requestingUser = f" -u {userPassedArgs.user}" if userPassedArgs.user is not None else ""
                 enableLog = f" -l" if userPassedArgs.log else ""
                 enableTelegramMode = f" --telegram" if userPassedArgs is not None and userPassedArgs.telegram else ""
@@ -2005,7 +2013,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if len(monitorOption) == 0:
                 for choice in selectedChoice.keys():
                     monitorOption = (f"{monitorOption}:" if len(monitorOption) > 0  else '') + f"{selectedChoice[choice]}"
-            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results),monitorOption,monitorOption],skip=(["1","2","4"] if menuOption in ["F"] else []))
+            m0.renderPinnedMenu(substitutes=[monitorOption,len(prevOutput_results),monitorOption,monitorOption,monitorOption],skip=(["1","2","4","5"] if menuOption in ["F"] else []))
             pinOption = input(
                     colorText.FAIL + "  [+] Select option: "
                 ) or 'M'
@@ -2094,7 +2102,14 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 configManager.myMonitorOptions = f"{prevMonitorOption}{monitorOption}"
                 configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
                 OutputControls().printOutput(f"[+] {colorText.GREEN} Your monitoring options have been updated:{colorText.END}\n     {colorText.WARN}{configManager.myMonitorOptions}{colorText.END}\n[+] {colorText.GREEN}You can run it using the option menu {colorText.END}{colorText.FAIL}-m{colorText.END} {colorText.GREEN}or using the main launch option {colorText.END}{colorText.FAIL}M >{colorText.END}")
-                sleep(5)
+                sleep(4)
+            elif pinOption in ["5"]:
+                if len(saveResults) > 0:
+                    lastScanOutputStockCodes = list(saveResults.index)
+                    userPassedArgs.options = None
+                    menuOption = None
+                    executeOption = 0
+                    return main(userArgs=userPassedArgs,optionalFinalOutcome_df=optionalFinalOutcome_df)
             show_saved_diff_results = False
             return None, None
 
@@ -2862,7 +2877,7 @@ def printNotifySaveScreenedResults(
                 hiddenColumns.remove("Pattern")
             if executeOption in [33]:
                 hiddenColumns.remove("52Wk-L")
-            if executeOption in [30]:
+            if executeOption in [30,5] or "RSI" in menuChoiceHierarchy:
                 hiddenColumns.remove("RSI")
                 hiddenColumns.remove("CCI")
         except:
@@ -3982,6 +3997,9 @@ def cleanupLocalResults():
     runCleanUp = True
     # No need to ask and show prompts if launched by system
     if userPassedArgs.answerdefault is not None or userPassedArgs.systemlaunched or userPassedArgs.testbuild:
+        return
+    from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
+    if not NSEMarketStatus().shouldFetchNextBell():
         return
     launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
     shouldPrompt = (launcher.endswith(".py\"") or launcher.endswith(".py")) and (userPassedArgs is None or userPassedArgs.answerdefault is None)
