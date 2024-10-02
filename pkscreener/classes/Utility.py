@@ -770,10 +770,25 @@ class tools:
         bData, fontPath, _ = Archiver.findFile(fontFile)
         if bData is None:
             resp = fetcher.fetchURL(fontURL, stream=True)
-            with open(fontPath, "wb") as f:
-                for chunk in resp.iter_content(chunk_size=1024):
-                    if chunk:  # filter out keep-alive new chunks
-                        f.write(chunk)
+            if resp is not None:
+                with open(fontPath, "wb") as f:
+                    for chunk in resp.iter_content(chunk_size=1024):
+                        if chunk:  # filter out keep-alive new chunks
+                            f.write(chunk)
+            else:
+                path1 = os.path.join(Archiver.get_user_outputs_dir().replace("results","pkscreener"),"courbd.ttf")
+                path2 = os.path.join(os.getcwd(),"courbd.ttf")
+                if os.path.isfile(path1):
+                    fontPath = path1
+                elif os.path.isfile(path2):
+                    fontPath = path2
+                else:
+                    if "Windows" in platform.system():
+                        fontPath = "arial.ttf"
+                    elif "Darwin" in platform.system():
+                        fontPath = "/System/Library/Fonts/Keyboard.ttf"
+                    else:
+                        fontPath = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
         return fontPath
 
     def getLegendHelpText(table,backtestSummary):
