@@ -80,7 +80,7 @@ async def takeScreenshot(page,saveFileName=None,text=""):
 async def getScreenshotsForGlobalMarketBarometer():
     # https://scrapeops.io/python-web-scraping-playbook/python-pyppeteer/#how-to-click-on-buttons-with-pyppeteer
     browser = await launch({
-            "headless": False,
+            "headless": True,
             "args": [
                 '--start-maximized',
                 '--window-size=1920,1080',
