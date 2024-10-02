@@ -79,7 +79,7 @@ async def takeScreenshot(page,saveFileName=None,text=""):
 # behaviour  of the pop-ups.
 async def getScreenshotsForGlobalMarketBarometer():
     # https://scrapeops.io/python-web-scraping-playbook/python-pyppeteer/#how-to-click-on-buttons-with-pyppeteer
-    browser = await launch({
+    launchDict = {
             "headless": True,
             "args": [
                 '--start-maximized',
@@ -87,7 +87,10 @@ async def getScreenshotsForGlobalMarketBarometer():
                 '--no-sandbox'
             ],
             "defaultViewport": None,
-        }); 
+        }
+    if "PUPPETEER_EXECUTABLE_PATH" in os.environ.keys():
+        launchDict["executablePath"] = os.environ["PUPPETEER_EXECUTABLE_PATH"]
+    browser = await launch(launchDict); 
     page = await browser.newPage()
     # # Must use this when headless = True above. Not needed when headless = False
     # await page._client.send('Emulation.clearDeviceMetricsOverride')
