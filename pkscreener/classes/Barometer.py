@@ -84,6 +84,7 @@ async def getScreenshotsForGlobalMarketBarometer():
             "args": [
                 '--start-maximized',
                 '--window-size=1920,1080',
+                '--no-sandbox'
             ],
             "defaultViewport": None,
         }); 
