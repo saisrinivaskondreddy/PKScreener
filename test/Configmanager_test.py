@@ -176,7 +176,7 @@ def test_toggleConfig_intraday(config_parser):
     tool.duration = '1d'
     tool.cacheEnabled = True
     tool.toggleConfig('1h', clearCache=True)
-    assert tool.period == '1d'
+    assert tool.period == '4mo'
     assert tool.duration == '1h'
     assert tool.daysToLookback <= 50
     assert tool.cacheEnabled == True

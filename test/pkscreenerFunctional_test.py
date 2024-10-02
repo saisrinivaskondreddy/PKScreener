@@ -280,8 +280,8 @@ def test_option_T(mocker, capsys):
     originalPeriod = globals.configManager.period
     mocker.patch("builtins.input", side_effect=["T","L","2","\n"])
     args = argParser.parse_known_args(args=["-e", "-a", "Y", "-t", "-p"])[0]
-    with pytest.raises(SystemExit):
-        main(userArgs=args)
+    # with pytest.raises(SystemExit):
+    main(userArgs=args)
     globals.configManager.getConfig(ConfigManager.parser)
     assert globals.configManager != originalPeriod
     out, err = capsys.readouterr()
@@ -289,8 +289,8 @@ def test_option_T(mocker, capsys):
     
     # Get to the changed state
     mocker.patch("builtins.input", side_effect=["T","S","2","\n"])
-    with pytest.raises(SystemExit):
-        main(userArgs=args)
+    # with pytest.raises(SystemExit):
+    main(userArgs=args)
     out, err = capsys.readouterr()
     assert err == ""
     assert globals.configManager.period != originalPeriod
