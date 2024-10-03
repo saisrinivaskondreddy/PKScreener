@@ -3701,7 +3701,8 @@ def saveNotifyResultsFile(
 
 def sendGlobalMarketBarometer(userArgs=None):
     from pkscreener.classes import Barometer
-    caption = "Global Market Barometer with India market Performance (top) and Valuation (bottom)"
+    suggestion_text = "Feel free to share on social media.Try @nse_pkscreener_bot for more scans! <i><b><u>You agree that you have read</u></b>:https://pkjmesra.github.io/PKScreener/Disclaimer.txt</i> <b>and accept TOS</b>: https://pkjmesra.github.io/PKScreener/tos.txt <b>STOP using and exit from channel/group, if you do not.</b>"
+    caption = f"Global Market Barometer with India market Performance (top) and Valuation (bottom).{suggestion_text}"
     gmbPath = Barometer.getGlobalMarketBarometerValuation()
     try:
         if gmbPath is not None:
