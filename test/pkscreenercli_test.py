@@ -25,8 +25,11 @@ import logging
 import os
 import sys
 import builtins
-from unittest.mock import patch,ANY
+from unittest.mock import patch,ANY,MagicMock, call
 from unittest import mock
+import unittest
+import csv
+import re
 
 import pytest
 from PKDevTools.classes.ColorText import colorText
@@ -280,6 +283,154 @@ def test_pkscreenercli_setConfig_is_called_if_NotSet():
             with pytest.raises((SystemExit)):
                 pkscreenercli.pkscreenercli()
                 mock_setConfig.assert_called_once()
+
+from pkscreener.pkscreenercli import csv_split,re_split, get_debug_args
+
+class TestCsvAndReSplit(unittest.TestCase):
+
+    def test_csv_split(self):
+        # Positive test case
+        self.assertEqual(csv_split("a b c"), ['a', 'b', 'c'])
+        self.assertEqual(csv_split("1,2,3"), ['1,2,3'])  # Note: delimiter is space, so no split happens
+
+        # Negative test case
+        self.assertNotEqual(csv_split(""), ['a', 'b', 'c'])  # Empty string should not match any values
+
+    def test_re_split(self):
+        # Positive test cases
+        self.assertEqual(re_split('a "b c" d'), ['a', 'b c', 'd'])
+        self.assertEqual(re_split("'single quoted' text"), ['single quoted', 'text'])
+        self.assertEqual(re_split('escaped \\"quote\\"'), ['escaped', '"quote"'])
+        self.assertEqual(re_split('-e -a Y -o "X:12:23:>|X:0:5:0:30:i 1m:"'), ['-e', '-a','Y','-o','X:12:23:>|X:0:5:0:30:i 1m:'])
+        self.assertEqual(re_split('-e -a Y -o "X:12:23:i 15m:>|X:0:5:0:30:i 1m:"'), ['-e', '-a','Y','-o','X:12:23:i 15m:>|X:0:5:0:30:i 1m:'])
+        self.assertEqual(re_split('-e -a Y -o "X:12:23:i 15m:>|X:0:5:0:30:"'), ['-e', '-a','Y','-o','X:12:23:i 15m:>|X:0:5:0:30:'])
+        self.assertEqual(re_split("-e -a Y -o 'X:12:23:>|X:0:5:0:30:i 1m:'"), ['-e', '-a','Y','-o','X:12:23:>|X:0:5:0:30:i 1m:'])
+        self.assertEqual(re_split("-e -a Y -o 'X:12:23:i 15m:>|X:0:5:0:30:i 1m:'"), ['-e', '-a','Y','-o','X:12:23:i 15m:>|X:0:5:0:30:i 1m:'])
+        self.assertEqual(re_split("-e -a Y -o 'X:12:23:i 15m:>|X:0:5:0:30:'"), ['-e', '-a','Y','-o','X:12:23:i 15m:>|X:0:5:0:30:'])
+        self.assertEqual(re_split("-e -a Y -o 'X:12:23:i 15m:>|X:0:5:0:30:' -l"), ['-e', '-a','Y','-o','X:12:23:i 15m:>|X:0:5:0:30:','-l'])
+
+        # Negative test cases
+        self.assertEqual(re_split('"unmatched quote'), ['"unmatched', 'quote'])  # Should return the unmatched quote as is
+        self.assertEqual(re_split(""), [])  # Empty string should return an empty list
+
+    def test_get_debug_args(self):
+        # Mocking sys.argv for testing
+        original_argv = sys.argv
+        
+        try:
+            import argparse
+            # Positive test case
+            sys.argv = ['script_name', 'arg1 arg2']
+            self.assertTrue(isinstance(get_debug_args(),argparse.Namespace))
+            
+            # Another positive test case
+            sys.argv = ['script_name', '"arg with spaces"']
+            self.assertTrue(isinstance(get_debug_args(),argparse.Namespace))
+            
+            # Negative test case
+            sys.argv = ['script_name']
+            self.assertTrue(isinstance(get_debug_args(),argparse.Namespace))
+            
+            # Check for invalid input
+            sys.argv = ['script_name', '']
+            self.assertTrue(isinstance(get_debug_args(),argparse.Namespace))
+
+        finally:
+            sys.argv = original_argv  # Restore original argv
+
+from pkscreener.pkscreenercli import configManager, exitGracefully
+from pkscreener.classes import ConfigManager
+class TestExitGracefully(unittest.TestCase):
+
+    @patch('os.remove')
+    @patch('os.path.join')
+    @patch('PKDevTools.classes.Archiver.get_user_data_dir')
+    @patch('pkscreener.globals.resetConfigToDefault')
+    @patch('argparse.ArgumentParser.parse_known_args')
+    @patch('pkscreener.classes.ConfigManager.tools.setConfig')
+    def test_exitGracefully_success(self, mock_setConfig, mock_parse_known_args, mock_resetConfigToDefault,
+                                     mock_get_user_data_dir, mock_path_join, mock_remove):
+        # Setup mocks
+        mock_get_user_data_dir.return_value = '/mock/user/data/dir'
+        mock_path_join.return_value = '/mock/user/data/dir/monitor_outputs'
+        mock_parse_known_args.return_value = (MagicMock(options='SomeOption'),)
+        configManager.maxDashboardWidgetsPerRow = 2
+        configManager.maxNumResultRowsInMonitor = 3
+        
+        # Call the function
+        exitGracefully()
+
+        # Check if files were attempted to be removed
+        expected_calls = [call('/mock/user/data/dir/monitor_outputs_0.txt'),
+                          call('/mock/user/data/dir/monitor_outputs_1.txt'),
+                          call('/mock/user/data/dir/monitor_outputs_2.txt'),
+                          call('/mock/user/data/dir/monitor_outputs_3.txt'),
+                          call('/mock/user/data/dir/monitor_outputs_4.txt'),
+                          call('/mock/user/data/dir/monitor_outputs_5.txt')]
+        mock_remove.assert_has_calls(expected_calls, any_order=True)
+
+        # Check if resetConfigToDefault was called
+        mock_resetConfigToDefault.assert_called_once_with(force=True)
+
+        # Check if setConfig was called with correct parameters
+        mock_setConfig.assert_called_once_with(ConfigManager.parser, default=True, showFileCreatedText=False)
+
+    @patch('os.remove')
+    @patch('os.path.join')
+    @patch('PKDevTools.classes.Archiver.get_user_data_dir')
+    @patch('pkscreener.globals.resetConfigToDefault')
+    @patch('argparse.ArgumentParser.parse_known_args')
+    @patch('pkscreener.classes.ConfigManager.tools.setConfig')
+    def test_exitGracefully_no_files(self, mock_setConfig, mock_parse_known_args, mock_resetConfigToDefault,
+                                      mock_get_user_data_dir, mock_path_join, mock_remove):
+        # Setup mocks
+        mock_get_user_data_dir.return_value = '/mock/user/data/dir'
+        mock_path_join.return_value = None  # Simulate no file path
+        mock_parse_known_args.return_value = (MagicMock(options='SomeOption'),)
+
+        # Call the function
+        exitGracefully()
+
+        # Check that remove was never called
+        mock_remove.assert_not_called()
+        mock_resetConfigToDefault.assert_not_called()
+
+    @patch('os.remove')
+    @patch('os.path.join')
+    @patch('PKDevTools.classes.Archiver.get_user_data_dir')
+    @patch('pkscreener.globals.resetConfigToDefault')
+    @patch('argparse.ArgumentParser.parse_known_args')
+    @patch('pkscreener.classes.ConfigManager.tools.setConfig')
+    def test_exitGracefully_runtime_error(self, mock_setConfig, mock_parse_known_args, mock_resetConfigToDefault,
+                                           mock_get_user_data_dir, mock_path_join, mock_remove):
+        # Setup mocks
+        mock_setConfig.side_effect = RuntimeError("Test RuntimeError")
+        mock_parse_known_args.return_value = (MagicMock(options='SomeOption'),)
+
+        # Call the function
+        with patch("builtins.print") as mock_print:
+            exitGracefully()
+            mock_print.assert_called_with("\x1b[33mIf you're running from within docker, please run like this:\x1b[0m\n\x1b[31mdocker run -it pkjmesra/pkscreener:latest\n\x1b[0m", sep=' ', end='\n', flush=False)
+            
+
+    @patch('os.remove')
+    @patch('os.path.join')
+    @patch('PKDevTools.classes.Archiver.get_user_data_dir')
+    @patch('pkscreener.globals.resetConfigToDefault')
+    @patch('argparse.ArgumentParser.parse_known_args')
+    @patch('pkscreener.classes.ConfigManager.tools.setConfig')
+    def test_exitGracefully_invalid_option(self, mock_setConfig, mock_parse_known_args, mock_resetConfigToDefault,
+                                            mock_get_user_data_dir, mock_path_join, mock_remove):
+        # Setup mocks
+        mock_get_user_data_dir.return_value = '/mock/user/data/dir'
+        mock_path_join.return_value = '/mock/user/data/dir/monitor_outputs'
+        mock_parse_known_args.return_value = (MagicMock(options='T-InvalidOption'),)
+
+        # Call the function
+        exitGracefully()
+
+        # Check that resetConfigToDefault was not called
+        mock_resetConfigToDefault.assert_not_called()
 
 # def test_intraday_args_are_parsed():
 #     with patch("pkscreener.globals.main") as mock_main:

@@ -316,6 +316,7 @@ def re_split(s):
         if s and (s[0] == '"' or s[0] == "'") and s[0] == s[-1]:
             return s[1:-1]
         return s
+    # pieces = [p for p in re.split("( |\\\".*?\\\"|'.*?')", s) if p.strip()]
     return [strip_quotes(p).replace('\\"', '"').replace("\\'", "'") for p in re.findall(r'(?:[^"\s]*"(?:\\.|[^"])*"[^"\s]*)+|(?:[^\'\s]*\'(?:\\.|[^\'])*\'[^\'\s]*)+|[^\s]+', s)]
 
 def get_debug_args():
