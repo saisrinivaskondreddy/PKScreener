@@ -872,6 +872,7 @@ def removeOldInstances():
 def updateConfig(args):
     if args is None:
         return
+    configManager.getConfig(ConfigManager.parser)
     if args.intraday:
         configManager.toggleConfig(candleDuration=args.intraday, clearCache=False)
         if configManager.candlePeriodFrequency not in ["d","mo"] or configManager.candleDurationFrequency not in ["m"]:
@@ -879,9 +880,10 @@ def updateConfig(args):
             configManager.duration = args.intraday
             configManager.setConfig(ConfigManager.parser,default=True, showFileCreatedText=False)
     elif configManager.candlePeriodFrequency not in ["y","max","mo"] or configManager.candleDurationFrequency not in ["d","wk","mo","h"]:
-        configManager.period = "1y"
-        configManager.duration = "1d"
-        configManager.setConfig(ConfigManager.parser,default=True, showFileCreatedText=False)
+        if args.answerdefault is not None or args.systemlaunched:
+            configManager.period = "1y"
+            configManager.duration = "1d"
+            configManager.setConfig(ConfigManager.parser,default=True, showFileCreatedText=False)
 
 def pkscreenercli():
     global originalStdOut, args
