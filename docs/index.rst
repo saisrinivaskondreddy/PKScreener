@@ -51,7 +51,7 @@ You can now run the ``pkscreenerbot`` on your local machine or if it's running o
 
 Installation
 ------------
-Requirements: Python 3.9+.
+Requirements: Python 3.11+.
 
 How to use on your own local Windows/Linux/Macbook laptop?
 ----------------------------------------------------------
@@ -70,16 +70,16 @@ Installing the latest version from PyPi.
 
 Building from source repo
 -------------------------
-* Install python 3.9 for your OS/CPU. Download the installer from https://www.python.org/downloads/release/python-3913/#Files
+* Install python 3.11 for your OS/CPU. Download the installer from https://www.python.org/downloads/release/python-3913/#Files
 * Just clone the repo with ``git clone https://github.com/pkjmesra/PKScreener.git``
 * ``cd PKScreener``
 * ``pip install -r requirements.txt`` .
 * (Optional) If you would like to have technical indicators evaluated using TA-Lib, go ahead and install TA-Lib as well. ``pip3 install ta-lib``
 * Head to `.github/dependencies/` under this repo. Download the respective TA-Lib file/whl file and install either from the .whl file or from source. Check out any of the workflow files for steps to install TA-Lib.
-* For example:
-  For `Windows`: See https://github.com/pkjmesra/PKScreener/blob/c1e94ba3137915cb781161fa2d5fb69129940fd3/.github/workflows/w1-workflow-build-matrix.yml#L91-L101 
-  For `Mac``: `brew install ta-lib`
-  For `Ubuntu/Linux`: https://github.com/pkjmesra/PKScreener/blob/main/.github/workflows/w1-workflow-build-matrix.yml#L121-L132 should help.
+* If you want to exactly follow the steps as we follow during the build process, please refer to this:
+  For `Windows`: See https://github.com/pkjmesra/PKScreener/blob/main/.github/workflows/w1-workflow-build-matrix.yml#L117-L136
+  For `Mac``: https://github.com/pkjmesra/PKScreener/blob/main/.github/workflows/w1-workflow-build-matrix.yml#L177-L184
+  For `Ubuntu/Linux`: https://github.com/pkjmesra/PKScreener/blob/main/.github/workflows/w1-workflow-build-matrix.yml#L150-L164
 * ``cd pkscreener``
 * Finally, from within the ``pkscreener`` directory, run ``python pkscreenercli.py`` or just ``pkscreener``. You are all set.
 
@@ -88,8 +88,8 @@ Usage
 -----
 Running the executables
 -----------------------
-* Download the suitable file according to your OS.
-* Linux & Mac users should make sure that the ``pkscreenercli.bin or pkscreenercli.run`` is having ``execute`` permission (``chmod +x pkscreenercli.bin``).
+* Download the suitable file according to your OS from the release page: https://github.com/pkjmesra/PKScreener/releases
+* Linux & Mac users should make sure that the ``pkscreenercli.bin or pkscreenercli.run`` is having ``execute`` permission (``chmod +x pkscreenercli.bin``) or for Mac : (``chmod +x pkscreenercli.run``).
 * :guilabel:`Run` the file.
 
 Configuration

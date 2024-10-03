@@ -3854,6 +3854,15 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
     OutputControls().printOutput(colorText.FAIL + summaryText + colorText.END + "\n")
     OutputControls().printOutput(tabulated_text + "\n")
     choices, filename = getBacktestReportFilename(sortKey, optionalName,choices=choices)
+    if userPassedArgs is not None and userPassedArgs.runintradayanalysis and userPassedArgs.user is not None:
+        pngName = f'PKS_{choices}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
+        try:
+            sendQuickScanResult(menuChoiceHierarchy, userPassedArgs.user,
+                            tabulated_text,Utility.tools.removeAllColorStyles(tabulated_text),
+                            f"{optionalName}:{choices}:{filename.replace('.html','')}",
+                            pngName,".png",forceSend=True)
+        except:
+            pass
     headerDict = {0: "<th></th>"}
     index = 1
     for col in backtest_df.columns:
