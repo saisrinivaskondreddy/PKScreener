@@ -884,7 +884,8 @@ class tools:
                         for pattern in patterns:
                             for f in glob.glob(pattern, root_dir=dir, recursive=True):
                                 OutputControls().printOutput(colorText.GREEN + f"=> {f}" + colorText.END)
-                                Committer.execOSCommand(f"git add {f} -f >/dev/null 2>&1")
+                                if "RUNNER" in os.environ.keys():
+                                    Committer.execOSCommand(f"git add {f} -f >/dev/null 2>&1")
 
             except pickle.PicklingError as e:  # pragma: no cover
                 default_logger().debug(e, exc_info=True)

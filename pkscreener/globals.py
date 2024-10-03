@@ -3884,7 +3884,8 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
         colored_text = colored_text.encode('utf-8').decode(STD_ENCODING)
         with open(filename, "w") as f:
             f.write(colored_text)
-        Committer.execOSCommand(f"git add {filename} -f >/dev/null 2>&1")
+        if "RUNNER" in os.environ.keys():
+            Committer.execOSCommand(f"git add {filename} -f >/dev/null 2>&1")
     try:
         # Save in excel file as well if the config is set to do so
         if configManager.alwaysExportToExcel:
@@ -3909,7 +3910,8 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
             oneline_text = f"{oneline_text}<td class='w'>{PKDateUtilities.currentDateTime().strftime('%Y/%m/%d')}</td><td class='w'>{round(elapsed_time,2)}</td>"
             with open(onelineSummaryFile, "w") as f:
                 f.write(oneline_text)
-            Committer.execOSCommand(f"git add {onelineSummaryFile} -f >/dev/null 2>&1")
+            if "RUNNER" in os.environ.keys():
+                Committer.execOSCommand(f"git add {onelineSummaryFile} -f >/dev/null 2>&1")
 
 def scanOutputDirectory(backtest=False):
     dirName = 'actions-data-scan' if not backtest else "Backtest-Reports"
