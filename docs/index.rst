@@ -82,7 +82,7 @@ Building from source repo
   For `Ubuntu/Linux`: https://github.com/pkjmesra/PKScreener/blob/main/.github/workflows/w1-workflow-build-matrix.yml#L150-L164
 * ``cd pkscreener``
 * Finally, from within the ``pkscreener`` directory, run ``python pkscreenercli.py`` or just ``pkscreener``. You are all set.
-
+* If you are running from the project root directory (where the ``pkscreener`` directory is), please run ``python pkscreener/pkscreenercli.py``
 
 Usage
 -----
