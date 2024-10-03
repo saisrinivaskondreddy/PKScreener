@@ -3861,7 +3861,8 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
                             tabulated_text,Utility.tools.removeAllColorStyles(tabulated_text),
                             f"{optionalName}:{choices}:{filename.replace('.html','')}",
                             pngName,".png",forceSend=True)
-        except:
+        except Exception as e:
+            default_logger().debug(e,exc_info=True)
             pass
     headerDict = {0: "<th></th>"}
     index = 1
