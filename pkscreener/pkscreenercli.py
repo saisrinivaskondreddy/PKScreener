@@ -760,7 +760,7 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
                                         user=int(f"-{Channel_Id}"),
                                         tabulated_results=mark_down,
                                         markdown_results=mark_down,
-                                        caption="IntradayAnalysis - Morning alert vs Market Close",
+                                        caption="Intraday Analysis Summary - Morning alert vs Market Close",
                                         pngName= f"PKS_IA_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}",
                                         pngExtension= ".png",
                                         forceSend=True

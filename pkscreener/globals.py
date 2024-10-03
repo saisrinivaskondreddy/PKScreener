@@ -812,7 +812,8 @@ def isInterrupted():
     return keyboardInterruptEventFired
 
 def resetUserMenuChoiceOptions():
-    global menuChoiceHierarchy, userPassedArgs
+    global menuChoiceHierarchy, userPassedArgs, media_group_dict
+    media_group_dict = {}
     menuChoiceHierarchy = ""
     userPassedArgs.pipedtitle = ""
 
@@ -2433,7 +2434,7 @@ def resetConfigToDefault(force=False):
     #     configManager.toggleConfig(candleDuration="1d", clearCache=False)
     if userPassedArgs is not None and userPassedArgs.monitor is None:
         if "PKDevTools_Default_Log_Level" in os.environ.keys():
-            if userPassedArgs is None or (userPassedArgs is not None and userPassedArgs.options is not None and "|" not in userPassedArgs.options):
+            if userPassedArgs is None or (userPassedArgs is not None and userPassedArgs.options is not None and "|" not in userPassedArgs.options and not userPassedArgs.runintradayanalysis and userPassedArgs.pipedtitle is None):
                 del os.environ['PKDevTools_Default_Log_Level']
         configManager.logsEnabled = False
     if force:
@@ -2849,7 +2850,7 @@ def printNotifySaveScreenedResults(
         + colorText.END
         , enableMultipleLineOutput=True
     )
-    pngName = f'PKS_{runOptionName}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
+    pngName = f'PKS_{"IA_" if userPassedArgs is not None and userPassedArgs.runintradayanalysis else ""}{runOptionName}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
     pngExtension = ".png"
     eligible = is_token_telegram_configured()
     targetDateG10k = prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, testing, user, pngName, pngExtension, eligible)
@@ -3013,6 +3014,7 @@ def printNotifySaveScreenedResults(
                     ).encode("utf-8").decode(STD_ENCODING)
                     try:
                         if "EoDDiff" in saveResultsTrimmed.columns:
+                            caption = f"<b>Intraday Analysis</b>:{caption}"
                             caption_df = saveResultsTrimmed[['LTP','DayHighDiff','EoDDiff']].tail(configManager.telegramSampleNumberRows)
                             for col in caption_df.columns:
                                 caption_df.loc[:, col] = caption_df.loc[:, col].apply(
@@ -3036,8 +3038,9 @@ def printNotifySaveScreenedResults(
                         cols = [list(saveResultsTrimmed.columns)[0]]
                         cols.extend(list(saveResultsTrimmed.columns[5:]))
                         caption_df = saveResultsTrimmed[cols].head(2)
-                    for col in caption_df.columns:
-                        caption_df[col] = caption_df[col].astype(str)
+                    with pd.option_context('mode.chained_assignment', None):
+                        for col in caption_df.columns:
+                            caption_df[col] = caption_df[col].astype(str)
                     caption_results = colorText.miniTabulator().tabulate(
                         caption_df,
                         headers="keys",
@@ -3045,10 +3048,13 @@ def printNotifySaveScreenedResults(
                         maxcolwidths=[None,None,4,3]
                     ).encode("utf-8").decode(STD_ENCODING).replace("-K-----S-----C-----R","-K-----S----C---R").replace("%  ","% ").replace("=K=====S=====C=====R","=K=====S====C===R").replace("Vol  |","Vol|").replace("Hgh  |","Hgh|").replace("EoD  |","EoD|").replace("x  ","x")
                     caption_results = Utility.tools.removeAllColorStyles(caption_results.replace("-E-----N-----E-----R","-E-----N----E---R").replace("=E=====N=====E=====R","=E=====N====E===R"))
-                    suggestion_text = "Try @nse_pkscreener_bot for more scan options! <i><b><u>You agree that you have read </u></b>:https://pkjmesra.github.io/PKScreener/Disclaimer.txt</i> and accept TOS: https://pkjmesra.github.io/PKScreener/tos.txt"
-                    finalCaption = f"{caption}.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text} {suggestion_text}"
-                if not testing: # and not userPassedArgs.runintradayanalysis:
-                    kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
+                    suggestion_text = "Try @nse_pkscreener_bot for more scans! <i><b><u>You agree that you have read</u></b>:https://pkjmesra.github.io/PKScreener/Disclaimer.txt</i> <b>and accept TOS</b>: https://pkjmesra.github.io/PKScreener/tos.txt <b>STOP using and exit from channel/group, if you do not</b>"
+                    finalCaption = f"{caption}.Feel free to share on social media.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text} {suggestion_text}"
+                if not testing:
+                    if PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday():
+                        kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
+                    else:
+                        kite_file_path, kite_caption = "Dummy.html", "Dummy"
                     sendQuickScanResult(
                         f"{reportTitle}{menuChoiceHierarchy}",
                         user,
@@ -3657,6 +3663,7 @@ def saveNotifyResultsFile(
         choices = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
         if userPassedArgs.progressstatus is not None:
             choices = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1]
+        choices = f'{choices.strip()}{"_IA" if userPassedArgs is not None and userPassedArgs.runintradayanalysis else ""}'
         needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
         pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0) if needsCalc else None
         filename = Utility.tools.promptSaveResults(choices,
@@ -3793,7 +3800,7 @@ def sendMessageToTelegramChannel(
             except:
                 pass
     if user is not None:
-        if user != DEV_CHANNEL_ID and userPassedArgs is not None and not userPassedArgs.monitor:
+        if str(user) != str(DEV_CHANNEL_ID) and userPassedArgs is not None and not userPassedArgs.monitor:
             # Send an update to dev channel
             send_message(
                 f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options.replace(':D','')}]",
@@ -3854,16 +3861,6 @@ def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName=
     OutputControls().printOutput(colorText.FAIL + summaryText + colorText.END + "\n")
     OutputControls().printOutput(tabulated_text + "\n")
     choices, filename = getBacktestReportFilename(sortKey, optionalName,choices=choices)
-    if userPassedArgs is not None and userPassedArgs.runintradayanalysis and userPassedArgs.user is not None:
-        pngName = f'PKS_{choices}_{PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")}'
-        try:
-            sendQuickScanResult(menuChoiceHierarchy, userPassedArgs.user,
-                            tabulated_text,Utility.tools.removeAllColorStyles(tabulated_text),
-                            f"{optionalName}:{choices}:{filename.replace('.html','')}",
-                            pngName,".png",forceSend=True)
-        except Exception as e:
-            default_logger().debug(e,exc_info=True)
-            pass
     headerDict = {0: "<th></th>"}
     index = 1
     for col in backtest_df.columns:

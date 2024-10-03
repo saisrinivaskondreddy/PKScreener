@@ -280,7 +280,7 @@ class PKScanRunner:
         if choices.endswith("_"):
             choices = choices[:-1]
         choices = f"{choices}{'_i' if isIntraday else ''}"
-        return choices
+        return f'{choices.strip()}{"_IA" if userArgs is not None and userArgs.runintradayanalysis else ""}'
 
     def refreshDatabase(consumers,stockDictPrimary,stockDictSecondary):
         for worker in consumers:
