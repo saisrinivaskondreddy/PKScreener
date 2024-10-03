@@ -171,7 +171,7 @@ class tools:
         )
         communityInfo = "[📢] Join Community Discussions: https://github.com/pkjmesra/PKScreener/discussions"
         latestInfo = "[⏰] Download latest software from https://github.com/pkjmesra/PKScreener/releases/latest"
-        donationInfo = "[💰] PKScreener is and will always remain free for everyone. Hosting servers and running services costs money.\n[💸] Please donate whatever you can: 8007162973@APL using UPI(India) or https://github.com/sponsors/pkjmesra 🙏🏻"
+        donationInfo = "[💰] PKScreener is and will always remain free for everyone. Hosting servers and running services costs money.\n[💸] Please donate whatever you can: PKScreener@APL using UPI(India) or https://github.com/sponsors/pkjmesra 🙏🏻"
         totalDownloads = "200k+"
         respPepyTech = fetcher.fetchURL(url="https://static.pepy.tech/badge/pkscreener",headers={'user-agent': f'{random_user_agent()}'},timeout=2)
         if respPepyTech is not None and respPepyTech.status_code == 200:
@@ -1091,7 +1091,7 @@ class tools:
         return stockDict, stockDataLoaded
 
     @Halo(text='', spinner='dots')
-    def tryFetchFromServer(cache_file):
+    def tryFetchFromServer(cache_file,repoOwner="pkjmesra",repoName="PKScreener"):
         OutputControls().printOutput(
                     colorText.FAIL
                     + "[+] Loading data from server. Market Stock Data is not cached, or forced to redownload .."
@@ -1103,7 +1103,7 @@ class tools:
                 + colorText.END
             )
         cache_url = (
-                "https://raw.githubusercontent.com/pkjmesra/PKScreener/actions-data-download/actions-data-download/"
+                f"https://raw.githubusercontent.com/{repoOwner}/{repoName}/actions-data-download/actions-data-download/"
                 + cache_file  # .split(os.sep)[-1]
             )
         headers = {
@@ -1117,11 +1117,13 @@ class tools:
                     'sec-fetch-mode': 'cors',
                     'sec-fetch-site': 'cross-site',                  
                     'origin': 'https://github.com',
-                    'referer': f'https://github.com/pkjmesra/PKScreener/blob/actions-data-download/actions-data-download/{cache_file}',
+                    'referer': f'https://github.com/{repoOwner}/{repoName}/blob/actions-data-download/actions-data-download/{cache_file}',
                     'user-agent': f'{random_user_agent()}' 
                     #'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
             }
         resp = fetcher.fetchURL(cache_url, headers=headers, stream=True)
+        if resp is None or (resp is not None and resp.status_code != 200 and repoOwner=="pkjmesra"):
+            return tools.tryFetchFromServer(cache_file,repoOwner=repoName)
         return resp
 
     @Halo(text='', spinner='dots')
