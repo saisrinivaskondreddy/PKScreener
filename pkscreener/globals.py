@@ -1388,6 +1388,15 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             selectedChoice["3"] = str(respChartPattern)
             selectedChoice["4"] = str(insideBarToLookback) if (respChartPattern in [1, 2, 3] and (userPassedArgs is not None and userPassedArgs.pipedmenus is not None)) else str(maLength)
             selectedChoice["5"] = str(maLength) if (respChartPattern in [1, 2, 3] and (userPassedArgs is not None and userPassedArgs.pipedmenus is not None)) else ""
+        if respChartPattern == 7: # candle stick patterns
+            maLength = "0"
+            m0.renderCandleStickPatterns()
+            filterOption = input(colorText.FAIL + "  [+] Select option: ") or "0"
+            if str(filterOption).upper() not in ["0","M"]:
+                maLength = str(filterOption)
+            elif str(filterOption).upper() in ["M"]:
+                return None, None
+
     if executeOption == 8:
         if len(options) >= 5:
             if "".join(str(options[3]).split(".")).isdecimal():
@@ -3312,6 +3321,8 @@ def sendQuickScanResult(
         if (("RUNNER" not in os.environ.keys()) or ("RUNNER" in os.environ.keys() and os.environ["RUNNER"] == "LOCAL_RUN_SCANNER")):
             return
     try:
+        if not is_token_telegram_configured():
+            return
         Utility.tools.tableToImage(
             markdown_results,
             tabulated_results,

@@ -343,7 +343,7 @@ class tools:
         font_vertical = ImageFont.truetype(fontPath, font_size_vertical)
         #font = ImageFont.load_default() # fallback
 
-        # watermark
+        # watermark 1
         opacity = int(256 * .6)
         mark_width, mark_height = font.getsize(watermarkText)
         watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
@@ -359,6 +359,22 @@ class tools:
         watermark_vertical = watermark_ver.rotate(90, expand=1)
 
         # merge
+        try:
+            logo_wm_path = os.path.join(Archiver.get_user_outputs_dir().replace("results","pkscreener"),"LogoWM.txt")
+            if not os.path.isfile(logo_wm_path):
+                resp = tools.tryFetchFromServer(cache_file="LogoWM.png",directory="screenshots/logos",hideOutput=True)
+                with open(logo_wm_path,"wb",) as f:
+                    f.write(resp.content)
+            logo_img = Image.open(logo_wm_path,formats=["PNG"]).convert('LA')
+            # logo_img = logo_img.resize((min(width,height),min(width,height)), Image.ANTIALIAS, reducing_gap=2)
+            lx, ly = logo_img.size
+            plx = int((width - lx)/2)
+            ply = int((height - ly)/2)
+            sourceImage.paste(logo_img, (plx, ply, plx + lx, ply + ly), logo_img)
+        except Exception as e:
+            default_logger().debug(e,exc_info=True)
+            pass
+
         wx, wy = watermark_diag.size
         px = int((width - wx)/2)
         py = int((height - wy)/2)
@@ -1091,19 +1107,20 @@ class tools:
         return stockDict, stockDataLoaded
 
     @Halo(text='', spinner='dots')
-    def tryFetchFromServer(cache_file,repoOwner="pkjmesra",repoName="PKScreener"):
-        OutputControls().printOutput(
-                    colorText.FAIL
-                    + "[+] Loading data from server. Market Stock Data is not cached, or forced to redownload .."
+    def tryFetchFromServer(cache_file,repoOwner="pkjmesra",repoName="PKScreener",directory="actions-data-download",hideOutput=False):
+        if not hideOutput:
+            OutputControls().printOutput(
+                        colorText.FAIL
+                        + "[+] Loading data from server. Market Stock Data is not cached, or forced to redownload .."
+                        + colorText.END
+                    )
+            OutputControls().printOutput(
+                    colorText.GREEN
+                    + f"  [+] Downloading {colorText.END}{colorText.FAIL}{'Intraday' if configManager.isIntradayConfig() else 'Daily'}{colorText.END}{colorText.GREEN} cache from server ({'Primary' if repoOwner=='pkjmesra' else 'Secondary'}) for faster processing, Please Wait.."
                     + colorText.END
                 )
-        OutputControls().printOutput(
-                colorText.GREEN
-                + f"  [+] Downloading {colorText.END}{colorText.FAIL}{'Intraday' if configManager.isIntradayConfig() else 'Daily'}{colorText.END}{colorText.GREEN} cache from server for faster processing, Please Wait.."
-                + colorText.END
-            )
         cache_url = (
-                f"https://raw.githubusercontent.com/{repoOwner}/{repoName}/actions-data-download/actions-data-download/"
+                f"https://raw.githubusercontent.com/{repoOwner}/{repoName}/actions-data-download/{directory}/"
                 + cache_file  # .split(os.sep)[-1]
             )
         headers = {
@@ -1117,7 +1134,7 @@ class tools:
                     'sec-fetch-mode': 'cors',
                     'sec-fetch-site': 'cross-site',                  
                     'origin': 'https://github.com',
-                    'referer': f'https://github.com/{repoOwner}/{repoName}/blob/actions-data-download/actions-data-download/{cache_file}',
+                    'referer': f'https://github.com/{repoOwner}/{repoName}/blob/actions-data-download/{directory}/{cache_file}',
                     'user-agent': f'{random_user_agent()}' 
                     #'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36
             }

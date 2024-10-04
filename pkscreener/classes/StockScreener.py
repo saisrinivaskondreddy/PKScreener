@@ -400,6 +400,7 @@ class StockScreener:
                                 screeningDictionary,
                                 saveDictionary,
                                 lookFor=maLength, # 1 =Buy, 2 =Sell, 3 = Any
+                                stock=stock,
                             )
                             if not isLorentzian:
                                 return returnLegibleData(f"isLorentzian:{isLorentzian}")
@@ -438,8 +439,15 @@ class StockScreener:
                         if not hasBbandsSqz:
                             return returnLegibleData(f"hasBbandsSqz:{hasBbandsSqz}")
                     elif respChartPattern == 7:
+                        try:
+                            filterPattern = None
+                            if str(maLength) != "0":
+                                from pkscreener.classes.MenuOptions import CANDLESTICK_DICT
+                                filterPattern = CANDLESTICK_DICT[str(maLength)]
+                        except:
+                            pass
                         isCandlePattern = candlePatterns.findPattern(
-                        processedData, screeningDictionary, saveDictionary)
+                        processedData, screeningDictionary, saveDictionary,filterPattern)
                         if not isCandlePattern:
                             return returnLegibleData(f"isCandlePattern:{isCandlePattern}")
                     elif respChartPattern == 8:
@@ -635,6 +643,7 @@ class StockScreener:
                                         screeningDictionary,
                                         saveDictionary,
                                         lookFor=maLength, # 1 =Buy, 2 =Sell, 3 = Any
+                                        stock=stock,
                                     )
                         if isNotMonitoringDashboard and not (executeOption in [1,2]):
                             screener.findBreakoutValue(

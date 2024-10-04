@@ -454,6 +454,17 @@ class pktalib:
             return talib.CDLMORNINGSTAR(open, high, low, close)
 
     @classmethod
+    def CDLCUPANDHANDLE(self, open, high, low, close):
+        if len(high) < 8:
+            return False
+        return (high.iloc[7] < high.iloc[6] and 
+                high.iloc[7] < high.iloc[5] and 
+                high.iloc[5] < high.iloc[4] and 
+                high.iloc[5] < high.iloc[3] and 
+                high.iloc[3] > high.iloc[2] and 
+                high.iloc[0] > high.iloc[6])
+
+    @classmethod
     def CDLMORNINGDOJISTAR(self, open, high, low, close):
         try:
             return talib.cdl_pattern(open, high, low, close, "morningdojistar")

@@ -43,6 +43,14 @@ async def takeScreenshot(page,saveFileName=None,text=""):
     clip_y = 245
     clip_width = 1010
     clip_height = 650
+    window_width=1920
+    window_height=1080
+
+    countriesSVG = await page.querySelector(selector='.countries.zoomable')
+    await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)
+    elementWidth = await page.evaluate(f'(countriesSVG) => countriesSVG.parentElement.parentElement.width.baseVal.valueInSpecifiedUnits', countriesSVG)
+    clip_x = int((window_width - elementWidth)/2)
+    clip_width = elementWidth
     folderPath = Archiver.get_user_data_dir()
     indiaElement = await page.querySelector(selector='#India')
     await page.waitFor(selectorOrFunctionOrTimeout=QUERY_SELECTOR_TIMEOUT)

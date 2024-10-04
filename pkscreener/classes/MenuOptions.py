@@ -479,6 +479,18 @@ PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT = {
     "0": "Cancel"
 }
 
+from pkscreener.classes.CandlePatterns import CandlePatterns
+CANDLESTICK_DICT = {}
+candleStickMenuIndex = 1
+for candlestickPattern in CandlePatterns.reversalPatternsBullish:
+    CANDLESTICK_DICT[str(candleStickMenuIndex)] = candlestickPattern
+    candleStickMenuIndex += 1
+for candlestickPattern in CandlePatterns.reversalPatternsBearish:
+    CANDLESTICK_DICT[str(candleStickMenuIndex)] = candlestickPattern
+    candleStickMenuIndex += 1
+CANDLESTICK_DICT["0"] = "No Filter"
+CANDLESTICK_DICT["M"] = "Cancel"
+
 class MenuRenderStyle(Enum):
     STANDALONE = 1
     TWO_PER_ROW = 2
@@ -676,11 +688,20 @@ class menus:
         line = 0
         lineIndex = 1
         substituteIndex = 0
+        rawDictionary = { k:v.strip() for k, v in rawDictionary.items()}
+        dictToRender = dict((key,rawDictionary[key]) for key in rawDictionary.keys() if str(key).isnumeric())
+        dictToRenderOnTheirOwnLine = {key: rawDictionary[key] for key in renderExceptionKeys}
+        keysToRender = set(dictToRender) - set(dictToRenderOnTheirOwnLine)
+        dictToRender = {key: rawDictionary[key] for key in keysToRender}
+        if len(dictToRender.keys()) > 0:
+            maxLengthOfItem = len(max(dictToRender.values(), key=len)) + 4
+        else:
+            maxLengthOfItem = 0
         for key in rawDictionary:
             if skip is not None and key in skip:
                 continue
             m = menu()
-            menuText = rawDictionary[key]
+            menuText = str(rawDictionary[key]).ljust(maxLengthOfItem) if key in dictToRender.keys() else str(rawDictionary[key])
             if "{0}" in menuText and len(substitutes) > 0:
                 if isinstance(substitutes[substituteIndex],int) and substitutes[substituteIndex] == 0:
                     substituteIndex += 1
@@ -730,6 +751,15 @@ class menus:
                                                  coloredValues=(["M"]),
                                                  defaultMenu="M",
                                                  substitutes = substitutes,
+                                                 skip=skip)
+    
+    def renderCandleStickPatterns(self,skip=[]):
+        return self.renderMenuFromDictionary(dict=CANDLESTICK_DICT,
+                                                 exceptionKeys=["0","M"],
+                                                 coloredValues=(["0"]),
+                                                 defaultMenu="0",
+                                                 renderStyle=MenuRenderStyle.TWO_PER_ROW,
+                                                 optionText="  [+] Would you like to filter by a specific Candlestick pattern? Select filter:",
                                                  skip=skip)
     
     def renderForMenu(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):

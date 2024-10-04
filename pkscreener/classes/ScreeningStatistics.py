@@ -3021,7 +3021,7 @@ class ScreeningStatistics:
 
     #@measure_time
     # Validate Lorentzian Classification signal
-    def validateLorentzian(self, df, screenDict, saveDict, lookFor=3):
+    def validateLorentzian(self, df, screenDict, saveDict, lookFor=3,stock=None):
         if df is None or len(df) == 0:
             return False
         data = df.copy()
@@ -3038,7 +3038,38 @@ class ScreeningStatistics:
         )
         try:
             with SuppressOutput(suppress_stdout=True, suppress_stderr=True):
-                lc = ata.LorentzianClassification(data=data)
+                lc = ata.LorentzianClassification(data=data,
+                features=[
+                    ata.LorentzianClassification.Feature("RSI", 14, 2),  # f1
+                    ata.LorentzianClassification.Feature("WT", 10, 11),  # f2
+                    ata.LorentzianClassification.Feature("CCI", 20, 2),  # f3
+                    ata.LorentzianClassification.Feature("ADX", 20, 2),  # f4
+                    ata.LorentzianClassification.Feature("RSI", 9, 2),   # f5
+                    pktalib.MFI(data['high'], data['low'], data['close'], data['volume'], 14) #f6
+                ],
+                settings=ata.LorentzianClassification.Settings(
+                    source=data['close'],
+                    neighborsCount=8,
+                    maxBarsBack=2000,
+                    useDynamicExits=False
+                ),
+                filterSettings=ata.LorentzianClassification.FilterSettings(
+                    useVolatilityFilter=True,
+                    useRegimeFilter=True,
+                    useAdxFilter=False,
+                    regimeThreshold=-0.1,
+                    adxThreshold=20,
+                    kernelFilter = ata.LorentzianClassification.KernelFilter(
+                        useKernelSmoothing = False,
+                        lookbackWindow = 8,
+                        relativeWeight = 8.0,
+                        regressionLevel = 25,
+                        crossoverLag = 2,
+                    )
+                ))
+            # if stock is not None:
+            #     lc.dump(f'{stock}_result.csv')
+            #     lc.plot(f'{stock}_result.jpg')
             saved = self.findCurrentSavedValue(screenDict, saveDict, "Pattern")
             if lc.df.iloc[-1]["isNewBuySignal"]:
                 screenDict["Pattern"] = (
@@ -3054,7 +3085,7 @@ class ScreeningStatistics:
                 saveDict["Pattern"] = saved[1] + "Lorentzian-Sell"
                 if lookFor != 1: # Not Buy
                     return True
-        except Exception:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             # ValueError: operands could not be broadcast together with shapes (20,) (26,)
             # File "/opt/homebrew/lib/python3.11/site-packages/advanced_ta/LorentzianClassification/Classifier.py", line 186, in __init__
             # File "/opt/homebrew/lib/python3.11/site-packages/advanced_ta/LorentzianClassification/Classifier.py", line 395, in __classify
@@ -3063,7 +3094,7 @@ class ScreeningStatistics:
             # File "/opt/homebrew/lib/python3.11/site-packages/pandas/core/series.py", line 5810, in _logical_method
             # File "/opt/homebrew/lib/python3.11/site-packages/pandas/core/ops/array_ops.py", line 456, in logical_op
             # File "/opt/homebrew/lib/python3.11/site-packages/pandas/core/ops/array_ops.py", line 364, in na_logical_op
-            # self.default_logger.debug(e, exc_info=True)
+            self.default_logger.debug(e, exc_info=True)
             pass
         return False
 

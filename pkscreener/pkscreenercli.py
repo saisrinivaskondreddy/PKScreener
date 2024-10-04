@@ -598,6 +598,10 @@ def runApplication():
                 closeWorkersAndExit()
                 exitGracefully()
                 sys.exit(0)
+            except KeyboardInterrupt:
+                closeWorkersAndExit()
+                exitGracefully()
+                sys.exit(0)
             except Exception as e:
                 default_logger().debug(e, exc_info=True)
                 if args.log:
@@ -701,6 +705,10 @@ def generateIntradayAnalysisReports(args):
                 configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(), pattern="*intraday_stock_data_*.pkl")
             if isInterrupted():
                 break
+        except KeyboardInterrupt:
+            closeWorkersAndExit()
+            exitGracefully()
+            sys.exit(0)
         except Exception as e:
             OutputControls().printOutput(e)
             if args.log:
@@ -1074,6 +1082,11 @@ def pkscreenercli():
             sys.exit(0)
         else:
             runApplicationForScreening()
+    except KeyboardInterrupt:
+        from pkscreener.globals import closeWorkersAndExit
+        closeWorkersAndExit()
+        exitGracefully()
+        sys.exit(0)
     except Exception as e:
         if "RUNNER" not in os.environ.keys() and ('PKDevTools_Default_Log_Level' in os.environ.keys() and os.environ["PKDevTools_Default_Log_Level"] != str(log.logging.NOTSET)):
                 OutputControls().printOutput(
@@ -1170,4 +1183,7 @@ if __name__ == "__main__":
     try:
         pkscreenercli()
     except KeyboardInterrupt:
+        from pkscreener.globals import closeWorkersAndExit
+        closeWorkersAndExit()
+        exitGracefully()
         sys.exit(0)

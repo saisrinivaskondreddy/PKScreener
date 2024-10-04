@@ -44,3 +44,4 @@ results/*.csv
 *.txt
 *.whl
 results
+pkscreener/*.txt
