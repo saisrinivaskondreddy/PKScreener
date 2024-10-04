@@ -321,6 +321,10 @@ After you have finished the run, go to that copied path, zip the contents of the
 * The Author(s), the software and any related/unrelated entity will not be held liable for your own investing decisions or losses. The authors or this softfware does not make any claim about the correctness of the results.
 * This screener began as a [fork] but has since added a lot of additional scanners, backtesting, Telegram bots, Alerts and a number of modifications and improvements.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=pkjmesra/pkscreener&type=Date)](https://star-history.com/#pkjmesra/pkscreener&Date)
+
 [MADE-IN-INDIA-badge]: https://img.shields.io/badge/MADE%20WITH%20%E2%9D%A4%20IN-INDIA-orange
 [MADE-IN-INDIA]: https://en.wikipedia.org/wiki/India
 [Windows-badge]: https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white
