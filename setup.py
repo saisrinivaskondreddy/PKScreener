@@ -113,14 +113,16 @@ except ImportError:
     bdist_wheel = None
 
 package_files_To_Install = ["LICENSE","README.md","requirements.txt",f"docs{os.sep}LICENSE-Others",
-                            f"docs{os.sep}Disclaimer.txt",f"screenshots{os.sep}logos{os.sep}LogoWM.png"]
+                            f"Disclaimer.txt",f"screenshots{os.sep}logos{os.sep}LogoWM.png"]
 package_files = [__PACKAGENAME__ + ".ini","courbd.ttf"]
 package_dir = os.path.join(os.getcwd(),__PACKAGENAME__)
 if os.path.exists(package_dir):
     for file in package_files_To_Install:
         targetFileName = file.split(os.sep)[-1].split(".")[0] + ".txt"
         package_files.append(targetFileName)
-        shutil.copy(os.path.join(os.getcwd(),file),os.path.join(package_dir,targetFileName))
+        srcFile = os.path.join(os.getcwd(),file)
+        if os.path.isfile(srcFile):
+            shutil.copy(srcFile,os.path.join(package_dir,targetFileName))
 
 setup(
     name=__PACKAGENAME__,

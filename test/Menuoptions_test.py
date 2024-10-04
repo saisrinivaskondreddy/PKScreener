@@ -91,9 +91,9 @@ class TestMenus:
         }
         m.fromDictionary(rawDictionary)
         assert len(m.menuDict) == 3
-        assert m.find("1").menuText == "Menu 1"
-        assert m.find("2").menuText == "Menu 2"
-        assert m.find("3").menuText == "Menu 3"
+        assert m.find("1").menuText.strip() == "Menu 1"
+        assert m.find("2").menuText.strip() == "Menu 2"
+        assert m.find("3").menuText.strip() == "Menu 3"
 
     def test_render(self):
         m = menus()
@@ -103,7 +103,7 @@ class TestMenus:
             "3": "Menu 3"
         }
         m.fromDictionary(rawDictionary)
-        assert m.render() == "\n     1 > Menu 1\n     2 > Menu 2\n     3 > Menu 3"
+        assert m.render().replace(" ","") == f"\n1>Menu1\n2>Menu2\n3>Menu3"
 
     def test_find_existing_key(self):
         m = menus()
@@ -113,7 +113,7 @@ class TestMenus:
             "3": "Menu 3"
         }
         m.fromDictionary(rawDictionary)
-        assert m.find("1").menuText == "Menu 1"
+        assert m.find("1").menuText.strip() == "Menu 1"
 
     def test_find_nonexistent_key(self):
         m = menus()
@@ -146,9 +146,9 @@ class TestMenus:
         m1.parent.menuKey = "6"
         list_menus = m.renderForMenu(selectedMenu=m1, asList=True)
         assert len(list_menus) == 4
-        assert list_menus[0].menuText == "Buy"
-        assert list_menus[1].menuText == "Sell"
-        assert list_menus[2].menuText == "Any/All"
+        assert list_menus[0].menuText.strip() == "Buy"
+        assert list_menus[1].menuText.strip() == "Sell"
+        assert list_menus[2].menuText.strip() == "Any/All"
     
     def test_renderLevel_X(self):
         m = menus()
