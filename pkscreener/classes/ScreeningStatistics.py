@@ -3523,7 +3523,7 @@ class ScreeningStatistics:
             if hasPriceCross:
                 percentageDiff = round(100*(ppsr_df["Close"].iloc[0]-ppsr_df[ppToCheck].iloc[0])/ppsr_df[ppToCheck].iloc[0],1)
                 saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
-                maText = f"{ppToCheck}-Cross-{'FromBelow' if crossDirectionFromBelow else 'FromAbove'}({ppsr_df[ppToCheck].iloc[0]})"
+                maText = f"Cross-{'FromBelow' if crossDirectionFromBelow else 'FromAbove'}({ppToCheck}:{ppsr_df[ppToCheck].iloc[0]})"
                 saveDict["MA-Signal"] = saved[1] + maText + f"({percentageDiff}%)"
                 screenDict["MA-Signal"] = saved[0] + f"{colorText.GREEN}{maText}{colorText.END}{colorText.FAIL if abs(percentageDiff) > 1 else colorText.WARN}({percentageDiff}%){colorText.END}"
         return hasPriceCross
