@@ -74,6 +74,13 @@ jobs:
           rm -rf patterns
           rm -rf test
           rm -rf pkscreener/classes/*.py
+          rm -rf pkscreener/ml/*.*
+          rm -rf pkscreener/*.md
+          rm -rf pkscreener/*.ini
+          rm -rf pkscreener/*.py
+          rm -rf pkscreener/*.xlsx
+          rm -rf pkscreener/*.ttf
+          rm -rf Backtest-Reports/*_OneLine_Summary.html
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v2
