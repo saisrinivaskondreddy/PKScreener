@@ -3502,7 +3502,32 @@ class ScreeningStatistics:
                 saveDict["MA-Signal"] = saved[1] + maText + f"({percentageDiff}%)"
                 screenDict["MA-Signal"] = saved[0] + f"{colorText.GREEN}{maText}{colorText.END}{colorText.FAIL if abs(percentageDiff) > 1 else colorText.WARN}({percentageDiff}%){colorText.END}"
         return hasAtleastOneMACross
-    
+
+    def validatePriceActionCrossesForPivotPoint(self, df, screenDict, saveDict, pivotPoint="1", crossDirectionFromBelow=True):
+        if df is None or len(df) == 0:
+            return False
+        hasPriceCross = False
+        data = df.copy()
+        pp_map = {"1":"PP","2":"S1","3":"S2","4":"S3","5":"R1","6":"R2","7":"R3"}
+        if pivotPoint is not None and pivotPoint != "0" and str(pivotPoint).isnumeric():
+            ppToCheck = pp_map[str(pivotPoint)]
+            ppsr_df = pktalib.get_ppsr_df(data["High"],data["Low"],data["Close"],ppToCheck)
+            if ppsr_df is None:
+                return False
+            if crossDirectionFromBelow:
+                hasPriceCross = (ppsr_df["Close"].iloc[0] > ppsr_df[ppToCheck].iloc[0] and 
+                             ppsr_df["Close"].iloc[1] <= ppsr_df[ppToCheck].iloc[1])
+            else:
+                hasPriceCross = (ppsr_df["Close"].iloc[0] < ppsr_df[ppToCheck].iloc[0] and 
+                             ppsr_df["Close"].iloc[1] >= ppsr_df[ppToCheck].iloc[1])
+            if hasPriceCross:
+                percentageDiff = round(100*(ppsr_df["Close"].iloc[0]-ppsr_df[ppToCheck].iloc[0])/ppsr_df[ppToCheck].iloc[0],1)
+                saved = self.findCurrentSavedValue(screenDict,saveDict,"MA-Signal")
+                maText = f"{ppToCheck}-Cross-{'FromBelow' if crossDirectionFromBelow else 'FromAbove'}({ppsr_df[ppToCheck].iloc[0]})"
+                saveDict["MA-Signal"] = saved[1] + maText + f"({percentageDiff}%)"
+                screenDict["MA-Signal"] = saved[0] + f"{colorText.GREEN}{maText}{colorText.END}{colorText.FAIL if abs(percentageDiff) > 1 else colorText.WARN}({percentageDiff}%){colorText.END}"
+        return hasPriceCross
+
     # Validate if the stock prices are at least rising by 2% for the last 3 sessions
     def validatePriceRisingByAtLeast2Percent(self, df, screenDict, saveDict):
         if df is None or len(df) == 0:

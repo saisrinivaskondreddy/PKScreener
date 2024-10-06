@@ -559,7 +559,12 @@ class StockScreener:
                                                                   mas=insideBarToLookback,
                                                                   isEMA=respChartPattern,
                                                                   maDirectionFromBelow=reversalOption)
-
+                if executeOption == 41:
+                    priceCrossed = screener.validatePriceActionCrossesForPivotPoint(df=processedData.head(2),
+                                                                  screenDict=screeningDictionary,
+                                                                  saveDict=saveDictionary,
+                                                                  pivotPoint=respChartPattern,
+                                                                  crossDirectionFromBelow=reversalOption)
                 if not (isLorentzian or (isInsideBar !=0) or isBuyingTrendline or isIpoBase or isNR or isVCP or isVSA or isMinerviniVCP):
                     isMomentum = screener.validateMomentum(
                         processedData, screeningDictionary, saveDictionary
@@ -632,6 +637,7 @@ class StockScreener:
                         or (executeOption == 26)
                         or (executeOption == 29 and bidGreaterThanAsk)
                         or (executeOption == 40 and priceCrossed)
+                        or (executeOption == 41 and priceCrossed)
                     ):
                         isNotMonitoringDashboard = userArgs is None or userArgs.monitor is None or (userArgs.monitor is not None and "~" not in userArgs.monitor)
                         # Now screen for common ones to improve performance

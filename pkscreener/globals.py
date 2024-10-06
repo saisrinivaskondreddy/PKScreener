@@ -81,6 +81,7 @@ from pkscreener.classes.MenuOptions import (
     level3_X_PotentialProfitable_MenuDict,
     PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT,
     PRICE_CROSS_SMA_EMA_TYPE_MENUDICT,
+    PRICE_CROSS_PIVOT_POINT_TYPE_MENUDICT,
     level3_X_Reversal_MenuDict,
     level4_X_Lorenzian_MenuDict,
     level4_X_ChartPattern_Confluence_MenuDict,
@@ -1618,7 +1619,34 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             smas = input(colorText.FAIL + "  [+] Price should cross which of these comma separated EMA/SMA(s): (e.g. 200 or 8,9,21,55,200) [Default: 200]:") or "200"
         insideBarToLookback = smas.split(",")
         selectedChoice["5"] = str(smas)
-        
+    if executeOption == 41:
+        Utility.tools.clearScreen(forceTop=True)
+        selectedMenu = m2.find(str(executeOption))
+        m3.renderForMenu(selectedMenu=selectedMenu)
+        if userPassedArgs.options is not None:
+            options = userPassedArgs.options.split(":")
+        if len(options) >=4:
+            pivotPoint = options[3]
+            pivotPoint = "1" if pivotPoint == "D" else pivotPoint
+        else:
+            pivotPoint = input(colorText.FAIL + "  [+] Select option: ") or "1"
+        if pivotPoint == "0" or not str(pivotPoint).isnumeric:
+            return None, None
+        selectedChoice["3"] = str(pivotPoint)
+        respChartPattern = pivotPoint
+        selectedMenu = m3.find(str(pivotPoint))
+        Utility.tools.clearScreen(forceTop=True)
+        m4.renderForMenu(selectedMenu=selectedMenu)
+        if len(options) >=5:
+            priceDirection = options[4]
+            priceDirection = "2" if priceDirection == "D" else priceDirection
+        else:
+            priceDirection = input(colorText.FAIL + "  [+] Select option: ") or "2"
+        if priceDirection == "0" or not str(priceDirection).isnumeric:
+            return None, None
+        selectedChoice["4"] = str(priceDirection)
+        reversalOption = (priceDirection == "2")
+
     if executeOption == 42:
         Utility.tools.getLastScreenedResults(defaultAnswer)
         return None, None
@@ -2654,7 +2682,16 @@ def updateMenuChoiceHierarchy():
                 menuChoiceHierarchy
                 + f'>{PRICE_CROSS_SMA_EMA_TYPE_MENUDICT[selectedChoice["4"]].strip()}'
             )
-            
+        elif selectedChoice["2"] == "41":
+            menuChoiceHierarchy = (
+                menuChoiceHierarchy
+                + f'>{PRICE_CROSS_PIVOT_POINT_TYPE_MENUDICT[selectedChoice["3"]].strip()}'
+            )
+            menuChoiceHierarchy = (
+                menuChoiceHierarchy
+                + f'>{PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT[selectedChoice["4"]].strip()}'
+            )
+        
         intraday = "(Intraday)" if ("Intraday" not in menuChoiceHierarchy and (userPassedArgs is not None and userPassedArgs.intraday) or configManager.isIntradayConfig()) else ""
         menuChoiceHierarchy = f"{menuChoiceHierarchy}{intraday}"
         global nValueForMenu

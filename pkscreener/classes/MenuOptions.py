@@ -352,12 +352,13 @@ level2_X_MenuDict = {
     "38": "Intraday Short Sell (PSAR / Volume SMA)  ",
     "39": "IPO-Lifetime First day bullish break     ",
     "40": "Price Action                             ",
+    "41": "Pivot Points                             ",
     "50": "Show Last Screened Results               ",
 
     "M": "Back to the Top/Main menu                 ",
     "Z": "Exit (Ctrl + C)                           ",
 }
-MAX_SUPPORTED_MENU_OPTION = 40
+MAX_SUPPORTED_MENU_OPTION = 41
 MAX_MENU_OPTION = 50
 
 level3_X_Reversal_MenuDict = {
@@ -471,7 +472,19 @@ PRICE_CROSS_SMA_EMA_TYPE_MENUDICT = {
 
     "0": "Cancel"
 }
+PRICE_CROSS_PIVOT_POINT_TYPE_MENUDICT = {
+    "1": "Pivot Point (PP)",
 
+    "2": "Support Level 1 (S1)",
+    "3": "Support Level 2 (S2)",
+    "4": "Support Level 3 (S3)",
+
+    "5": "Resistance Level 1 (R1)",
+    "6": "Resistance Level 2 (R2)",
+    "7": "Resistance Level 3 (R3)",
+
+    "0": "Cancel"
+}
 PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT = {
     "1": "Price Crosses From Above (Sell)",
     "2": "Price Crosses From Below (Buy)",
@@ -986,6 +999,15 @@ class menus:
                                                          renderStyle=renderStyle,
                                                          skip=skip, 
                                                          parent=selectedMenu)
+                elif selectedMenu.menuKey in ["41"]:
+                    return self.renderMenuFromDictionary(dict=PRICE_CROSS_PIVOT_POINT_TYPE_MENUDICT,
+                                                         exceptionKeys=["0","1","2","5"],
+                                                         coloredValues=["1"],
+                                                         defaultMenu="1",
+                                                         asList=asList,
+                                                         renderStyle=renderStyle,
+                                                         skip=skip, 
+                                                         parent=selectedMenu)
             elif selectedMenu.level == 3:
                 self.level = 4
                 # next levelsub-menu of the selected sub-menu
@@ -1025,7 +1047,10 @@ class menus:
                                                          renderStyle=renderStyle,
                                                          skip=skip, 
                                                          parent=selectedMenu)
-                if selectedMenu.parent.menuKey == "40" and selectedMenu.menuKey in PRICE_CROSS_SMA_EMA_TYPE_MENUDICT.keys():
+                if ((selectedMenu.parent.menuKey == "40" and 
+                        selectedMenu.menuKey in PRICE_CROSS_SMA_EMA_TYPE_MENUDICT.keys()) or 
+                    (selectedMenu.parent.menuKey == "41" and 
+                        selectedMenu.menuKey in PRICE_CROSS_PIVOT_POINT_TYPE_MENUDICT.keys())):
                     return self.renderMenuFromDictionary(dict=PRICE_CROSS_SMA_EMA_DIRECTION_MENUDICT,
                                                          exceptionKeys=["0"],
                                                          coloredValues=["2"],
