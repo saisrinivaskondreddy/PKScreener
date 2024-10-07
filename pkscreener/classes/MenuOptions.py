@@ -35,6 +35,12 @@ configManager = ConfigManager.tools()
 MENU_SEPARATOR = ""
 LINE_SEPARATOR = "\n"
 
+STOCK_EXCHANGE_DICT = {
+    "1" : "NSE - India",
+    "2" : "NASDAQ - US",
+    "3" : "Borso - Turkey",
+}
+
 level0MenuDict = {
     "X": "Scanners",
     "F": "Find a stock in scanners",

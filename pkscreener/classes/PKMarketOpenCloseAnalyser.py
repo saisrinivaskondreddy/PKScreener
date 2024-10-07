@@ -147,7 +147,7 @@ class PKMarketOpenCloseAnalyser:
             if not exists and len(stockDict) <= 0:
                 OutputControls().printOutput(f"  [+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_data_dir()}/ !")
                 OutputControls().printOutput(f"  [+] Please run {colorText.FAIL}pkscreener{colorText.END}{colorText.GREEN} -a Y -e -d -i 1m{colorText.END} and then run this menu option again.")
-                input("Press any key to continue...")
+                OutputControls().takeUserInput("Press any key to continue...")
         try:
             if os.path.exists(copyFilePath) and exists:
                 shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
@@ -199,7 +199,7 @@ class PKMarketOpenCloseAnalyser:
             if not exists and len(stockDict) <= 0:
                 OutputControls().printOutput(f"  [+] {colorText.FAIL}{cache_file}{colorText.END} not found under {Archiver.get_user_data_dir()}/ !")
                 OutputControls().printOutput(f"  [+] Please run {colorText.FAIL}pkscreener{colorText.END}{colorText.GREEN} -a Y -e -d{colorText.END} and then run this menu option again.")
-                input("Press any key to continue...")
+                OutputControls().takeUserInput("Press any key to continue...")
         try:
             if os.path.exists(copyFilePath) and exists:
                 shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth

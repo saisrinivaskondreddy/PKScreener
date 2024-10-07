@@ -186,7 +186,7 @@ class tools:
         OutputControls().printOutput(colorText.BLUE + latestInfo + colorText.END)
         OutputControls().printOutput(colorText.FAIL + donationInfo + colorText.END)
         if defaultAnswer is None:
-            input(
+            OutputControls().takeUserInput(
                 colorText.FAIL
                 + "  [+] Press <Enter> to continue!"
                 + colorText.END
@@ -271,7 +271,7 @@ class tools:
                 + colorText.END
             )
         if defaultAnswer is None:
-            input(
+            OutputControls().takeUserInput(
                 colorText.GREEN
                 + "  [+] Press <Enter> to continue.."
                 + colorText.END
@@ -1510,7 +1510,7 @@ class tools:
             raise ValueError
         except ValueError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
-            input(
+            OutputControls().takeUserInput(
                 colorText.FAIL
                 + "\n  [+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
@@ -1575,7 +1575,7 @@ class tools:
             raise ValueError
         except ValueError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
-            input(
+            OutputControls().takeUserInput(
                 colorText.FAIL
                 + "\n  [+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END
@@ -1616,7 +1616,7 @@ class tools:
             raise ValueError
         except ValueError as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)
-            input(
+            OutputControls().takeUserInput(
                 colorText.FAIL
                 + "\n  [+] Invalid Option Selected. Press <Enter> to try again..."
                 + colorText.END

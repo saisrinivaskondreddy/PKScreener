@@ -288,7 +288,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                         + "  [+] Default configuration generated as user configuration is not found!"
                         + colorText.END
                     )
-                    input("Press <Enter> to continue...")
+                    OutputControls().takeUserInput("Press <Enter> to continue...")
                     return
             except IOError as e:  # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
@@ -297,7 +297,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     + "  [+] Failed to save user config. Exiting.."
                     + colorText.END
                 )
-                input("Press <Enter> to continue...")
+                OutputControls().takeUserInput("Press <Enter> to continue...")
                 sys.exit(1)
         else:
             parser = configparser.ConfigParser(strict=False)
@@ -582,7 +582,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     + "  [+] User configuration saved."
                     + colorText.END
                 )
-                input("Press <Enter> to continue...")
+                OutputControls().takeUserInput("Press <Enter> to continue...")
                 return
             except IOError as e:  # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
@@ -591,7 +591,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     + "  [+] Failed to save user config. Exiting.."
                     + colorText.END
                 )
-                input("Press <Enter> to continue...")
+                OutputControls().takeUserInput("Press <Enter> to continue...")
                 sys.exit(1)
 
     # Load user config from file
@@ -803,7 +803,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             f.close()
             OutputControls().printOutput("\n" + configData)
             if defaultAnswer is None:
-                input("Press <Enter> to continue...")
+                OutputControls().takeUserInput("Press <Enter> to continue...")
             return f"{prompt}\n{configData}"
         except Exception as e:  # pragma: no cover
             self.default_logger.debug(e, exc_info=True)

@@ -450,7 +450,7 @@ def warnAboutDependencies():
                 + "  [+] Neither ta-lib nor pandas_ta was located. You need at least one of them to continue! \n  [+] Please follow instructions from README file under PKScreener repo: https://github.com/pkjmesra/PKScreener"
                 + colorText.END
             )
-            input("Press any key to try anyway...")
+            OutputControls().takeUserInput("Press any key to try anyway...")
     
 def runApplication():
     from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions,menuChoiceHierarchy
@@ -593,7 +593,7 @@ def runApplication():
                                     + colorText.END
                                 )
                             if args.answerdefault is None:
-                                input("Press <Enter> to continue...")
+                                OutputControls().takeUserInput("Press <Enter> to continue...")
             except SystemExit:
                 closeWorkersAndExit()
                 exitGracefully()
@@ -908,7 +908,7 @@ def pkscreenercli():
             pass
     try:
         removeOldInstances()
-        OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis)).printOutput("",end="\r")
+        OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis),enableUserInput=(args is None or args.answerdefault is None)).printOutput("",end="\r")
         configManager.getConfig(ConfigManager.parser)
         userAcceptance = configManager.tosAccepted
         if not configManager.tosAccepted:
@@ -927,7 +927,7 @@ def pkscreenercli():
                     sleep(2)
                     break
         if not userAcceptance and ((args is not None and args.answerdefault is not None and str(args.answerdefault).lower() != "y") or (args is not None and args.answerdefault is None)):
-            userAcceptance = input(f"{colorText.WARN}By using this Software, you agree to\n[+] having read through the Disclaimer {colorText.END}({disclaimerLink}){colorText.WARN}\n[+] and accept Terms Of Service {colorText.END}({tosLink}){colorText.WARN} of PKScreener ? {colorText.END}(Y/N){colorText.GREEN} [Default: {colorText.END}{colorText.FAIL}N{colorText.END}{colorText.GREEN}] :{colorText.END}") or "N"
+            userAcceptance = OutputControls().takeUserInput(f"{colorText.WARN}By using this Software, you agree to\n[+] having read through the Disclaimer {colorText.END}({disclaimerLink}){colorText.WARN}\n[+] and accept Terms Of Service {colorText.END}({tosLink}){colorText.WARN} of PKScreener ? {colorText.END}(Y/N){colorText.GREEN} [Default: {colorText.END}{colorText.FAIL}N{colorText.END}{colorText.GREEN}] :{colorText.END}",defaultInput="N",enableUserInput=True) or "N"
             if str(userAcceptance).lower() != "y":
                 OutputControls().printOutput(f"\n{colorText.WARN}You seem to have\n    [+] passed disagreement to the Disclaimer and \n    [+] not accepted Terms Of Service of PKScreener.\n{colorText.END}{colorText.FAIL}[+] You MUST read and agree to the disclaimer and MUST accept the Terms of Service to use PKScreener.{colorText.END}\n\n{colorText.WARN}Exiting now!{colorText.END}")
                 sleep(5)
@@ -970,7 +970,7 @@ def pkscreenercli():
             setupLogger(shouldLog=True, trace=args.testbuild)
             if not args.prodbuild and args.answerdefault is None:
                 try:
-                    input("Press <Enter> to continue...")
+                    OutputControls().takeUserInput("Press <Enter> to continue...")
                 except EOFError:
                     OutputControls().printOutput(f"{colorText.WARN}If you're running from within docker, please run like this:{colorText.END}\n{colorText.FAIL}docker run -it pkjmesra/pkscreener:latest\n{colorText.END}")
                     pass
