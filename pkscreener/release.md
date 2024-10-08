@@ -2,21 +2,8 @@
 
 ## What's New?
 1. [v0.45.20241006.620] release
-* Telegram userID/username + OTP based auth for PKScreener added.
-* My monitoring options added. Now you can add any scan to your own monitoring list and run it from -m or M > menu option.
-* Find a stock in scanners. You can now look-up a stock and find out which all basic standard scanners gave out that stock in result.
-* GPU enabled for running scans on computers where GPU device(s) is available
-* Excel hyperlinks enabled for stocks when the results are saved/exported to excel.
-* Added support for time-window-slider. It's still an experimental feature. So use wth care. It may be buggy and may not work for all period/duration combinations. If you want to try this experimental feature, choose option 3 to go back in time and run the scan again to come up with a diff of stocks between now and then, when presented with options after the scan finishes. Please report various bugs under https://github.com/pkjmesra/PKScreener/issues
-* Added more profitable setups. Try X > 12 > 33. Added Bullish Today for Previous Day Open/Close (PDO/PDC) with 1M Volume (Try X > 12 > 33 > 2) and moved the previous option under X > 12 > 33 > 1
-* Added the ability to run VCP using additional filters. By default these filters are turned on but you can turn it off when running locally as well. Try X > 12 > 7 > 4
-* Added two more piped scans with VCP/Volume/Price breakouts.
-* Enabling entering specific date in YYYY-MM-DD format for quick backtests using T > B menu.
-* Price action option added for filtering out stocks where price has crossed given SMA/EMA from above/below. Try X > 12 > 40
-* Improved super-confluence. Added it under pre-defined scans as well. Try out P_1_26 and P_1_27.
-* Short sell analysis options added : Try out X > 14 > 35 or X > 14 > 36 or X > 12 > 37 or X > 12 > 38.
-* Added IPO-Lifetime First day bullish break. Try X > 13 > 39.
-* Added several new sectoral indices. Try X > S >
+* Enabled Large deals symbol under trends for bulk/block/short deals.
+* Legends can now be read/seen/reviewed right after the results appear on the desktop version.
 * Fixed multiple bugs.
 
 ## Older Releases

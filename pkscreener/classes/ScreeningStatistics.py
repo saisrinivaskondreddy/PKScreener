@@ -1885,13 +1885,13 @@ class ScreeningStatistics:
         # Let's get the large deals for the stock
         try:
             dealsInfo = ""
+            symbolKeys = ["Ⓑ","Ⓛ","Ⓢ"]
             largeDealsData, filePath, modifiedDateTime = Archiver.findFileInAppResultsDirectory(directory=Archiver.get_user_data_dir(), fileName="large_deals.json")
             dealsFileSize = os.stat(filePath).st_size if os.path.exists(filePath) else 0
             if dealsFileSize > 0 and len(largeDealsData) > 0:
                 import json
                 countKeys = ["BULK_DEALS","BLOCK_DEALS","SHORT_DEALS"]
                 dataKeys = ["BULK_DEALS_DATA","BLOCK_DEALS_DATA","SHORT_DEALS_DATA"]
-                symbolKeys = ["Ⓑ","Ⓛ","Ⓢ"]
                 jsonDeals = json.loads(largeDealsData)
                 index = 0
                 for countKey in countKeys:
@@ -1901,8 +1901,7 @@ class ScreeningStatistics:
                                 buySellInfo = "" if deal["buySell"] is None else (f"({'B' if deal['buySell'] == 'BUY' else 'S'})")
                                 qty = int(deal["qty"])
                                 qtyInfo = f"({int(qty/1000000)}M)" if qty >= 1000000 else (f"({int(qty/1000)}K)" if qty >= 1000 else f"({qty})")
-                                dealsInfo = f" {buySellInfo}{qtyInfo} {symbolKeys[index]}"
-                                break
+                                dealsInfo = f"{dealsInfo} {buySellInfo}{qtyInfo}{symbolKeys[index]}"
                     index += 1
         except:
             pass
@@ -1911,6 +1910,13 @@ class ScreeningStatistics:
         decision_scr = (colorText.GREEN if isUptrend else (colorText.FAIL if isDowntrend else colorText.WARN)) + f"{decision}" + colorText.END
         dma50decision_scr = (colorText.GREEN if is50DMAUptrend else (colorText.FAIL if is50DMADowntrend else colorText.WARN)) + f"{dma50decision}" + colorText.END
         saveDict["Trend"] = f"{saved[1]} {decision} {dma50decision} {mf}{dealsInfo}"
+        for symbol in symbolKeys:
+            dealParts = dealsInfo.split(" ")
+            dealPartsRefined = []
+            for dealPart in dealParts:
+                dealPart = dealPart.replace(symbol,(colorText.GREEN+symbol+colorText.END) if ("(B)" in dealPart) else ((colorText.FAIL+symbol+colorText.END) if ("(S)" in dealPart) else symbol))
+                dealPartsRefined.append(dealPart)
+            dealsInfo = " ".join(dealPartsRefined).strip()
         screenDict["Trend"] = f"{saved[0]} {decision_scr} {dma50decision_scr} {mfs}{dealsInfo}"
         saveDict["MFI"] = mf_inst_ownershipChange
         screenDict["MFI"] = mf_inst_ownershipChange

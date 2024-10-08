@@ -755,13 +755,13 @@ class tools:
         # if 'RUNNER' not in os.environ.keys() and 'PKDevTools_Default_Log_Level' in os.environ.keys():
         # im.show()
 
-    def wrapFitLegendText(table, backtestSummary, legendText):
+    def wrapFitLegendText(table=None, backtestSummary=None, legendText=None):
         wrapper = textwrap.TextWrapper(
             width=2
             * int(
                 len(table.split("\n")[0])
                 if (table is not None and len(table) > 0)
-                else (len(backtestSummary.split("\n")[0]) if backtestSummary is not None else 500)
+                else (len(backtestSummary.split("\n")[0]) if backtestSummary is not None else 80)
             )
         )
         word_list = wrapper.wrap(text=legendText)
@@ -807,7 +807,7 @@ class tools:
                         fontPath = "/usr/share/fonts/truetype/freefont/FreeMono.ttf"
         return fontPath
 
-    def getLegendHelpText(table,backtestSummary):
+    def getLegendHelpText(table=None,backtestSummary=None):
         legendText = "\n***1.Stock***: This is the NSE symbol/ticker for a company. Stocks that are NOT stage two, are coloured red.***2.Consol.***: It shows the price range in which stock is trading for the last 22 trading sessions(22 trading sessions per month)***3.Breakout(22Prds)***: The BO is Breakout level based on last 22 sessions. R is the resistance level (if available)."
         legendText = f"{legendText} An investor should consider both BO & R level to analyse entry / exits in their trading lessons. If the BO value is green, it means the stock has already broken out (is above BO level). If BO is in red, it means the stock is yet to break out.***4.LTP***: This is the last/latest trading/closing price of the given stock on a given date at NSE. The LTP in green/red means the"
         legendText = f"{legendText} stock price has increased / decreased since last trading session. (1.5%, 1.3%,1.8%) with LTP shows the stock price rose by 1.5%, 1.3% and 1.8% in the last 1, 2 and 3 trading sessions respectively.***5.%Chng***: This is the change(rise/fall in percentage) in closing/trading price from the previous trading session's closing price. Green means that price rose from the previous"
@@ -827,7 +827,7 @@ class tools:
         legendText = f"{legendText} have invested 10,000 on the given date.***17.[T][_trend_]***: [T] is for Trends followed by the trend name in the filter.***18.[BO]***: This Shows the Breakout filter value from the backtest reports and will be available only if 'showpaststrategydata' configuration is turned on.***19.[P]***: [P] shows pattern name.***20.MFI***: Top 5 Mutual fund ownership and "
         legendText = f"{legendText} top 5 Institutional investor ownership status as on the last day of the last month, based on analysis from Morningstar.***21.FairValue***: Morningstar Fair value of a given stock as of last trading day as determined by 3rd party analysis based on fundamentals.***22.MCapWt%***: This shows the market-cap weighted portfolio weight to consider investing. "
         legendText = f"{legendText} ***23.Block/Bulk/Short Deals***: Ⓑ : Bulk Deals,Ⓛ: Block Deals,Ⓢ: Short deals. (B) indicates Buy, (S) indicates Sell. (1M) or (1K) indicates the quantity in million/kilo(thousand).\n"
-        legendText = tools.wrapFitLegendText(table,backtestSummary, legendText)
+        legendText = tools.wrapFitLegendText(table=table,backtestSummary=backtestSummary, legendText=legendText)
         # legendText = legendText.replace("***:", colorText.END + colorText.WHITE)
         # legendText = legendText.replace("***", colorText.END + colorText.FAIL)
         # return colorText.WHITE + legendText + colorText.END
@@ -1304,7 +1304,7 @@ class tools:
         return '=HYPERLINK("%s", "%s")' % (url.format(tools.stockNameFromDecoratedName(value)), value)
 
     # Save screened results to excel
-    def promptSaveResults(sheetName,df_save, defaultAnswer=None,pastDate=None):
+    def promptSaveResults(sheetName,df_save, defaultAnswer=None,pastDate=None,screenResults=None):
         """
         Tries to save the dataframe output into an excel file.
 
@@ -1332,6 +1332,14 @@ class tools:
         isSaved = False
         try:
             if defaultAnswer is None:
+                responseLegends = str(
+                        OutputControls().takeUserInput(
+                            colorText.WARN
+                            + f"[>] Do you want to review legends used in the report above? [Y/N](Default:{colorText.END}{colorText.FAIL}N{colorText.END}): ",defaultInput="N"
+                        ) or "N"
+                    ).upper()
+                if "Y" in responseLegends:
+                    OutputControls().printOutput(tools.getLegendHelpText(table=None).replace("***:",colorText.END+":").replace("***"," " +colorText.FAIL))
                 if not configManager.alwaysExportToExcel:
                     response = str(
                         input(
