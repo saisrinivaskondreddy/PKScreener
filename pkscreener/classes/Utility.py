@@ -825,7 +825,8 @@ class tools:
         legendText = f"{legendText} red, example, -5.67%, it means the price actually decreased by 5.67%. Gains are in green and losses are in red in this grid. The Date column has the date(s) on which that specific stock was found under the chosen scan options in the past 22 trading sessions.***14.52Wk-H/L***: These have 52 weeks high/low prices and will be shown in red, green or yellow based on how close the"
         legendText = f"{legendText} price is to the 52 wk high/low value.If the 52 week high/low value is within 10% of LTP:Yellow, LTP is above 52 week high:Green. If the LTP is below 90% of 52 week high:Red.***15.1-Pd-%***: Shows the 1 period gain in percent from the given date. Similarly 2-Pd-%, 3-Pd-% etc shows 2 day, 3 days gain etc.***16.1-Pd-10k***: Shows 1 period/day portfolio value if you would"
         legendText = f"{legendText} have invested 10,000 on the given date.***17.[T][_trend_]***: [T] is for Trends followed by the trend name in the filter.***18.[BO]***: This Shows the Breakout filter value from the backtest reports and will be available only if 'showpaststrategydata' configuration is turned on.***19.[P]***: [P] shows pattern name.***20.MFI***: Top 5 Mutual fund ownership and "
-        legendText = f"{legendText} top 5 Institutional investor ownership status as on the last day of the last month, based on analysis from Morningstar.***21.FairValue***: Morningstar Fair value of a given stock as of last trading day as determined by 3rd party analysis based on fundamentals.***22.MCapWt%***: This shows the market-cap weighted portfolio weight to consider investing.\n"
+        legendText = f"{legendText} top 5 Institutional investor ownership status as on the last day of the last month, based on analysis from Morningstar.***21.FairValue***: Morningstar Fair value of a given stock as of last trading day as determined by 3rd party analysis based on fundamentals.***22.MCapWt%***: This shows the market-cap weighted portfolio weight to consider investing. "
+        legendText = f"{legendText} ***23.Block/Bulk/Short Deals***: Ⓑ : Bulk Deals,Ⓛ: Block Deals,Ⓢ: Short deals. (B) indicates Buy, (S) indicates Sell. (1M) or (1K) indicates the quantity in million/kilo(thousand).\n"
         legendText = tools.wrapFitLegendText(table,backtestSummary, legendText)
         # legendText = legendText.replace("***:", colorText.END + colorText.WHITE)
         # legendText = legendText.replace("***", colorText.END + colorText.FAIL)
@@ -958,6 +959,29 @@ class tools:
         leftOutStocks = list(set(stockCodes)-set(processedStocks))
         default_logger().debug(f"Attempted fresh download of {len(stockCodes)} stocks and downloaded {len(processedStocks)} stocks. {len(leftOutStocks)} stocks remaining.")
         return stockDict, leftOutStocks
+
+    def loadLargeDeals():
+        shouldFetch = False
+        dealsFile = os.path.join(Archiver.get_user_data_dir(),"large_deals.json")
+        dealsFileSize = os.stat(dealsFile).st_size if os.path.exists(dealsFile) else 0
+        if dealsFileSize > 0:
+            modifiedDateTime = Archiver.get_last_modified_datetime(dealsFile)
+            curr = datetime.datetime.now(pytz.timezone("Asia/Kolkata"))
+            shouldFetch = modifiedDateTime.date() < curr.date()
+        else:
+            shouldFetch = True
+        if shouldFetch:
+            from PKNSETools.Benny.NSE import NSE
+            import json
+            try:
+                nseFetcher = NSE(Archiver.get_user_data_dir())
+                jsonDict = nseFetcher.largeDeals()
+                if jsonDict and len(jsonDict) > 0:
+                    with open(dealsFile,"w") as f:
+                        f.write(json.dumps(jsonDict))
+            except Exception as e:
+                default_logger().debug(e,exc_info=True)
+                pass
 
     def loadStockData(
         stockDict,

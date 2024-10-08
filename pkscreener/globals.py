@@ -2262,6 +2262,7 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
         configManager.period = prevPeriod
         configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
     loadedStockData = True
+    Utility.tools.loadLargeDeals()
     return stockDictPrimary, stockDictSecondary
 
 def getLatestTradeDateTime(stockDictPrimary):
