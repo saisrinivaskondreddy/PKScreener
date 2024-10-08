@@ -149,6 +149,7 @@ SCANNER_SUBMENUS_CHILDLEVEL_SUPPORT = {"6":[ "7","10"], "7":[ "3","6","9"],}
 INDEX_COMMANDS_SKIP_MENUS_SCANNER = ["W", "E", "M", "Z", "S"]
 INDEX_COMMANDS_SKIP_MENUS_BACKTEST = ["W", "E", "M", "Z", "S", "N", "0", "15"]
 PIPED_SCAN_SKIP_COMMAND_MENUS =["2", "3", "M", "0", "4"]
+PIPED_SCAN_SKIP_INDEX_MENUS =["W","N","E","S","0","Z","M","15"]
 UNSUPPORTED_COMMAND_MENUS =["22","42","M","Z","0",str(MAX_MENU_OPTION)]
 SUPPORTED_COMMAND_MENUS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"]
 
@@ -1074,9 +1075,24 @@ def command_handler(update: Update, context: CallbackContext) -> None:
             update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
             return START_ROUTES
         elif len(selection) == 3:
+            m0.renderForMenu(
+                selectedMenu=None,
+                skip=TOP_LEVEL_SCANNER_SKIP_MENUS[:len(TOP_LEVEL_SCANNER_SKIP_MENUS)-1],
+                asList=True,
+                renderStyle=MenuRenderStyle.STANDALONE,
+            )
+            cmds = m1.renderForMenu(m0.find(key="X"),skip=PIPED_SCAN_SKIP_INDEX_MENUS,asList=True,renderStyle=MenuRenderStyle.STANDALONE)
+            for indexCmd in cmds:
+                cmdText = (
+                    f"{cmdText}\n\n/{cmd.upper()}{indexCmd.commandTextKey().replace('/X','')} for Piped scan of {indexCmd.commandTextLabel().replace('Scanners >',cmd.upper()+' >')}"
+                )
+            cmdText = f"{cmdText}\n\nClick /start if you want to restart the session."
+            update.message.reply_text(sanitiseTexts(f"Choose an option:\n{cmdText}"))
+            return START_ROUTES
+        elif len(selection) == 4:
             options = ":".join(selection)
             launchScreener(
-                options=options,
+                options=options.upper(),
                 user=update.message.from_user,
                 context=context,
                 optionChoices=cmd.upper(),
@@ -1372,6 +1388,7 @@ def addCommandsForMenuItems(application):
         asList=True,
         renderStyle=MenuRenderStyle.STANDALONE,
     )
+    cmds3p = m4.renderForMenu(m0.find(key="X"),skip=PIPED_SCAN_SKIP_INDEX_MENUS,asList=True,renderStyle=MenuRenderStyle.STANDALONE)
     for mnu0 in cmds0:
         p0 = mnu0.menuKey.upper()
         application.add_handler(CommandHandler(p0, command_handler))
@@ -1405,6 +1422,12 @@ def addCommandsForMenuItems(application):
                 application.add_handler(
                     CommandHandler(f"{p0}_{p1}_{p2}", command_handler)
                 )
+                if p0 in ["P"]:
+                    for indexCmd in cmds3p:
+                        p3 = indexCmd.menuKey.upper()
+                        application.add_handler(
+                            CommandHandler(f"{p0}_{p1}_{p2}_{p3}", command_handler)
+                        )
                 if (p2 in SCANNER_MENUS_WITH_SUBMENU_SUPPORT and p0 in ["X", "B"]):
                     selectedMenu = m2.find(p2)
                     cmds3 = m3.renderForMenu(

@@ -1026,9 +1026,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if menuOption in ["P"]:
         predefinedOption = None
         selPredefinedOption = None
+        selIndexOption = None
         if len(options) >= 3:
             predefinedOption = str(options[1])
             selPredefinedOption = str(options[2])
+            if len(options) >= 4:
+                selIndexOption = str(options[3])
         selectedChoice["0"] = "P"
         updateMenuChoiceHierarchy()
         selectedMenu = m0.find(menuOption)
@@ -1052,6 +1055,14 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 scannerOption = PIPED_SCANNERS[selPredefinedOption]
                 if predefinedOption == "4": # Watchlist
                     scannerOption = scannerOption.replace("-o 'X:12:","-o 'X:W:")
+                elif predefinedOption == "1": # Predefined
+                    if selIndexOption is None and (userPassedArgs is None or userPassedArgs.answerdefault is None):
+                        m1.renderForMenu(m0.find(key="X"),skip=["W","N","E","S","0","Z"])
+                        selIndexOption = input(colorText.FAIL + f"{pastDate}  [+] Select option: ") or str(configManager.defaultIndex)
+                        if "M" in selIndexOption:
+                            return None, None
+                    if selIndexOption is not None:
+                        scannerOption = scannerOption.replace("-o 'X:12:",f"-o 'X:{selIndexOption}:")
                 if userPassedArgs is not None:
                     userPassedArgs.usertag = PREDEFINED_SCAN_MENU_TEXTS[int(selPredefinedOption)-1]
                 selectedChoice["2"] = selPredefinedOption

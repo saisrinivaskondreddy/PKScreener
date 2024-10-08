@@ -4,6 +4,7 @@
 1. [v0.45.20241006.620] release
 * Enabled Large deals symbol under trends for bulk/block/short deals.
 * Legends can now be read/seen/reviewed right after the results appear on the desktop version.
+* Enabled bot to allow running piped scanners for any selected index.
 * Fixed multiple bugs.
 
 ## Older Releases
