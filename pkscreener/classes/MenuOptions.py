@@ -273,24 +273,9 @@ level1_S_MenuDict = {
     "M": "Back to the Top/Main menu",
     "Z": "Exit (Ctrl + C)",
 }
-INDICES_MAP = {
-    "1": "Nifty 50          ",
-    "2": "Nifty Next 50     ",
-    "3": "Nifty 100         ",
-    "4": "Nifty 200         ",
-    "5": "Nifty 500         ",
-    "6": "Nifty Smallcap 50 ",
-    "7": "Nifty Smallcap 100",
-    "8": "Nifty Smallcap 250",
-    "9": "Nifty Midcap 50   ",
-    "10": "Nifty Midcap 100",
-    "11": "Nifty Midcap 150 ",
-    "12": "Nifty (All Stocks)",
-    "14": "F&O Stocks Only", #Discontinued:  https://nsearchives.nseindia.com/content/circulars/FAOP61157.pdf
-    "15": "NASDAQ",
 
-    "M": "Back to the Top/Main menu",
-}
+INDICES_MAP = {}
+
 level1_X_MenuDict = {
     "W": "Screen stocks from my own Watchlist",
     "N": "Nifty Prediction using Artifical Intelligence (Use for Gap-Up/Gap-Down/BTST/STBT)",
@@ -316,6 +301,10 @@ level1_X_MenuDict = {
     "M": "Back to the Top/Main menu",
     "Z": "Exit (Ctrl + C)",
 }
+for indexKey in level1_X_MenuDict.keys():
+    if (indexKey.isnumeric() and int(indexKey) > 0) or (indexKey in ["M"]):
+        INDICES_MAP[indexKey] = level1_X_MenuDict[indexKey].strip()
+
 level2_X_MenuDict = {
     "0": "Full Screening (Shows Technical Parameters without any criterion)",
     "1": "Probable Breakouts/Breakdowns             ",

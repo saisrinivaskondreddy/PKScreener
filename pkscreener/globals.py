@@ -1059,7 +1059,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     if selIndexOption is None and (userPassedArgs is None or userPassedArgs.answerdefault is None):
                         m1.renderForMenu(m0.find(key="X"),skip=["W","N","E","S","0","Z"])
                         selIndexOption = input(colorText.FAIL + f"{pastDate}  [+] Select option: ") or str(configManager.defaultIndex)
-                        if "M" in selIndexOption:
+                        if str(selIndexOption).upper() in "M":
                             return None, None
                     if selIndexOption is not None:
                         scannerOption = scannerOption.replace("-o 'X:12:",f"-o 'X:{selIndexOption}:")
@@ -1231,7 +1231,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             return None, None
 
     handleMenu_XBG(menuOption, indexOption, executeOption)
-    if indexOption == "M" or executeOption == "M":
+    if str(indexOption).upper() == "M" or str(executeOption).upper() == "M":
         Utility.tools.clearScreen(forceTop=True)
         # Go back to the caller. It will show the console menu again.
         return None, None
@@ -1675,7 +1675,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         OutputControls().takeUserInput("Press <Enter> to continue...")
         return None, None
     if (
-        not str(indexOption).isnumeric() and indexOption in ["W", "E", "M", "N", "Z", "S"]
+        not str(indexOption).isnumeric() and str(indexOption).upper() in ["W", "E", "M", "N", "Z", "S"]
     ) or (
         str(indexOption).isnumeric()
         and (int(indexOption) >= 0 and int(indexOption) < 16)
@@ -1716,7 +1716,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 if defaultAnswer is None:
                     input("\nPress <Enter> to Continue...\n")
                 return None, None
-            elif indexOption == "M":
+            elif str(indexOption) == "M":
                 return None, None
             elif indexOption == "Z":
                 OutputControls().takeUserInput(
@@ -1832,7 +1832,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     pass
                 exchangeName = "NASDAQ" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else "INDIA"
                 runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-                if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+                if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
                     runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1]
                 if menuOption in ["F"]:
                     if "^NSEI" in listStockCodes:
@@ -1860,7 +1860,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 consumers = None
             if menuOption in ["C"]:
                 runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-                if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+                if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
                     runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1]
                 if saveResults is not None and not saveResults.empty:
                     saveResults, screenResults = PKMarketOpenCloseAnalyser.runOpenCloseAnalysis(stockDictPrimary,endOfdayCandles,screenResults, saveResults,runOptionName=runOptionName,filteredListOfStocks=listStockCodes)
@@ -2725,7 +2725,7 @@ def updateMenuChoiceHierarchy():
     pastDate = f"[ {PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0)} ]" if needsCalc else ""
     reportTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs is not None and userPassedArgs.pipedtitle is not None else ""
     runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-    if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+    if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
         runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
     reportTitle = f"{runOptionName} | {reportTitle}" if runOptionName is not None else reportTitle
 
@@ -2906,12 +2906,15 @@ def printNotifySaveScreenedResults(
             screenResults.drop_duplicates(keep="first", inplace=True)
         if "Stock" in saveResults.columns:
             saveResults.drop_duplicates(keep="first", inplace=True)
-    
-    reportTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs is not None and userPassedArgs.pipedtitle is not None else ""
+
     runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-    if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+    if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
         runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
+    indexName = f" for {INDICES_MAP[runOptionName.split('_')[-1]]}" if runOptionName is not None and len(runOptionName.split('_')) >= 4 else ""
+    userPassedArgs.pipedtitle = f"{userPassedArgs.pipedtitle}{indexName}" if userPassedArgs.pipedtitle is not None else ""
+    reportTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs is not None and userPassedArgs.pipedtitle is not None else ""
     reportTitle = f"{runOptionName} | {reportTitle}" if runOptionName is not None else reportTitle
+    
     OutputControls().printOutput(
         colorText.FAIL
         + f"  [+] You chose: {reportTitle}{menuChoiceHierarchy}[{len(screenResults) if screenResults is not None and not screenResults.empty else 0}]"
@@ -3192,7 +3195,7 @@ def printNotifySaveScreenedResults(
         )
     if not testing:
         runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
-        if (":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None:
+        if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
             runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
         Utility.tools.setLastScreenedResults(screenResults, saveResults, f"{runOptionName}_{recordDate if recordDate is not None else ''}")
     scanCycleRunning = False
@@ -4080,7 +4083,7 @@ def cleanupLocalResults():
     if userPassedArgs.answerdefault is not None or userPassedArgs.systemlaunched or userPassedArgs.testbuild:
         return
     from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
-    if not NSEMarketStatus().shouldFetchNextBell():
+    if not NSEMarketStatus().shouldFetchNextBell()[0]:
         return
     launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
     shouldPrompt = (launcher.endswith(".py\"") or launcher.endswith(".py")) and (userPassedArgs is None or userPassedArgs.answerdefault is None)

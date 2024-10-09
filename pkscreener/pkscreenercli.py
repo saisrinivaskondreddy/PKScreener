@@ -635,8 +635,14 @@ def updateProgressStatus(args,monitorOptions=None):
         if args.systemlaunched or monitorOptions is not None:
             optionsToUse = args.options if monitorOptions is None else monitorOptions
             choices = f"--systemlaunched -a y -e -o '{optionsToUse.replace('C:','X:').replace('D:','')}'"
-            indexNum = PREDEFINED_SCAN_MENU_VALUES.index(choices)
-            choices = f"{'P_1_'+str(indexNum +1) if '>|' in choices else choices}"
+            from pkscreener.classes.MenuOptions import INDICES_MAP
+            searchChoices = choices
+            for indexKey in INDICES_MAP.keys():
+                if indexKey.isnumeric():
+                    searchChoices = searchChoices.replace(f"X:{indexKey}:","X:12:")
+            indexNum = PREDEFINED_SCAN_MENU_VALUES.index(searchChoices)
+            selectedIndexOption = choices.split(":")[1]
+            choices = f"P_1_{str(indexNum +1)}_{str(selectedIndexOption)}" if ">|" in choices else choices
             args.progressstatus = f"  [+] {choices} => Running {choices}"
             args.usertag = PREDEFINED_SCAN_MENU_TEXTS[indexNum]
             args.maxdisplayresults = 2000 #if monitorOptions is None else 100
