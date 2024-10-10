@@ -2910,7 +2910,7 @@ def printNotifySaveScreenedResults(
     runOptionName = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
     if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
         runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
-    indexName = f" for {INDICES_MAP[runOptionName.split('_')[-1]]}" if runOptionName is not None and len(runOptionName.split('_')) >= 4 else ""
+    indexName = f" for {INDICES_MAP[runOptionName.split('_')[-1]]}" if runOptionName is not None and len(runOptionName.split('_')) >= 4 and str(runOptionName.split('_')[-1]).isnumeric() and int(str(runOptionName.split('_')[-1])) <= int(list(INDICES_MAP.keys())[-2]) else ""
     userPassedArgs.pipedtitle = f"{userPassedArgs.pipedtitle}{indexName}" if userPassedArgs.pipedtitle is not None else ""
     reportTitle = f"{userPassedArgs.pipedtitle}|" if userPassedArgs is not None and userPassedArgs.pipedtitle is not None else ""
     reportTitle = f"{runOptionName} | {reportTitle}" if runOptionName is not None else reportTitle

@@ -368,9 +368,9 @@ class tools:
             logo_img = Image.open(logo_wm_path,formats=["PNG"]).convert('LA')
             # logo_img = logo_img.resize((min(width,height),min(width,height)), Image.ANTIALIAS, reducing_gap=2)
             lx, ly = logo_img.size
-            plx = int((width - lx)/2)
-            ply = int((height - ly)/2)
-            sourceImage.paste(logo_img, (int(plx/2.5), int(ply/2), plx + lx, ply + ly), logo_img)
+            plx = int((width - lx)/4)
+            ply = int((height - ly)/3)
+            sourceImage.paste(logo_img, (plx, ply, plx + lx, ply + ly), logo_img)
         except Exception as e:
             default_logger().debug(e,exc_info=True)
             pass
@@ -756,6 +756,8 @@ class tools:
         # im.show()
 
     def wrapFitLegendText(table=None, backtestSummary=None, legendText=None):
+        if legendText is None or len(legendText) < 1:
+            return legendText
         wrapper = textwrap.TextWrapper(
             width=2
             * int(
@@ -764,6 +766,8 @@ class tools:
                 else (len(backtestSummary.split("\n")[0]) if backtestSummary is not None else 80)
             )
         )
+        if wrapper.width <= 0:
+            return legendText
         word_list = wrapper.wrap(text=legendText)
         legendText_new = ""
         for ii in word_list[:-1]:
