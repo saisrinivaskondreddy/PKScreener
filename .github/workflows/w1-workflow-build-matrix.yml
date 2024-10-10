@@ -132,7 +132,6 @@ jobs:
               pip3 uninstall -y PKNSETools
               pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
-              pip3 install -r requirements-dev.txt
               pip3 install .
             TEST_BUILD: |
               ./dist/pkscreenercli.exe --testbuild
@@ -159,7 +158,6 @@ jobs:
               pip3 uninstall -y PKNSETools
               pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
-              pip3 install -r requirements-dev.txt
               pip3 install ta-lib==0.4.32
               pip3 install .
             TEST_BUILD: |
@@ -179,7 +177,6 @@ jobs:
               pip3 uninstall -y PKNSETools
               pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
-              pip3 install -r requirements-dev.txt
               python3 -m pip install -U ta-lib==0.4.32
               pip3 install .
             TEST_BUILD: |
