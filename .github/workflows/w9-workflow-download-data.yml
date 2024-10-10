@@ -251,6 +251,9 @@ jobs:
         git add actions-data-download/*.pkl --force
         git add results/Data/*.pkl --force
         git add results/Indices/*.csv --force
+        git add results/Indices/*.csv -u
+        git add results/Data/*.pkl -u
+        git add actions-data-download/*.pkl -u
         git commit -m "GitHub-Action-Workflow-Market-Data-Download-(Default-Config)"
         git push -v -u origin +actions-data-download
       env:
