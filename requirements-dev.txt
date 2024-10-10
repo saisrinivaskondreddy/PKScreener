@@ -9,7 +9,7 @@ mistletoe
 pep517
 pip
 pip-chill
-pyinstaller==6.8.0
+pyinstaller
 pytest
 pytest-cov
 pytest-mock
@@ -19,4 +19,4 @@ setuptools
 # because tensorflow recently moved the keras 
 # out of the default package and now is only 
 # available through the tf-nightly install.
-tf-nightly
+# tf-nightly
