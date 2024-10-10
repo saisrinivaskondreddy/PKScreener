@@ -59,7 +59,11 @@ def test_showDevInfo():
     # Mocking the input() function
     with patch("builtins.input", return_value="Y") as mock_input:
         with patch("pkscreener.classes.OtaUpdater.OTAUpdater.showWhatsNew", return_value="Some exciting new features!"):
+            from PKDevTools.classes.OutputControls import OutputControls
+            prevValue = OutputControls().enableUserInput
+            OutputControls().enableUserInput = True
             result = tools.showDevInfo()
+            OutputControls().enableUserInput = prevValue
             # Assert that input() is called with the correct argument
             mock_input.assert_called_once_with(
                 colorText.FAIL
@@ -399,7 +403,11 @@ def test_promptReversalScreening():
 def test_promptReversalScreening_4x_Does_not_raise_value_error():
     # Mocking the input() function
     with patch("builtins.input", side_effect=["4", "x", "\n"]) as mock_input:
+        from PKDevTools.classes.OutputControls import OutputControls
+        prevValue = OutputControls().enableUserInput
+        OutputControls().enableUserInput = True
         result = tools.promptReversalScreening()
+        OutputControls().enableUserInput = prevValue
         # Assert that input() is called with the correct argument
         mock_input.assert_called_with(
             colorText.FAIL

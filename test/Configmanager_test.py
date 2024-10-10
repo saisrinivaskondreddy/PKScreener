@@ -161,7 +161,11 @@ def test_showConfigFile(config_parser):
         mock_open.return_value.read.return_value = 'config data'
         assert tool.showConfigFile(defaultAnswer='Y') == '  [+] PKScreener User Configuration:\nconfig data'
         mock_input.assert_not_called()
+        from PKDevTools.classes.OutputControls import OutputControls
+        prevValue = OutputControls().enableUserInput
+        OutputControls().enableUserInput = True
         assert tool.showConfigFile(defaultAnswer=None) == '  [+] PKScreener User Configuration:\nconfig data'
+        OutputControls().enableUserInput = prevValue
         mock_input.assert_called()
 
 def test_checkConfigFile(config_parser):

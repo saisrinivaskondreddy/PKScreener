@@ -16,3 +16,7 @@ pytest-mock
 pytoml
 ruff
 setuptools
+# because tensorflow recently moved the keras 
+# out of the default package and now is only 
+# available through the tf-nightly install.
+tf-nightly

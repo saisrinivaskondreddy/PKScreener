@@ -266,13 +266,17 @@ def test_option_H(mocker, capsys):
 
 def test_nifty_prediction(mocker, capsys):
     cleanup()
+    from PKDevTools.classes.OutputControls import OutputControls
+    prevValue = OutputControls().enableUserInput
+    OutputControls().enableUserInput = True
     mocker.patch("builtins.input", side_effect=["X", "N"])
-    args = argParser.parse_known_args(args=["-e", "-a", "Y", "-t", "-p"])[0]
+    args = argParser.parse_known_args(args=["-e", "-a", "Y", "-t", "-p", "-l"])[0]
     main(userArgs=args)
+    OutputControls().enableUserInput = prevValue
     out, err = capsys.readouterr()
     assert err == ""
     assert len(globals.test_messages_queue) > 0
-    # assert messageSentToTelegramQueue("Nifty AI prediction for the Next Day") == True
+    assert messageSentToTelegramQueue("Nifty AI prediction") == True
 
 
 

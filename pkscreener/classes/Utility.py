@@ -370,7 +370,7 @@ class tools:
             lx, ly = logo_img.size
             plx = int((width - lx)/2)
             ply = int((height - ly)/2)
-            sourceImage.paste(logo_img, (plx, ply, plx + lx, ply + ly), logo_img)
+            sourceImage.paste(logo_img, (int(plx/2.5), int(ply/2), plx + lx, ply + ly), logo_img)
         except Exception as e:
             default_logger().debug(e,exc_info=True)
             pass
