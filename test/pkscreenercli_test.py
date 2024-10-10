@@ -243,7 +243,11 @@ def test_pkscreenercli_warnAboutDependencies():
     with patch.dict("pkscreener.Imports", {"talib": False, "pandas_ta":False}):
         with patch("builtins.print") as mock_print:
             with patch("builtins.input") as mock_input:
+                from PKDevTools.classes.OutputControls import OutputControls
+                prevValue = OutputControls().enableUserInput
+                OutputControls().enableUserInput = True
                 pkscreenercli.warnAboutDependencies()
+                OutputControls().enableUserInput = prevValue
                 mock_print.assert_called()
                 mock_print.call_count = 2
                 mock_input.assert_called()
