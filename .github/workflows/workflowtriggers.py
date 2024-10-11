@@ -557,8 +557,7 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
     if PKDateUtilities.currentDateTime() <= PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute):
         if not shouldRunWorkflow():
             return
-        for scanIndex in PREDEFINED_SCAN_ALERT_MENU_KEYS:
-            triggerRemoteScanAlertWorkflow(f"P:1:{scanIndex}:", branch)
+
     if scanDaysInPast > 0 or "ALERT_TRIGGER" not in os.environ.keys():
         try:
             os.remove(os.path.join(os.getcwd(),".env.dev"))
@@ -596,7 +595,13 @@ def triggerScanWorkflowActions(launchLocal=False, scanDaysInPast=0):
                 sleep(5)
             else:
                 break
-    
+
+    if PKDateUtilities.currentDateTime() <= PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute):
+        if not shouldRunWorkflow():
+            return
+        for scanIndex in PREDEFINED_SCAN_ALERT_MENU_KEYS:
+            triggerRemoteScanAlertWorkflow(f"P:1:{scanIndex}:", branch)
+
     # runIntradayAnalysisScans(branch="main")
 
 def runIntradayAnalysisScans(branch="gh-pages"):
@@ -604,11 +609,11 @@ def runIntradayAnalysisScans(branch="gh-pages"):
         return
     # Trigger the intraday analysis only in the 2nd half after it gets trigerred anytime after 3 PM IST
     if PKDateUtilities.currentDateTime() >= PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute-30):
-        while (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour+1,minute=MarketHours().closeMinute-15)):
+        while (PKDateUtilities.currentDateTime() < PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour+1,minute=MarketHours().closeMinute+15)):
             print(f"Waiting for {(MarketHours().closeHour+1):02}:{(MarketHours().closeMinute):02} PM IST...")
             sleep(300) # Wait for 4:15 PM IST because the download data will take time and we need the downloaded data
             # to be uploaded to actions-data-download folder on github before the intraday analysis can be run.
-        triggerRemoteScanAlertWorkflow("C:12: --runintradayanalysis -u -1001785195297", branch)
+        triggerRemoteScanAlertWorkflow(f"C:12: --runintradayanalysis", branch)
 
 def triggerRemoteScanAlertWorkflow(scanOptions, branch):
     cmd_options = scanOptions.replace("_",":")
@@ -894,8 +899,8 @@ def triggerMiscellaneousTasks():
 
 if __name__ == '__main__':
     if args.barometer:
-        if PKDateUtilities.currentDateTime() <= PKDateUtilities.currentDateTime(simulate=True,hour=MORNING_ALERT_HOUR+1,minute=MORNING_ALERT_MINUTE):
-            triggerRemoteScanAlertWorkflow("X:12: --barometer", "main")
+        if args.force or (PKDateUtilities.currentDateTime() <= PKDateUtilities.currentDateTime(simulate=True,hour=MORNING_ALERT_HOUR+1,minute=MORNING_ALERT_MINUTE)):
+            triggerRemoteScanAlertWorkflow("X:12: --barometer -l", "main")
     if args.report:
         generateBacktestReportMainPage()
     if args.backtests:
