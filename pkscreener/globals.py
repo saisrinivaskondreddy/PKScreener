@@ -3125,7 +3125,7 @@ def printNotifySaveScreenedResults(
                     suggestion_text = "Try @nse_pkscreener_bot for more scans! <i><b><u>You agree that you have read</u></b>:https://pkjmesra.github.io/PKScreener/Disclaimer.txt</i> <b>and accept TOS</b>: https://pkjmesra.github.io/PKScreener/tos.txt <b>STOP using and exit from channel/group, if you do not</b>"
                     finalCaption = f"{caption}.Feel free to share on social media.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text} {suggestion_text}"
                 if not testing:
-                    if PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday():
+                    if PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday()[0]:
                         kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
                     else:
                         kite_file_path, kite_caption = "Dummy.html", "Dummy"
@@ -3211,11 +3211,12 @@ def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,us
         try:
             with pd.option_context('mode.chained_assignment', None):
                 kite_basket_df = pd.DataFrame(columns=["product","exchange","tradingsymbol","quantity","transaction_type","order_type","price"], index=saveResultsTrimmed.index)
-                kite_basket_df["price"] = saveResultsTrimmed["LTP"] if "LTP" in saveResultsTrimmed.columns else 0
+                price = (saveResultsTrimmed["LTP"].astype(float)*0.995).round(1) if "LTP" in saveResultsTrimmed.columns else 0
+                kite_basket_df.loc[:,"price"] = price
                 kite_basket_df["quantity"] = 1
                 kite_basket_df["product"] = "MIS"
                 kite_basket_df["exchange"] = "NSE"
-                kite_basket_df["transaction_type"] = "BUY"
+                kite_basket_df["transaction_type"] = "SELL" if "sell" in caption.lower() or "bear" in caption.lower() else "BUY"
                 kite_basket_df["order_type"] = "LIMIT"
                 kite_basket_df.reset_index(inplace=True)
                 kite_basket_df.reset_index(inplace=True, drop=True)
