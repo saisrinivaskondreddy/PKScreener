@@ -365,3 +365,16 @@ jobs:
       version: ${{ needs.Build.outputs.version }}
     secrets: inherit
   
+  Cleanup:
+    name: Clean up and delete old release
+    runs-on: ${{ 'ubuntu-20.04'}} #ubuntu-20.04 #windows-latest
+    permissions: write-all
+    needs: [Build, README_Update]
+    steps:
+    - name: Delete this workflow run
+      continue-on-error: true
+      shell: bash
+      run: |
+        gh release delete ${{ needs.Build.outputs.oldVersion }} --cleanup-tag -y -R pkjmesra/pkscreener
+      env:
+        GH_TOKEN : ${{secrets.GITHUB_TOKEN}}
