@@ -178,7 +178,7 @@ jobs:
         run: bash .github/dependencies/build_tools/wheels/build_wheels.sh
 
       - name: Store artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: dist/*.whl #wheelhouse/*.whl
 
@@ -265,7 +265,7 @@ jobs:
       #     SKLEARN_SKIP_NETWORK_TESTS: 1
 
       - name: Store artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: dist/*.tar.gz
 
