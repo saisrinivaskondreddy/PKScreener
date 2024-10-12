@@ -3217,6 +3217,21 @@ class ScreeningStatistics:
                 ltpValid = float(str(pct_save).replace("%","")) >= minChange
             saveDict["LTP"] = round(ltp, 2)
             screenDict["LTP"] = (colorText.GREEN if ltpValid else colorText.FAIL) + ("%.2f" % ltp) + colorText.END
+            try:
+                dateTimePart = str(recent.index[0]).split(" ")
+                if len(dateTimePart) == 1:
+                    indexDate = PKDateUtilities.dateFromYmdString(dateTimePart[0])
+                    dayDate = f"{indexDate.day}/{indexDate.month}"
+                elif len(dateTimePart) == 2:
+                    today = PKDateUtilities.currentDateTime()
+                    indexDate = datetime.datetime.strptime(str(recent.index[0]),"%Y-%m-%d %H:%M:%S").replace(tzinfo=today.tzinfo)
+                    dayDate = f"{indexDate.day}/{indexDate.month} {indexDate.hour}:{indexDate.minute}"
+                    screenDict["Time"] = f"{colorText.FAIL}{dayDate}{colorText.END}"
+                    saveDict["Time"] = str(dayDate)
+            except Exception as e:
+                self.default_logger.debug(e, exc_info=True)
+                pass
+            
             return ltpValid, verifyStageTwo
         screenDict["LTP"] = colorText.FAIL + ("%.2f" % ltp) + colorText.END
         saveDict["LTP"] = round(ltp, 2)
