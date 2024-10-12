@@ -30,14 +30,146 @@ from unittest import mock
 import unittest
 import csv
 import re
+import tempfile
+from pkscreener.pkscreenercli import logFilePath, setupLogger, warnAboutDependencies, runApplication, updateProgressStatus, generateIntradayAnalysisReports, saveSendFinalOutcomeDataframe, checkIntradayComponent, updateConfigDurations, pipeResults, removeOldInstances, updateConfig, pkscreenercli, runApplicationForScreening
 
 import pytest
 from PKDevTools.classes.ColorText import colorText
 from PKDevTools.classes.log import default_logger
 
-from pkscreener import pkscreenercli
+from pkscreener import pkscreenercli, Imports
 from pkscreener.classes.PKScanRunner import PKScanRunner
 
+class TestPKScreenerFunctions(unittest.TestCase):
+
+    @patch('PKDevTools.classes.Archiver.get_user_data_dir')
+    def test_logFilePath(self, mock_get_user_data_dir):
+        with patch("builtins.open", return_value=None):
+            # Positive case
+            mock_get_user_data_dir.return_value = "/mock/path"
+            expected_path = os.path.join("/mock/path", "pkscreener-logs.txt")
+            result = logFilePath()
+            self.assertEqual(result, expected_path)
+            self.assertFalse(os.path.exists(result))
+
+        # Negative case (simulating an exception)
+        with patch('builtins.open', side_effect=Exception("Error")):
+            result = logFilePath()
+            self.assertIn(tempfile.gettempdir(), result)
+
+    @patch('os.remove')
+    @patch('os.path.exists', return_value=True)
+    @patch('PKDevTools.classes.log.setup_custom_logger')
+    def test_setupLogger(self, mock_setup_custom_logger, mock_exists, mock_remove):
+        with patch('pkscreener.pkscreenercli.logFilePath', return_value="mock_path"):
+            setupLogger(shouldLog=True, trace=False)
+            mock_remove.assert_called_once_with("mock_path")
+            mock_setup_custom_logger.assert_called_once()
+
+        # Test logger not set up
+        setupLogger(shouldLog=False)
+        self.assertNotIn('PKDevTools_Default_Log_Level', os.environ)
+
+    @patch.dict(Imports, {"talib": False, "pandas_ta": False})
+    def test_warnAboutDependencies(self):
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput') as mock_output_controls:
+            # Positive case: TA-Lib not installed, pandas_ta installed
+            warnAboutDependencies()
+            mock_output_controls.assert_called()
+
+        # Negative case: Neither installed
+        with patch('PKDevTools.classes.OutputControls.OutputControls.takeUserInput') as mock_input:
+                from PKDevTools.classes.OutputControls import OutputControls
+                prevValue = OutputControls().enableUserInput
+                OutputControls().enableUserInput = True
+                warnAboutDependencies()
+                OutputControls().enableUserInput = prevValue
+                mock_input.assert_called()
+
+    @patch('pkscreener.globals.main')
+    def test_runApplication(self, mock_main):
+        mock_main.return_value = (MagicMock(), MagicMock())
+        with patch('pkscreener.pkscreenercli.get_debug_args', return_value=MagicMock()):
+            runApplication()
+            mock_main.assert_called()
+
+    def test_updateProgressStatus(self):
+        args = MagicMock()
+        args.options = "X:12:9:2.5:>|X:12:30:1:"
+        args.systemlaunched = True
+        args, choices = updateProgressStatus(args)
+        self.assertIn("Running", args.progressstatus)
+
+    @patch('pkscreener.globals.main')
+    def test_generateIntradayAnalysisReports(self, mock_main):
+        args = MagicMock()
+        args.options = "X:12:9:2.5:>|X:12:30:1:"
+        mock_main.return_value = (MagicMock(), MagicMock())
+        args.pipedmenus = None
+        with patch('pkscreener.globals.resetUserMenuChoiceOptions'):
+            generateIntradayAnalysisReports(args)
+            mock_main.assert_called()
+
+    def test_saveSendFinalOutcomeDataframe(self):
+        # Positive case
+        df = MagicMock()
+        df.empty = False
+        df.columns = ['Pattern', 'LTP', 'LTP@Alert', 'SqrOffLTP', 'SqrOffDiff', 'EoDDiff', 'DayHigh', 'DayHighDiff']
+        saveSendFinalOutcomeDataframe(df)
+
+        # Negative case
+        df.empty = True
+        saveSendFinalOutcomeDataframe(df)
+
+    def test_checkIntradayComponent(self):
+        args = MagicMock()
+        monitorOption = "mock:monitorOption"
+        result = checkIntradayComponent(args, monitorOption)
+        self.assertIn("mock", result)
+
+    def test_updateConfigDurations(self):
+        args = MagicMock()
+        args.options = "X:12:9:2.5:i 1m>|X:12:30:1:"
+        updateConfigDurations(args)
+        self.assertIsNotNone(args.intraday)
+
+    def test_pipeResults(self):
+        args = MagicMock()
+        args.options = "X:12:9:2.5:i 1m>|X:12:30:1:"
+        import pandas as pd
+        prevOutput = pd.DataFrame(["Dummy"],columns=["Stock"])
+        result = pipeResults(prevOutput, args)
+        self.assertTrue(result)
+
+    @patch('glob.glob')
+    @patch('os.remove')
+    def test_removeOldInstances(self, mock_remove, mock_glob):
+        mock_glob.return_value = ["pkscreenercli_test"]
+        removeOldInstances()
+        mock_remove.assert_called()
+
+    @patch('pkscreener.pkscreenercli.configManager')
+    def test_updateConfig(self, mock_config):
+        args = MagicMock()
+        args.intraday = "1m"
+        updateConfig(args)
+        mock_config.toggleConfig.assert_called()
+
+    @patch('pkscreener.pkscreenercli.runApplicationForScreening')
+    def test_pkscreenercli(self, mock_run_application):
+        args = MagicMock()
+        args.options = "mock:options"
+        with pytest.raises((SystemExit)):
+            pkscreenercli.pkscreenercli()
+            mock_run_application.assert_called()
+
+    @patch('pkscreener.pkscreenercli.runApplicationForScreening')
+    def test_runApplicationForScreening(self, mock_run_application):
+        args = MagicMock()
+        args.croninterval = None
+        with pytest.raises((SystemExit)):
+            runApplicationForScreening()
+            mock_run_application.assert_called()
 
 # Mocking necessary functions or dependencies
 @pytest.fixture(autouse=True)
@@ -440,6 +572,7 @@ class TestExitGracefully(unittest.TestCase):
 #     with patch("pkscreener.globals.main") as mock_main:
 #         sys.argv[0] = "launcher"
 #         sys.argv[1] = "-e -a Y -p -o 'X:0:0:SBIN:i 1m'"
+#         mock_main.return_value = (MagicMock(), MagicMock())
 #         pkscreenercli.pkscreenercli()
 #         mock_main.assert_called_with(None)
 
