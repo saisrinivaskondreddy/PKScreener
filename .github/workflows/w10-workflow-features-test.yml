@@ -130,7 +130,7 @@ jobs:
         echo ${{steps.create_pr.outputs.pr_number}} >> pr.txt
 
     - name: Save PR Log File
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: PR_Log.txt
         path: pr.txt

@@ -1057,7 +1057,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     scannerOption = scannerOption.replace("-o 'X:12:","-o 'X:W:")
                 elif predefinedOption == "1": # Predefined
                     if selIndexOption is None and (userPassedArgs is None or userPassedArgs.answerdefault is None):
-                        m1.renderForMenu(m0.find(key="X"),skip=["W","N","E","S","0","Z"])
+                        m1.renderForMenu(m0.find(key="X"),skip=["W","N","E","S","Z"])
                         selIndexOption = input(colorText.FAIL + f"{pastDate}  [+] Select option: ") or str(configManager.defaultIndex)
                         if str(selIndexOption).upper() in "M":
                             return None, None
