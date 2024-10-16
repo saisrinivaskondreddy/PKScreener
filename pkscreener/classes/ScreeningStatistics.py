@@ -3224,9 +3224,13 @@ class ScreeningStatistics:
                     dayDate = f"{indexDate.day}/{indexDate.month}"
                 elif len(dateTimePart) == 2:
                     today = PKDateUtilities.currentDateTime()
-                    indexDate = datetime.datetime.strptime(str(recent.index[0]),"%Y-%m-%d %H:%M:%S").replace(tzinfo=today.tzinfo)
-                    dayDate = f"{indexDate.day}/{indexDate.month} {indexDate.hour}:{indexDate.minute}"
-                    screenDict["Time"] = f"{colorText.FAIL}{dayDate}{colorText.END}"
+                    try:
+                        indexDate = datetime.datetime.strptime(str(recent.index[0]),"%Y-%m-%d %H:%M:%S").replace(tzinfo=today.tzinfo)
+                    except:
+                        indexDate = datetime.datetime.strptime(str(recent.index[0]),"%Y-%m-%d %H:%M:%S%z").replace(tzinfo=today.tzinfo)
+                        pass
+                    dayDate = f"{indexDate.day}/{indexDate.month} {indexDate.hour}:{indexDate.minute}" if indexDate.hour > 0 else f"{indexDate.day}/{indexDate.month} {today.hour}:{today.minute}"
+                    screenDict["Time"] = f"{colorText.WHITE}{dayDate}{colorText.END}"
                     saveDict["Time"] = str(dayDate)
             except Exception as e:
                 self.default_logger.debug(e, exc_info=True)
