@@ -3812,6 +3812,8 @@ def sendGlobalMarketBarometer(userArgs=None):
                 user=user,
             )
             os.remove(gmbPath)
+        else:
+            sys.exit(0)
     except Exception as e:
         default_logger().debug(e,exc_info=True)
         pass
