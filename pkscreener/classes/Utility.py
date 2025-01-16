@@ -317,8 +317,12 @@ class tools:
         zeroSizeImage = Image.new('RGB',(0, 0), (0,0,0))
         zeroDraw = ImageDraw.Draw(zeroSizeImage)
         # zeroDraw = ImageDraw.Draw(zeroSizeImage)
-        left, top, bottom, right = zeroDraw.multiline_textbbox((x,y),srcText,font)
-        return right - left, bottom - top
+        bbox = zeroDraw.multiline_textbbox((x,y),srcText,font)
+        # Calculate width and height from the bounding box
+        width = bbox[2] - bbox[0]
+        height = bbox[3] - bbox[1]
+        # default_logger().debug(f"Text size for text: {srcText}: {width}x{height}")
+        return width, height
 
     def getsize(font,srcText,x=0,y=0):
         left, top, bottom, right = font.getbbox(srcText)
@@ -386,7 +390,7 @@ class tools:
         
         # Draw the data sources
         dataSrcFont = ImageFont.truetype(fontPath, DATASRC_FONTSIZE)
-        dataSrc_width, dataSrc_height = dataSrcFont.getsize_multiline(dataSrc)
+        dataSrc_width, dataSrc_height = tools.getsize_multiline(font=dataSrcFont,srcText=dataSrc)
         draw = ImageDraw.Draw(sourceImage)
         draw.text((width-dataSrc_width, height-dataSrc_height-2), text=dataSrc, font=dataSrcFont, fill=(128, 128, 128, opacity))
         # sourceImage.show()
@@ -543,31 +547,31 @@ class tools:
             detailLabel if detailLabel is not None else "  [+] 1 to 30 period gain/loss % for matching stocks on respective date from earlier predictions:[Example, 5% under 1-Pd, means the stock price actually gained 5% the next day from given date.]",
         ]
 
-        artfont_arttext_width, artfont_arttext_height = artfont.getsize_multiline(artText+ f" | {marketStatus()}")
-        stdFont_oneLinelabel_width, stdFont_oneLinelabel_height = stdfont.getsize_multiline(label)
-        stdFont_scanResulttext_width, stdFont_scanResulttext_height = stdfont.getsize_multiline(table) if len(table) > 0 else (0,0)
+        artfont_arttext_width, artfont_arttext_height = tools.getsize_multiline(font=artfont,srcText=artText+ f" | {marketStatus()}")
+        stdFont_oneLinelabel_width, stdFont_oneLinelabel_height = tools.getsize_multiline(font=stdfont,srcText=label)
+        stdFont_scanResulttext_width, stdFont_scanResulttext_height = tools.getsize_multiline(font=stdfont,srcText=table) if len(table) > 0 else (0,0)
         unstyled_backtestsummary = tools.removeAllColorStyles(backtestSummary)
         unstyled_backtestDetail = tools.removeAllColorStyles(backtestDetail)
-        stdFont_backtestSummary_text_width,stdFont_backtestSummary_text_height= stdfont.getsize_multiline(unstyled_backtestsummary) if len(unstyled_backtestsummary) > 0 else (0,0)
-        stdFont_backtestDetail_text_width, stdFont_backtestDetail_text_height = stdfont.getsize_multiline(unstyled_backtestDetail) if len(unstyled_backtestDetail) > 0 else (0,0)
-        artfont_scanResultText_width, _ = artfont.getsize_multiline(table) if len(table) > 0 else (0,0)
-        artfont_backtestSummary_text_width, _ = artfont.getsize_multiline(backtestSummary) if (backtestSummary is not None and len(backtestSummary)) > 0 else (0,0)
+        stdFont_backtestSummary_text_width,stdFont_backtestSummary_text_height= tools.getsize_multiline(font=stdfont,srcText=unstyled_backtestsummary) if len(unstyled_backtestsummary) > 0 else (0,0)
+        stdFont_backtestDetail_text_width, stdFont_backtestDetail_text_height = tools.getsize_multiline(font=stdfont, srcText=unstyled_backtestDetail) if len(unstyled_backtestDetail) > 0 else (0,0)
+        artfont_scanResultText_width, _ = tools.getsize_multiline(font=artfont,srcText=table) if len(table) > 0 else (0,0)
+        artfont_backtestSummary_text_width, _ = tools.getsize_multiline(font= artfont,srcText=backtestSummary) if (backtestSummary is not None and len(backtestSummary)) > 0 else (0,0)
         stdfont_addendumtext_height = 0
         stdfont_addendumtext_width = 0
         if addendum is not None and len(addendum) > 0:
             unstyled_addendum = tools.removeAllColorStyles(addendum)
-            stdfont_addendumtext_width , stdfont_addendumtext_height = stdfont.getsize_multiline(unstyled_addendum)
+            stdfont_addendumtext_width , stdfont_addendumtext_height = tools.getsize_multiline(font=stdfont,srcText=unstyled_addendum)
             titleLabels.append(addendumLabel)
             dfs_to_print.append(addendum)
             unstyled_dfs.append(unstyled_addendum)
 
         repoText = tools.getRepoHelpText(table,backtestSummary)
-        artfont_repotext_width, artfont_repotext_height = artfont.getsize_multiline(repoText)
+        artfont_repotext_width, artfont_repotext_height = tools.getsize_multiline(font=artfont,srcText=repoText)
         legendText = legendPrefixText + tools.getLegendHelpText(table,backtestSummary)
-        _, artfont_legendtext_height = artfont.getsize_multiline(legendText)
+        _, artfont_legendtext_height = tools.getsize_multiline(font=artfont,srcText=legendText)
         column_separator = "|"
         line_separator = "+"
-        stdfont_sep_width, _ = stdfont.getsize_multiline(column_separator)
+        stdfont_sep_width, _ = tools.getsize_multiline(font=stdfont, srcText=column_separator)
 
         startColValue = 100
         xVertical = startColValue
@@ -623,7 +627,7 @@ class tools:
             lineNumber = 0
             screenLines = df.splitlines()
             for line in screenLines:
-                _, stdfont_line_height = stdfont.getsize_multiline(line)
+                _, stdfont_line_height = tools.getsize_multiline(font=stdfont, srcText=line)
                 # Print the row separators
                 if not (line.startswith(column_separator)):
                     draw.text(
@@ -682,7 +686,7 @@ class tools:
                             elif bgColor == "black" and style == "blue":
                                 # blue on a black background is difficult to read
                                 style = "yellow"
-                            col_width, _ = stdfont.getsize_multiline(cleanValue)
+                            col_width, _ = tools.getsize_multiline(font=stdfont, srcText=cleanValue)
                             draw.text(
                                 (colPixelRunValue, rowPixelRunValue),
                                 cleanValue,
@@ -718,10 +722,10 @@ class tools:
         rowPixelRunValue += 2 * stdFont_oneLinelabel_height + 20
         legendLines = legendText.splitlines()
         legendSeperator = "***"
-        col_width_sep, _ = artfont.getsize_multiline(legendSeperator)
+        col_width_sep, _ = tools.getsize_multiline(font=artfont, srcText=legendSeperator)
         for line in legendLines:
             colPixelRunValue = startColValue
-            _, artfont_line_height = artfont.getsize_multiline(line)
+            _, artfont_line_height = tools.getsize_multiline(font=artfont, srcText=line)
             lineitems = line.split(legendSeperator)
             red = True
             for lineitem in lineitems:
@@ -742,7 +746,7 @@ class tools:
                     font=artfont,
                     fill=style,
                 )
-                col_width, _ = artfont.getsize_multiline(lineitem)
+                col_width, _ = tools.getsize_multiline(font=artfont, srcText=lineitem)
                 # Move to the next text in the same line
                 colPixelRunValue += col_width + 1
                 
