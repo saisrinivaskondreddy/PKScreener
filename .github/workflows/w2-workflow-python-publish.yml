@@ -341,9 +341,9 @@ jobs:
           pip3 install .
           python3 -c "import os; from PKDevTools.classes.Telegram import send_message; send_message('Dear Channel!\nA new version of PKScreener (v' + os.environ['RELEASE_VERSION'] + ') just got released. Check it out at \n\nhttps://github.com/pkjmesra/PKScreener/releases\n or https://pypi.org/project/pkscreener/ \n\n'+os.environ['WHATS_NEW']+'\n');"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: wheels-cp${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
           path: dist/*.whl
           if-no-files-found: ignore
 
