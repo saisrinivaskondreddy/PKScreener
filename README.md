@@ -191,7 +191,7 @@ For `Ubuntu/Linux`: See https://github.com/pkjmesra/PKScreener/blob/main/.github
 * Now launch your favorite command line CLI and issue `pkscreener`. This will launch the pkscreener executable.
 
 # Building from source repo
-* Install python 3.11 for your OS/CPU. Download the installer from https://www.python.org/downloads/release/python-3913/#Files
+* Install python 3.12 for your OS/CPU. Download the installer from https://www.python.org/downloads/release/python-3913/#Files
 * Just clone the repo with `git clone https://github.com/pkjmesra/PKScreener.git`
 * `cd PKScreener`
 * `pip install -r requirements.txt` .

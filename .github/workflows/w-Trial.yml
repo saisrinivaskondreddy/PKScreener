@@ -41,7 +41,7 @@ jobs:
         name: Check build trigger
         run: bash .github/dependencies/build_tools/github/check_build_trigger.sh
 
-  # Build the wheels for Linux, Windows and macOS for Python 3.11 and newer
+  # Build the wheels for Linux, Windows and macOS for Python 3.12 and newer
   build_wheels:
     name: Build wheel for cp${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
     runs-on: ${{ matrix.os }}
@@ -125,7 +125,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11" # update once build dependencies are available
+          python-version: "3.12" # update once build dependencies are available
 
       - name: Install conda for macos arm64
         if: ${{ matrix.platform_id == 'macosx_arm64' }}
@@ -252,7 +252,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5.1.0
         with:
-          python-version: "3.11" # update once build dependencies are available
+          python-version: "3.12" # update once build dependencies are available
 
       - name: Build source distribution
         run: bash .github/dependencies/build_tools/github/build_source.sh

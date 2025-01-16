@@ -54,10 +54,10 @@ on:
         default: 'yes'
 
       targetPythonVersion:
-        description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
+        description: 'Target Python version: 3.9 , 3.10, 3.11,3,12,3.13 ?'
         required: false
         type: string
-        default: '3.11'
+        default: '3.12'
 
   # schedule:
   #   - cron: '30 7 * * 6'
@@ -77,10 +77,10 @@ on:
         required: false
         default: 'no'
       targetPythonVersion:
-        description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
+        description: 'Target Python version: 3.9 , 3.10, 3.11, 3.12, 3.13 ?'
         required: false
         type: string
-        default: '3.11'
+        default: '3.12'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -164,7 +164,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11" # update once build dependencies are available
+          python-version: "3.12" # update once build dependencies are available
 
       - name: Install conda for macos arm64
         if: ${{ matrix.platform_id == 'macosx_arm64' }}

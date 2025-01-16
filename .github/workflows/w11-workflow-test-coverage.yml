@@ -47,7 +47,7 @@ on:
         description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
         required: false
         type: string
-        default: '3.11'
+        default: '3.12'
   workflow_call:
     inputs:
       branch-name:
@@ -58,7 +58,7 @@ on:
         description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
         required: false
         type: string
-        default: '3.11'
+        default: '3.12'
 jobs:
   # Job for testing coverage
   Build:
@@ -171,7 +171,7 @@ jobs:
       - name: Set up Python 
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ inputs.targetPythonVersion || 3.11 }}
+          python-version: ${{ inputs.targetPythonVersion || 3.12 }}
 
       - name: Load Cache for Linux Dependencies
         uses: actions/cache@v4
