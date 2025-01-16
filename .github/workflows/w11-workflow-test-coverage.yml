@@ -143,10 +143,17 @@ jobs:
               find . -name ".coverage.*" -exec rm -rf {} \;
             DEP_BUILD: |
               brew install ta-lib
+              arch -arm64 brew install ta-lib
               python3 -m pip install --upgrade pip
+              pip3 uninstall -y PKNSETools
+              pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
               pip3 install -r requirements-dev.txt
-              pip3 install ta-lib==0.4.32
+              export TA_INCLUDE_PATH="$(brew --prefix ta-lib)/include"
+              export TA_LIBRARY_PATH="$(brew --prefix ta-lib)/lib"
+              python3 -m pip install --no-cache-dir ta-lib
+              pip3 install -r requirements.txt
+              pip3 install -r requirements-dev.txt
               pip3 install .
             TEST_BUILD: |
               pytest -vv --durations-min=0.005 --cov-config=.coveragerc --durations=0
@@ -155,6 +162,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch-name || github.head_ref || github.ref }}
+
+      - name: Activate virtualenv for MacOS
+        if: startsWith(runner.os, 'MacOS')
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          echo PATH=$PATH >> $GITHUB_ENV
 
       - name: Declare env variables
         id: vars
