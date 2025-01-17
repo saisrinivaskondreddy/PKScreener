@@ -188,10 +188,18 @@ jobs:
           echo "$MINIFORGE_PATH/bin" >> $GITHUB_PATH
           echo "CONDA_HOME=$MINIFORGE_PATH" >> $GITHUB_ENV
 
-      - name: Set conda environment for non-macos arm64 environments
-        if: ${{ matrix.platform_id != 'macosx_arm64' }}
+      - name: Install conda for macos x86_64
+        if: ${{ matrix.platform_id == 'macosx_x86_64' }}
         run: |
-          # Non-macos arm64 envrionments already have conda installed
+          set -ex
+          brew install anaconda
+          export PATH="/usr/local/anaconda3/bin:$PATH"
+          echo "CONDA_HOME=/usr/local/anaconda3" >> $GITHUB_ENV
+          
+      - name: Set conda environment for non-macos arm64 environments
+        if: ${{ matrix.platform_id != 'macosx_arm64' && matrix.platform_id != 'macosx_x86_64'}}
+        run: |
+          # Non-macos arm64 environments already have conda installed
           echo "CONDA_HOME=/usr/local/miniconda" >> $GITHUB_ENV
 
       # - name: Install TA-Lib
