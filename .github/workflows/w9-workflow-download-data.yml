@@ -246,6 +246,7 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
         git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+        git config --global http.postBuffer 150000000
         git remote update
         git fetch
         git add actions-data-download/*.pkl --force
@@ -266,6 +267,7 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
+        git config --global http.postBuffer 150000000
         git fetch
         python3 .github/workflows/squash.py -b actions-data-download -m "GitHub-Action-Workflow-Market-Data-Download-(Default-Config)"
       env:
@@ -385,6 +387,7 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
         git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+        git config --global http.postBuffer 150000000
         git remote update
         git fetch
         git add actions-data-scan/*.txt --force
