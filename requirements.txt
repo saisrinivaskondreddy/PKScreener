@@ -1,5 +1,5 @@
 advanced_ta #>=0.1.8
-alive-progress>=1.6.2,<=1.6.2
+alive-progress==1.6.2
 bs4 #>=0.0.2
 click #>=8.1.7
 gitpython #>=3.1.43
@@ -10,7 +10,7 @@ joblib #>=1.4.2
 keras # #>=3.6.0
 # libsql-experimental
 libsql_client #>=0.3.1
-lxml>=4.9.4,<=4.9.4 # 5.0.0 or above causes problems.
+lxml==4.9.4 # 5.0.0 or above causes problems.
 numpy #>=1.26.4
 openpyxl #>=3.1.5
 pandas #>=2.2.3
@@ -30,7 +30,7 @@ python-telegram-bot>=13.4,<20.0
 requests_cache #>=1.2.1
 rich #>=13.9.2
 scikit-learn #>=1.5.2
-scipy<=1.12.0 # cdflib removed from  #>=1.13.0 which breaks the build
+scipy #<=1.12.0 # cdflib removed from  #>=1.13.0 which breaks the build
 # ta-lib # Install this separately. See README.
 tabulate #>=0.9.0
 tensorflow # #>=2.16.2
