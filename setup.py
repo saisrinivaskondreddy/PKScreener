@@ -56,7 +56,7 @@ if os.path.isfile("requirements.txt") and os.path.isfile("requirements.txt"):
         install_requires = fh.read().splitlines()
         install_requires.append("advanced_ta")
 
-talibWindowsFile = ".github/dependencies/TA_Lib-0.4.29-cp311-cp311-win_amd64.whl"
+talibWindowsFile = ".github/dependencies/ta_lib-0.6.0-cp312-cp312-win_amd64.whl"
 talibLinuxFile = ".github/dependencies/build_tools/github/talib.sh"
 if "Windows" in platform.system() and os.path.isfile(talibWindowsFile) and os.path.isfile(talibWindowsFile):
     install_requires = [talibWindowsFile].extend(install_requires)
