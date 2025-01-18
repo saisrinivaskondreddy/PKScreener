@@ -286,7 +286,7 @@ jobs:
           echo "##[set-output name=DEV_VERSION;]$(echo ${DEV_VERSION})"
 
       - name: Create Tag
-        if: ${{ matrix.platform_id == 'manylinux_x86_64' }} && startsWith(runner.os, 'Linux')
+        if: ${{ matrix.platform_id == 'manylinux_x86_64' }}
         run: |
             git config user.name github-actions
             git config user.email github-actions@github.com
