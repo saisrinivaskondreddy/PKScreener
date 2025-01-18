@@ -141,6 +141,7 @@ jobs:
             FILE_NAME: pkscreenercli.exe
           
           - os: ubuntu-latest
+            platform_id: manylinux_x86_64
             TARGET: Linux
             CMD_BUILD: |
               pyinstaller --onefile --add-data="README.md:." --add-data="LICENSE:." --add-data="docs/LICENSE-Others:." --add-data="Disclaimer.txt:." --icon=screenshots/icon.ico pkscreener/pkscreenercli.py  --hidden-import cmath --hidden-import talib.stream --hidden-import numpy --hidden-import pandas --hidden-import alive_progress  --hidden-import scipy.special._cdflib
@@ -169,6 +170,7 @@ jobs:
             FILE_NAME: pkscreenercli_x64.bin
 
           - os: ubuntu-24.04-arm
+            platform_id: manylinux_arm64
             TARGET: Linux
             CMD_BUILD: |
               pyinstaller --onefile --add-data="README.md:." --add-data="LICENSE:." --add-data="docs/LICENSE-Others:." --add-data="Disclaimer.txt:." --icon=screenshots/icon.ico pkscreener/pkscreenercli.py  --hidden-import cmath --hidden-import talib.stream --hidden-import numpy --hidden-import pandas --hidden-import alive_progress  --hidden-import scipy.special._cdflib
@@ -197,6 +199,7 @@ jobs:
             FILE_NAME: pkscreenercli_arm64.bin
 
           - os: macos-latest
+            platform_id: macosx_arm64
             TARGET: MacOS
             CMD_BUILD: |
               pyinstaller --onefile --windowed --add-data="README.md:." --add-data="LICENSE:." --add-data="docs/LICENSE-Others:." --add-data="Disclaimer.txt:." --icon=screenshots/icon.ico pkscreener/pkscreenercli.py  --hidden-import cmath --hidden-import talib.stream --hidden-import numpy --hidden-import pandas --hidden-import alive_progress --hidden-import scipy.special._cdflib
@@ -221,6 +224,7 @@ jobs:
             FILE_NAME: pkscreenercli_arm64.run
           
           - os: macos-13
+            platform_id: macosx_x86_64
             TARGET: MacOS
             CMD_BUILD: |
               pyinstaller --onefile --windowed --add-data="README.md:." --add-data="LICENSE:." --add-data="docs/LICENSE-Others:." --add-data="Disclaimer.txt:." --icon=screenshots/icon.ico pkscreener/pkscreenercli.py  --hidden-import cmath --hidden-import talib.stream --hidden-import numpy --hidden-import pandas --hidden-import alive_progress --hidden-import scipy.special._cdflib
@@ -282,7 +286,7 @@ jobs:
           echo "##[set-output name=DEV_VERSION;]$(echo ${DEV_VERSION})"
 
       - name: Create Tag
-        if: startsWith(runner.os, 'Linux')
+        if: ${{ matrix.platform_id == 'manylinux_x86_64' }} && startsWith(runner.os, 'Linux')
         run: |
             git config user.name github-actions
             git config user.email github-actions@github.com
