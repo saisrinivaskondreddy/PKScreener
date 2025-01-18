@@ -51,9 +51,9 @@ on:
           required: false
           default: 'echo Finished running'
       runson:
-          description: 'Runner OS. e.g: ubuntu-20.04, windows-latest or macos-latest'
+          description: 'Runner OS. e.g: ubuntu-latest, windows-latest or macos-latest'
           required: false
-          default: 'ubuntu-20.04'
+          default: 'ubuntu-latest'
       installtalib:
         description: 'Is TA-Lib install required? (Y/N)'
         required: false
@@ -74,7 +74,7 @@ jobs:
 
   Generic_Workflow_Runner:
 
-    runs-on: ${{ inputs.runson || 'ubuntu-20.04' }} #ubuntu-20.04 #windows-latest
+    runs-on: ${{ inputs.runson || 'ubuntu-latest' }} #ubuntu-latest #windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -208,7 +208,7 @@ jobs:
         ${{ inputs.postrun }}
 
   # Delete_Workflow_Run:
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-latest
   #   needs: [Generic_Workflow_Runner]
   #   name: Delete workflow run
   #   steps:

@@ -52,9 +52,9 @@ on:
         type: string
         default: '3.12'
       runson:
-          description: 'Runner OS. e.g: ubuntu-20.04, windows-latest or macos-latest'
+          description: 'Runner OS. e.g: ubuntu-latest, windows-latest or macos-latest'
           required: false
-          default: 'ubuntu-20.04'
+          default: 'ubuntu-latest'
       installtalib:
         description: 'Is TA-Lib install required? (Y/N)'
         required: false
@@ -65,7 +65,7 @@ run-name: ${{ inputs.name }} Backtest for Generic params- ${{ inputs.params }}
 jobs:
 
   Generic:
-    runs-on: ${{ inputs.runson || 'ubuntu-20.04' }} #ubuntu-20.04 #windows-latest
+    runs-on: ${{ inputs.runson || 'ubuntu-latest' }} #ubuntu-latest #windows-latest
     outputs:
       runIdentifier: ${{ github.event.inputs.id }}
     steps:
@@ -254,7 +254,7 @@ jobs:
     #       python3 -c "import os; from PKDevTools.classes.Telegram import send_message; send_message(message='Hello! The workflow('+os.environ['BACKTEST_NAME']+') for backtesting has finished and will soon get deployed in the next 2-3 minutes. You can check directly at https://pkjmesra.github.io/PKScreener/Backtest-Reports/PKScreener_'+os.environ['BACKTEST_NAME']+'_Summary_StockSorted.html for summary and https://pkjmesra.github.io/PKScreener/Backtest-Reports/PKScreener_'+os.environ['BACKTEST_NAME']+'_backtest_result_StockSorted.html for details after it gets deployed.', userID=os.environ['NOTIFY_USER']);"
 
   # Delete_Workflow_Run:
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-latest
   #   needs: [Generic]
   #   name: Delete workflow run
   #   steps:

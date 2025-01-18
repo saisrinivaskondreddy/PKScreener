@@ -140,7 +140,7 @@ jobs:
             OUT_PATH: .\dist\pkscreenercli.exe
             FILE_NAME: pkscreenercli.exe
           
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             TARGET: Linux
             CMD_BUILD: |
               pyinstaller --onefile --add-data="README.md:." --add-data="LICENSE:." --add-data="docs/LICENSE-Others:." --add-data="Disclaimer.txt:." --icon=screenshots/icon.ico pkscreener/pkscreenercli.py  --hidden-import cmath --hidden-import talib.stream --hidden-import numpy --hidden-import pandas --hidden-import alive_progress  --hidden-import scipy.special._cdflib
@@ -320,7 +320,7 @@ jobs:
           make_latest: true
 
   README_Update:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     permissions: write-all
       # actions: write
     needs: [Build]
@@ -372,7 +372,7 @@ jobs:
   
   Cleanup:
     name: Clean up and delete old release
-    runs-on: ${{ 'ubuntu-20.04'}} #ubuntu-20.04 #windows-latest
+    runs-on: ${{ 'ubuntu-latest'}} #ubuntu-latest #windows-latest
     permissions: write-all
     needs: [Build, README_Update]
     steps:

@@ -67,7 +67,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             TARGET: Linux
             CMD_BUILD: |
               rm -rf .pytest_cache
@@ -216,7 +216,7 @@ jobs:
         continue-on-error: false
 
   # Delete_Workflow_Run:
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-latest
   #   needs: [Build]
   #   name: Delete workflow run
   #   steps:
