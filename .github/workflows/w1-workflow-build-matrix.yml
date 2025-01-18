@@ -231,7 +231,7 @@ jobs:
               mv /Users/runner/work/PKScreener/PKScreener/dist/pkscreenercli /Users/runner/work/PKScreener/PKScreener/dist/pkscreenercli_x64.run
             DEP_BUILD: |
               brew install ta-lib
-              arch -arm64 brew install ta-lib
+              arch -x86_64 brew install ta-lib
               python3 -m pip install --upgrade pip
               pip3 uninstall -y PKNSETools
               pip3 uninstall -y PKDevTools
