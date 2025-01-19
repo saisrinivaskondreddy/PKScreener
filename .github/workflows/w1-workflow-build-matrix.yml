@@ -150,7 +150,7 @@ jobs:
             DEP_BUILD: |
               cd .github/dependencies/
               pwd
-              tar -xzf ta-lib-0.4.0-src.tar.gz
+              tar -xzf ta-lib-0.6.4-src.tar.gz
               cd ta-lib/
               ./configure --prefix=/usr
               make
@@ -161,7 +161,7 @@ jobs:
               pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
               pip3 install -r requirements-dev.txt
-              pip3 install ta-lib==0.4.32
+              pip3 install ta-lib
               pip3 install .
             TEST_BUILD: |
               /home/runner/work/PKScreener/PKScreener/dist/pkscreenercli_x64.bin --testbuild
@@ -179,7 +179,7 @@ jobs:
             DEP_BUILD: |
               cd .github/dependencies/
               pwd
-              tar -xzf ta-lib-0.4.0-src.tar.gz
+              tar -xzf ta-lib-0.6.4-src.tar.gz
               cd ta-lib/
               ./configure --prefix=/usr --build=aarch64-unknown-linux-gnu
               make
@@ -190,7 +190,7 @@ jobs:
               pip3 uninstall -y PKDevTools
               pip3 install -r requirements.txt
               pip3 install -r requirements-dev.txt
-              pip3 install ta-lib==0.4.32
+              pip3 install ta-lib
               pip3 install .
             TEST_BUILD: |
               /home/runner/work/PKScreener/PKScreener/dist/pkscreenercli_arm64.bin --testbuild
@@ -214,7 +214,7 @@ jobs:
               pip3 install -r requirements-dev.txt
               export TA_INCLUDE_PATH="$(brew --prefix ta-lib)/include"
               export TA_LIBRARY_PATH="$(brew --prefix ta-lib)/lib"
-              #python3 -m pip install -U ta-lib==0.4.32
+              #python3 -m pip install -U ta-lib
               python3 -m pip install --no-cache-dir ta-lib
               pip3 install .
             TEST_BUILD: |
@@ -239,7 +239,7 @@ jobs:
               pip3 install -r requirements-dev.txt
               export TA_INCLUDE_PATH="$(brew --prefix ta-lib)/include"
               export TA_LIBRARY_PATH="$(brew --prefix ta-lib)/lib"
-              #python3 -m pip install -U ta-lib==0.4.32
+              #python3 -m pip install -U ta-lib
               python3 -m pip install --no-cache-dir ta-lib
               pip3 install .
             TEST_BUILD: |

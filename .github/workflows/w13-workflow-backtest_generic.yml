@@ -121,13 +121,13 @@ jobs:
       run: |
         cd .github/dependencies/
         pwd
-        tar -xzf ta-lib-0.4.0-src.tar.gz
+        tar -xzf ta-lib-0.6.4-src.tar.gz
         cd ta-lib/
         ./configure --prefix=/usr
         make
         sudo make install
         cd /home/runner/work/PKScreener/PKScreener/
-        pip3 install ta-lib==0.4.32
+        pip3 install ta-lib
 
     - name: Environment setup to get latest EXE
       shell: bash

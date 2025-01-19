@@ -102,10 +102,12 @@ jobs:
       if: ${{ inputs.buildBase == 'Y' }}
       run: |
         docker buildx create --use
+        export DOCKER_BUILDKIT=1
         docker buildx build --push \
           --tag pkjmesra/pkscreener:base \
           --platform linux/amd64,linux/arm64/v8 \
           -f ./Dockerfile_base . --no-cache
+        export DOCKER_BUILDKIT=1
         docker buildx build --push \
           --tag pkjmesra/pkscreener:latest \
           --platform linux/amd64,linux/arm64/v8 . --no-cache
