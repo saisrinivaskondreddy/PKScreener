@@ -122,7 +122,7 @@ jobs:
         cd .github/dependencies/
         pwd
         tar -xzf ta-lib-0.6.4-src.tar.gz
-        cd ta-lib/
+        cd ta-lib-0.6.4/
         ./configure --prefix=/usr
         make
         sudo make install
