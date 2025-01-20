@@ -170,8 +170,8 @@ jobs:
       env:
         exe_path: ${{ steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
-        curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin -JL $exe_path
-        chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin
+        curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -JL $exe_path
+        chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
 
     - name: Configure env.dev file
       run: |
@@ -204,7 +204,7 @@ jobs:
         ALERT_TRIGGER: ${{ inputs.alertTrigger || 'N' }}
       run: |
         ${{ inputs.prerequisites }}
-        /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin ${{ inputs.params }} --maxdisplayresults 100
+        /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin ${{ inputs.params }} --maxdisplayresults 100
         ${{ inputs.postrun }}
 
   # Delete_Workflow_Run:

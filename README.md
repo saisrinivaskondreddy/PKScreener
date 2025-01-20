@@ -201,7 +201,7 @@ For `Ubuntu/Linux`: See https://github.com/pkjmesra/PKScreener/blob/main/.github
 
 # Running the executables
 * Download the suitable file according to your OS.
-* Linux & Mac users should make sure that the `pkscreenercli.bin or pkscreenercli.run` is having `execute` permission. (`chmod +x pkscreenercli.run`)
+* Linux & Mac users should make sure that the `pkscreenercli_x64.bin or pkscreenercli_x64.run` is having `execute` permission. (`chmod +x pkscreenercli_x64.run`)
 
 * **Run** the file. Following window will appear.
 

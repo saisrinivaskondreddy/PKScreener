@@ -167,8 +167,8 @@ jobs:
       env:
         exe_path: ${{ steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
-        curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin -JL $exe_path
-        chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin
+        curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -JL $exe_path
+        chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
 
     - name: Delete stock data
       shell: bash
@@ -198,8 +198,8 @@ jobs:
       continue-on-error: true
       if: ${{ inputs.skipDownload == '' && startsWith(runner.os, 'Linux' ) }}
       run: |
-        /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin -d -a Y
-        /home/runner/work/PKScreener/PKScreener/pkscreenercli.bin -d -a Y -i 1m
+        /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -d -a Y
+        /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -d -a Y -i 1m
         rm -rf results//Data/*.lck || true
         ls -l results/Data
         cp results/Data/*.pkl actions-data-download
