@@ -169,6 +169,13 @@ jobs:
         with:
           python-version: "3.12" # update once build dependencies are available
 
+      - name: Activate virtualenv for MacOS
+        if: startsWith(runner.os, 'MacOS')
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          echo PATH=$PATH >> $GITHUB_ENV
+  
       - name: Install conda for macos arm64
         if: ${{ matrix.platform_id == 'macosx_arm64' }}
         run: |
