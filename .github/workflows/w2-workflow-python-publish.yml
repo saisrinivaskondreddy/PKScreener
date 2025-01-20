@@ -128,6 +128,9 @@ jobs:
   build_wheels:
     name: Build wheel for cp${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
     # needs: check_build_trigger
     # if: needs.check_build_trigger.outputs.build
 
@@ -201,6 +204,16 @@ jobs:
         run: |
           # Non-macos arm64 environments already have conda installed
           echo "CONDA_HOME=/usr/local/miniconda" >> $GITHUB_ENV
+
+      - name: Install conda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: "latest"
+          channels: bioconda, conda-forge, defaults
+          use-only-tar-bz2: true  # IMPORTANT: This needs to be set for caching to work properly!
+          auto-update-conda: true
+          auto-activate-base: true
+          python-version: "3.12"
 
       # - name: Install TA-Lib
       #   shell: bash

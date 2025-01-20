@@ -24,6 +24,7 @@
 # """
 # docker buildx build --push --platform linux/arm/v7,linux/arm64/v8,linux/amd64 --tag pkjmesra/pkscreener:latest -f ./Dockerfile_base . --no-cache
 # docker buildx build --push --platform linux/arm64/v8,linux/amd64 --tag pkjmesra/pkscreener:latest -f ./Dockerfile_base . --no-cache
+# docker buildx build --push --platform linux/arm64/v8 --tag pkjmesra/pkscreener:latest -f ./Dockerfile_base . --no-cache
 
 FROM python:3.12.8-slim as base
 ENV PYTHONUNBUFFERED 1
@@ -45,7 +46,7 @@ RUN wget https://raw.githubusercontent.com/pkjmesra/PKScreener/main/.github/depe
   cd ta-lib-0.6.4/ && \
   wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O config.guess && \
   wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O config.sub && \
-  ./configure --prefix=/usr --build ${TARGETARCH} && \
+  ./configure --prefix=/usr --build arm64 && \
   make && \
   make install && \
   pip3 install setuptools cmake numpy
