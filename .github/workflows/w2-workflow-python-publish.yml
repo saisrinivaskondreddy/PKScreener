@@ -323,28 +323,20 @@ jobs:
           # echo VERSION='${{ steps.vars.outputs.THIS_VERSION }}' >> pkscreener/classes/__init__.py
           twine upload --verbose dist/*.whl
 
-      - name: Generate source archive
-        shell: bash
-        timeout-minutes: 1
-        continue-on-error: true
-        run: |
-          python3 -m pip install --upgrade build
-          python3 -m build
-
       - name: Build and publish source code 📦 to Test PyPI
         env:
           TWINE_USERNAME: ${{ secrets.TESTPYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.TESTPYPI_PASSWORD }}
           repository_url: https://test.pypi.org/legacy/
         shell: bash
-        if: ${{ matrix.platform_id == 'manylinux_x86_64' && matrix.python == '311' }}
+        if: ${{ matrix.platform_id == 'manylinux_x86_64' && matrix.python == '312' }}
         run: |
           # del /s /q pkscreener/classes/__init__.py
           # echo VERSION='${{ steps.vars.outputs.THIS_VERSION }}' >> pkscreener/classes/__init__.py
           twine upload --verbose --repository-url https://test.pypi.org/legacy/ dist/*.tar.gz
   
       - name: Publish source code 📦 to PyPI
-        if: ${{ matrix.platform_id == 'manylinux_x86_64' && matrix.python == '311' && startsWith(inputs.branch-name, 'refs/tags') }}
+        if: ${{ matrix.platform_id == 'manylinux_x86_64' && matrix.python == '312' && startsWith(inputs.branch-name, 'refs/tags') }}
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
