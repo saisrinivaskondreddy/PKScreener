@@ -349,14 +349,14 @@ class tools:
 
         # watermark 1
         opacity = int(256 * .6)
-        mark_width, mark_height = font.getsize(watermarkText)
+        _,_,mark_width, mark_height = font.getbbox(watermarkText)
         watermark = Image.new('RGBA', (mark_width, mark_height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(watermark)
         draw.text((0, 0), text=watermarkText, font=font, fill=(128, 128, 128, opacity))
         angle = math.degrees(math.atan(height/width))
         watermark_diag = watermark.rotate(angle, expand=1)
         
-        mark_width_ver, mark_height_ver = font_vertical.getsize(watermarkText)
+        _,_,mark_width_ver, mark_height_ver = font_vertical.getbbox(watermarkText)
         watermark_ver = Image.new('RGBA', (mark_width_ver, mark_height_ver), (0, 0, 0, 0))
         draw = ImageDraw.Draw(watermark_ver)
         draw.text((0, 0), text=watermarkText, font=font_vertical, fill=(128, 128, 128, opacity))
