@@ -128,9 +128,9 @@ jobs:
   build_wheels:
     name: Build wheel for cp${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
+    # defaults:
+    #   run:
+    #     shell: bash -l {0}
     # needs: check_build_trigger
     # if: needs.check_build_trigger.outputs.build
 
@@ -169,12 +169,12 @@ jobs:
         with:
           python-version: "3.12" # update once build dependencies are available
 
-      - name: Activate virtualenv for MacOS
-        if: startsWith(runner.os, 'MacOS')
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          echo PATH=$PATH >> $GITHUB_ENV
+      # - name: Activate virtualenv for MacOS
+      #   if: startsWith(runner.os, 'MacOS')
+      #   run: |
+      #     python3 -m venv venv
+      #     source venv/bin/activate
+      #     echo PATH=$PATH >> $GITHUB_ENV
   
       - name: Install conda for macos arm64
         if: ${{ matrix.platform_id == 'macosx_arm64' }}
