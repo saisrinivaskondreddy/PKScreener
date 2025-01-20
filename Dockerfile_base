@@ -31,8 +31,14 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get install -y apt-transport-https
 RUN apt-get -y update && apt-get upgrade -y
+RUN apt update && \
+    apt install -y automake libtool autogen mcpp && \
+    # apt install -y openjdk-21-jdk && \
+    # apt install -y gcc-multilib && \
+    apt install -y gcc-i686-linux-gnu && \
+    apt install -y gcc-aarch64-linux-gnu
 
-RUN apt-get install -y gcc curl make build-essential wget unzip tar pkg-config libhdf5-serial-dev
+RUN apt-get install -y gcc curl make build-essential wget unzip tar pkg-config libhdf5-serial-dev 
 
 ENV LANG C.UTF-8
 
@@ -43,16 +49,16 @@ RUN pip3 install --upgrade pip
 
 RUN wget https://raw.githubusercontent.com/pkjmesra/PKScreener/main/.github/dependencies/ta-lib-0.6.4-src.tar.gz && \
   tar -xzf ta-lib-0.6.4-src.tar.gz && \
-  cd ta-lib-0.6.4/ && \
-  wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O config.guess && \
-  wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O config.sub && \
-  ./configure --prefix=/usr --build arm64 && \
+  cd ta-lib-0.6.4 && \
+  # wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O config.guess && \
+  # wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O config.sub && \
+  ./configure --prefix=/usr && \
   make && \
   make install && \
   pip3 install setuptools cmake numpy
 
-RUN rm -rf ta-lib ta-lib-0.6.4-src.tar.gz main.zip
-RUN pip3 install ta-lib
+RUN rm -rf ta-lib-0.6.4 ta-lib-0.6.4-src.tar.gz main.zip
+RUN pip3 install ta-lib==0.6.0
 
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
