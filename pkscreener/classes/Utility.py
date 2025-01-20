@@ -370,7 +370,7 @@ class tools:
                 with open(logo_wm_path,"wb",) as f:
                     f.write(resp.content)
             logo_img = Image.open(logo_wm_path,formats=["PNG"]).convert('LA')
-            # logo_img = logo_img.resize((min(width,height),min(width,height)), Image.ANTIALIAS, reducing_gap=2)
+            # logo_img = logo_img.resize((min(width,height),min(width,height)), Image.LANCZOS, reducing_gap=2)
             lx, ly = logo_img.size
             plx = int((width - lx)/4)
             ply = int((height - ly)/3)
@@ -754,7 +754,7 @@ class tools:
                 # Let's go to the next line
                 rowPixelRunValue += artfont_line_height + 1
 
-            im = im.resize((int(im.size[0]*configManager.telegramImageCompressionRatio),int(im.size[1]*configManager.telegramImageCompressionRatio)), Image.ANTIALIAS, reducing_gap=2)
+            im = im.resize((int(im.size[0]*configManager.telegramImageCompressionRatio),int(im.size[1]*configManager.telegramImageCompressionRatio)), Image.LANCZOS, reducing_gap=2)
             im = tools.addQuickWatermark(im,xVertical,dataSrc="Yahoo!finance; Morningstar, Inc; National Stock Exchange of India Ltd;TradingHours.com;",dataSrcFontSize=ART_FONT_SIZE)
             im.save(filename, format=configManager.telegramImageFormat, bitmap_format=configManager.telegramImageFormat, optimize=True, quality=int(configManager.telegramImageQualityPercentage))
         except Exception as e:
