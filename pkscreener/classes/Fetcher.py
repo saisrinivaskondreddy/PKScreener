@@ -32,7 +32,11 @@ warnings.simplefilter("ignore", FutureWarning)
 import pandas as pd
 import yfinance as yf
 from yfinance import shared
-from yfinance.exceptions import YFPricesMissingError, YFInvalidPeriodError
+# from yfinance.exceptions import YFPricesMissingError, YFInvalidPeriodError
+class YFPricesMissingError(Exception):
+    pass
+class YFInvalidPeriodError(Exception):
+    pass
 from concurrent.futures import ThreadPoolExecutor
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
 from PKDevTools.classes.ColorText import colorText

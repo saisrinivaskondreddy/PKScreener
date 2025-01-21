@@ -88,7 +88,7 @@ nseFetcher = nseStockDataFetcher()
 fetcher = Fetcher.screenerStockDataFetcher()
 
 
-artText = f"{getArtText()}\nv{VERSION}"
+artText = f"{getArtText()}\n"
 
 STD_ENCODING=sys.stdout.encoding if sys.stdout is not None else 'utf-8'
 
@@ -111,7 +111,7 @@ def marketStatus():
         lngStatus = f"{lngStatus} | Next Bell: {colorText.WARN}{next_bell.replace('T',' ').split('+')[0]}{colorText.END}"
     return (lngStatus +"\n") if lngStatus is not None else "\n"
 
-art = colorText.GREEN + f"{getArtText()}\nv{VERSION}" + colorText.END + f" | {marketStatus()}"
+art = colorText.GREEN + f"{getArtText()}\n" + colorText.END + f"{marketStatus()}"
 
 lastScreened = os.path.join(
     Archiver.get_user_data_dir(), "last_screened_results.pkl"
@@ -154,7 +154,7 @@ class tools:
                 OutputControls().moveCursorToStartPosition()
                 
             if clearAlways or OutputControls().enableMultipleLineOutput:
-                art = colorText.GREEN + f"{getArtText()}\nv{VERSION}" + colorText.END + f" | {marketStatus()}"
+                art = colorText.GREEN + f"{getArtText()}\n" + colorText.END + f"{marketStatus()}"
                 OutputControls().printOutput(art.encode('utf-8').decode(STD_ENCODING), enableMultipleLineOutput=True)
         except Exception as e:# pragma: no cover
             default_logger().debug(e, exc_info=True)
@@ -548,7 +548,7 @@ class tools:
                 detailLabel if detailLabel is not None else "  [+] 1 to 30 period gain/loss % for matching stocks on respective date from earlier predictions:[Example, 5% under 1-Pd, means the stock price actually gained 5% the next day from given date.]",
             ]
 
-            artfont_arttext_width, artfont_arttext_height = tools.getsize_multiline(font=artfont,srcText=artText+ f" | {marketStatus()}")
+            artfont_arttext_width, artfont_arttext_height = tools.getsize_multiline(font=artfont,srcText=artText+ f"{marketStatus()}")
             stdFont_oneLinelabel_width, stdFont_oneLinelabel_height = tools.getsize_multiline(font=stdfont,srcText=label)
             stdFont_scanResulttext_width, stdFont_scanResulttext_height = tools.getsize_multiline(font=stdfont,srcText=table) if len(table) > 0 else (0,0)
             unstyled_backtestsummary = tools.removeAllColorStyles(backtestSummary)
@@ -601,7 +601,7 @@ class tools:
             im = Image.new("RGB",(im_width,im_height),bgColor)
             draw = ImageDraw.Draw(im)
             # artwork
-            draw.text((startColValue, rowPixelRunValue), artText+ f" | {tools.removeAllColorStyles(marketStatus())}", font=artfont, fill=artColor)
+            draw.text((startColValue, rowPixelRunValue), artText+ f"{tools.removeAllColorStyles(marketStatus())}", font=artfont, fill=artColor)
             rowPixelRunValue += artfont_arttext_height + 1
             # Report title
             # reportTitle = tools.wrapFitLegendText(table,backtestSummary, reportTitle)
