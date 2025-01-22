@@ -56,12 +56,10 @@ if os.path.exists("requirements.txt") and os.path.isfile("requirements.txt"):
     with open("requirements.txt", "r") as fh:
         install_requires = fh.read().splitlines()
         install_requires.append("advanced_ta")
-        install_requires.append("ta-lib")
 elif os.path.exists(os.path.join(__PACKAGENAME__,"requirements.txt")) and os.path.isfile(os.path.join(__PACKAGENAME__,"requirements.txt")):
     with open(os.path.join(__PACKAGENAME__,"requirements.txt"), "r") as fh:
         install_requires = fh.read().splitlines()
         install_requires.append("advanced_ta")
-        install_requires.append("ta-lib")
 
 talibWindowsFile = ".github/dependencies/ta_lib-0.6.0-cp312-cp312-win_amd64.whl"
 talibLinuxFile = ".github/dependencies/build_tools/github/talib.sh"
