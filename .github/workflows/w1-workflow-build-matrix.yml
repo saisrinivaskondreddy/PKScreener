@@ -219,7 +219,7 @@ jobs:
               python3 -m pip install --no-cache-dir ta-lib
               pip3 install .
             TEST_BUILD: |
-              /Users/runner/work/PKScreener/PKScreener/dist/pkscreenercli_arm64.run --testbuild
+              /Users/runner/work/PKScreener/PKScreener/dist/pkscreenercli_arm64.run -e -a Y -o H
               exit $?
             OUT_PATH: /Users/runner/work/PKScreener/PKScreener/dist/pkscreenercli_arm64.run
             FILE_NAME: pkscreenercli_arm64.run
