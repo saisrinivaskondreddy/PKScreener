@@ -75,7 +75,7 @@ del updater.bat & exit
         if url is None or len(url) == 0:
             return
         from PKDevTools.classes.System import PKSystem
-        _,_,_,sysArch = PKSystem.get_platform()
+        _,_,_,_,sysArch = PKSystem.get_platform()
         bashFile = (
             """#!/bin/bash
 echo ""
@@ -111,7 +111,7 @@ rm updater.sh
         if url is None or len(url) == 0:
             return
         from PKDevTools.classes.System import PKSystem
-        _,_,_,sysArch = PKSystem.get_platform()
+        _,_,_,_,sysArch = PKSystem.get_platform()
         bashFile = (
             """#!/bin/bash
 echo ""
@@ -157,7 +157,7 @@ rm updater.sh
         )  
         size = 0
         from PKDevTools.classes.System import PKSystem
-        _,_,_,sysArch = PKSystem.get_platform()
+        _,_,_,_,sysArch = PKSystem.get_platform()
         if "Windows" in platform.system():
             exe_name = "pkscreenercli.exe"
         elif "Darwin" in platform.system():

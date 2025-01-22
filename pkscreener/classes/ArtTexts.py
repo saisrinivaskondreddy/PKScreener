@@ -200,5 +200,5 @@ def getArtText():
     random.shuffle(artTexts)
     from PKDevTools.classes.System import PKSystem
     from pkscreener.classes import VERSION
-    sysName,_,_,_ = PKSystem.get_platform()
+    sysName,_,_,_,_ = PKSystem.get_platform()
     return f"{random.choice(artTexts)}{sysName} | v{VERSION}"

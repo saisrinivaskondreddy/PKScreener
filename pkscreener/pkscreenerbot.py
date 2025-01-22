@@ -344,7 +344,7 @@ def launchIntradayMonitor():
     appLogsEnabled = ("PKDevTools_Default_Log_Level" in os.environ.keys() or sys.argv[0].endswith(".py"))
     # User wants an Int. Monitor
     from PKDevTools.classes.System import PKSystem
-    _,_,_,sysArch = PKSystem.get_platform()
+    _,_,_,_,sysArch = PKSystem.get_platform()
     launcher = f"/home/runner/work/PKScreener/PKScreener/pkscreenercli_{sysArch}.bin" if "MONITORING_BOT_RUNNER" in os.environ.keys() else "pkscreener"
     launcher = f"python3.12 {launcher}" if launcher.endswith(".py") else launcher
     
