@@ -3161,9 +3161,10 @@ def printNotifySaveScreenedResults(
                         addendumLabel=addendumLabel,
                     )
                     png_filepath = pngName+pngExtension
-                    media_group_dict["ATTACHMENTS"] = [{"FILEPATH":kite_file_path,"CAPTION":kite_caption.replace('&','n')},
-                                                       {"FILEPATH":png_filepath,"CAPTION":finalCaption.replace('&','n')}]
-                    media_group_dict["CAPTION"] = caption
+                    if not userPassedArgs.runintradayanalysis or (userPassedArgs.runintradayanalysis and "Intraday Analysis" in finalCaption):
+                        media_group_dict["ATTACHMENTS"] = [{"FILEPATH":kite_file_path,"CAPTION":kite_caption.replace('&','n')},
+                                                        {"FILEPATH":png_filepath,"CAPTION":finalCaption.replace('&','n')}]
+                        media_group_dict["CAPTION"] = caption
                     # Let's send the backtest results now only if the user requested 1-on-1 for scan.
                     if user is not None:
                         # Now let's try and send backtest results
