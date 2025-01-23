@@ -92,7 +92,8 @@ jobs:
               python3 -m pip install coveralls
             TEST_BUILD: |
               coverage erase
-              coverage run --source=${package_name} --branch -m pytest -vv --durations-min=0.005 --cov-config=.coveragerc --durations=0
+              # coverage run --source=${package_name} --branch -m pytest -vv --durations-min=0.005 --cov-config=.coveragerc --durations=0
+              coverage run --source=${package_name} --branch -m pytest --cov-config=.coveragerc
               coverage combine
               # quick local report output to console:
               coverage report -i
