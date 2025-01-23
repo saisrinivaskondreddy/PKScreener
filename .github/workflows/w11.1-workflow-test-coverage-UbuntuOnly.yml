@@ -185,16 +185,14 @@ jobs:
         with:
           python-version: ${{ inputs.targetPythonVersion || 3.12 }}
 
-      - name: Load Cache for Linux Dependencies
+      - name: Restore Dependencies from Cache
         uses: actions/cache@v4
-        if: startsWith(runner.os, 'Linux')
+        continue-on-error: True
         with:
-          path: |
-            /usr/include/ta-lib
-            /usr/bin/ta-lib-config
-          key: ${{ runner.os }}-talib
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-talib
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies for ${{ matrix.TARGET }}
         shell: bash
