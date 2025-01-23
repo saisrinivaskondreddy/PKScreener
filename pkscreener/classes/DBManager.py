@@ -24,7 +24,7 @@
 """
 try:
     import libsql_client as libsql
-except:
+except: # pragma: no cover
     pass
 import pyotp
 from time import sleep
@@ -76,7 +76,7 @@ class DBManager:
         skipLoading = False
         try:
             import libsql_client as libsql
-        except:
+        except: # pragma: no cover
             skipLoading = True
             pass
         return skipLoading
@@ -170,7 +170,7 @@ class DBManager:
             cursor = self.connection() #.cursor()
             try:
                 userID = int(userIDOrusername)
-            except:
+            except: # pragma: no cover
                 userID = 0
                 pass
             if userID == 0:

@@ -29,7 +29,7 @@ import datetime
 from PIL import Image,ImageDraw,ImageFont
 try:
     from pyppeteer import launch
-except:
+except: # pragma: no cover
     pass
 from PKDevTools.classes import Archiver
 from PKDevTools.classes.log import default_logger

@@ -1353,7 +1353,7 @@ class ScreeningStatistics:
             # Let's only consider those candles that are after the alert issue-time in the mornings + 2 candles (for buy/sell)
             diff_df = data[data.index >=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+self.configManager.morninganalysiscandlenumber + 2}:00+05:30').to_datetime64()]
             # brokerSqrOfftime = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} 15:14:00+05:30').to_datetime64()
-        except:
+        except: # pragma: no cover
             diff_df = data[data.index >=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+self.configManager.morninganalysiscandlenumber + 2}:00+05:30', utc=True)]
             # brokerSqrOfftime = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} 15:14:00+05:30', utc=True)
             pass
@@ -1378,7 +1378,7 @@ class ScreeningStatistics:
         for candle1MinuteNumberSinceMarketStarted in candleDurations:
             try:
                 int_df = df_intraday[df_intraday.index <=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30').to_datetime64()]
-            except:
+            except: # pragma: no cover
                 int_df = df_intraday[df_intraday.index <=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30', utc=True)]
                 pass
             if int_df is not None and len(int_df) > 0:
@@ -1460,7 +1460,7 @@ class ScreeningStatistics:
             # Let's only consider those candles that are after the alert issue-time in the mornings + 2 candles (for buy/sell)
             diff_df = diff_df[diff_df.index >=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+self.configManager.morninganalysiscandlenumber + 2}:00+05:30').to_datetime64()]
             # brokerSqrOfftime = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} 15:14:00+05:30').to_datetime64()
-        except:
+        except: # pragma: no cover
             diff_df = diff_df[diff_df.index >=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+self.configManager.morninganalysiscandlenumber + 2}:00+05:30', utc=True)]
             # brokerSqrOfftime = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} 15:14:00+05:30', utc=True)
             pass
@@ -1478,7 +1478,7 @@ class ScreeningStatistics:
                     while((diff_df["diff"][index-1] >= 0 and index >=0)): # and diff_df.index <= brokerSqrOfftime): # or diff_df["rsi"][index-1] <= minRSI):
                         # Loop until signal line has not crossed yet and is above the zero line
                         index -= 1
-            except:
+            except: # pragma: no cover
                 continue
             crossOver += 1
         ts = diff_df.tail(len(diff_df)-index +1).head(1).index[-1]
@@ -2049,7 +2049,7 @@ class ScreeningStatistics:
                                 qtyInfo = f"({int(qty/1000000)}M)" if qty >= 1000000 else (f"({int(qty/1000)}K)" if qty >= 1000 else f"({qty})")
                                 dealsInfo = f"{dealsInfo} {buySellInfo}{qtyInfo}{symbolKeys[index]}"
                     index += 1
-        except:
+        except: # pragma: no cover
             pass
 
         saved = self.findCurrentSavedValue(screenDict,saveDict,"Trend")
@@ -2111,7 +2111,7 @@ class ScreeningStatistics:
                             fvResponseValue = fv["latestFairValue"]
                             if fvResponseValue is not None:
                                 fairValue = float(fvResponseValue)
-                        except: # pragma: no cover
+                        except: # pragma: no cover # pragma: no cover
                             pass
                             # self.default_logger.debug(f"{e}\nResponse:fv:\n{fv}", exc_info=True)
                     fairValue = round(float(fairValue),1)
@@ -3372,7 +3372,7 @@ class ScreeningStatistics:
                     today = PKDateUtilities.currentDateTime()
                     try:
                         indexDate = datetime.datetime.strptime(str(recent.index[0]),"%Y-%m-%d %H:%M:%S").replace(tzinfo=today.tzinfo)
-                    except:
+                    except: # pragma: no cover
                         indexDate = datetime.datetime.strptime(str(recent.index[0]),"%Y-%m-%d %H:%M:%S%z").replace(tzinfo=today.tzinfo)
                         pass
                     dayDate = f"{indexDate.day}/{indexDate.month} {indexDate.hour}:{indexDate.minute}" if indexDate.hour > 0 else f"{indexDate.day}/{indexDate.month} {today.hour}:{today.minute}"

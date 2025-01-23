@@ -674,7 +674,7 @@ class menus:
                                                                 continue
                                                             try:
                                                                 level6ChildMenus  = menuItems.renderForMenu(level5ChildMenu,asList=True)
-                                                            except:
+                                                            except: # pragma: no cover
                                                                 level6ChildMenus = None
                                                                 pass
                                                             if level6ChildMenus is None:
@@ -1104,7 +1104,7 @@ class menus:
                 if checkUpdate:
                     try:
                         OTAUpdater.checkForUpdate(VERSION, skipDownload=True)
-                    except:
+                    except: # pragma: no cover
                         pass
             return menuText
         

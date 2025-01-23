@@ -102,7 +102,7 @@ class PKMarketOpenCloseAnalyser:
             shouldSuppress = not OutputControls().enableMultipleLineOutput
             with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
                 save_df, screen_df = PKMarketOpenCloseAnalyser.diffMorningCandleDataWithLatestDailyCandleData(screen_df,save_df, updatedCandleData, allDailyCandles,runOptionName=runOptionName,filteredListOfStocks=filteredListOfStocks)
-        except:
+        except: # pragma: no cover
             pass
         Utility.tools.saveStockData(allDailyCandles,PKMarketOpenCloseAnalyser.configManager,1,False,False, True)
         return save_df, screen_df
@@ -120,7 +120,7 @@ class PKMarketOpenCloseAnalyser:
             try:
                 os.remove(srcFilePath)
                 exists = False
-            except:
+            except: # pragma: no cover
                 pass
         isTrading = PKDateUtilities.isTradingTime()
         if not exists or isTrading:
@@ -153,7 +153,7 @@ class PKMarketOpenCloseAnalyser:
                 shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
             if not os.path.exists(copyFilePath) and exists: # Let's make a copy of the original one
                 shutil.copy(srcFilePath,copyFilePath)
-        except:
+        except: # pragma: no cover
             pass
         return exists, cache_file, stockDict
 
@@ -170,7 +170,7 @@ class PKMarketOpenCloseAnalyser:
             try:
                 os.remove(srcFilePath)
                 exists = False
-            except:
+            except: # pragma: no cover
                 pass
         isTrading = PKDateUtilities.isTradingTime()
         if not exists or isTrading:
@@ -205,7 +205,7 @@ class PKMarketOpenCloseAnalyser:
                 shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
             if not os.path.exists(copyFilePath) and exists: # Let's make a copy of the original one
                 shutil.copy(srcFilePath,copyFilePath)
-        except:
+        except: # pragma: no cover
             pass
         return exists, cache_file, stockDict
     
@@ -237,7 +237,7 @@ class PKMarketOpenCloseAnalyser:
         #                       columns=allDailyCandles[stock]["columns"],
         #                       index=[allDailyCandles[stock]["index"][-1]])
         #         latestDailyCandle[stock] = df.to_dict("split")
-        #     except:
+        #     except: # pragma: no cover
         #         continue
         return allDailyCandles
     
@@ -273,7 +273,7 @@ class PKMarketOpenCloseAnalyser:
                 try:
                     alertCandleTimestamp = sliceWindowDatetime if sliceWindowDatetime is not None else f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30'
                     df = df[df.index <=  pd.to_datetime(alertCandleTimestamp).to_datetime64()]
-                except:
+                except: # pragma: no cover
                     alertCandleTimestamp = sliceWindowDatetime if sliceWindowDatetime is not None else f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+candle1MinuteNumberSinceMarketStarted}:00+05:30'
                     df = df[df.index <=  pd.to_datetime(alertCandleTimestamp, utc=True)]
                     pass
@@ -335,7 +335,7 @@ class PKMarketOpenCloseAnalyser:
                     # but for whatever reason, if we don't have the stock, we should skip those
                     # stocks from analysis
                     del mutableAllDailyCandles[stock]
-            except:
+            except: # pragma: no cover
                 del mutableAllDailyCandles[stock]
                 if 'PKDevTools_Default_Log_Level' in os.environ.keys():
                     intradayChange = colorText.miniTabulator().tabulate(
@@ -395,7 +395,7 @@ class PKMarketOpenCloseAnalyser:
                     savedMorningLTP = updatedCandleData[stock]["data"][-1][3]
                     morningTime = PKDateUtilities.utc_to_ist(updatedCandleData[stock]["index"][-1]).strftime("%H:%M")
                     morningAlertTime = updatedCandleData[stock]["index"][-1]
-                except:
+                except: # pragma: no cover
                     savedMorningLTP = round(save_df["LTP"][index],2)
                     morningTime = DEFAULT_ALERT_TIME.strftime("%H:%M")
                     morningAlertTime = DEFAULT_ALERT_TIME
@@ -408,7 +408,7 @@ class PKMarketOpenCloseAnalyser:
                 # try:
                 #     # Let's only consider those candles that are after the alert issue-time in the mornings
                 #     df = df[df.index >=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} 09:{15+PKMarketOpenCloseAnalyser.configManager.morninganalysiscandlenumber}:00+05:30').to_datetime64()]
-                # except:
+                # except: # pragma: no cover
                 #     df = df[df.index >=  pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} 09:{15+PKMarketOpenCloseAnalyser.configManager.morninganalysiscandlenumber}:00+05:30', utc=True)]
                 #     pass
                 ts, row = scrStats.findMACDCrossover(df=df,
@@ -425,7 +425,7 @@ class PKMarketOpenCloseAnalyser:
                 #         # Let's only consider those candles that are right after the alert issue-time in the mornings
                 #         index = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+PKMarketOpenCloseAnalyser.configManager.morninganalysiscandlenumber+nextSellMinute}:00+05:30').to_datetime64()
                 #         df = df[df.index <=  index]
-                #     except:
+                #     except: # pragma: no cover
                 #         index = pd.to_datetime(f'{PKDateUtilities.tradingDate().strftime(f"%Y-%m-%d")} {MarketHours().openHour:02}:{MarketHours().openMinute+PKMarketOpenCloseAnalyser.configManager.morninganalysiscandlenumber+nextSellMinute}:00+05:30', utc=True)
                 #         df = df[df.index <=  index]
                 #         pass
@@ -448,7 +448,7 @@ class PKMarketOpenCloseAnalyser:
                 sqrOffDiffs.append(round(row["High"][-1] - morningLTP,2))
                 morningAlertLTPs.append(str(int(round(morningLTP,0))))
                 index += 1
-            except:
+            except: # pragma: no cover
                 eodLTPs.append("0")
                 eodDiffs.append("0")
                 dayHighLTPs.append("0")

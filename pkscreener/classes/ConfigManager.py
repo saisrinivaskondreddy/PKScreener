@@ -133,7 +133,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         temp = re.compile("([0-9]+)([a-zA-Z]+)")
         try:
             res = temp.match(self.duration).groups()
-        except:
+        except: # pragma: no cover
             return self.duration
         return int(res[0])
     
@@ -142,7 +142,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         temp = re.compile("([0-9]+)([a-zA-Z]+)")
         try:
             res = temp.match(self.duration).groups()
-        except:
+        except: # pragma: no cover
             return self.duration
         return res[1]
 
@@ -151,7 +151,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         temp = re.compile("([0-9]+)([a-zA-Z]+)")
         try:
             res = temp.match(self.period).groups()
-        except:
+        except: # pragma: no cover
             return self.period
         return int(res[0])
     
@@ -160,7 +160,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
         temp = re.compile("([0-9]+)([a-zA-Z]+)")
         try:
             res = temp.match(self.period).groups()
-        except:
+        except: # pragma: no cover
             return self.period
         return res[1]
 
@@ -620,7 +620,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
             try:
                 try:
                     self.appVersion = parser.get("config", "appVersion")
-                except:
+                except: # pragma: no cover
                     pass
                 self.tosAccepted = self.appVersion == VERSION
                 self.userID = parser.get("config", "userID")

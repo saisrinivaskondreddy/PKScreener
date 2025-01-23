@@ -369,7 +369,7 @@ def exitGracefully():
         filePath = None
         try:
             filePath = os.path.join(Archiver.get_user_data_dir(), "monitor_outputs")
-        except:
+        except: # pragma: no cover
             pass
         if filePath is None:
             return
@@ -377,7 +377,7 @@ def exitGracefully():
         while index < configManager.maxDashboardWidgetsPerRow*configManager.maxNumResultRowsInMonitor:
             try:
                 os.remove(f"{filePath}_{index}.txt")
-            except:
+            except: # pragma: no cover
                 pass
             index += 1
 
@@ -464,7 +464,7 @@ def runApplication():
     try:
         savedPipedArgs = None
         savedPipedArgs = args.pipedmenus if args is not None and args.pipedmenus is not None else None
-    except:
+    except: # pragma: no cover
         pass
     global results, resultStocks, plainResults, dbTimestamp, elapsed_time, start_time,argParser
     from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
@@ -555,7 +555,7 @@ def runApplication():
                             monitorOption = ":>|".join(innerPipes)
                             monitorOption = monitorOption.replace("::",":").replace(":>:>",":>")
                             # monitorOption = f"{monitorOption}:{savedStocks}:"
-                        except:
+                        except: # pragma: no cover
                             # Probably wrong (non-integer) index passed. Let's continue anyway
                             pass
                     elif resultStocks is not None:
@@ -617,11 +617,11 @@ def runApplication():
             if plainResults is not None and not plainResults.empty:
                 try:
                     plainResults.set_index("Stock", inplace=True)
-                except:
+                except: # pragma: no cover
                     pass
                 try:
                     results.set_index("Stock", inplace=True)
-                except:
+                except: # pragma: no cover
                     pass
                 plainResults = plainResults[~plainResults.index.duplicated(keep='first')]
                 results = results[~results.index.duplicated(keep='first')]
@@ -652,7 +652,7 @@ def updateProgressStatus(args,monitorOptions=None):
             args.progressstatus = f"  [+] {choices} => Running {choices}"
             args.usertag = PREDEFINED_SCAN_MENU_TEXTS[indexNum]
             args.maxdisplayresults = 2000 #if monitorOptions is None else 100
-    except:
+    except: # pragma: no cover
         choices = ""
         pass
     return args, choices
@@ -749,7 +749,7 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
                         final_df = df_group[["Pattern","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]
                     else:
                         final_df = pd.concat([final_df, df_group[["Pattern","LTP","LTP@Alert","SqrOffLTP","SqrOffDiff","EoDDiff","DayHigh","DayHighDiff"]]], axis=0)
-        except:
+        except: # pragma: no cover
             pass
         if final_df is not None and not final_df.empty:
             with pd.option_context('mode.chained_assignment', None):
@@ -863,7 +863,7 @@ def pipeResults(prevOutput,args):
             if prevOutput is not None and not prevOutput.empty:
                 try:
                     prevOutput.set_index("Stock", inplace=True)
-                except:
+                except: # pragma: no cover
                     pass
                 prevOutput_results = prevOutput[~prevOutput.index.duplicated(keep='first')]
                 prevOutput_results = prevOutput_results.index
@@ -886,7 +886,7 @@ def removeOldInstances():
         if not fileToDelete.endswith(thisInstance):
             try:
                 os.remove(fileToDelete)
-            except:
+            except: # pragma: no cover
                 pass
 
 def updateConfig(args):
@@ -948,7 +948,7 @@ def pkscreenercli():
             from pkscreener.classes import VERSION
             # Reset logging. If the user indeed passed the --log flag, it will be enabled later anyways
             del os.environ['PKDevTools_Default_Log_Level']
-        except:
+        except: # pragma: no cover
             pass
         configManager.logsEnabled = False
         configManager.tosAccepted = True

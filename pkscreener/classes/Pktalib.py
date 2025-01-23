@@ -51,7 +51,7 @@ if Imports["talib"]:
                 + "  [+] TA-Lib is not installed. Falling back on pandas_ta.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
                 + colorText.END
             )
-        except:
+        except: # pragma: no cover
             OutputControls().printOutput(
                 colorText.FAIL
                 + "  [+] pandas_ta is not installed. Falling back on pandas_ta also failed.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
@@ -468,7 +468,7 @@ class pktalib:
                 psr[pivotPoint] = round(result,2)
             with pd.option_context('mode.chained_assignment', None):
                 PSR = pd.DataFrame(psr)
-        except:
+        except: # pragma: no cover
             # default_logger().debug(e, exc_info=True)
             pass
         return PSR

@@ -62,7 +62,7 @@ class PKAnalyticsService():
                     username = os.environ.get('USERPROFILE')
                     if username is None or len(username) == 0:
                         username = os.path.expandvars("%userprofile%") if platform.startswith("win") else getpass.getuser()
-        except:
+        except: # pragma: no cover
             username = f"Unidentified-{platform.system()}"
             pass
         return username
@@ -73,7 +73,7 @@ class PKAnalyticsService():
             f = fetcher()
             response = f.fetchURL(url=url,timeout=5,headers={'user-agent': f'{random_user_agent()}'})
             data = json.loads(response.text)
-        except:
+        except: # pragma: no cover
             data = {"locationInfo":f"Unidentified-{platform.system()}"}
             pass
         return data

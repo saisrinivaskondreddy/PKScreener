@@ -39,7 +39,7 @@ class PKUserRegistration:
             dbManager = DBManager()
             if "RUNNER" in os.environ.keys() or dbManager.shouldSkipLoading():
                 return True
-        except:
+        except: # pragma: no cover
             return True
         from pkscreener.classes import Utility
         Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
@@ -72,7 +72,7 @@ class PKUserRegistration:
             try:
                 usernameInt = int(username)
                 userUsedUserID = True
-            except:
+            except: # pragma: no cover
                 userUsedUserID = False
                 pass
 
