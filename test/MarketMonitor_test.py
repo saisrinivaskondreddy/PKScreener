@@ -123,6 +123,8 @@ class TestMarketMonitor2(unittest.TestCase):
         # Call again to test cycling through monitors
         option = self.monitor.currentMonitorOption()
         self.assertEqual(option, 'GOOGL')
+        option = self.monitor.currentMonitorOption()
+        self.assertEqual(option, 'MSFT')
 
     def test_saveMonitorResultStocks_with_empty_dataframe(self):
         df = pd.DataFrame()
@@ -151,9 +153,27 @@ class TestMarketMonitor2(unittest.TestCase):
             'RSI': [45, 46, 64],
         }
         df = pd.DataFrame(data)
+        df.set_index("Stock",inplace=True)
         self.monitor.refresh(screen_df=df, screenOptions='AAPL')
         self.assertFalse(self.monitor.monitor_df.empty)
-        self.assertIn('A1', self.monitor.monitor_df.columns)
+        self.assertIn('LTP', self.monitor.monitor_df.columns)
+
+    def test_refresh_with_pinnedMode(self):
+        data = {
+            'Stock': ['AAPL', 'GOOGL', 'MSFT'],
+            'LTP': [150, 2800, 300],
+            '%Chng': ['1.5%', '2.0%', '3.0%'],
+            '52Wk-H': [160, 2900, 310],
+            'Volume': [1000, 2000, 1500],
+            'RSI': [45, 46, 64],
+        }
+        df = pd.DataFrame(data)
+        df.set_index("Stock",inplace=True)
+        self.monitor.isPinnedSingleMonitorMode = True
+        self.monitor.pinnedIntervalWaitSeconds = 0.1
+        self.monitor.refresh(screen_df=df, screenOptions='AAPL')
+        self.assertFalse(self.monitor.monitor_df.empty)
+        self.assertIn('LTP', self.monitor.monitor_df.columns)
 
     def test_updateDataFrameForTelegramMode(self):
         data = {
