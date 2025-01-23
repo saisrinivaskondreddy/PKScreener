@@ -122,8 +122,11 @@ def test_showWhatsNew():
         output = OTAUpdater.showWhatsNew()
         assert output == expected_output
 
-
 # Positive test case: Test checkForUpdate function with prod_update = True
+@pytest.mark.skipif(
+    "Linux" in platform.system(),
+    reason="Cannot simulate the environment on Linux",
+)
 def test_checkForUpdate_prod_update():
     VERSION = "1.0.0"
     patch.object(platform, "system", return_value="Linux")
