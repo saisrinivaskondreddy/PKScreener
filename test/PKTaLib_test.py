@@ -1,3 +1,28 @@
+#!/usr/bin/python3
+"""
+    The MIT License (MIT)
+
+    Copyright (c) 2023 pkjmesra
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+"""
 import unittest
 import pandas as pd
 import numpy as np
@@ -17,6 +42,14 @@ class TestPktalib(unittest.TestCase):
             'Date': pd.date_range(start='2023-01-01', periods=5)
         })
         self.df.set_index('Date', inplace=True)
+        self.large_df = pd.DataFrame({
+            'High': np.random.rand(1000) * 100,
+            'Low': np.random.rand(1000) * 100,
+            'Close': np.random.rand(1000) * 100,
+            'Volume': np.random.randint(1, 1000, size=1000),
+            'Date': pd.date_range(start='2023-01-01', periods=1000)
+        })
+        self.large_df.set_index('Date', inplace=True)
 
     def test_AVWAP(self):
         anchored_date = pd.Timestamp('2023-01-03')
@@ -88,15 +121,7 @@ class TestPktalib(unittest.TestCase):
         self.assertTrue(len(result) > 0)
 
     def test_RVM(self):
-        large_df = pd.DataFrame({
-            'High': np.random.rand(1000) * 100,
-            'Low': np.random.rand(1000) * 100,
-            'Close': np.random.rand(1000) * 100,
-            'Volume': np.random.randint(1, 1000, size=1000),
-            'Date': pd.date_range(start='2023-01-01', periods=1000)
-        })
-        large_df.set_index('Date', inplace=True)
-        result = pktalib.RVM(large_df['High'], large_df['Low'], large_df['Close'], timeperiod=3)
+        result = pktalib.RVM(self.large_df['High'], self.large_df['Low'], self.large_df['Close'], timeperiod=3)
         self.assertEqual(len(result), 1)
         result = result.replace('nan', np.nan)
         result = result.dropna()
@@ -142,13 +167,22 @@ class TestPktalib(unittest.TestCase):
             pktalib.EMA(single_row_df['Close'], timeperiod=1)
 
     def test_performance(self):
-        large_df = pd.DataFrame({
-            'High': np.random.rand(1000) * 100,
-            'Low': np.random.rand(1000) * 100,
-            'Close': np.random.rand(1000) * 100,
-            'Volume': np.random.randint(1, 1000, size=1000),
-            'Date': pd.date_range(start='2023-01-01', periods=1000)
-        })
-        large_df.set_index('Date', inplace=True)
-        result = pktalib.ATR(large_df['High'], large_df['Low'], large_df['Close'])
+        result = pktalib.ATR(self.large_df['High'], self.large_df['Low'], self.large_df['Close'])
         self.assertEqual(len(result), 1000)
+
+    def test_MACD(self):
+        result = pktalib.MACD(self.large_df["Close"], 10, 18, 9)
+        self.assertEqual(len(result), 3)
+        for df in result:
+            df = df.replace('nan', np.nan)
+            df = df.dropna()
+            self.assertTrue(np.all(np.isfinite(df)))
+            self.assertTrue(len(df) > 0)
+
+    def test_MFI(self):
+        result = pktalib.MFI(self.large_df['High'], self.large_df['Low'], self.large_df['Close'],self.large_df["Volume"])
+        self.assertEqual(len(result), len(self.large_df))
+        result = result.replace('nan', np.nan)
+        result = result.dropna()
+        self.assertTrue(np.all(np.isfinite(result)))
+        self.assertTrue(len(result) > 0)
