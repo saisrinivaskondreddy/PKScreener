@@ -179,8 +179,58 @@ class TestPktalib(unittest.TestCase):
             self.assertTrue(np.all(np.isfinite(df)))
             self.assertTrue(len(df) > 0)
 
+    def test_RSI(self):
+        result = pktalib.RSI(self.large_df['Close'],timeperiod=14)
+        self.assertEqual(len(result), len(self.large_df))
+        result = result.replace('nan', np.nan)
+        result = result.dropna()
+        self.assertTrue(np.all(np.isfinite(result)))
+        self.assertTrue(len(result) > 0)
+
     def test_MFI(self):
         result = pktalib.MFI(self.large_df['High'], self.large_df['Low'], self.large_df['Close'],self.large_df["Volume"])
+        self.assertEqual(len(result), len(self.large_df))
+        result = result.replace('nan', np.nan)
+        result = result.dropna()
+        self.assertTrue(np.all(np.isfinite(result)))
+        self.assertTrue(len(result) > 0)
+
+    def test_CCI(self):
+        result = pktalib.CCI(self.large_df['High'], self.large_df['Low'], self.large_df['Close'],timeperiod=14)
+        self.assertEqual(len(result), len(self.large_df))
+        result = result.replace('nan', np.nan)
+        result = result.dropna()
+        self.assertTrue(np.all(np.isfinite(result)))
+        self.assertTrue(len(result) > 0)
+
+    def test_Aroon(self):
+        result = pktalib.Aroon(self.large_df['High'], self.large_df['Low'],timeperiod=14)
+        self.assertEqual(len(result), len(self.large_df))
+        result = result.replace('nan', np.nan)
+        result = result.dropna()
+        self.assertTrue(np.all(np.isfinite(result)))
+        self.assertTrue(len(result) > 0)
+
+    def test_Stochf(self):
+        result = pktalib.STOCHF(self.large_df['High'], self.large_df['Low'], self.large_df['Close'],fastk_period=5,fastd_period=3,fastd_matype=0)
+        self.assertEqual(len(result), 2)
+        for df in result:
+            df = df.replace('nan', np.nan)
+            df = df.dropna()
+            self.assertTrue(np.all(np.isfinite(df)))
+            self.assertTrue(len(df) > 0)
+
+    def test_StochRSI(self):
+        result = pktalib.STOCHRSI(self.large_df['Close'],timeperiod=14,fastk_period=5,fastd_period=3,fastd_matype=0)
+        self.assertEqual(len(result), 2)
+        import numpy
+        for df in result:
+            df = df[~numpy.isnan(df)]
+            self.assertTrue(np.all(np.isfinite(df)))
+            self.assertTrue(len(df) > 0)
+    
+    def test_PSAR(self):
+        result = pktalib.psar(self.large_df['High'], self.large_df['Low'])
         self.assertEqual(len(result), len(self.large_df))
         result = result.replace('nan', np.nan)
         result = result.dropna()
