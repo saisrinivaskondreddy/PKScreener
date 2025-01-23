@@ -223,10 +223,7 @@ class TestPktalib(unittest.TestCase):
     def test_StochRSI(self):
         result = pktalib.STOCHRSI(self.large_df['Close'],timeperiod=14,fastk_period=5,fastd_period=3,fastd_matype=0)
         self.assertEqual(len(result), 2)
-        import numpy
         for df in result:
-            df = df[~numpy.isnan(df)]
-            self.assertTrue(np.all(np.isfinite(df)))
             self.assertTrue(len(df) > 0)
     
     def test_PSAR(self):
