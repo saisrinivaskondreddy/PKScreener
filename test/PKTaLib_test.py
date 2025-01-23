@@ -233,3 +233,25 @@ class TestPktalib(unittest.TestCase):
         result = result.dropna()
         self.assertTrue(np.all(np.isfinite(result)))
         self.assertTrue(len(result) > 0)
+
+    def test_PPSR(self):
+        pp_map = {"1":"PP","2":"S1","3":"S2","4":"S3","5":"R1","6":"R2","7":"R3"}
+        for pivotPoint in pp_map.keys():
+            ppToCheck = pp_map[str(pivotPoint)]
+            result = pktalib.get_ppsr_df(self.large_df["High"],self.large_df["Low"],self.large_df["Close"],ppToCheck)
+            self.assertEqual(len(result), len(self.large_df))
+            result = result.replace('nan', np.nan)
+            result = result.dropna()
+            self.assertTrue(np.all(np.isfinite(result)))
+            self.assertTrue(len(result) > 0)
+
+    def test_cupNhandleCandle(self):
+        df = pd.DataFrame({
+            'High': [31, 20, 25, 32, 32,30,30,25],
+            'Date': pd.date_range(start='2023-01-01', periods=8)
+        })
+        df.set_index('Date', inplace=True)
+        result = pktalib.CDLCUPANDHANDLE(None,df["High"],None,None)
+        self.assertTrue(result)
+        result = pktalib.CDLCUPANDHANDLE(None,df["High"].tail(6),None,None)
+        self.assertFalse(result)
