@@ -69,7 +69,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
 
     def get_stats(self,ticker):
         info = yf.Tickers(ticker).tickers[ticker].fast_info
-        screenerStockDataFetcher._tickersInfoDict[ticker] = {"marketCap":info.market_cap}
+        screenerStockDataFetcher._tickersInfoDict[ticker] = {"marketCap":info.market_cap if info is not None else 0}
 
     def fetchAdditionalTickerInfo(self,ticker_list,exchangeSuffix=".NS"):
         if not isinstance(ticker_list,list):
