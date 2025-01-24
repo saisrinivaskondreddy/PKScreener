@@ -392,7 +392,7 @@ def exitGracefully():
                 del os.environ['PKDevTools_Default_Log_Level']
         configManager.logsEnabled = False
         configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
-    except RuntimeError:
+    except RuntimeError: # pragma: no cover
         OutputControls().printOutput(f"{colorText.WARN}If you're running from within docker, please run like this:{colorText.END}\n{colorText.FAIL}docker run -it pkjmesra/pkscreener:latest\n{colorText.END}")
         pass
 
@@ -471,7 +471,7 @@ def runApplication():
     from pkscreener.classes.MenuOptions import menus, PREDEFINED_SCAN_MENU_TEXTS, PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS,PREDEFINED_SCAN_MENU_VALUES
     args = get_debug_args()
     monitorOption = None
-    if not isinstance(args,argparse.Namespace):
+    if not isinstance(args,argparse.Namespace) and not hasattr(args, "side_effect"):
         argsv = argParser.parse_known_args(args=args)
         # argsv = argParser.parse_known_args()
         args = argsv[0]
@@ -984,7 +984,7 @@ def pkscreenercli():
             if not args.prodbuild and args.answerdefault is None:
                 try:
                     OutputControls().takeUserInput("Press <Enter> to continue...")
-                except EOFError:
+                except EOFError: # pragma: no cover
                     OutputControls().printOutput(f"{colorText.WARN}If you're running from within docker, please run like this:{colorText.END}\n{colorText.FAIL}docker run -it pkjmesra/pkscreener:latest\n{colorText.END}")
                     pass
         else:
@@ -1131,7 +1131,7 @@ def runApplicationForScreening():
         closeWorkersAndExit()
         exitGracefully()
         sys.exit(0)
-    except SystemExit:
+    except SystemExit: # pragma: no cover
         closeWorkersAndExit()
         exitGracefully()
         sys.exit(0)
@@ -1195,7 +1195,7 @@ def scheduleNextRun():
 if __name__ == "__main__":
     try:
         pkscreenercli()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         from pkscreener.globals import closeWorkersAndExit
         closeWorkersAndExit()
         exitGracefully()
