@@ -331,7 +331,7 @@ def get_debug_args():
             # make sure that args are mutable
             args = list(args)
         return args
-    except NameError as e:
+    except NameError as e: # pragma: no cover
         args = sys.argv[1:]
         if isinstance(args,list):
             if len(args) == 1:

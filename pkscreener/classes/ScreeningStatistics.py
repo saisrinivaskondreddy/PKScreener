@@ -126,7 +126,7 @@ class ScreeningStatistics:
                     ema = pktalib.EMA(df["Close"], ema_period) if ema_period > 1 else df["Close"]#short_name='EMA', ewm=True)        
                     df["Above"] = ema > df["ATRTrailingStop"]
                     df["Below"] = ema < df["ATRTrailingStop"]
-        except (OSError,FileNotFoundError) as e:
+        except (OSError,FileNotFoundError) as e: # pragma: no cover
             OutputControls().printOutput(f"{colorText.FAIL}Some dependencies are missing. Try and run this option again.{colorText.END}")
             # OSError:RALLIS: [Errno 2] No such file or directory: '/tmp/_MEIzoTV6A/vectorbt/templates/light.json'
             # if "No such file or directory" in str(e):
@@ -143,7 +143,7 @@ class ScreeningStatistics:
             if retry:
                 return self.computeBuySellSignals(df,ema_period=ema_period,retry=False)
             return None
-        except ImportError as e:
+        except ImportError as e: # pragma: no cover
             OutputControls().printOutput(f"{colorText.FAIL}The main module needed for best Buy/Sell result calculation is missing. Falling back on an alternative, but it is not very reliable.{colorText.END}")
             if df is not None:
                 ema = pktalib.EMA(df["Close"], ema_period) if ema_period > 1 else df["Close"]#short_name='EMA', ewm=True)        

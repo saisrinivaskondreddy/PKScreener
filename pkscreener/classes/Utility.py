@@ -1119,7 +1119,7 @@ class tools:
                     # else:
                     #     stockDict = stockData
                     stockDataLoaded = True
-            except pickle.UnpicklingError as e:
+            except pickle.UnpicklingError as e: # pragma: no cover
                 default_logger().debug(e, exc_info=True)
                 f.close()
                 OutputControls().printOutput(

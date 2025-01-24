@@ -151,10 +151,10 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                             # we'd have received a multiindex dataframe
                             listStockCodes = multiIndex.get_level_values(0)
                             data = data.get(listStockCodes[0])
-            except (KeyError,YFPricesMissingError) as e:
+            except (KeyError,YFPricesMissingError) as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)
                 pass
-            except (YFInvalidPeriodError,Exception) as e:
+            except (YFInvalidPeriodError,Exception) as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)                    
         if printCounter and type(screenCounter) != int:
             sys.stdout.write("\r\033[K")

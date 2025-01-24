@@ -293,18 +293,30 @@ class PKMarketOpenCloseAnalyser:
         return morningIntradayCandle
 
     def getMorningOpen(df):
-        open = df["Open"][0]
+        try:
+            open = df["Open"][0]
+        except KeyError:
+            open = df["Open"][df.index.values[0]]
         index = 0
         while np.isnan(open) and index < len(df):
-            open = df["Open"][index + 1]
+            try:
+                open = df["Open"][index + 1]
+            except KeyError:
+                open = df["Open"][df.index.values[index + 1]]
             index += 1
         return open
     
     def getMorningClose(df):
-        close = df["Close"][-1]
+        try:
+            close = df["Close"][-1]
+        except KeyError:
+            close = df["Close"][df.index.values[-1]]
         index = len(df)
         while np.isnan(close) and index >= 0:
-            close = df["Close"][index - 1]
+            try:
+                close = df["Close"][index - 1]
+            except KeyError:
+                close = df["Close"][df.index.values[index - 1]]
             index -= 1
         return close
     
@@ -453,6 +465,18 @@ class PKMarketOpenCloseAnalyser:
                 eodDiffs.append("0")
                 dayHighLTPs.append("0")
                 dayHighDiffs.append("0")
+                if len(morningAlertLTPs) < len(eodLTPs):
+                    morningAlertLTPs.append("0")
+                if len(morningTimestamps) < len(eodLTPs):
+                    morningTimestamps.append("09:30")
+                if len(sellTimestamps) < len(eodLTPs):
+                    sellTimestamps.append("09:40")
+                if len(sellLTPs) < len(eodLTPs):
+                    sellLTPs.append("0")
+                if len(sqrOffDiffs) < len(eodLTPs):
+                    sqrOffDiffs.append("0")
+                if len(dayHighTimestamps) < len(eodLTPs):
+                    dayHighTimestamps.append("09:45")
                 continue
         diffColumns = ["LTP@Alert", "AlertTime", "SqrOff", "SqrOffLTP", "SqrOffDiff","DayHighTime","DayHigh","DayHighDiff", "EoDLTP", "EoDDiff"]
         diffValues = [morningAlertLTPs, morningTimestamps, sellTimestamps, sellLTPs, sqrOffDiffs,dayHighTimestamps,dayHighLTPs, dayHighDiffs,eodLTPs, eodDiffs]
@@ -460,11 +484,12 @@ class PKMarketOpenCloseAnalyser:
             columnName = column
             save_df[columnName] = diffValues[diffColumns.index(columnName)]
             screen_df.loc[:, columnName] = save_df.loc[:, columnName].apply(
-                lambda x: x if columnName in ["LTP@Alert","AlertTime", "SqrOff", "SqrOffLTP", "EoDLTP","DayHigh","DayHighTime"] else ((colorText.GREEN if x >= 0 else colorText.FAIL) + str(x) + colorText.END)
+                lambda x: x if columnName in ["LTP@Alert","AlertTime", "SqrOff", "SqrOffLTP", "EoDLTP","DayHigh","DayHighTime"] else ((colorText.GREEN if float(x) >= 0 else colorText.FAIL) + str(x) + colorText.END)
             )
 
         columns = save_df.columns
         lastIndex = len(save_df)
+        ltpSum = 0
         for col in columns:
             if col in ["Stock", "LTP@Alert", "Pattern", "LTP", "SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff", "EoDLTP", "EoDDiff", "%Chng"]:
                 if col == "Stock":
@@ -483,9 +508,9 @@ class PKMarketOpenCloseAnalyser:
         eodDiff = save_df.loc[lastIndex,"EoDDiff"]
         sqrOffDiff = save_df.loc[lastIndex,"SqrOffDiff"]
         dayHighDiff = save_df.loc[lastIndex,"DayHighDiff"]
-        save_df.loc[lastIndex,"EoDDiff"] = str(eodDiff) + f'({round(100*eodDiff/ltpSum,2)}%)'
-        save_df.loc[lastIndex,"SqrOffDiff"] = str(sqrOffDiff) + f'({round(100*sqrOffDiff/ltpSum,2)}%)'
-        save_df.loc[lastIndex,"DayHighDiff"] = str(dayHighDiff) + f'({round(100*dayHighDiff/ltpSum,2)}%)'
+        save_df.loc[lastIndex,"EoDDiff"] = str(eodDiff) + f'({round(100*eodDiff/ltpSum,2) if ltpSum >0 else 0}%)'
+        save_df.loc[lastIndex,"SqrOffDiff"] = str(sqrOffDiff) + f'({round(100*sqrOffDiff/ltpSum,2) if ltpSum >0 else 0}%)'
+        save_df.loc[lastIndex,"DayHighDiff"] = str(dayHighDiff) + f'({round(100*dayHighDiff/ltpSum,2) if ltpSum >0 else 0}%)'
         screen_df.loc[lastIndex,"EoDDiff"] = (colorText.GREEN if eodDiff >= 0 else colorText.FAIL) + save_df.loc[lastIndex,"EoDDiff"] + colorText.END
         screen_df.loc[lastIndex,"SqrOffDiff"] = (colorText.GREEN if sqrOffDiff >= 0 else colorText.FAIL) + save_df.loc[lastIndex,"SqrOffDiff"] + colorText.END
         screen_df.loc[lastIndex,"DayHighDiff"] = (colorText.GREEN if dayHighDiff >= 0 else colorText.FAIL) + save_df.loc[lastIndex,"DayHighDiff"] + colorText.END

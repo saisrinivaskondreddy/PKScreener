@@ -321,7 +321,7 @@ def getSummaryCorrectnessOfStrategy(resultdf, summaryRequired=True):
                 },
                 inplace=True,
             )
-    except urllib.error.HTTPError as e:
+    except urllib.error.HTTPError as e: # pragma: no cover
         if "HTTP Error 404" in str(e):
             pass
         else:
@@ -1773,7 +1773,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         listStockCodes = sorted(list(filter(None,list(set(stockDictPrimary.keys())))))
                 if str(indexOption) not in ["S"]:
                     listStockCodes = prepareStocksForScreening(testing, downloadOnly, listStockCodes, indexOption)
-        except urllib.error.URLError as e:
+        except urllib.error.URLError as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL

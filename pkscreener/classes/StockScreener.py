@@ -720,7 +720,7 @@ class StockScreener:
             # if data is None or (data is not None and not data.isnull().values.all(axis=0)[0]):
             #     hostRef.default_logger.debug(f"StockDataEmptyException:{stock}: {e}", exc_info=True)
             pass
-        except ScreeningStatistics.EligibilityConditionNotMet as e:
+        except ScreeningStatistics.EligibilityConditionNotMet as e: # pragma: no cover
             # if userArgsLog:
             #     hostRef.default_logger.debug(f"EligibilityConditionNotMet:{stock}: {e}", exc_info=True)
             pass
@@ -1010,7 +1010,7 @@ class StockScreener:
                 data = pd.DataFrame(
                         hostData["data"], columns=columns, index=hostData["index"]
                     )
-            except (ValueError, AssertionError) as e:
+            except (ValueError, AssertionError) as e: # pragma: no cover
                 # 9 columns passed, passed data had 11 columns
                 # 10 columns passed, passed data had 11 columns
                 excLookingFor = " columns passed, passed data had "
@@ -1093,7 +1093,7 @@ class StockScreener:
                             end="\r",
                             flush=True,
                         )
-            except ZeroDivisionError as e:
+            except ZeroDivisionError as e: # pragma: no cover
                 hostRef.default_logger.debug(e, exc_info=True)
                 pass
             sys.stdout.write("\r\033[K")

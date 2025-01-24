@@ -228,7 +228,7 @@ class TestAllMenus(unittest.TestCase):
         self.assertEqual(runKeyOptions, {})
 
 class TestMenuRendering(unittest.TestCase):
-    # @patch('pkscreener.classes.MenuOptions.Pin_MenuDict')  # Replace 'your_module' with the actual module name
+    # @patch('pkscreener.classes.MenuOptions.Pin_MenuDict') 
     @patch('pkscreener.classes.MenuOptions.menus.renderMenuFromDictionary')  # Mocking the renderMenuFromDictionary method
     def test_renderPinnedMenu_positive(self, mock_render):
         m = menus()
@@ -265,7 +265,7 @@ class TestMenuRendering(unittest.TestCase):
             m.renderPinnedMenu(substitutes=substitutes, skip=skip)
         self.assertEqual(str(context.exception), "Error rendering menu")
 
-    # @patch('pkscreener.classes.MenuOptions.CANDLESTICK_DICT')  # Replace 'your_module' with the actual module name
+    # @patch('pkscreener.classes.MenuOptions.CANDLESTICK_DICT')
     @patch('pkscreener.classes.MenuOptions.menus.renderMenuFromDictionary')
     def test_renderCandleStickPatterns_positive(self, mock_render):
         m = menus()
