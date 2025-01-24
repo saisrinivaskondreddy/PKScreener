@@ -845,7 +845,7 @@ def formatGridOutput(df,replacenan=True):
             continue
         maxGrowth = df[col].max()
         if "Pd-%" in col:
-            df.loc[:, col] = df.loc[:, col].apply(
+            df.loc[:, col] = df.loc[:, col].astype(str).apply(
                 lambda x: x
                 if (str(x) == "-")
                 else (
@@ -867,7 +867,7 @@ def formatGridOutput(df,replacenan=True):
                 )
             )
         if "Pd-10k" in col:
-            df.loc[:, col] = df.loc[:, col].apply(
+            df.loc[:, col] = df.loc[:, col].astype(str).apply(
                 lambda x: x
                 if (str(x) == "-")
                 else (
