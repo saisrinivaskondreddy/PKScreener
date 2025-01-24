@@ -100,15 +100,15 @@ jobs:
               coverage erase
               # coverage run --source=${package_name} --branch -m pytest -vv --durations-min=0.005 --cov-config=.coveragerc --disable-warnings --durations=0
               coverage run --source=${package_name} --branch -m pytest --cov-config=.coveragerc --disable-warnings
-              coverage combine
-              # quick local report output to console:
-              coverage report -i
-              coverage html -i
-              coverage xml -i
-              curl -s https://codecov.io/bash | bash
-              coveralls --service=github
-              # coverage run --source=${package_name} --branch -m pytest --cov=pkscreener test/
+              # coverage combine
+              # # quick local report output to console:
+              # coverage report -i
+              # coverage html -i
+              # coverage xml -i
+              # curl -s https://codecov.io/bash | bash
               # coveralls --service=github
+              # # coverage run --source=${package_name} --branch -m pytest --cov=pkscreener test/
+              # # coveralls --service=github
           - os: windows-latest
             TARGET: Windows
             CMD_BUILD: |
@@ -223,8 +223,25 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: ${{ matrix.TEST_BUILD }}
-        continue-on-error: false
+        continue-on-error: True
 
+      - name: Upload report
+        if: startsWith(runner.os, 'Linux')
+        run: |
+          coverage combine
+          # quick local report output to console:
+          coverage report -i
+          coverage html -i
+          coverage xml -i
+          curl -s https://codecov.io/bash | bash
+          coveralls --service=github
+          # coverage run --source=${package_name} --branch -m pytest --cov=pkscreener test/
+          # coveralls --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        continue-on-error: False
   # Delete_Workflow_Run:
   #   runs-on: ubuntu-latest
   #   needs: [Build]
