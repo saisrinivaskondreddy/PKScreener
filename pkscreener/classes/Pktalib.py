@@ -38,7 +38,7 @@ from pkscreener import Imports
 if Imports["talib"]:
     try:
         import talib
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         OutputControls().printOutput(
                 colorText.FAIL
                 + "  [+] 'TA-Lib' library is not installed. For best results, please install 'TA-Lib'! You may wish to follow instructions from\n  [+] https://github.com/pkjmesra/PKScreener/"

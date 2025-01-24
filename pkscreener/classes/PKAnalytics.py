@@ -50,7 +50,7 @@ class PKAnalyticsService():
             if "readme" in metrics.keys():
                 del metrics['readme']
             self.tryCommitAnalytics(userDict=metrics,username=userName)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
 
     def getUserName(self):
@@ -85,7 +85,7 @@ class PKAnalyticsService():
             test_branch = "main"
             repo = git.Repo.clone_from(repo_clone_url, local_repo)
             repo.git.checkout(test_branch)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             repo = git.Repo(local_repo)
             repo.git.checkout(test_branch)
             pass

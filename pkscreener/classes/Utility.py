@@ -375,7 +375,7 @@ class tools:
             plx = int((width - lx)/4)
             ply = int((height - ly)/3)
             sourceImage.paste(logo_img, (plx, ply), logo_img)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             default_logger().debug(e,exc_info=True)
             pass
 
@@ -757,7 +757,7 @@ class tools:
             im = im.resize((int(im.size[0]*configManager.telegramImageCompressionRatio),int(im.size[1]*configManager.telegramImageCompressionRatio)), Image.LANCZOS, reducing_gap=2)
             im = tools.addQuickWatermark(im,xVertical,dataSrc="Yahoo!finance; Morningstar, Inc; National Stock Exchange of India Ltd;TradingHours.com;",dataSrcFontSize=ART_FONT_SIZE)
             im.save(filename, format=configManager.telegramImageFormat, bitmap_format=configManager.telegramImageFormat, optimize=True, quality=int(configManager.telegramImageQualityPercentage))
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
         # if 'RUNNER' not in os.environ.keys() and 'PKDevTools_Default_Log_Level' in os.environ.keys():
         # im.show()
@@ -990,7 +990,7 @@ class tools:
                 if jsonDict and len(jsonDict) > 0:
                     with open(dealsFile,"w") as f:
                         f.write(json.dumps(jsonDict))
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)
                 pass
 
@@ -1329,7 +1329,7 @@ class tools:
             data = data.fillna(0)
             data = data.replace([np.inf, -np.inf], 0)
             data = tools.removeAllColorStyles(data)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             default_logger().debug(e,exc_info=True)
             pass
         try:

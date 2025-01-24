@@ -342,9 +342,10 @@ def get_debug_args():
             else:
                 return args
         return None
-    except TypeError as e: # NameSpace object is not iterable
+    except TypeError as e: # pragma: no cover
+        # NameSpace object is not iterable
         return args
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         return None
     # return ' --systemlaunched -a y -e -o "X:12:9:2.5:>|X:0:31:>|X:0:23:>|X:0:27:" -u -1001785195297 --stocklist GLS,NESCO,SBICARD,DREAMFOLKS,JAGRAN,ACEINTEG,RAMASTEEL'.split(" ")
 
@@ -600,15 +601,15 @@ def runApplication():
                                 )
                             if args.answerdefault is None:
                                 OutputControls().takeUserInput("Press <Enter> to continue...")
-            except SystemExit:
+            except SystemExit: # pragma: no cover
                 closeWorkersAndExit()
                 exitGracefully()
                 sys.exit(0)
-            except KeyboardInterrupt:
+            except KeyboardInterrupt: # pragma: no cover
                 closeWorkersAndExit()
                 exitGracefully()
                 sys.exit(0)
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 default_logger().debug(e, exc_info=True)
                 if args.log:
                     traceback.print_exc()
@@ -684,7 +685,7 @@ def generateIntradayAnalysisReports(args):
             runOptionName = f"--systemlaunched -a y -e -o '{runOption.replace('C:','X:').replace('D:','')}'"
             indexNum = PREDEFINED_SCAN_MENU_VALUES.index(runOptionName)
             runOptionName = f"{'  [+] P_1_'+str(indexNum +1) if '>|' in runOption else runOption}"
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             default_logger().debug(e,exc_info=True)
             runOptionName = f"  [+] {runOption.replace('D:','').replace(':D','').replace(':','_').replace('_D','').replace('C_','X_')}"
             pass
@@ -717,11 +718,11 @@ def generateIntradayAnalysisReports(args):
                 configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(), pattern="*intraday_stock_data_*.pkl")
             if isInterrupted():
                 break
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             closeWorkersAndExit()
             exitGracefully()
             sys.exit(0)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             OutputControls().printOutput(e)
             if args.log:
                 traceback.print_exc()
@@ -1094,12 +1095,12 @@ def pkscreenercli():
             sys.exit(0)
         else:
             runApplicationForScreening()
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         from pkscreener.globals import closeWorkersAndExit
         closeWorkersAndExit()
         exitGracefully()
         sys.exit(0)
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         if "RUNNER" not in os.environ.keys() and ('PKDevTools_Default_Log_Level' in os.environ.keys() and os.environ["PKDevTools_Default_Log_Level"] != str(log.logging.NOTSET)):
                 OutputControls().printOutput(
                     "  [+] RuntimeError with 'multiprocessing'.\n  [+] Please contact the Developer, if this does not work!"

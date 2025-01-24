@@ -464,7 +464,7 @@ def handleSecondaryMenuChoices(
                     # User entered a date
                     try:
                         backtestDaysAgo = abs(PKDateUtilities.trading_days_between(d1=PKDateUtilities.dateFromYmdString(str(backtestDaysAgo)),d2=PKDateUtilities.currentDateTime()))
-                    except Exception as e:
+                    except Exception as e: # pragma: no cover
                         default_logger().debug(e,exc_info=True)
                         OutputControls().printOutput(f"An error occured! Going ahead with default inputs.")
                         backtestDaysAgo = ('22' if configManager.period == '1y' else '15')
@@ -754,7 +754,7 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
                 pass
             screenResults.sort_values(by=sortKey, ascending=ascending, inplace=True)
             saveResults.sort_values(by=sortKey, ascending=ascending, inplace=True)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
             pass
         columnsToBeDeleted = ["MFI","FVDiff","ConfDMADifference","bbands_ulr_ratio_max5", "RSIi"]
@@ -952,7 +952,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     _,nasdaq_df = nasdaq.fetchNasdaqIndexConstituents()
                     try:
                         nasdaq_df.to_csv(filePath)
-                    except Exception as e:
+                    except Exception as e: # pragma: no cover
                         OutputControls().printOutput(f"{colorText.FAIL}We encountered an error. Please try again!{colorText.END}\n{colorText.WARN}{e}{colorText.END}")
                         pass
                     OutputControls().printOutput(f"{colorText.GREEN}{filePrefix} Saved at: {filePath}{colorText.END}")
@@ -2017,7 +2017,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             executeOption=executeOption,
                             menuOption=menuOption
                         )
-                    except Exception as e:
+                    except Exception as e: # pragma: no cover
                         default_logger().debug(e, exc_info=True)
                         if userPassedArgs.log:
                             import traceback
@@ -2427,7 +2427,7 @@ def describeUser():
         # On Github CI, we may run out of memory because of saving results in
         # shared multiprocessing dict.
         PKScheduler.scheduleTasks([task],"Starting up...", showProgressBars=False,submitTaskAsArgs=False,timeout=600)
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         pass
 
 @Halo(text='', spinner='dots')
@@ -2470,7 +2470,7 @@ def prepareGroupedXRay(backtestPeriod, backtest_df):
         df_xray.loc[:, "Date"] = df_xray.loc[:, "Date"].apply(
                     lambda x: x.replace("-", "/")
                 )
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         default_logger().debug(e,exc_info=True)
         pass
     return df_xray
@@ -3610,7 +3610,7 @@ def runScanners(
             logging.shutdown()
         except KeyboardInterrupt:
             pass
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         default_logger().debug(e, exc_info=True)
         OutputControls().printOutput(
             colorText.FAIL
@@ -3820,7 +3820,7 @@ def sendGlobalMarketBarometer(userArgs=None):
             os.remove(gmbPath)
         else:
             sys.exit(0)
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         default_logger().debug(e,exc_info=True)
         pass
 

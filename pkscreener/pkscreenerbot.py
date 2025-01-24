@@ -206,7 +206,7 @@ def otp(update: Update, context: CallbackContext) -> str:
             otpValue = 0
             dbManager = DBManager()
             otpValue = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             pass
         userText = ""
         if len(str(user.username)) >= 1:
@@ -366,7 +366,7 @@ def launchIntradayMonitor():
         else:
             result_outputs = "Intraday Monitor is already running/launching, but the results are being prepared. Try again in the next few seconds."
             logger.info(f"{launcher} -a Y -m 'X' -p --telegram already running")
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         result_outputs = "Hmm...It looks like you caught us taking a break! Try again later :-)"
         logger.info(f"{launcher} -a Y -m 'X' -p --telegram could not be launched")
         logger.info(e)
@@ -454,7 +454,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
                 f.close()
             start(update, context, updatedResults=result_outputs,monitorIndex=monitorIndex)
             return START_ROUTES
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             result_outputs = "Hmm...It looks like you caught us taking a break! Try again later :-)\nCycleTime shows how much it's taking us to download latest data and then perform each cycle of analysis for all configured scanners. We may be downloading the latest data right now."
             logger.info(e)
             logger.info(f"Could not read {filePath}")
@@ -815,7 +815,7 @@ def launchScreener(options, user, context, optionChoices, update):
             #         str(user.id),
             #     ]
             # )
-    except Exception as e:
+    except Exception as e: # pragma: no cover
         import traceback
         traceback.print_exc()
         print(e)

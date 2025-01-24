@@ -200,13 +200,13 @@ class tools(SingletonMixin, metaclass=SingletonType):
                     if not f.endswith(excludeFile):
                         try:
                             os.remove(f if os.sep in f else os.path.join(dir,f))
-                        except Exception as e:
+                        except Exception as e: # pragma: no cover
                             self.default_logger.debug(e, exc_info=True)
                             pass
                 else:
                     try:
                         os.remove(f if os.sep in f else os.path.join(dir,f))
-                    except Exception as e:
+                    except Exception as e: # pragma: no cover
                         self.default_logger.debug(e, exc_info=True)
                         pass
 
@@ -493,7 +493,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                         f"  [+] Enable enforcing SMA-200 check for super-confluence? When enabled, at least one of 8/21/55-EMA should be lower than SMA-200 [Y/N, Current: {colorText.FAIL}{'y' if self.superConfluenceEnforce200SMA else 'n'}{colorText.END}]: "
                     ) or ('y' if self.superConfluenceEnforce200SMA else 'n')
                 ).lower()
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)
                 from time import sleep
                 OutputControls().printOutput(colorText.FAIL + "Could not save configuration! Please check!" + colorText.END)
@@ -577,7 +577,7 @@ class tools(SingletonMixin, metaclass=SingletonType):
                 parser.set("filters", "minPrice", str(self.minLTP))
                 parser.set("filters", "volumeRatio", str(self.volumeRatio))
 
-            except Exception as e:
+            except Exception as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)
                 from time import sleep
                 OutputControls().printOutput(colorText.FAIL + "Could not save configuration! Please check!" + colorText.END)
