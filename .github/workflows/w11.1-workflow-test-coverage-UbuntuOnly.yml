@@ -75,7 +75,9 @@ jobs:
             CMD_BUILD: |
               rm -rf .pytest_cache
               rm -rf pkscreener/__pycache__
+              rm -rf pkscreener/classes/__pycache__
               rm -rf test/__pycache__
+              rm -rf test/.pytest_cache
               rm -rf test/.coverage
               rm -rf .coverage
               find . -name "*.pyc" -exec rm -rf {} \;
@@ -96,7 +98,7 @@ jobs:
             TEST_BUILD: |
               coverage erase
               # coverage run --source=${package_name} --branch -m pytest -vv --durations-min=0.005 --cov-config=.coveragerc --disable-warnings --durations=0
-              coverage run --branch -m pytest -v --cov-config=.coveragerc --disable-warnings
+              coverage run --branch -m pytest -vv --cov-config=.coveragerc
               coverage combine
               # quick local report output to console:
               coverage report -i
