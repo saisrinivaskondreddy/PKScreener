@@ -2326,6 +2326,7 @@ def FinishBacktestDataCleanup(backtest_df, df_xray):
     showBacktestResults(backtest_df)
     showBacktestResults(summary_df, optionalName="Summary")
     sorting = False if defaultAnswer is not None else True
+    tasksList = []
     sortKeys = {
                 "S": "Stock",
                 "D": "Date",

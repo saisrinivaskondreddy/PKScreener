@@ -478,6 +478,7 @@ def getbacktestPeriod(args):
 
 def statScanCalculations(userArgs, saveResults, periods,progressLabel:str=None):
     scanResults = []
+    tasksList = []
     if saveResults is not None and len(saveResults) >= 1:
         task1 = PKTask(f"[{len(saveResults)}] RSI Stats",long_running_fn=statScanCalculationForRSI)
         task2 = PKTask(f"[{len(saveResults)}] Trend Stats",long_running_fn=statScanCalculationForTrend)
