@@ -482,8 +482,8 @@ def runApplication():
         args = argsv[0]
     # args.slicewindow = "2024-09-06 10:55:12.481253+05:30"
     if args.user is None:
-        from PKDevTools.classes.Telegram import get_secrets
-        Channel_Id, _, _, _ = get_secrets()
+        from PKDevTools.classes.Environment import PKEnvironment
+        Channel_Id, _, _, _ = PKEnvironment().secrets
         if Channel_Id is not None and len(str(Channel_Id)) > 0:
             args.user = int(f"-{Channel_Id}")
     if args.triggertimestamp is None:
@@ -775,8 +775,8 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
                                 ).encode("utf-8").decode(Utility.STD_ENCODING)
             showBacktestResults(final_df,optionalName="Intraday_Backtest_Result_Summary",choices="Summary")
             OutputControls().printOutput(mark_down)
-            from PKDevTools.classes.Telegram import get_secrets
-            Channel_Id, _, _, _ = get_secrets()
+            from PKDevTools.classes.Environment import PKEnvironment
+            Channel_Id, _, _, _ = PKEnvironment().secrets
             if Channel_Id is not None and len(str(Channel_Id)) > 0:
                 sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
                                         user=int(f"-{Channel_Id}"),

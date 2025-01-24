@@ -72,6 +72,7 @@ from pkscreener.classes import VERSION, PortfolioXRay
 from pkscreener.classes.Backtest import backtest, backtestSummary
 from pkscreener.classes.PKSpreadsheets import PKSpreadsheets
 from PKDevTools.classes.OutputControls import OutputControls
+from PKDevTools.classes.Environment import PKEnvironment
 from pkscreener.classes.MenuOptions import (
     level0MenuDict,
     level1_X_MenuDict,
@@ -3806,8 +3807,7 @@ def sendGlobalMarketBarometer(userArgs=None):
     gmbPath = Barometer.getGlobalMarketBarometerValuation()
     try:
         if gmbPath is not None:
-            from PKDevTools.classes.Telegram import get_secrets
-            Channel_Id, _, _, _ = get_secrets()
+            Channel_Id, _, _, _ = PKEnvironment().secrets
             user = userArgs.user if userArgs is not None else (int(f"-{Channel_Id}") if Channel_Id is not None and len(str(Channel_Id)) > 0 else None)
             gmbFileSize = os.stat(gmbPath).st_size if os.path.exists(gmbPath) else 0
             OutputControls().printOutput(f"Barometer report created with size {gmbFileSize} @ {gmbPath}")

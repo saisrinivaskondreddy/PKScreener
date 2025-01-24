@@ -61,7 +61,7 @@ MINUTES_2_IN_SECONDS = 120
 OWNER_USER = "Itsonlypk"
 APOLOGY_TEXT = "Apologies! The @nse_pkscreener_bot is NOT available for the time being! We are working with our host GitHub and other data source providers to sort out pending invoices and restore the services soon! Thanks for your patience and support! 🙏"
 
-from PKDevTools.classes.Telegram import get_secrets
+from PKDevTools.classes.Environment import PKEnvironment
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
 from PKDevTools.classes.ColorText import colorText
 from PKDevTools.classes.MarketHours import MarketHours
@@ -1508,7 +1508,7 @@ def runpkscreenerbot(availability=True) -> None:
     # Create the Application and pass it your bot's token.
     global chat_idADMIN, Channel_Id, bot_available, _updater
     bot_available = availability
-    Channel_Id, TOKEN, chat_idADMIN, GITHUB_TOKEN = get_secrets()
+    Channel_Id, TOKEN, chat_idADMIN, GITHUB_TOKEN = PKEnvironment().secrets
     # TOKEN = '1234567'
     # Channel_Id = 1001785195297
     # application = Application.builder().token(TOKEN).build()

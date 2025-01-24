@@ -91,6 +91,12 @@ jobs:
               # note: the following also installs "coverage"
               python3 -m pip install coveralls
             TEST_BUILD: |
+              # Check current limit
+              ulimit -n
+              # Raise limit to 2048
+              # Only affects processes started from this shell
+              ulimit -n 2048
+              ulimit -n
               coverage erase
               # coverage run --source=${package_name} --branch -m pytest -vv --durations-min=0.005 --cov-config=.coveragerc --disable-warnings --durations=0
               coverage run --source=${package_name} --branch -m pytest --cov-config=.coveragerc --disable-warnings
@@ -154,6 +160,12 @@ jobs:
               pip3 install -r requirements-dev.txt
               pip3 install .
             TEST_BUILD: |
+              # Check current limit
+              ulimit -n
+              # Raise limit to 2048
+              # Only affects processes started from this shell
+              ulimit -n 2048
+              ulimit -n
               python3 -m pytest -vv --durations-min=0.005 --cov-config=.coveragerc --disable-warnings --durations=0
 
     steps:

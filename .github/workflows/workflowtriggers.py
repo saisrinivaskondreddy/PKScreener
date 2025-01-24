@@ -207,8 +207,8 @@ nse = nseStockDataFetcher()
 
 if args.user is None and "ALERT_TRIGGER" in os.environ.keys():
     try:
-        from PKDevTools.classes.Telegram import get_secrets
-        Channel_Id, _, _, _ = get_secrets()
+        from PKDevTools.classes.Environment import PKEnvironment
+        Channel_Id, _, _, _ = PKEnvironment().secrets
         if Channel_Id is not None and len(str(Channel_Id)) > 0:
             args.user = int(f"-{Channel_Id}")
     except:
@@ -502,8 +502,8 @@ def run_workflow(workflow_name, postdata, option=""):
     owner = os.popen('git ls-remote --get-url origin | cut -d/ -f4').read().replace("\n","")
     repo = os.popen('git ls-remote --get-url origin | cut -d/ -f5').read().replace(".git","").replace("\n","")
     ghp_token = ""
-    # from PKDevTools.classes.Telegram import get_secrets
-    # _, _, _, ghp_token = get_secrets()
+    # from PKDevTools.classes.Environment import PKEnvironment
+    # _, _, _, ghp_token = PKEnvironment().secrets
     
     if "GITHUB_TOKEN" in os.environ.keys():
         ghp_token = os.environ["GITHUB_TOKEN"]
