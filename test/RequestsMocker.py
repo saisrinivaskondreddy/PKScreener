@@ -46,14 +46,17 @@ def google_query(query):
 
 class RequestsMocker:
     def __init__(self) -> None:
-        with open('test/Fixture.json') as f:
-            d = json.load(f)
-            self.savedResponses = d
-        self.stockSortedDF = pd.read_html("test/StockSorted.html")
-        self.dateSortedDF = pd.read_html("test/DateSorted.html")
-        with open('pkscreener/release.md') as r:
-            self.savedResponses["release.md"] = r.read()
-        self.savedResponses["/finance/chart/"] = self.get_saved_yf_response()
+        try:
+            with open('test/Fixture.json') as f:
+                d = json.load(f)
+                self.savedResponses = d
+            self.stockSortedDF = pd.read_html("test/StockSorted.html")
+            self.dateSortedDF = pd.read_html("test/DateSorted.html")
+            with open('pkscreener/release.md') as r:
+                self.savedResponses["release.md"] = r.read()
+            self.savedResponses["/finance/chart/"] = self.get_saved_yf_response()
+        except:
+            pass
 
     def patched_readhtml(self, *args, **kwargs) -> list[pd.DataFrame]:
         if args[0].endswith("StockSorted.html"):
