@@ -65,11 +65,12 @@ from PKDevTools.classes.Environment import PKEnvironment
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
 from PKDevTools.classes.ColorText import colorText
 from PKDevTools.classes.MarketHours import MarketHours
+from PKDevTools.classes.UserSubscriptions import PKUserSusbscriptions, PKSubscriptionModel
 from pkscreener.classes.MenuOptions import MenuRenderStyle, menu, menus,MAX_MENU_OPTION
 from pkscreener.classes.WorkflowManager import run_workflow
 import pkscreener.classes.ConfigManager as ConfigManager
 try:
-    from pkscreener.classes.DBManager import DBManager
+    from PKDevTools.classes.DBManager import DBManager
 except: # pragma: no cover
     pass
 
@@ -205,7 +206,7 @@ def otp(update: Update, context: CallbackContext) -> str:
         try:
             otpValue = 0
             dbManager = DBManager()
-            otpValue = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
+            otpValue, subsModel = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
         except Exception as e: # pragma: no cover
             pass
         userText = ""
@@ -213,11 +214,24 @@ def otp(update: Update, context: CallbackContext) -> str:
             userText = f"\nusername: {user.username} or \nuserID: {user.id}"
         else:
             userText = f"\nuserID: {user.id}"
+        try:
+            subscriptionModelNames = "\n<pre>All available subscription models with unlimited premium scan requests for paid users:\n"
+            for name,value in PKUserSusbscriptions().subscriptionKeyValuePairs.items():
+                if name == PKSubscriptionModel.No_Subscription.name:
+                    subscriptionModelNames = f"{subscriptionModelNames}\n{name} : ₹ {value} (Only Basic Scans are free)\n"
+                else:
+                    subscriptionModelNames = f"{subscriptionModelNames}\n{name.ljust(15)} : ₹ {value}"
+            subscriptionModelNames = f"{subscriptionModelNames}\n\nPlease pay using UPI to <b>PKScreener@APL</b> to subscribe.</pre>"
+
+            subscriptionModelName = PKUserSusbscriptions().subscriptionValueKeyPairs[subsModel]
+        except:
+            subscriptionModelName = PKSubscriptionModel.No_Subscription.name
+            pass
         if otpValue == 0:
             updatedResults = f"We are having difficulty generating OTP for your {userText}. Please try again later."
         else:
-            updatedResults = f"Use your {userText} \nwith the following OTP to login to PKScreener:\n{otpValue}\n\nValid only for {configManager.otpInterval} seconds."
-    update.message.reply_text(sanitiseTexts(updatedResults))
+            updatedResults = f"Use your {userText} \nwith the following OTP to login to PKScreener:\n{otpValue}\n\nYour current subscription : <b>{subscriptionModelName}</b>. {subscriptionModelNames}"
+    update.message.reply_text(sanitiseTexts(updatedResults), parse_mode="HTML")
     shareUpdateWithChannel(update=update, context=context, optionChoices=f"/otp\n{updatedResults}")
     return START_ROUTES
     
@@ -308,7 +322,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
             text=f"Name: {user.first_name}, Username:@{user.username} with ID: {str(user.id)} started using the bot!\n{chosenBotMenuOption}",
             parse_mode="HTML",
         )
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
     # Tell ConversationHandler that we're in state `FIRST` now
     return START_ROUTES
 
@@ -497,7 +511,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
         menuText = f"{PKDateUtilities.currentDateTime()}:\n{menuText}"
     menuText = f"{menuText}\n\nClick /start if you want to restart the session."
     query.edit_message_text(text=menuText, reply_markup=reply_markup)
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
     return START_ROUTES
 
 
@@ -729,7 +743,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
         sendUpdatedMenu(
             menuText=menuText, update=update, context=context, reply_markup=reply_markup
         )
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
     return START_ROUTES
 
 def default_markup(inlineMenus):
@@ -851,7 +865,7 @@ def BBacktests(update: Update, context: CallbackContext) -> str:
         text=responseText,
         reply_markup=reply_markup,
     )
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
     return START_ROUTES
 
 
@@ -1344,7 +1358,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
             context.bot.send_message(
                 chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
             )
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}")
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
 
 
 def _shouldAvoidResponse(update):

@@ -29,12 +29,12 @@ from time import sleep
 from pkscreener.classes.ConfigManager import tools, parser
 from PKDevTools.classes.OutputControls import OutputControls
 from PKDevTools.classes.ColorText import colorText
-from pkscreener.classes.DBManager import DBManager
+from PKDevTools.classes.DBManager import DBManager
 from PKDevTools.classes.log import default_logger
 
 class PKUserRegistration:
     def login():
-        return True
+        # return True
         try:
             dbManager = DBManager()
             if "RUNNER" in os.environ.keys() or dbManager.shouldSkipLoading():
@@ -45,7 +45,7 @@ class PKUserRegistration:
         Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
         configManager = tools()
         configManager.getConfig(parser)
-        OutputControls().printOutput(f"[+] {colorText.GREEN}PKScreener will always remain free and open source!{colorText.END}\n[+] {colorText.GREEN}Please use {colorText.END}{colorText.WARN}@nse_pkscreener_bot{colorText.END}{colorText.GREEN} in telegram app on \n    your mobile phone to request your {colorText.END}{colorText.WARN}userID{colorText.END}{colorText.GREEN} and {colorText.END}{colorText.WARN}OTP{colorText.END}{colorText.GREEN} to login:\n{colorText.END}")
+        OutputControls().printOutput(f"[+] {colorText.GREEN}PKScreener will always remain free and open source!{colorText.END}\n[+] {colorText.FAIL}PKScreener does offer certain premium/paid features!{colorText.END}\n[+] {colorText.GREEN}Please use {colorText.END}{colorText.WARN}@nse_pkscreener_bot{colorText.END}{colorText.GREEN} in telegram app on \n    your mobile phone to request your {colorText.END}{colorText.WARN}userID{colorText.END}{colorText.GREEN} and {colorText.END}{colorText.WARN}OTP{colorText.END}{colorText.GREEN} to login:\n{colorText.END}")
         username = None
         if configManager.userID is not None and len(configManager.userID) >= 1:
             username = input(f"[+] Your Username or UserID from telegram: (Default: {colorText.GREEN}{configManager.userID}{colorText.END}): ") or configManager.userID
@@ -76,7 +76,7 @@ class PKUserRegistration:
                 userUsedUserID = False
                 pass
 
-            if dbManager.validateOTP(username,str(otp)):
+            if dbManager.validateOTP(username,str(otp),validityIntervalInSeconds=configManager.otpInterval):
                 configManager.userID = username
                 configManager.setConfig(parser,default=True,showFileCreatedText=False)
                 Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
