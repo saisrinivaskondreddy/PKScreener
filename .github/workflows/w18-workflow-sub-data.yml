@@ -80,6 +80,7 @@ jobs:
       shell: bash
       run: |
         pip3 install PKDevTools
+        pip3 install PKNSETools
 
     - name: Configure env.dev file
       run: |
@@ -97,6 +98,7 @@ jobs:
   
     - name: Update Sub Data
       shell: bash
+      timeout-minutes: 5
       continue-on-error: true
       if: ${{ inputs.subtype == 'update' || inputs.subtype == ''}}
       run: |
@@ -106,6 +108,7 @@ jobs:
 
     - name: Add Sub Data
       shell: bash
+      timeout-minutes: 2
       continue-on-error: true
       if: ${{ inputs.subtype == 'add' }}
       run: |
@@ -115,6 +118,7 @@ jobs:
   
     - name: Remove Sub Data
       shell: bash
+      timeout-minutes: 2
       continue-on-error: true
       if: ${{ inputs.subtype == 'remove' }}
       run: |
@@ -124,6 +128,7 @@ jobs:
 
     - name: Push Sub Data
       continue-on-error: true
+      timeout-minutes: 5
       shell: bash
       run: |
         git config user.name github-actions
@@ -141,6 +146,7 @@ jobs:
         
     - name: Squash Commits (Python)
       shell: bash
+      timeout-minutes: 5
       continue-on-error: true
       run: |
         git config user.name github-actions
