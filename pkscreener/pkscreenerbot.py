@@ -211,17 +211,17 @@ def otp(update: Update, context: CallbackContext) -> str:
             pass
         userText = ""
         if len(str(user.username)) >= 1:
-            userText = f"\nusername: {user.username} or \nuserID: {user.id}"
+            userText = f"\nusername: <b>{user.username}</b> or \nuserID: <b>{user.id}</b>"
         else:
-            userText = f"\nuserID: {user.id}"
+            userText = f"\nuserID: <b>{user.id}</b>"
         try:
-            subscriptionModelNames = "\n<pre>All available subscription models with unlimited premium scan requests for paid users:\n"
+            subscriptionModelNames = "\n<pre>Following basic and premium subscription models are available. Premium subscription allows for unlimited premium scans:\n"
             for name,value in PKUserSusbscriptions().subscriptionKeyValuePairs.items():
                 if name == PKSubscriptionModel.No_Subscription.name:
                     subscriptionModelNames = f"{subscriptionModelNames}\n{name} : ₹ {value} (Only Basic Scans are free)\n"
                 else:
                     subscriptionModelNames = f"{subscriptionModelNames}\n{name.ljust(15)} : ₹ {value}"
-            subscriptionModelNames = f"{subscriptionModelNames}\n\nPlease pay using UPI to <b>PKScreener@APL</b> to subscribe.</pre>"
+            subscriptionModelNames = f"{subscriptionModelNames}</pre>\nPlease pay to subscribe:\n\n1. Using UPI(India) to <b>PKScreener@APL</b> \nor\n2. Proudly <b>sponsor</b>: https://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra\n\nPlease drop a message to @ItsOnlyPK after paying to enable subscription!"
 
             subscriptionModelName = PKUserSusbscriptions().subscriptionValueKeyPairs[subsModel]
         except:
@@ -230,7 +230,7 @@ def otp(update: Update, context: CallbackContext) -> str:
         if otpValue == 0:
             updatedResults = f"We are having difficulty generating OTP for your {userText}. Please try again later."
         else:
-            updatedResults = f"Use your {userText} \nwith the following OTP to login to PKScreener:\n{otpValue}\n\nYour current subscription : <b>{subscriptionModelName}</b>. {subscriptionModelNames}"
+            updatedResults = f"Please use your {userText} \nwith the following OTP to login to PKScreener:\n<b>{otpValue}</b>\n\nYour current subscription : <b>{subscriptionModelName}</b>. {subscriptionModelNames}"
     update.message.reply_text(sanitiseTexts(updatedResults), parse_mode="HTML")
     shareUpdateWithChannel(update=update, context=context, optionChoices=f"/otp\n{updatedResults}")
     return START_ROUTES
