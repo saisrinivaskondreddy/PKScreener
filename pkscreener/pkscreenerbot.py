@@ -206,7 +206,7 @@ def otp(update: Update, context: CallbackContext) -> str:
         try:
             otpValue = 0
             dbManager = DBManager()
-            otpValue, subsModel = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+            otpValue, subsModel,subsValidity = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
         except Exception as e: # pragma: no cover
             pass
         userText = ""
@@ -224,6 +224,8 @@ def otp(update: Update, context: CallbackContext) -> str:
             subscriptionModelNames = f"{subscriptionModelNames}</pre>\nPlease pay to subscribe:\n\n1. Using UPI(India) to <b>PKScreener@APL</b> \nor\n2. Proudly <b>sponsor</b>: https://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra\n\nPlease drop a message to @ItsOnlyPK after paying to enable subscription!"
 
             subscriptionModelName = PKUserSusbscriptions().subscriptionValueKeyPairs[subsModel]
+            if subscriptionModelName != PKSubscriptionModel.No_Subscription.name:
+                subscriptionModelName = f"{subscriptionModelName} (Expires on: {subsValidity})"
         except:
             subscriptionModelName = PKSubscriptionModel.No_Subscription.name
             pass
