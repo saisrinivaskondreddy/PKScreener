@@ -292,7 +292,7 @@ level1_X_MenuDict = {
     "8": "Nifty Smallcap 250",
     "9": "Nifty Midcap 50   ",
     "10": "Nifty Midcap 100",
-    "11": "Nifty Midcap 150 ",
+    "11": "Nifty Midcap 150",
     "12": "Nifty (All Stocks)",
     "13": "Newly Listed (IPOs in last 1 Year)           ",
     "14": "F&O Stocks Only", #Discontinued:  https://nsearchives.nseindia.com/content/circulars/FAOP61157.pdf
@@ -516,6 +516,7 @@ class menu:
         self.parent = parent
         self.line = 0
         self.lineIndex = 0
+        self.isPremium = False
 
     def create(self, key, text, level=0, isException=False, parent=None):
         self.menuKey = str(key)
@@ -525,6 +526,7 @@ class menu:
         self.parent = parent
         self.line = 0
         self.lineIndex = 0
+        self.isPremium
         return self
 
     def keyTextLabel(self):
@@ -567,6 +569,9 @@ class menu:
                 t = f"\t{self.keyTextLabel()}"
         if coloredValues is not None and str(self.menuKey) in coloredValues:
             t = f"{colorText.FAIL}{t}{colorText.END}"
+        self.isPremium = "₹/$" in t
+        if self.isPremium:
+            t = t.replace("(₹/$)",f"{colorText.WHITE}({colorText.END}{colorText.FAIL}₹/${colorText.END}{colorText.WHITE}){colorText.END}")    
         return t
 
     def renderSpecial(self, menuKey):
@@ -695,7 +700,8 @@ class menus:
         renderExceptionKeys=[],
         skip=[],
         parent=None,
-        substitutes=[]
+        substitutes=[],
+        subOnly=[]
     ):
         tabLevel = 0
         self.menuDict = {}
@@ -715,13 +721,15 @@ class menus:
             if skip is not None and key in skip:
                 continue
             m = menu()
-            menuText = str(rawDictionary[key]).ljust(maxLengthOfItem) if key in dictToRender.keys() else str(rawDictionary[key])
+            menuText = str(rawDictionary[key])
             if "{0}" in menuText and len(substitutes) > 0:
                 if isinstance(substitutes[substituteIndex],int) and substitutes[substituteIndex] == 0:
                     substituteIndex += 1
                     continue
                 menuText = menuText.format(f"{colorText.WARN}{substitutes[substituteIndex]}{colorText.END}")
                 substituteIndex += 1
+            menuText = f"{menuText if str(key) not in subOnly else f'{menuText}(₹/$)'}"
+            menuText = menuText.ljust(maxLengthOfItem+5) if key in dictToRender.keys() else menuText
             m.create(
                 str(key).upper(), menuText, level=self.level, parent=parent
             )
@@ -787,7 +795,8 @@ class menus:
                                                  asList=asList, 
                                                  renderStyle=renderStyle, 
                                                  parent=selectedMenu,
-                                                 checkUpdate=True)
+                                                 checkUpdate=True,
+                                                 subOnly=["F", "M", "S", "B", "G", "C", "P", "D"])
         elif selectedMenu is not None:
             if selectedMenu.menuKey == "S" and selectedMenu.level == 0:
                 strategies = self.strategyNames
@@ -853,7 +862,8 @@ class menus:
                                                             if renderStyle is not None
                                                             else MenuRenderStyle.THREE_PER_ROW, 
                                                          parent=selectedMenu,
-                                                         checkUpdate=False)
+                                                         checkUpdate=False,
+                                                         subOnly=["W","E","S","2","3","4","5","6","7","8","9","10","11","12","13","14","15"])
             elif selectedMenu.level == 1:
                 self.level = 2
                 if selectedMenu.parent.menuKey in ["D"]:
@@ -1071,7 +1081,7 @@ class menus:
                 return None
         return None
 
-    def renderMenuFromDictionary(self, dict={},exceptionKeys=[],coloredValues=[], optionText="  [+] Select a menu option:", defaultMenu="0", asList=False, renderStyle=None, parent=None, skip=None, substitutes=[],checkUpdate=False):
+    def renderMenuFromDictionary(self, dict={},exceptionKeys=[],coloredValues=[], optionText="  [+] Select a menu option:", defaultMenu="0", asList=False, renderStyle=None, parent=None, skip=None, substitutes=[],checkUpdate=False,subOnly=[]):
         menuText = self.fromDictionary(
             dict,
             renderExceptionKeys=exceptionKeys,
@@ -1080,7 +1090,8 @@ class menus:
             else MenuRenderStyle.STANDALONE,
             skip=skip,
             parent=parent,
-            substitutes = substitutes
+            substitutes = substitutes,
+            subOnly=subOnly
         ).render(asList=asList,coloredValues=coloredValues)
         if asList:
             return menuText
