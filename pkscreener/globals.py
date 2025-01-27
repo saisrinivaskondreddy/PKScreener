@@ -105,6 +105,7 @@ from pkscreener.classes.PKTask import PKTask
 from pkscreener.classes.PKScheduler import PKScheduler
 from pkscreener.classes.PKScanRunner import PKScanRunner
 from pkscreener.classes.PKMarketOpenCloseAnalyser import PKMarketOpenCloseAnalyser
+from pkscreener.classes.PKUserRegistration import PKUserRegistration, ValidationResult
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
@@ -910,6 +911,13 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     # Print Level 1 menu options
     selectedMenu = initExecution(menuOption=menuOption)
     menuOption = selectedMenu.menuKey
+    if menuOption in ["F", "M", "S", "B", "G", "C", "P", "D"] or selectedMenu.isPremium:
+        subscriber, subState = PKUserRegistration.validateToken()
+        if not subscriber:
+            OutputControls().printOutput(f"[+] {colorText.WARN}This is a premium/paid feature.{colorText.END}\n[+] {colorText.FAIL}You do not have a paid subscription to PKScreener!{colorText.END}\n[+] {colorText.GREEN}If you would like to subscribe, please pay UPI: PKScreener@APL{colorText.END}\n[+] {colorText.GREEN}Or, Use GitHub sponsor link to sponsor{colorText.END}\n[+] {colorText.GREEN}Or, Drop a message to @ItsOnlyPK on telegram{colorText.END}\n[+] {colorText.GREEN} Follow instructions in the response message to /OTP on @nse_pkscreener_bot on telegram for subscription details!{colorText.END}")
+            sleep(5)
+        elif subState != ValidationResult.Success:
+            PKUserRegistration.login()
     if menuOption in ["M", "D", "I", "L", "F"]:
         launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
         launcher = f"python3.12 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher

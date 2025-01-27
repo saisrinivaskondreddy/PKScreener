@@ -41,6 +41,12 @@ STOCK_EXCHANGE_DICT = {
     "3" : "Borso - Turkey",
 }
 
+userTypeMenuDict = {
+    "1": "I am a paid/premium subscriber",
+    "2": "I am a free/trial user",
+    "Z": "Exit (Ctrl + C)",
+}
+
 level0MenuDict = {
     "X": "Scanners",
     "F": "Find a stock in scanners",
@@ -783,6 +789,19 @@ class menus:
                                                  renderStyle=MenuRenderStyle.TWO_PER_ROW,
                                                  optionText="  [+] Would you like to filter by a specific Candlestick pattern? Select filter:",
                                                  skip=skip)
+    
+    def renderUserType(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
+            # Top level Application Main menu for user type
+            return self.renderMenuFromDictionary(dict=userTypeMenuDict,
+                                                exceptionKeys=[],
+                                                coloredValues=(["1"] if not asList else []),
+                                                defaultMenu="1",
+                                                skip=skip, 
+                                                asList=asList, 
+                                                renderStyle=renderStyle, 
+                                                parent=selectedMenu,
+                                                checkUpdate=True,
+                                                subOnly=["1"])
     
     def renderForMenu(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
         if selectedMenu is None and self.level == 0:
