@@ -47,6 +47,13 @@ userTypeMenuDict = {
     "Z": "Exit (Ctrl + C)",
 }
 
+userDemoMenuDict = {
+    "1": "Show me a demo!",
+    "2": "I would like to subscribe",
+    "3": "I am already a subscriber",
+    "Z": "Exit (Ctrl + C)",
+}
+
 level0MenuDict = {
     "X": "Scanners",
     "F": "Find a stock in scanners",
@@ -793,7 +800,7 @@ class menus:
     def renderUserType(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
             # Top level Application Main menu for user type
             return self.renderMenuFromDictionary(dict=userTypeMenuDict,
-                                                exceptionKeys=[],
+                                                exceptionKeys=["1","2","Z"],
                                                 coloredValues=(["1"] if not asList else []),
                                                 defaultMenu="1",
                                                 skip=skip, 
@@ -802,6 +809,18 @@ class menus:
                                                 parent=selectedMenu,
                                                 checkUpdate=True,
                                                 subOnly=["1"])
+    
+    def renderUserDemoMenu(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
+        return self.renderMenuFromDictionary(dict=userDemoMenuDict,
+                                                exceptionKeys=["1","2","Z"],
+                                                coloredValues=(["1"] if not asList else []),
+                                                defaultMenu="1",
+                                                skip=skip, 
+                                                asList=asList, 
+                                                renderStyle=renderStyle, 
+                                                parent=selectedMenu,
+                                                checkUpdate=True,
+                                                subOnly=[])
     
     def renderForMenu(self, selectedMenu:menu=None, skip=[], asList=False, renderStyle=None):
         if selectedMenu is None and self.level == 0:

@@ -36,11 +36,13 @@ from PKDevTools.classes.Pikey import PKPikey
 from PKDevTools.classes import Archiver
 from PKDevTools.classes.log import default_logger
 from pkscreener.classes import Utility
+from pkscreener.classes.MenuOptions import menus
 
 class ValidationResult(Enum):
     Success = 0
     BadUserID = 1
     BadOTP = 2
+    Trial = 3
 
 class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
     def __init__(self):
@@ -69,7 +71,7 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
         try:
             PKPikey.removeSavedFile(f"{PKUserRegistration.userID}")
             resp = Utility.tools.tryFetchFromServer(cache_file=f"{PKUserRegistration.userID}.pdf",directory="results/Data",hideOutput=True, branchName="SubData")
-            if resp.status_code != 200:
+            if resp is None or resp.status_code != 200:
                 return False, ValidationResult.BadUserID
             with open(os.path.join(Archiver.get_user_data_dir(),f"{PKUserRegistration.userID}.pdf"),"wb",) as f:
                 f.write(resp.content)
@@ -80,15 +82,16 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
             return False, ValidationResult.BadOTP
 
     @classmethod
-    def login(self):
+    def login(self, trialCount=0):
         try:
             dbManager = DBManager()
             if "RUNNER" in os.environ.keys() or dbManager.shouldSkipLoading():
-                return True
+                return ValidationResult.Success
         except: # pragma: no cover
             return True
-        from pkscreener.classes import Utility
         Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
+        if trialCount >= 1:
+            return PKUserRegistration.presentTrialOptions()
         configManager = tools()
         configManager.getConfig(parser)
         OutputControls().printOutput(f"[+] {colorText.GREEN}PKScreener will always remain free and open source!{colorText.END}\n[+] {colorText.FAIL}PKScreener does offer certain premium/paid features!{colorText.END}\n[+] {colorText.GREEN}Please use {colorText.END}{colorText.WARN}@nse_pkscreener_bot{colorText.END}{colorText.GREEN} in telegram app on \n    your mobile phone to request your {colorText.END}{colorText.WARN}userID{colorText.END}{colorText.GREEN} and {colorText.END}{colorText.WARN}OTP{colorText.END}{colorText.GREEN} to login:\n{colorText.END}")
@@ -126,24 +129,36 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
                 PKUserRegistration.userID = usernameInt
                 PKUserRegistration.otp = otp
 
-                validationResult,validationFailReason = PKUserRegistration.validateToken()
-                if not validationResult and validationFailReason == ValidationResult.BadUserID:
-                    OutputControls().printOutput(f"{colorText.FAIL}[+] Invalid userID!{colorText.END}\n{colorText.GREEN}[+] May be try entering the UserID instead of username?{colorText.END}\n[+] {colorText.GREEN}If you have purchased a subscription and are still not able to login, plesae reach out to @ItsOnlyPK on Telegram!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
+                validationResult,validationReason = PKUserRegistration.validateToken()
+                if not validationResult and validationReason == ValidationResult.BadUserID:
+                    OutputControls().printOutput(f"{colorText.FAIL}[+] Invalid userID!{colorText.END}\n{colorText.WARN}[+] May be try entering the UserID instead of username?{colorText.END}\n[+] {colorText.WARN}If you have purchased a subscription and are still not able to login, plesae reach out to {colorText.END}{colorText.GREEN}@ItsOnlyPK{colorText.END} {colorText.WARN}on Telegram!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
                     sleep(5)
-                    return PKUserRegistration.login()
-                if not validationResult and validationFailReason == ValidationResult.BadOTP:
+                    return PKUserRegistration.presentTrialOptions()
+                if not validationResult and validationReason == ValidationResult.BadOTP:
                     OutputControls().printOutput(f"{colorText.FAIL}[+] Invalid OTP!{colorText.END}\n[+] {colorText.GREEN}If you have purchased a subscription and are still not able to login, plesae reach out to @ItsOnlyPK on Telegram!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
                     sleep(5)
-                    return PKUserRegistration.login()
-                if validationResult and validationFailReason == ValidationResult.Success:
+                    return PKUserRegistration.login(trialCount=trialCount+1)
+                if validationResult and validationReason == ValidationResult.Success:
                     # Remember the userID for future login
                     configManager.userID = str(PKUserRegistration.userID)
                     configManager.setConfig(parser,default=True,showFileCreatedText=False)
                     Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
-                    return validationResult
-        except Exception as e: # pragma: no cover
+                    return validationReason
+        except Exception as e: # pragma: n`o cover
             default_logger().debug(e, exc_info=True)
             pass
         OutputControls().printOutput(f"{colorText.WARN}[+] Invalid userID or OTP!{colorText.END}\n{colorText.GREEN}[+] May be try entering the {'UserID instead of username?' if userUsedUserID else 'Username instead of userID?'} {colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
         sleep(3)
-        return PKUserRegistration.login()
+        return PKUserRegistration.login(trialCount=trialCount+1)
+
+    @classmethod
+    def presentTrialOptions(self):
+        m = menus()
+        m.renderUserType()
+        userTypeOption = input(colorText.FAIL + "  [+] Select option: ") or "1"
+        if str(userTypeOption).upper() in ["1"]:
+            return PKUserRegistration.login(trialCount=0)
+        elif str(userTypeOption).upper() in ["2"]:
+            return ValidationResult.Trial
+        sys.exit(0)
+    
