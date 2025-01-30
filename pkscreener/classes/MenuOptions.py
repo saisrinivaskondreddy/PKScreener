@@ -944,7 +944,7 @@ class menus:
                                                          defaultMenu="1",
                                                          skip=skip, 
                                                          asList=asList,
-                                                         optionText="  [+] Select a scanner:",
+                                                         optionText="  [+] Options with (₹/$) are paid/premium. Select a scanner:",
                                                          renderStyle=renderStyle
                                                             if renderStyle is not None
                                                             else MenuRenderStyle.TWO_PER_ROW, 
@@ -958,7 +958,7 @@ class menus:
                                                          defaultMenu=str(len(indexKeys)),
                                                          skip=skip, 
                                                          asList=asList,
-                                                         optionText="  [+] Select a sectoral index:",
+                                                         optionText="  [+] Options with (₹/$) are paid/premium. Select a sectoral index:",
                                                          renderStyle=renderStyle
                                                             if renderStyle is not None
                                                             else MenuRenderStyle.TWO_PER_ROW, 
@@ -972,7 +972,7 @@ class menus:
                                                          defaultMenu="9",
                                                          skip=skip, 
                                                          asList=asList,
-                                                         optionText="  [+] Select a Criterion for Stock Screening: ",
+                                                         optionText="  [+] Options with (₹/$) are paid/premium. Select a Criterion for Stock Screening: ",
                                                          renderStyle=renderStyle
                                                             if renderStyle is not None
                                                             else MenuRenderStyle.TWO_PER_ROW, 
@@ -989,7 +989,7 @@ class menus:
                                                          defaultMenu="3",
                                                          skip=skip, 
                                                          asList=asList,
-                                                         optionText="  [+] Select an option: ",
+                                                         optionText="  [+] Options with (₹/$) are paid/premium. Select an option: ",
                                                          renderStyle=renderStyle
                                                             if renderStyle is not None
                                                             else MenuRenderStyle.STANDALONE, 
@@ -1120,7 +1120,7 @@ class menus:
                 return None
         return None
 
-    def renderMenuFromDictionary(self, dict={},exceptionKeys=[],coloredValues=[], optionText="  [+] Select a menu option:", defaultMenu="0", asList=False, renderStyle=None, parent=None, skip=None, substitutes=[],checkUpdate=False,subOnly=[]):
+    def renderMenuFromDictionary(self, dict={},exceptionKeys=[],coloredValues=[], optionText="  [+] Options with (₹/$) are paid/premium. Select a menu option:", defaultMenu="0", asList=False, renderStyle=None, parent=None, skip=None, substitutes=[],checkUpdate=False,subOnly=[]):
         menuText = self.fromDictionary(
             dict,
             renderExceptionKeys=exceptionKeys,

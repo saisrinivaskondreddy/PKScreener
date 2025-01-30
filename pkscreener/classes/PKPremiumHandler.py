@@ -24,6 +24,7 @@
 
 """
 import sys
+import os
 from pkscreener.classes.MenuOptions import menu, menus
 from pkscreener.classes.PKDemoHandler import PKDemoHandler
 from pkscreener.classes.PKUserRegistration import PKUserRegistration, ValidationResult
@@ -37,29 +38,29 @@ class PKPremiumHandler:
     def hasPremium(self,mnu:menu):
         findingPremium = True
         consideredMenu = mnu
-        isPremium = False
-        while findingPremium:
-            findingPremium = not consideredMenu.isPremium
-            if findingPremium:
-                if consideredMenu.parent is not None:
-                    consideredMenu = consideredMenu.parent
-                else:
-                    findingPremium = False
-            else:
-                isPremium = True
-        if isPremium:
-            return PKPremiumHandler.showPremiumDemoOptions(mnu) == ValidationResult.Success
-        return isPremium
+        isPremium = consideredMenu.isPremium #False
+        # while findingPremium:
+        #     findingPremium = not consideredMenu.isPremium
+        #     if findingPremium:
+        #         if consideredMenu.parent is not None:
+        #             consideredMenu = consideredMenu.parent
+        #         else:
+        #             findingPremium = False
+        #     else:
+        #         isPremium = True
+        return (PKPremiumHandler.showPremiumDemoOptions(mnu) == ValidationResult.Success) or ("RUNNER" in os.environ.keys()) if isPremium else (not isPremium)
     
     @classmethod
     def showPremiumDemoOptions(self,mnu):
+        from pkscreener.classes import Utility
         result, reason = PKUserRegistration.validateToken()
+        Utility.tools.clearScreen(forceTop=True)
         if result and reason == ValidationResult.Success:
             return reason
         elif not result and reason == ValidationResult.BadOTP:
             return PKUserRegistration.login(trialCount=1)
         else:
-            OutputControls().printOutput(f"[+] {colorText.WARN}This is a premium/paid feature.{colorText.END}\n[+] {colorText.WARN}You do not seem to have a paid subscription to PKScreener or you are not logged-in. Please login!!{colorText.END}\n[+] {colorText.GREEN}If you would like to subscribe, please pay UPI: PKScreener@APL{colorText.END}\n[+] {colorText.GREEN}Or, Use GitHub sponsor link to sponsor: https://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra{colorText.END}\n[+] {colorText.WARN}Or, Drop a message to {colorText.END}{colorText.GREEN}@ItsOnlyPK{colorText.END}{colorText.WARN} on telegram{colorText.END}\n[+] {colorText.WARN}Follow instructions in the response message to{colorText.END} {colorText.GREEN}/OTP on @nse_pkscreener_bot on telegram{colorText.END} {colorText.WARN}for subscription details!{colorText.END}")
+            OutputControls().printOutput(f"[+] {colorText.GREEN}{mnu.menuText}{colorText.END}\n[+] {colorText.WARN}This is a premium/paid feature.{colorText.END}\n[+] {colorText.WARN}You do not seem to have a paid subscription to PKScreener or you are not logged-in. Please login!!{colorText.END}\n[+] {colorText.GREEN}If you would like to subscribe, please pay UPI: PKScreener@APL{colorText.END}\n[+] {colorText.GREEN}Or, Use GitHub sponsor link to sponsor: https://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra{colorText.END}\n[+] {colorText.WARN}Or, Drop a message to {colorText.END}{colorText.GREEN}@ItsOnlyPK{colorText.END}{colorText.WARN} on telegram{colorText.END}\n[+] {colorText.WARN}Follow instructions in the response message to{colorText.END} {colorText.GREEN}/OTP on @nse_pkscreener_bot on telegram{colorText.END} {colorText.WARN}for subscription details!{colorText.END}")
             m = menus()
             m.renderUserDemoMenu()
             userDemoOption = input(colorText.FAIL + "  [+] Select option: ") or "1"

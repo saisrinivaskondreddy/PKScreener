@@ -654,6 +654,8 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
             m2.renderForMenu(selectedMenu=selectedMenu, skip=skip)
             stockIndexCode = "18"
             if indexOption == "S":
+                if not PKPremiumHandler.hasPremium(selectedMenu):
+                    sys.exit(0)
                 indexKeys = level1_index_options_sectoral.keys()
                 stockIndexCode = input(
                     colorText.FAIL + "  [+] Select option: "
@@ -678,13 +680,15 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
                     colorText.FAIL + f"{pastDate}  [+] Select option: "
                 ) or "9"
                 OutputControls().printOutput(colorText.END, end="")
+            if not PKPremiumHandler.hasPremium(m2.find(str(executeOption))):
+                sys.exit(0)
             if executeOption == "":
                 executeOption = 1
             if not str(executeOption).isnumeric():
                 executeOption = executeOption.upper()
             else:
                 executeOption = int(executeOption)
-                if executeOption < 0 or executeOption > 44:
+                if executeOption < 0 or executeOption > MAX_MENU_OPTION: # or (executeOption > MAX_SUPPORTED_MENU_OPTION and executeOption < MAX_MENU_OPTION):
                     raise ValueError
         else:
             executeOption = 0
@@ -1692,7 +1696,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         selectedChoice["4"] = str(priceDirection)
         reversalOption = (priceDirection == "2")
 
-    if executeOption == 42:
+    if executeOption == MAX_MENU_OPTION:
         Utility.tools.getLastScreenedResults(defaultAnswer)
         return None, None
     if executeOption > MAX_SUPPORTED_MENU_OPTION and executeOption < MAX_MENU_OPTION:

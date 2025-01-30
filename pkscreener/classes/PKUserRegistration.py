@@ -131,11 +131,11 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
 
                 validationResult,validationReason = PKUserRegistration.validateToken()
                 if not validationResult and validationReason == ValidationResult.BadUserID:
-                    OutputControls().printOutput(f"{colorText.FAIL}[+] Invalid userID!{colorText.END}\n{colorText.WARN}[+] May be try entering the UserID instead of username?{colorText.END}\n[+] {colorText.WARN}If you have purchased a subscription and are still not able to login, plesae reach out to {colorText.END}{colorText.GREEN}@ItsOnlyPK{colorText.END} {colorText.WARN}on Telegram!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
+                    OutputControls().printOutput(f"{colorText.FAIL}[+] Invalid userID!{colorText.END}\n{colorText.WARN}[+] Maybe try entering the {colorText.END}{colorText.GREEN}UserID{colorText.END}{colorText.WARN} instead of username?{colorText.END}\n[+] {colorText.WARN}If you have purchased a subscription and are still not able to login, please reach out to {colorText.END}{colorText.GREEN}@ItsOnlyPK{colorText.END} {colorText.WARN}on Telegram!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
                     sleep(5)
                     return PKUserRegistration.presentTrialOptions()
                 if not validationResult and validationReason == ValidationResult.BadOTP:
-                    OutputControls().printOutput(f"{colorText.FAIL}[+] Invalid OTP!{colorText.END}\n[+] {colorText.GREEN}If you have purchased a subscription and are still not able to login, plesae reach out to @ItsOnlyPK on Telegram!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
+                    OutputControls().printOutput(f"{colorText.FAIL}[+] Invalid OTP!{colorText.END}\n[+] {colorText.GREEN}If you have purchased a subscription and are still not able to login, please reach out to @ItsOnlyPK on Telegram!{colorText.END}\n[+] {colorText.FAIL}Please try again or press Ctrl+C to exit!{colorText.END}")
                     sleep(5)
                     return PKUserRegistration.login(trialCount=trialCount+1)
                 if validationResult and validationReason == ValidationResult.Success:
