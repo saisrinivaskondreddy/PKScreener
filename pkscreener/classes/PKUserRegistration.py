@@ -31,7 +31,6 @@ from PKDevTools.classes.Singleton import SingletonType, SingletonMixin
 from pkscreener.classes.ConfigManager import tools, parser
 from PKDevTools.classes.OutputControls import OutputControls
 from PKDevTools.classes.ColorText import colorText
-from PKDevTools.classes.DBManager import DBManager
 from PKDevTools.classes.Pikey import PKPikey
 from PKDevTools.classes import Archiver
 from PKDevTools.classes.log import default_logger
@@ -95,8 +94,7 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
     @classmethod
     def login(self, trialCount=0):
         try:
-            dbManager = DBManager()
-            if "RUNNER" in os.environ.keys() or dbManager.shouldSkipLoading():
+            if "RUNNER" in os.environ.keys():
                 return ValidationResult.Success
         except: # pragma: no cover
             return ValidationResult.BadUserID
