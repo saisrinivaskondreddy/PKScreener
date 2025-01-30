@@ -795,7 +795,7 @@ def launchScreener(options, user, context, optionChoices, update):
                     isBasicScanRequest = True
                     break
             if not isBasicScanRequest:
-                responseText = f"Thank you for choosing {scanRequest}!\n\nThis scan request is,however,protected and is only available to premium subscribers. It seems like you are not subscribed to the paid/premium subscription to PKScreener.\nPlease checkout all premium options by sending out a\n/OTP\nrequest here. \nFor basic/unpaid users, you can try out the following:\n /X_0\n/X_N\n/X_1\n"
+                responseText = f"Thank you for choosing {scanRequest}!\n\nThis scan request is,however,protected and is only available to premium subscribers. It seems like you are not subscribed to the paid/premium subscription to PKScreener.\nPlease checkout all premium options by sending out a request:\n\n/OTP\n\nFor basic/unpaid users, you can try out the following:\n /X_0 StockCode1,StockCode2,etc.\n/X_N\n/X_1\n"
                 if update is not None and update.message is not None:
                     update.message.reply_text(sanitiseTexts(responseText))
                 else:
