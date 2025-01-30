@@ -77,7 +77,7 @@ class PKPremiumHandler:
                         subscriptionModelNames = f"{subscriptionModelNames}\n[+]{colorText.WARN} {name} : ₹ {value} (Only Basic Scans are free){colorText.END}\n"
                     else:
                         subscriptionModelNames = f"{subscriptionModelNames}\n[+]{colorText.GREEN} {name.ljust(15)} : ₹ {value}{colorText.END}\n"
-                subscriptionModelNames = f"{subscriptionModelNames}\n[+] {colorText.WARN}Please pay to subscribe:{colorText.END}\n[+] {colorText.GREEN}1. Using UPI(India) to {colorText.END}{colorText.FAIL}PKScreener@APL{colorText.END} or\n[+] {colorText.GREEN}2. Proudly sponsor: https://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra\n{colorText.END}[+] {colorText.WARN}Please drop a message to @ItsOnlyPK after paying to enable subscription!{colorText.END}\n\n"
+                subscriptionModelNames = f"{subscriptionModelNames}\n[+] {colorText.WARN}Please pay to subscribe:{colorText.END}\n[+] {colorText.GREEN}1. Using UPI(India) to {colorText.END}{colorText.FAIL}PKScreener@APL{colorText.END} or\n[+] {colorText.GREEN}2. Proudly sponsor: https://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra\n{colorText.END}[+] {colorText.WARN}Please drop a message to @ItsOnlyPK on Telegram after paying to enable subscription!{colorText.END}\n\n"
                 OutputControls().printOutput(subscriptionModelNames)
                 input("\n\nPress any key to exit and pay...")
             sys.exit(0)

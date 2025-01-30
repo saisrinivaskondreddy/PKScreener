@@ -473,6 +473,7 @@ Pin_MenuDict = {
 
     "M": "Back to the Top/Main menu",
 }
+Pin_MenuDict_Keys = [x for x in Pin_MenuDict.keys() if str(x).isnumeric()]
 
 PRICE_CROSS_SMA_EMA_TYPE_MENUDICT = {
     "1": "SMA",
@@ -511,6 +512,8 @@ for candlestickPattern in CandlePatterns.reversalPatternsBearish:
     candleStickMenuIndex += 1
 CANDLESTICK_DICT["0"] = "No Filter"
 CANDLESTICK_DICT["M"] = "Cancel"
+
+CANDLESTICK_DICT_Keys = [x for x in CANDLESTICK_DICT.keys() if str(x).isnumeric() and int(x) > 0]
 
 class MenuRenderStyle(Enum):
     STANDALONE = 1
@@ -786,7 +789,8 @@ class menus:
                                                  coloredValues=(["M"]),
                                                  defaultMenu="M",
                                                  substitutes = substitutes,
-                                                 skip=skip)
+                                                 skip=skip,
+                                                 subOnly=Pin_MenuDict_Keys)
     
     def renderCandleStickPatterns(self,skip=[]):
         return self.renderMenuFromDictionary(dict=CANDLESTICK_DICT,
@@ -949,7 +953,8 @@ class menus:
                                                             if renderStyle is not None
                                                             else MenuRenderStyle.TWO_PER_ROW, 
                                                          parent=selectedMenu,
-                                                         checkUpdate=False)
+                                                         checkUpdate=False,
+                                                         subOnly=PREDEFINED_SCAN_MENU_KEYS)
                 elif selectedMenu.menuKey == "S":
                     indexKeys = level1_index_options_sectoral.keys()
                     return self.renderMenuFromDictionary(dict=level1_index_options_sectoral,

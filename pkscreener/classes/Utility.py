@@ -171,7 +171,8 @@ class tools:
         )
         communityInfo = "[📢] Join Community Discussions: https://github.com/pkjmesra/PKScreener/discussions"
         latestInfo = "[⏰] Download latest software from https://github.com/pkjmesra/PKScreener/releases/latest"
-        donationInfo = "[💰] PKScreener had been free for a long time, but owing to cost/budgeting issues, only a basic set of features will always remain free for everyone. Consider donating to help cover the basic server costs or subscribe to premium.\n[💸] Please donate whatever you can: PKScreener@APL using UPI(India) or https://github.com/sponsors/pkjmesra 🙏🏻"
+        freeInfo = "[💰] PKScreener had been free for a long time"
+        donationInfo = ", but owing to cost/budgeting issues, only a basic set of features will always remain free for everyone. Consider donating to help cover the basic server costs or subscribe to premium.\n[💸] Please donate whatever you can: PKScreener@APL using UPI(India) or https://github.com/sponsors/pkjmesra 🙏🏻"
         totalDownloads = "200k+"
         respPepyTech = fetcher.fetchURL(url="https://static.pepy.tech/badge/pkscreener",headers={'user-agent': f'{random_user_agent()}'},timeout=2)
         if respPepyTech is not None and respPepyTech.status_code == 200:
@@ -184,7 +185,7 @@ class tools:
         OutputControls().printOutput(colorText.FAIL + issuesInfo + colorText.END)
         OutputControls().printOutput(colorText.GREEN + communityInfo + colorText.END)
         OutputControls().printOutput(colorText.BLUE + latestInfo + colorText.END)
-        OutputControls().printOutput(colorText.FAIL + donationInfo + colorText.END)
+        OutputControls().printOutput(colorText.GREEN + freeInfo + colorText.END + colorText.FAIL + donationInfo + colorText.END)
         if defaultAnswer is None:
             OutputControls().takeUserInput(
                 colorText.FAIL

@@ -511,11 +511,15 @@ def showSendConfigInfo(defaultAnswer=None, user=None):
     configData = configManager.showConfigFile(defaultAnswer=('Y' if user is not None else defaultAnswer))
     if user is not None:
         sendMessageToTelegramChannel(message=Utility.tools.removeAllColorStyles(configData), user=user)
+    if defaultAnswer is None:
+        input("Press any key to continue...")
 
 def showSendHelpInfo(defaultAnswer=None, user=None):
     helpData = Utility.tools.showDevInfo(defaultAnswer=('Y' if user is not None else defaultAnswer))
     if user is not None:
         sendMessageToTelegramChannel(message=Utility.tools.removeAllColorStyles(helpData), user=user)
+    if defaultAnswer is None:
+        input("Press any key to continue...")
 
 def initExecution(menuOption=None):
     global selectedChoice, userPassedArgs
@@ -537,7 +541,9 @@ def initExecution(menuOption=None):
                 log_file_path = os.path.join(Archiver.get_user_data_dir(), "pkscreener-logs.txt")
                 OutputControls().printOutput(colorText.FAIL + "\n      [+] Logs will be written to:"+colorText.END)
                 OutputControls().printOutput(colorText.GREEN + f"      [+] {log_file_path}"+colorText.END)
-                OutputControls().printOutput(colorText.FAIL + "      [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at https://github.com/pkjmesra/PKScreener/issues .\n" + colorText.END)
+                issueLink = "https://github.com/pkjmesra/PKScreener/issues"
+                issueLink = f"\x1b[97m\x1b]8;;{issueLink}\x1b\\{issueLink}\x1b]8;;\x1b\\\x1b[0m"
+                OutputControls().printOutput(colorText.FAIL + f"      [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at {issueLink}.\n" + colorText.END)
             menuOption = input(colorText.FAIL + f"{pastDate}  [+] Select option: ") or "P"
             OutputControls().printOutput(colorText.END, end="")
         if menuOption == "" or menuOption is None:
@@ -2113,6 +2119,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     colorText.FAIL + "  [+] Select option: "
                 ) or 'M'
             OutputControls().printOutput(colorText.END, end="")
+            if not PKPremiumHandler.hasPremium(m0.find(str(pinOption).upper())):
+                sys.exit(0)
             if pinOption in ["1","2"]:
                 if pinOption in ["2"]:
                     monitorOption = "X:0:0"
