@@ -521,6 +521,19 @@ def showSendHelpInfo(defaultAnswer=None, user=None):
     if defaultAnswer is None:
         input("Press any key to continue...")
 
+def ensureMenusLoaded(menuOption=None,indexOption=None,executeOption=None):
+    try:
+        if len(m0.menuDict.keys()) == 0:
+            m0.renderForMenu(asList=True)
+        if len(m1.menuDict.keys()) == 0:
+            m1.renderForMenu(selectedMenu=m0.find(menuOption),asList=True)
+        if len(m2.menuDict.keys()) == 0:
+            m2.renderForMenu(selectedMenu=m1.find(indexOption),asList=True)
+        if len(m3.menuDict.keys()) == 0:
+            m3.renderForMenu(selectedMenu=m2.find(executeOption),asList=True)
+    except:
+        pass
+
 def initExecution(menuOption=None):
     global selectedChoice, userPassedArgs
     Utility.tools.clearScreen(forceTop=True)
@@ -541,9 +554,7 @@ def initExecution(menuOption=None):
                 log_file_path = os.path.join(Archiver.get_user_data_dir(), "pkscreener-logs.txt")
                 OutputControls().printOutput(colorText.FAIL + "\n      [+] Logs will be written to:"+colorText.END)
                 OutputControls().printOutput(colorText.GREEN + f"      [+] {log_file_path}"+colorText.END)
-                issueLink = "https://github.com/pkjmesra/PKScreener/issues"
-                issueLink = f"\x1b[97m\x1b]8;;{issueLink}\x1b\\{issueLink}\x1b]8;;\x1b\\\x1b[0m"
-                OutputControls().printOutput(colorText.FAIL + f"      [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at {issueLink}.\n" + colorText.END)
+                OutputControls().printOutput(colorText.FAIL + "      [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at https://github.com/pkjmesra/PKScreener/issues .\n" + colorText.END)
             menuOption = input(colorText.FAIL + f"{pastDate}  [+] Select option: ") or "P"
             OutputControls().printOutput(colorText.END, end="")
         if menuOption == "" or menuOption is None:
@@ -601,10 +612,11 @@ def initPostLevel0Execution(
                 colorText.FAIL + f"{pastDate}  [+] Select option: "
             )
             OutputControls().printOutput(colorText.END, end="")
-        if (str(indexOption).isnumeric() and int(indexOption) > 1 and executeOption <= MAX_SUPPORTED_MENU_OPTION) or \
+        if (str(indexOption).isnumeric() and int(indexOption) > 1 and str(executeOption).isnumeric() and int(str(executeOption)) <= MAX_SUPPORTED_MENU_OPTION) or \
             str(indexOption).upper() in ["S", "E", "W"]:
+            ensureMenusLoaded(menuOption,indexOption,executeOption)
             if not PKPremiumHandler.hasPremium(m1.find(str(indexOption).upper())):
-                sys.exit(0)
+                return None, None
         if indexOption == "" or indexOption is None:
             indexOption = int(configManager.defaultIndex)
         # elif indexOption == 'W' or indexOption == 'w' or indexOption == 'N' or indexOption == 'n' or indexOption == 'E' or indexOption == 'e':
@@ -660,6 +672,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
             m2.renderForMenu(selectedMenu=selectedMenu, skip=skip)
             stockIndexCode = "18"
             if indexOption == "S":
+                ensureMenusLoaded("X",indexOption,executeOption)
                 if not PKPremiumHandler.hasPremium(selectedMenu):
                     sys.exit(0)
                 indexKeys = level1_index_options_sectoral.keys()
@@ -686,8 +699,9 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
                     colorText.FAIL + f"{pastDate}  [+] Select option: "
                 ) or "9"
                 OutputControls().printOutput(colorText.END, end="")
+            ensureMenusLoaded("X",indexOption,executeOption)
             if not PKPremiumHandler.hasPremium(m2.find(str(executeOption))):
-                sys.exit(0)
+                return None, None
             if executeOption == "":
                 executeOption = 1
             if not str(executeOption).isnumeric():
@@ -926,6 +940,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     selectedMenu = initExecution(menuOption=menuOption)
     menuOption = selectedMenu.menuKey
     if menuOption in ["F", "M", "S", "B", "G", "C", "P", "D"] or selectedMenu.isPremium:
+        ensureMenusLoaded(menuOption,indexOption,executeOption)
         if not PKPremiumHandler.hasPremium(selectedMenu):
             sys.exit(0)
     if menuOption in ["M", "D", "I", "L", "F"]:
@@ -1161,7 +1176,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             defaultAnswer=defaultAnswer,
             user=user,
         )
-
+        if indexOption is None:
+            return None, None
+        
         if menuOption in ["H", "U", "T", "E", "Y"]:
             Utility.tools.clearScreen(forceTop=True)
             return None, None
@@ -1715,6 +1732,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         return None, None
     
     if str(indexOption).isnumeric() and int(indexOption) > 1 and executeOption <= MAX_SUPPORTED_MENU_OPTION:
+        ensureMenusLoaded(menuOption,indexOption,executeOption)
         if not PKPremiumHandler.hasPremium(m2.find(str(executeOption).upper())):
             sys.exit(0)
     if (
@@ -2119,6 +2137,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     colorText.FAIL + "  [+] Select option: "
                 ) or 'M'
             OutputControls().printOutput(colorText.END, end="")
+            ensureMenusLoaded(menuOption,indexOption,executeOption)
             if not PKPremiumHandler.hasPremium(m0.find(str(pinOption).upper())):
                 sys.exit(0)
             if pinOption in ["1","2"]:

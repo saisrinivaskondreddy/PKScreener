@@ -1032,6 +1032,14 @@ def pkscreenercli():
             configManager.setConfig(
                 ConfigManager.parser, default=True, showFileCreatedText=False
             )
+        from pkscreener.classes.PKUserRegistration import PKUserRegistration, ValidationResult
+        if args.systemlaunched and not PKUserRegistration.validateToken()[0]:
+            result = PKUserRegistration.login()
+            if result != ValidationResult.Success:
+                OutputControls().printOutput(f"\n[+] {colorText.FAIL}You MUST be a premium/paid user to use this feature!{colorText.END}\n")
+                input("Press any key to exit...")
+                sys.exit(0)
+
         if args.systemlaunched and args.options is not None:
             args.systemlaunched = args.options
             
