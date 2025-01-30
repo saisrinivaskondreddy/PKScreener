@@ -136,7 +136,7 @@ _updater = None
 
 TOP_LEVEL_SCANNER_MENUS = ["X", "B", "MI","DV", "P"]
 TOP_LEVEL_SCANNER_SKIP_MENUS = ["M", "S", "F", "G", "C", "T", "D", "I", "E", "U", "L", "Z", "P"] # Last item will be skipped.
-INDEX_SKIP_MENUS = ["W","E","M","Z","0","2","3","4","6","7","9","10","S"]
+INDEX_SKIP_MENUS = ["W","E","M","Z","0","2","3","4","6","7","8","9","10","S","15"]
 SCANNER_SKIP_MENUS_1_TO_6 = ["0","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_7_TO_12 = ["0","1","2","3","4","5","6","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_13_TO_18 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
@@ -474,7 +474,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
             start(update, context, updatedResults=result_outputs,monitorIndex=monitorIndex)
             return START_ROUTES
 
-    midSkip = "1" if data == "X" else "N"
+    midSkip = "13" if data == "X" else "N"
     skipMenus = [midSkip]
     skipMenus.extend(INDEX_SKIP_MENUS)
     menuText = (
@@ -487,7 +487,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
         .replace("    ", "")
         .replace("  ", "")
         .replace("\t", "")
-        .replace(colorText.FAIL,"").replace(colorText.END,"")
+        .replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"")
     )
     menuText = menuText + "\n\nH > Home"
     mns = m1.renderForMenu(
@@ -729,6 +729,9 @@ def Level2(update: Update, context: CallbackContext) -> str:
             optionChoices=optionChoices,
             update=update,
         )
+        if not shouldSendUpdate:
+            DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+            return START_ROUTES
     try:
         if optionChoices != "" and Channel_Id is not None and len(str(Channel_Id)) > 0:
             context.bot.send_message(
@@ -738,8 +741,8 @@ def Level2(update: Update, context: CallbackContext) -> str:
             )
     except Exception:# pragma: no cover
         start(update, context)
-    menuText =  menuText.replace("\n     ","\n").replace("\n    ","\n").replace(colorText.FAIL,"").replace(colorText.END,"")
-    if not str(optionChoices.upper()).startswith("B") and shouldSendUpdate:
+    menuText =  menuText.replace("\n     ","\n").replace("\n    ","\n").replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"")
+    if not str(optionChoices.upper()).startswith("B"):
         sendUpdatedMenu(
             menuText=menuText, update=update, context=context, reply_markup=reply_markup
         )
@@ -763,7 +766,7 @@ def default_markup(inlineMenus):
 
 def sendUpdatedMenu(menuText, update: Update, context, reply_markup, replaceWhiteSpaces=True):
     try:
-        menuText.replace("     ", "").replace("    ", "").replace("\t", "").replace(colorText.FAIL,"").replace(colorText.END,"") if replaceWhiteSpaces else menuText
+        menuText.replace("     ", "").replace("    ", "").replace("\t", "").replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"") if replaceWhiteSpaces else menuText
         menuText = f"{menuText}\n\nClick /start if you want to restart the session." if "/start" not in menuText else menuText
         if update.callback_query.message.text == menuText:
             menuText = f"{PKDateUtilities.currentDateTime()}:\n{menuText}"
@@ -792,7 +795,7 @@ def launchScreener(options, user, context, optionChoices, update):
                     isBasicScanRequest = True
                     break
             if not isBasicScanRequest:
-                responseText = f"Thank you for choosing {scanRequest}!\n\nThis scan request however is, however, protected and is only available to premium subscribers.\nIt seems like you are not subscribed to the paid/premium subscription to PKScreener.\nPlease checkout all premium options by sending out a\n/OTP\nrequest here. \nFor basic/unpaid users, you can try out the following:\n /X_0\n/X_N\n/X_1\n"
+                responseText = f"Thank you for choosing {scanRequest}!\n\nThis scan request is,however,protected and is only available to premium subscribers. It seems like you are not subscribed to the paid/premium subscription to PKScreener.\nPlease checkout all premium options by sending out a\n/OTP\nrequest here. \nFor basic/unpaid users, you can try out the following:\n /X_0\n/X_N\n/X_1\n"
                 if update is not None and update.message is not None:
                     update.message.reply_text(sanitiseTexts(responseText))
                 else:
