@@ -76,6 +76,8 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
     @classmethod
     def validateToken(self):
         try:
+            if "RUNNER" in os.environ.keys():
+                return True, ValidationResult.Success
             PKPikey.removeSavedFile(f"{PKUserRegistration.userID}")
             resp = Utility.tools.tryFetchFromServer(cache_file=f"{PKUserRegistration.userID}.pdf",directory="results/Data",hideOutput=True, branchName="SubData")
             if resp is None or resp.status_code != 200:
@@ -86,6 +88,8 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
                 return False, ValidationResult.BadOTP
             return True, ValidationResult.Success
         except: # pragma: no cover
+            if "RUNNER" in os.environ.keys():
+                return True, ValidationResult.Success
             return False, ValidationResult.BadOTP
 
     @classmethod
