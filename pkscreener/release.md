@@ -4,6 +4,7 @@
 1. [v0.45.20250124.670] release
 * Python 3.12 upgrade
 * Fixed multiple bugs.
+* Subscription model added.
 
 ## Older Releases
 * [https://github.com/pkjmesra/PKScreener/releases] : Discarded to save on storage costs!
