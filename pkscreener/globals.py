@@ -595,6 +595,10 @@ def initPostLevel0Execution(
                 colorText.FAIL + f"{pastDate}  [+] Select option: "
             )
             OutputControls().printOutput(colorText.END, end="")
+        if (str(indexOption).isnumeric() and int(indexOption) > 1 and executeOption <= MAX_SUPPORTED_MENU_OPTION) or \
+            str(indexOption).upper() in ["S", "E", "W"]:
+            if not PKPremiumHandler.hasPremium(m1.find(str(indexOption).upper())):
+                sys.exit(0)
         if indexOption == "" or indexOption is None:
             indexOption = int(configManager.defaultIndex)
         # elif indexOption == 'W' or indexOption == 'w' or indexOption == 'N' or indexOption == 'n' or indexOption == 'E' or indexOption == 'e':
@@ -1699,6 +1703,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         )
         OutputControls().takeUserInput("Press <Enter> to continue...")
         return None, None
+    
+    if str(indexOption).isnumeric() and int(indexOption) > 1 and executeOption <= MAX_SUPPORTED_MENU_OPTION:
+        if not PKPremiumHandler.hasPremium(m2.find(str(executeOption).upper())):
+            sys.exit(0)
     if (
         not str(indexOption).isnumeric() and str(indexOption).upper() in ["W", "E", "M", "N", "Z", "S"]
     ) or (
@@ -1707,6 +1715,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     ):
         configManager.getConfig(ConfigManager.parser)
         try:
+            if str(indexOption).upper() in ["W", "E", "S"]:
+                if not PKPremiumHandler.hasPremium(m1.find(str(indexOption).upper())):
+                    sys.exit(0)
             if indexOption == "W":
                 listStockCodes = fetcher.fetchWatchlist()
                 if listStockCodes is None:

@@ -88,7 +88,7 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
             if "RUNNER" in os.environ.keys() or dbManager.shouldSkipLoading():
                 return ValidationResult.Success
         except: # pragma: no cover
-            return True
+            return ValidationResult.BadUserID
         Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
         if trialCount >= 1:
             return PKUserRegistration.presentTrialOptions()
