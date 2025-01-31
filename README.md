@@ -324,6 +324,7 @@ After you have finished the run, go to that copied path, zip the contents of the
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=pkjmesra/pkscreener&type=Date)](https://star-history.com/#pkjmesra/pkscreener&Date)
+
 [MADE-IN-INDIA-badge]: https://img.shields.io/badge/MADE%20WITH%20%E2%9D%A4%20IN-INDIA-orange
 [MADE-IN-INDIA]: https://en.wikipedia.org/wiki/India
 [Windows-badge]: https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white
