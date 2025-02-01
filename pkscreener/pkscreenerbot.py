@@ -212,7 +212,31 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
         if len(args) > 0: # UTR
             matchedTran = PKGmailReader.matchUTR(utr=args[0])
             if matchedTran is not None:
-                updatedResults = f"We have found the following transaction for the provided UTR:\n{matchedTran}\n\nYour subscription is being enabled soon!"
+                updatedResults = f"We have found the following transaction for the provided UTR:\n{matchedTran}\n\nYour subscription is being enabled soon!\n\nPlease check with /OTP in the next couple of minutes!\n\n"
+                workflow_name = "w18-workflow-sub-data.yml"
+                subtype = "add"
+                userid = user.id
+                branch = "main"
+                try:
+                    subvalue = int(matchedTran.get("amountPaid"))
+                    workflow_postData  = (
+                        '{"ref":"'
+                        + branch
+                        + '","inputs":{"userid":"'
+                        + f"{userid}"
+                        + '","subtype":"'
+                        + f"{subtype}"
+                        + '","subvalue":"'
+                        + f"{subvalue}"
+                        + '"}}'
+                    )
+                    ghp_token = PKEnvironment.allSecrets["PKG"]
+                    resp = run_workflow(workflowType="O",repo="pkscreener",owner="pkjmesra",branch=branch,ghp_token=ghp_token,workflow_name=workflow_name,workflow_postData=workflow_postData)
+                    if resp is not None and resp.status_code != 204:
+                        updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolove."
+                except:
+                    updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolove."
+                    pass
             else:
                 updatedResults = "We could not find any transaction details with the provided UTR.\nUPI transaction reference number is a 12-digit alphanumeric/numeric code that serves as a unique identifier for transactions. It is also known as the Unique Transaction Reference (UTR) number.\nYou can find your UPI reference number in the UPI-enabled app you used to make the transaction.\nFor example, you can find your UPI reference number in the History section of Google Pay. \nIn the Paytm app, you can find it by clicking View Details.\n\nIf you still cannot find it, please drop a message with transaction details/snapshot to @ItsOnlyPK to enable subscription."
 
@@ -332,7 +356,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
         reply_markup = None
 
     if updatedResults is None:
-        cmdText = "\n/otp to generate an OTP to login to PKScreener desktop console"
+        cmdText = "\n/otp to generate an OTP to login to PKScreener desktop console\n\n/check UPI_UTR_HERE_After_Making_Payment to share transaction reference number to automatically enable subscription after making payment via UPI"
         for cmd in cmds:
             cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
         cmdText = "\n\n/check UPI_UTR_HERE_After_Making_Payment to share transaction reference number to automatically enable subscription after making payment via UPI\n"
@@ -1422,7 +1446,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
         asList=True,
         renderStyle=MenuRenderStyle.STANDALONE,
     )
-    cmdText = "\n/otp to generate an OTP to login to PKScreener desktop console"
+    cmdText = "\n/otp to generate an OTP to login to PKScreener desktop console\n\n/check UPI_UTR_HERE_After_Making_Payment to share transaction reference number to automatically enable subscription after making payment via UPI"
     for cmd in cmds:
         cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
     reply_markup = default_markup([])
