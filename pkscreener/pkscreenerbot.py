@@ -363,7 +363,6 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
         cmdText = "\n/otp to generate an OTP to login to PKScreener desktop console\n\n/check UPI_UTR_HERE_After_Making_Payment to share transaction reference number to automatically enable subscription after making payment via UPI"
         for cmd in cmds:
             cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
-        cmdText = "\n\n/check UPI_UTR_HERE_After_Making_Payment to share transaction reference number to automatically enable subscription after making payment via UPI\n"
         tosDisclaimerText = "By using this Software, you agree to\n[+] having read through the Disclaimer (https://pkjmesra.github.io/PKScreener/Disclaimer.txt)\n[+] and accept Terms Of Service (https://pkjmesra.github.io/PKScreener/tos.txt) of PKScreener.\n\n[+] If that is not the case, you MUST immediately terminate using PKScreener and exit now!\n\n"
         menuText = f"Welcome {user.first_name}, {(user.username)}!\n\n{tosDisclaimerText}Please choose a menu option by selecting a button from below.\n\nYou can also explore a wide variety of all other scanners by typing in \n{cmdText}\n\n OR just use the buttons below to choose."
         try:
