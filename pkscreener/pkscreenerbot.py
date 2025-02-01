@@ -170,7 +170,8 @@ def initializeIntradayTimer():
                 int_timer.start()
             elif now >= marketStartTime and now <= marketCloseTime:
                 launchIntradayMonitor()
-    except: # pragma: no cover
+    except Exception as e: # pragma: no cover
+        logger.error(e)
         launchIntradayMonitor()
         pass
 
@@ -218,7 +219,7 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
                 userid = user.id
                 branch = "main"
                 try:
-                    subvalue = int(matchedTran.get("amountPaid"))
+                    subvalue = int(float(matchedTran.get("amountPaid")))
                     workflow_postData  = (
                         '{"ref":"'
                         + branch
@@ -233,9 +234,10 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
                     ghp_token = PKEnvironment.allSecrets["PKG"]
                     resp = run_workflow(workflowType="O",repo="pkscreener",owner="pkjmesra",branch=branch,ghp_token=ghp_token,workflow_name=workflow_name,workflow_postData=workflow_postData)
                     if resp is not None and resp.status_code != 204:
-                        updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolove."
-                except:
-                    updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolove."
+                        updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolve."
+                except Exception as e:
+                    logger.error(e)
+                    updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolve."
                     pass
             else:
                 updatedResults = "We could not find any transaction details with the provided UTR.\nUPI transaction reference number is a 12-digit alphanumeric/numeric code that serves as a unique identifier for transactions. It is also known as the Unique Transaction Reference (UTR) number.\nYou can find your UPI reference number in the UPI-enabled app you used to make the transaction.\nFor example, you can find your UPI reference number in the History section of Google Pay. \nIn the Paytm app, you can find it by clicking View Details.\n\nIf you still cannot find it, please drop a message with transaction details/snapshot to @ItsOnlyPK to enable subscription."
@@ -274,6 +276,7 @@ def otp(update: Update, context: CallbackContext) -> str:
             dbManager = DBManager()
             otpValue, subsModel,subsValidity = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
         except Exception as e: # pragma: no cover
+            logger.error(e)
             pass
         userText = f"\nUserID: <b>{user.id}</b>"
         try:
@@ -288,7 +291,8 @@ def otp(update: Update, context: CallbackContext) -> str:
             subscriptionModelName = PKUserSusbscriptions().subscriptionValueKeyPairs[subsModel]
             if subscriptionModelName != PKSubscriptionModel.No_Subscription.name:
                 subscriptionModelName = f"{subscriptionModelName} (Expires on: {subsValidity})"
-        except:
+        except Exception as e:
+            logger.error(e)
             subscriptionModelName = PKSubscriptionModel.No_Subscription.name
             pass
         if otpValue == 0:
@@ -365,7 +369,8 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
         try:
             if updateCarrier is not None and updateCarrier.data is not None and updateCarrier.data == "CP":
                 menuText = f"Piped Scanners are available using /P . Click on this /P to begin using piped scanners. To use other scanners, choose a menu option by selecting a button from below.\n\nYou can also explore a wide variety of all other scanners by typing in \n{cmdText}\n\n OR just use the buttons below to choose."
-        except: # pragma: no cover
+        except Exception as e: # pragma: no cover
+            logger.error(e)
             pass
         menuText = f"{menuText}\n\nClick /start if you want to restart the session."
     else:
@@ -402,7 +407,8 @@ def removeMonitorFile():
     while index < configManager.maxDashboardWidgetsPerRow*configManager.maxNumResultRowsInMonitor:
         try:
             os.remove(f"{filePath}_{index}.txt")
-        except: # pragma: no cover
+        except Exception as e: # pragma: no cover
+            logger.error(e)
             pass
         index += 1
 
@@ -419,7 +425,8 @@ def launchIntradayMonitor():
         result_outputs = f"{PKDateUtilities.currentDateTime()}\nIntraday Monitor is available only during the NSE trading hours! Please try during the next trading session."
         try:
             removeMonitorFile()
-        except: # pragma: no cover
+        except Exception as e: # pragma: no cover
+            logger.error(e)
             pass
         return result_outputs, filePath
 
@@ -451,7 +458,7 @@ def launchIntradayMonitor():
     except Exception as e: # pragma: no cover
         result_outputs = "Hmm...It looks like you caught us taking a break! Try again later :-)"
         logger.info(f"{launcher} -a Y -m 'X' -p --telegram could not be launched")
-        logger.info(e)
+        logger.error(e)
         pass
     return result_outputs, filePath
 
@@ -479,7 +486,8 @@ def XDevModeHandler(update: Update, context: CallbackContext) -> str:
             if monitor_proc is not None:
                 try:
                     monitor_proc.kill()
-                except: # pragma: no cover
+                except Exception as e: # pragma: no cover
+                    logger.error(e)
                     pass
             
             launchIntradayMonitor()
@@ -808,7 +816,8 @@ def Level2(update: Update, context: CallbackContext) -> str:
                 text=f"Name: <b>{query.from_user.first_name}</b>, Username:@{query.from_user.username} with ID: <b>@{str(query.from_user.id)}</b> submitted scan request <b>{optionChoices}</b> to the bot!",
                 parse_mode="HTML",
             )
-    except Exception:# pragma: no cover
+    except Exception as e:# pragma: no cover
+        logger.error(e)
         start(update, context)
     menuText =  menuText.replace("\n     ","\n").replace("\n    ","\n").replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"")
     if not str(optionChoices.upper()).startswith("B"):
