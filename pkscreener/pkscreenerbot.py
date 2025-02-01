@@ -231,8 +231,8 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
                         + f"{subvalue}"
                         + '"}}'
                     )
-                    ghp_token = PKEnvironment.allSecrets["PKG"]
-                    resp = run_workflow(workflowType="O",repo="pkscreener",owner="pkjmesra",branch=branch,ghp_token=ghp_token,workflow_name=workflow_name,workflow_postData=workflow_postData)
+                    ghp_token = PKEnvironment().allSecrets["PKG"]
+                    resp = run_workflow(workflowType="O",repo="PKScreener",owner="pkjmesra",branch=branch,ghp_token=ghp_token,workflow_name=workflow_name,workflow_postData=workflow_postData)
                     if resp is not None and resp.status_code != 204:
                         updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolve."
                 except Exception as e:
