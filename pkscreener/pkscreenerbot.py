@@ -832,7 +832,7 @@ def isUserSubscribed(user):
 def launchScreener(options, user, context, optionChoices, update):
     try:
         if not isUserSubscribed(user):
-            basicSubscriptions = ["X_0","X_N","X_1"]
+            basicSubscriptions = ["X_0","X_N","X_1_"]
             scanRequest = optionChoices.replace(" ", "").replace(">", "_").replace(":","_").replace("_D","").upper()
             isBasicScanRequest = False
             for basicSub in basicSubscriptions:
