@@ -366,7 +366,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
         tosDisclaimerText = "By using this Software, you agree to\n[+] having read through the Disclaimer (https://pkjmesra.github.io/PKScreener/Disclaimer.txt)\n[+] and accept Terms Of Service (https://pkjmesra.github.io/PKScreener/tos.txt) of PKScreener.\n\n[+] If that is not the case, you MUST immediately terminate using PKScreener and exit now!\n\n"
         menuText = f"Welcome {user.first_name}, {(user.username)}!\n\n{tosDisclaimerText}Please choose a menu option by selecting a button from below.\n\nYou can also explore a wide variety of all other scanners by typing in \n{cmdText}\n\n OR just use the buttons below to choose."
         try:
-            if updateCarrier is not None and updateCarrier.data is not None and updateCarrier.data == "CP":
+            if updateCarrier is not None and hasattr(updateCarrier, "data") and updateCarrier.data is not None and updateCarrier.data == "CP":
                 menuText = f"Piped Scanners are available using /P . Click on this /P to begin using piped scanners. To use other scanners, choose a menu option by selecting a button from below.\n\nYou can also explore a wide variety of all other scanners by typing in \n{cmdText}\n\n OR just use the buttons below to choose."
         except Exception as e: # pragma: no cover
             logger.error(e)
