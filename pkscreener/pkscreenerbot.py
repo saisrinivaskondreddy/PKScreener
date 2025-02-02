@@ -135,9 +135,11 @@ m4 = menus()
 int_timer = None
 _updater = None
 
-TOP_LEVEL_SCANNER_MENUS = ["X", "B", "MI","DV", "P"]
+TOP_LEVEL_SCANNER_MENUS = ["X", "B", "MI","DV", "P"] # 
 TOP_LEVEL_SCANNER_SKIP_MENUS = ["M", "S", "F", "G", "C", "T", "D", "I", "E", "U", "L", "Z", "P"] # Last item will be skipped.
-INDEX_SKIP_MENUS = ["W","E","M","Z","0","2","3","4","6","7","8","9","10","S","15"]
+INDEX_SKIP_MENUS_1_To_4 = ["W","E","M","Z","0","5","6","7","8","9","10","11","12","13","14","S","15"]
+INDEX_SKIP_MENUS_5_TO_9 = ["W","E","M","Z","N","0","1","2","3","4","10","11","12","13","14","S","15"]
+INDEX_SKIP_MENUS_10_TO_15 = ["W","E","M","Z","N","0","1","2","3","4","5","6","7","8","9","S"]
 SCANNER_SKIP_MENUS_1_TO_6 = ["0","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_7_TO_12 = ["0","1","2","3","4","5","6","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_13_TO_18 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
@@ -514,7 +516,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
     if query is None:
         start(update, context)
         return START_ROUTES
-    data = query.data.upper().replace("CX", "X").replace("CB", "B").replace("CG", "G").replace("CMI", "MI")
+    data = query.data.upper().replace("C", "")
     if data[0:2] not in TOP_LEVEL_SCANNER_MENUS:
         # Someone is trying to send commands we do not support
         return start(update, context)
@@ -529,6 +531,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
         # unavailable mode instead until this gets fixed.
         start(update, context)
         return START_ROUTES
+    ########################### Intraday Monitor ##############################
     if data.startswith("MI"): # Intraday monitor
         monitorIndex = int(data.split("_")[1])
         result_outputs, filePath = launchIntradayMonitor()
@@ -550,9 +553,11 @@ def XScanners(update: Update, context: CallbackContext) -> str:
             start(update, context, updatedResults=result_outputs,monitorIndex=monitorIndex)
             return START_ROUTES
 
+    ########################### Scanners ##############################
     midSkip = "13" if data == "X" else "N"
     skipMenus = [midSkip]
-    skipMenus.extend(INDEX_SKIP_MENUS)
+    skipMenus.extend(INDEX_SKIP_MENUS_1_To_4)
+    # Create the menu text labels
     menuText = (
         m1.renderForMenu(
             m0.find(data),
@@ -565,13 +570,17 @@ def XScanners(update: Update, context: CallbackContext) -> str:
         .replace("\t", "")
         .replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"")
     )
-    menuText = menuText + "\n\nH > Home"
+    menuText = f"{menuText}\n\nH > Home"
+    menuText = f"{menuText}\n\nP2 > More Options"
+
+    # Create the menu buttons
     mns = m1.renderForMenu(
         m0.find(data),
         skip=skipMenus,
         asList=True,
     )
     mns.append(menu().create("H", "Home", 2))
+    mns.append(menu().create("P2", "Next", 2))
     inlineMenus = []
     query.answer()
     for mnu in mns:
@@ -612,7 +621,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
     query = update.callback_query
     query.answer()
     preSelection = (
-        query.data.upper().replace("CX", "X").replace("CB", "B").replace("CG", "G")
+        query.data.upper().replace("C", "")
     )
     selection = preSelection.split("_")
     preSelection = f"{selection[0]}_{selection[1]}"
@@ -630,8 +639,58 @@ def Level2(update: Update, context: CallbackContext) -> str:
         # unavailable mode instead until this gets fixed.
         start(update, context)
         return START_ROUTES
-    if selection[len(selection)-1].upper() == "H":
+    if selection[len(selection)-1].upper() == "H": # Home button
         start(update, context)
+        return START_ROUTES
+    if len(selection) == 2 and selection[0] == "X" and selection[1] in ["P1","P2","P3"]:
+        nextOption = ""
+        if selection[1] == "P2":
+            skipMenus = INDEX_SKIP_MENUS_5_TO_9
+            nextOption = "P3"
+        elif selection[1] == "P3":
+            skipMenus = INDEX_SKIP_MENUS_10_TO_15
+            nextOption = "P1"
+        elif selection[1] == "P1":
+            skipMenus = INDEX_SKIP_MENUS_1_To_4
+            nextOption = "P2"
+        # Create the menu text labels
+        menuText = (
+            m1.renderForMenu(
+                m0.find(selection[0]),
+                skip=skipMenus,
+                renderStyle=MenuRenderStyle.STANDALONE,
+            )
+            .replace("     ", "")
+            .replace("    ", "")
+            .replace("  ", "")
+            .replace("\t", "")
+            .replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"")
+        )
+        menuText = f"{menuText}\n\nH > Home"
+        menuText = f"{menuText}\n\n{nextOption} > More Options"
+
+        # Create the menu buttons
+        mns = m1.renderForMenu(
+            m0.find(selection[0]),
+            skip=skipMenus,
+            asList=True,
+        )
+        mns.append(menu().create("H", "Home", 2))
+        mns.append(menu().create(f"{nextOption}", "More Options", 2))
+        inlineMenus = []
+        query.answer()
+        for mnu in mns:
+            inlineMenus.append(
+                InlineKeyboardButton(
+                    mnu.menuKey, callback_data=str(f"C{selection[0]}_{mnu.menuKey}")
+                )
+            )
+        keyboard = [inlineMenus]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        if query.message.text == menuText:
+            menuText = f"{PKDateUtilities.currentDateTime()}:\n{menuText}"
+        menuText = f"{menuText}\n\nClick /start if you want to restart the session."
+        query.edit_message_text(text=menuText, reply_markup=reply_markup)
         return START_ROUTES
     if len(selection) == 2 or (len(selection) == 3 and selection[2] == "P"):
         if str(selection[1]).isnumeric():
@@ -740,7 +799,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
                 skip=SCANNER_SKIP_MENUS_38_TO_43,
                 renderStyle=MenuRenderStyle.STANDALONE,
             )
-            menuText = menuText + "\n"
+            menuText = menuText + "\n\nP > More options"
             menuText = menuText + "\nH > Home"
             mns = m2.renderForMenu(
                 m1.find(selection[1]),
@@ -749,6 +808,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
                 renderStyle=MenuRenderStyle.STANDALONE,
             )
             mns.append(menu().create("H", "Home", 2))
+            mns.append(menu().create("P", "More Options", 2))
         elif str(selection[2]).isnumeric():
             preSelection = f"{selection[0]}_{selection[1]}_{selection[2]}"
             if selection[2] in SCANNER_MENUS_WITH_SUBMENU_SUPPORT:
@@ -776,7 +836,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
                     selection.extend(["", ""])
     elif len(selection) == 4:
         preSelection = (
-            query.data.upper().replace("CX", "X").replace("CB", "B").replace("CG", "G")
+            query.data.upper().replace("C", "")
         )
     optionChoices = ""
     if len(selection) <= 3 and mns is not None:
