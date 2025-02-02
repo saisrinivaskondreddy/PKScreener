@@ -642,7 +642,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
     if selection[len(selection)-1].upper() == "H": # Home button
         start(update, context)
         return START_ROUTES
-    if len(selection) == 2 and selection[0] == "X" and selection[1] in ["P1","P2","P3"]:
+    if len(selection) == 2 and selection[0] in ["X","B"] and selection[1] in ["P1","P2","P3"]:
         nextOption = ""
         if selection[1] == "P2":
             skipMenus = INDEX_SKIP_MENUS_5_TO_9

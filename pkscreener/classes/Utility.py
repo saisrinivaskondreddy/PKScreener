@@ -194,7 +194,7 @@ class tools:
                 + "  [+] Press <Enter> to continue!"
                 + colorText.END
             )
-        return f"\n{Changelog.changelog()}\n\n{devInfo}\n{versionInfo}\n\n{downloadsInfo}\n{homePage}\n{issuesInfo}\n{communityInfo}\n{latestInfo}\n{donationInfo}"
+        return f"\n{Changelog.changelog()}\n\n{devInfo}\n{versionInfo}\n\n{downloadsInfo}\n{homePage}\n{issuesInfo}\n{communityInfo}\n{latestInfo}\n{freeInfo}{donationInfo}"
 
     # Save last screened result to pickle file
     def setLastScreenedResults(df, df_save=None, choices=None):
