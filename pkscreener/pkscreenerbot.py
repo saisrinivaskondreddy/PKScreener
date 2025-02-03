@@ -243,7 +243,8 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
                     pass
             else:
                 updatedResults = "We could not find any transaction details with the provided UTR.\nUPI transaction reference number is a 12-digit alphanumeric/numeric code that serves as a unique identifier for transactions. It is also known as the Unique Transaction Reference (UTR) number.\nYou can find your UPI reference number in the UPI-enabled app you used to make the transaction.\nFor example, you can find your UPI reference number in the History section of Google Pay. \nIn the Paytm app, you can find it by clicking View Details.\n\nIf you still cannot find it, please drop a message with transaction details/snapshot to @ItsOnlyPK to enable subscription."
-
+        else:
+            updatedResults = "Did you forget to include the UTR number with /Check ?\nYou should use it like this:\n\n/Check UTR_Here\n\nUPI transaction reference number is a 12-digit alphanumeric/numeric code that serves as a unique identifier for transactions. It is also known as the Unique Transaction Reference (UTR) number.\nYou can find your UPI reference number in the UPI-enabled app you used to make the transaction.\nFor example, you can find your UPI reference number in the History section of Google Pay. \nIn the Paytm app, you can find it by clicking View Details.\n\nIf you still cannot find it, please drop a message with transaction details/snapshot to @ItsOnlyPK to enable subscription."
     update.message.reply_text(sanitiseTexts(updatedResults), parse_mode="HTML")
     shareUpdateWithChannel(update=update, context=context, optionChoices=f"/otp\n{updatedResults}")
     return START_ROUTES

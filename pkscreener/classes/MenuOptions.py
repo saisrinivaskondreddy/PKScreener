@@ -171,6 +171,7 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "Intraday(15m) VCP | Breaking out now                               ",  # 32
     "ATR Cross | Low RSI (<=40)                                         ",  # 33
     "Bullish Today x PDO/PDC | High Momentum | ATR Cross                ",  # 34
+    "Bullish Today x PDO/PDC | Breaking out now                         ",  # 35
 ]
 PREDEFINED_SCAN_MENU_KEYS = [str(x) for x in range(1,len(PREDEFINED_SCAN_MENU_TEXTS)+1,1)]
 level2_P_MenuDict = {}
@@ -215,6 +216,7 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:14:7:4:i 15m:>|X:0:23:'",               # 32
     "--systemlaunched -a y -e -o 'X:12:27:>|X:0:5:0:40:i 1m:'",             # 33
     "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:31:>|X:0:27:'",           # 34
+    "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:23:'",                    # 35
 ]
 PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS = []
 PREDEFINED_PIPED_MENU_OPTIONS = {}
