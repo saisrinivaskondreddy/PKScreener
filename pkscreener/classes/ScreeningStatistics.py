@@ -1296,6 +1296,105 @@ class ScreeningStatistics:
             t = t + 1
         return foundStockWithCupNHandle, df_point
 
+    def validate_cup(self,df, cup_start, cup_bottom, cup_end):
+        """Validate if the detected cup meets shape and depth criteria."""
+        start_price = df['Close'].iloc[cup_start]
+        bottom_price = df['Close'].iloc[cup_bottom]
+        end_price = df['Close'].iloc[cup_end]
+
+        # Cup Depth should be reasonable (10% - 50% drop from highs)
+        depth = (start_price - bottom_price) / start_price
+        if depth < 0.1 or depth > 0.5:
+            return False  
+
+        # Symmetry Check
+        left_depth = start_price - bottom_price
+        right_depth = end_price - bottom_price
+        if abs(left_depth - right_depth) / max(left_depth, right_depth) > 0.2:
+            return False  
+
+        # U-shape validation (Avoiding V-bottoms)
+        midpoint = (cup_start + cup_end) // 2
+        if df['Close'].iloc[midpoint] < bottom_price * 1.05:
+            return False  
+
+        return True
+
+    def get_dynamic_order(self,df):
+        """Dynamically calculate 'order' parameter for local extrema detection based on volatility."""
+        avg_volatility = df['Volatility'].mean()
+        
+        # If volatility is high, require more data points to confirm a cup
+        if avg_volatility > df['Close'].mean() * 0.02:  
+            return int(df['Close'].mean() * 0.2) + 1  # Higher volatility → require more confirmation
+        elif avg_volatility < df['Close'].mean() * 0.005:  
+            return int(df['Close'].mean() * 0.05) + 1  # Lower volatility → allow faster pattern detection
+        else:
+            return 15  # Default case
+        
+    def validate_volume(self,df, cup_start, cup_end, handle_end):
+        """Ensure decreasing volume in the cup and increasing volume at breakout."""
+        avg_cup_volume = df['Volume'].iloc[cup_start:cup_end].mean()
+        avg_handle_volume = df['Volume'].iloc[cup_end:handle_end].mean()
+        breakout_volume = df['Volume'].iloc[handle_end]
+
+        return avg_cup_volume > avg_handle_volume and breakout_volume > avg_handle_volume
+
+    def find_cup_and_handle(self,df,saveDict=None,screenDict=None,order=0):
+        """Detect Cup and Handle pattern with volume and breakout confirmation."""
+        try:
+            from scipy.signal import argrelextrema
+        except:
+            return False, None
+        close_prices = df['Close'].values
+        if order <=0:
+            order = self.get_dynamic_order(df)  # Set order dynamically
+        local_min_idx = argrelextrema(close_prices, np.less, order=order)[0]  # Local minima (potential cup bottoms)
+        local_max_idx = argrelextrema(close_prices, np.greater, order=order)[0]  # Local maxima (potential resistance)
+
+        if len(local_min_idx) < 3 or len(local_max_idx) < 2:
+            return False,None  
+
+        # Identifying the Cup
+        cup_start, cup_bottom, cup_end = local_min_idx[0], local_min_idx[len(local_min_idx)//2], local_min_idx[-1]
+
+        if not self.validate_cup(df, cup_start, cup_bottom, cup_end):
+            return False,None  
+
+        # Handle Detection
+        handle_start = cup_end
+        potential_handle = df['Close'][handle_start:handle_start+15]
+        handle_min = potential_handle.min()
+        handle_end = potential_handle.idxmin()
+
+        # Handle should not drop more than 50% of cup depth
+        cup_depth = df['Close'].iloc[cup_start] - df['Close'].iloc[cup_bottom]
+        handle_depth = df['Close'].iloc[handle_start] - handle_min
+        if handle_depth > cup_depth * 0.5:
+            return False,None  
+
+        # Breakout Confirmation
+        breakout_level = df['Close'].iloc[cup_start]
+        breakout = df[df.index > handle_end]['Close'].gt(breakout_level).any()
+        if not breakout:
+            return False,None  
+
+        # Volume Confirmation
+        if not self.validate_volume(df, cup_start, cup_end, handle_end):
+            return False,None  
+        
+        if saveDict is not None and screenDict is not None:
+            saved = self.findCurrentSavedValue(screenDict,saveDict, "Pattern")
+            screenDict["Pattern"] = (
+                saved[0] 
+                + colorText.GREEN
+                + f"Cup and Handle ({cup_start},{cup_bottom},{cup_end},{handle_start},{handle_end})"
+                + colorText.END
+            )
+            saveDict["Pattern"] = saved[1] + f"Cup and Handle ({cup_start},{cup_bottom},{cup_end},{handle_start},{handle_end})"
+
+        return True,(cup_start, cup_bottom, cup_end, handle_start, handle_end)
+    
     def findCurrentSavedValue(self, screenDict, saveDict, key):
         existingScreen = screenDict.get(key)
         existingSave = saveDict.get(key)
@@ -2607,6 +2706,7 @@ class ScreeningStatistics:
             # self.default_logger.info(f"Preprocessing data:\n{data.head(1)}\n")
             if daysToLookback is None:
                 daysToLookback = self.configManager.daysToLookback
+            volatility = df['Close'].rolling(window=20).std()
             if self.configManager.useEMA:
                 sma = pktalib.EMA(data["Close"], timeperiod=50)
                 lma = pktalib.EMA(data["Close"], timeperiod=200)
@@ -2616,6 +2716,7 @@ class ScreeningStatistics:
                 data.insert(len(data.columns), "LMA", lma)
                 data.insert(len(data.columns), "SSMA", ssma)
                 data.insert(len(data.columns), "SSMA20", ssma20)
+                data.insert(len(data.columns), "Volatility", volatility)
             else:
                 sma = pktalib.SMA(data["Close"], timeperiod=50)
                 lma = pktalib.SMA(data["Close"], timeperiod=200)
@@ -2625,6 +2726,7 @@ class ScreeningStatistics:
                 data.insert(len(data.columns), "LMA", lma)
                 data.insert(len(data.columns), "SSMA", ssma)
                 data.insert(len(data.columns), "SSMA20", ssma20)
+                data.insert(len(data.columns), "Volatility", volatility)
             vol = pktalib.SMA(data["Volume"], timeperiod=20)
             rsi = pktalib.RSI(data["Close"], timeperiod=14)
             data.insert(len(data.columns), "VolMA", vol)

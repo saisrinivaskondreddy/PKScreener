@@ -73,6 +73,7 @@ from pkscreener.classes.Backtest import backtest, backtestSummary
 from pkscreener.classes.PKSpreadsheets import PKSpreadsheets
 from PKDevTools.classes.OutputControls import OutputControls
 from PKDevTools.classes.Environment import PKEnvironment
+from pkscreener.classes.CandlePatterns import CandlePatterns
 from pkscreener.classes.MenuOptions import (
     level0MenuDict,
     level1_X_MenuDict,
@@ -97,7 +98,8 @@ from pkscreener.classes.MenuOptions import (
     PIPED_SCANNERS,
     PREDEFINED_SCAN_MENU_KEYS,
     PREDEFINED_SCAN_MENU_TEXTS,
-    INDICES_MAP
+    INDICES_MAP,
+    CANDLESTICK_DICT
 )
 from pkscreener.classes.OtaUpdater import OTAUpdater
 from pkscreener.classes.Portfolio import PortfolioCollection
@@ -1466,10 +1468,14 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             if userPassedArgs is None or userPassedArgs.answerdefault is None:
                 m0.renderCandleStickPatterns()
                 filterOption = input(colorText.FAIL + "  [+] Select option: ") or "0"
-                if str(filterOption).upper() not in ["0","M"]:
+                cupnHandleIndex = str(CandlePatterns.reversalPatternsBullish.index("Cup and Handle") + 1)
+                if filterOption == cupnHandleIndex:
+                    maLength = str(input("[+] Default is to find dynamically using volatility. Press enter to use default.\n[+] Enter number of candles to consider for left cup side formation:")) or "0"
+                if str(filterOption).upper() not in ["0","M",cupnHandleIndex]:
                     maLength = str(filterOption)
                 elif str(filterOption).upper() in ["M"]:
                     return None, None
+                selectedChoice["4"] = filterOption
 
     if executeOption == 8:
         if len(options) >= 5:
@@ -2752,6 +2758,11 @@ def updateMenuChoiceHierarchy():
                     menuChoiceHierarchy = (
                     menuChoiceHierarchy
                     + f'>{level4_X_ChartPattern_MASignalMenuDict[selectedChoice["4"]].strip()}'
+                )
+                elif len(selectedChoice) >= 5 and selectedChoice["3"] == "7":
+                    menuChoiceHierarchy = (
+                        menuChoiceHierarchy
+                        + f'>{CANDLESTICK_DICT[selectedChoice["4"]].strip() if selectedChoice["4"] != 0 else "No Filter"}'
                 )
             elif selectedChoice["2"] == "21":
                 menuChoiceHierarchy = (

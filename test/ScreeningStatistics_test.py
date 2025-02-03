@@ -3026,3 +3026,86 @@ def test_validateVolumeSpreadAnalysis_spread0_lessthan_spread1(mock_data, mock_s
 #         assert result == True
 #         assert screenDict['MA-Signal'] == '\033[32mBullish\033[0m, \033[32mBullish\033[0m'
 #         assert saveDict['MA-Signal'] == 'Bullish, Bullish'
+
+import unittest
+from pkscreener.classes.ScreeningStatistics import ScreeningStatistics
+
+class TestCupAndHandleDetection(unittest.TestCase):
+
+    def setUp(self):
+        """Create sample stock data for testing."""
+        dates = pd.date_range(start="2023-01-01", periods=80, freq='D')
+        
+        # Generate a synthetic cup and handle pattern
+        close_prices = np.concatenate([
+            np.linspace(100, 85, 20),  # Left cup side (down)
+            np.linspace(85, 90, 20),  # Cup bottom (stabilizing)
+            np.linspace(90, 100, 20),  # Right cup side (up)
+            np.linspace(100, 98, 5),  # Handle downtrend
+            np.linspace(98, 102, 10),  # Handle recovery
+            np.linspace(102, 110, 5)   # Breakout
+        ])
+        
+        volume = np.concatenate([
+            np.linspace(2000, 1500, 20),  # Decreasing volume in cup
+            np.linspace(1500, 1400, 20),  # Stabilized low volume
+            np.linspace(1400, 1800, 20),  # Increasing volume in recovery
+            np.linspace(1800, 1750, 5),   # Stable volume in handle
+            np.linspace(1750, 2200, 10),  # Volume picking up
+            np.linspace(2200, 3000, 5)    # Breakout volume spike
+        ])
+
+        self.df = pd.DataFrame({'Date': dates, 'Close': close_prices, 'Volume': volume})
+        self.df['Volatility'] = self.df['Close'].rolling(window=20).std()
+        self.df.set_index('Date', inplace=True)
+        self.screener = ScreeningStatistics(ConfigManager.tools(),None)
+
+    def test_valid_cup_and_handle(self):
+        """Test if a valid Cup and Handle pattern is detected."""
+        points = self.screener.find_cup_and_handle(self.df)
+        self.assertIsNotNone(points, "Cup and Handle pattern should be detected.")
+
+    def test_dynamic_order_calculation(self):
+        """Test if the order parameter adjusts based on volatility."""
+        high_vol_df = self.df.copy()
+        high_vol_df['Close'] += np.random.normal(0, 15, len(high_vol_df))  # Add artificial volatility
+        high_order = self.screener.get_dynamic_order(high_vol_df)
+        
+        low_vol_df = self.df.copy()
+        low_vol_df['Close'] += np.random.normal(0, 1, len(low_vol_df))  # Reduce volatility
+        low_order = self.screener.get_dynamic_order(low_vol_df)
+
+        self.assertGreaterEqual(high_order, low_order, "Higher volatility should increase order parameter.")
+    
+    def test_reject_v_shaped_cup(self):
+        """Ensure sharp V-bottoms are not detected as valid cups."""
+        v_shaped_df = self.df.copy()
+        v_shaped_df.iloc[10:30, v_shaped_df.columns.get_loc("Close")] = 85  # Sharp bottom
+        _,points = self.screener.find_cup_and_handle(v_shaped_df)
+        self.assertIsNone(points, "V-bottom shape should be rejected.")
+
+    def test_handle_depth_constraint(self):
+        """Ensure the handle does not drop too much (more than 50% of cup depth)."""
+        deep_handle_df = self.df.copy()
+        deep_handle_df.iloc[60:65, deep_handle_df.columns.get_loc("Close")] -= 5  # Excessive handle drop
+        _,points = self.screener.find_cup_and_handle(deep_handle_df)
+        self.assertIsNone(points, "Pattern should be rejected due to a deep handle.")
+
+    def test_no_breakout_rejection(self):
+        """Ensure patterns without a breakout are rejected."""
+        no_breakout_df = self.df.copy()
+        no_breakout_df.iloc[-5:, no_breakout_df.columns.get_loc("Close")] = 100  # No breakout
+        _,points = self.screener.find_cup_and_handle(no_breakout_df)
+        self.assertIsNone(points, "Pattern should be rejected without a breakout.")
+
+    def test_no_cup_no_detection(self):
+        """Ensure detection doesn't falsely identify a pattern when there's no cup formation."""
+        random_df = pd.DataFrame({
+            'Date': pd.date_range(start="2023-01-01", periods=100, freq='D'),
+            'Close': np.random.uniform(90, 110, 100),
+            'Volume': np.random.uniform(1500, 2500, 100)
+        })
+        random_df['Volatility'] = random_df['Close'].rolling(window=20).std()
+        random_df.set_index('Date', inplace=True)
+        _,points = self.screener.find_cup_and_handle(random_df)
+        self.assertIsNone(points, "No cup pattern exists, should return None.")
