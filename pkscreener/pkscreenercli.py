@@ -758,13 +758,13 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
             pass
         if final_df is not None and not final_df.empty:
             with pd.option_context('mode.chained_assignment', None):
-                final_df = final_df[["Pattern","LTP@Alert","LTP","EoDDiff","SqrOffLTP","SqrOffDiff","DayHigh","DayHighDiff"]]
+                final_df = final_df[["Pattern","LTP@Alert","LTP","EoDDiff","DayHigh","DayHighDiff"]] # "SqrOffLTP","SqrOffDiff"
                 final_df.rename(
                         columns={
                             "Pattern": "Scan Name",
                             "LTP@Alert": "Basket Value@Alert",
                             "LTP": "Basket Value@EOD",
-                            "SqrOffLTP": "Basket Value@SqrOff",
+                            # "SqrOffLTP": "Basket Value@SqrOff",
                             "DayHigh": "Basket Value@DayHigh",
                             },
                             inplace=True,
@@ -782,7 +782,7 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
             from PKDevTools.classes.Environment import PKEnvironment
             Channel_Id, _, _, _ = PKEnvironment().secrets
             if Channel_Id is not None and len(str(Channel_Id)) > 0:
-                sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis",
+                sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis (If you would have bought at alert time and sold at end of day or day high)",
                                         user=int(f"-{Channel_Id}"),
                                         tabulated_results=mark_down,
                                         markdown_results=mark_down,
