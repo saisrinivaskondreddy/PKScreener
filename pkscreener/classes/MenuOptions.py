@@ -135,8 +135,7 @@ LEVEL_1_DATA_DOWNLOADS = {
     "S": "NSE Symbols with Sector/Industry Details",
     "M": "Back to the Top/Main menu",
 }
-PREDEFINED_SCAN_ALERT_MENU_KEYS = ["1","5","6","8","18","22","25","27","28","29","30","31","32","33"]
-PREDEFINED_SCAN_MENU_KEYS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20", "21", "22", "23", "24", "25","26","27","28","29","30","31","32","33"]
+PREDEFINED_SCAN_ALERT_MENU_KEYS = ["2","5","6","18","25","27","29","30","31","32","33","34"]
 PREDEFINED_SCAN_MENU_TEXTS = [
     "Volume Scanners | High Momentum | Breaking Out Now | ATR Cross     ",  # 1
     "Volume Scanners | High Momentum | ATR Cross",                          # 2
@@ -171,7 +170,9 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "Bullish Today x PDO/PDC | VCP                                      ",  # 31
     "Intraday(15m) VCP | Breaking out now                               ",  # 32
     "ATR Cross | Low RSI (<=40)                                         ",  # 33
+    "Bullish Today x PDO/PDC | High Momentum | ATR Cross                ",  # 34
 ]
+PREDEFINED_SCAN_MENU_KEYS = [str(x) for x in range(1,len(PREDEFINED_SCAN_MENU_TEXTS)+1,1)]
 level2_P_MenuDict = {}
 for key in PREDEFINED_SCAN_MENU_KEYS:
     level2_P_MenuDict[key] = PREDEFINED_SCAN_MENU_TEXTS[int(key)-1]
@@ -213,6 +214,7 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:7:4:'",                   # 31
     "--systemlaunched -a y -e -o 'X:14:7:4:i 15m:>|X:0:23:'",               # 32
     "--systemlaunched -a y -e -o 'X:12:27:>|X:0:5:0:40:i 1m:'",             # 33
+    "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:31:>|X:0:27:'",           # 34
 ]
 PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS = []
 PREDEFINED_PIPED_MENU_OPTIONS = {}
