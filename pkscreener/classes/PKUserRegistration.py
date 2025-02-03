@@ -45,7 +45,7 @@ class ValidationResult(Enum):
 
 class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
     def __init__(self):
-        super(tools, self).__init__()
+        super(PKUserRegistration, self).__init__()
         self._userID = 0
         self._otp = 0
 

@@ -169,8 +169,9 @@ resultsContentsEncoded = None
 runCleanUp = False
 
 def startMarketMonitor(mp_dict,keyboardevent):
-    from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
-    NSEMarketStatus(mp_dict,keyboardevent).startMarketMonitor()
+    if not 'pytest' in sys.modules:
+        from PKDevTools.classes.NSEMarketStatus import NSEMarketStatus
+        NSEMarketStatus(mp_dict,keyboardevent).startMarketMonitor()
 
 def finishScreening(
     downloadOnly,
