@@ -23,7 +23,8 @@
 
 """
 import warnings
-from unittest.mock import ANY, MagicMock, patch, PropertyMock
+from unittest.mock import ANY, MagicMock, patch, PropertyMock, mock_open
+import unittest
 
 import numpy as np
 import platform
@@ -2983,6 +2984,239 @@ def test_validateVolumeSpreadAnalysis_spread0_lessthan_spread1(mock_data, mock_s
     assert tools_instance.validateVolumeSpreadAnalysis(mock_data, mock_screen_dict, mock_save_dict) == True
     assert mock_screen_dict.get("Pattern") == colorText.GREEN + "Demand Rise" + colorText.END 
     assert mock_save_dict.get("Pattern") == 'Demand Rise'
+
+
+class TestScreeningStatistics_calc_relative_strength(unittest.TestCase):
+
+    def setUp(self):
+        """Initialize the ScreeningStatistics instance."""
+        self.stats = ScreeningStatistics(ConfigManager.tools(),None)
+
+    def test_calc_relative_strength_none_dataframe(self):
+        """Test when the input DataFrame is None."""
+        result = self.stats.calc_relative_strength(None)
+        self.assertEqual(result, -1)
+
+    def test_calc_relative_strength_empty_dataframe(self):
+        """Test when the input DataFrame is empty."""
+        df = pd.DataFrame()
+        result = self.stats.calc_relative_strength(df)
+        self.assertEqual(result, -1)
+
+    def test_calc_relative_strength_insufficient_data(self):
+        """Test when the input DataFrame has only one row."""
+        df = pd.DataFrame({"Adj Close": [100]})
+        result = self.stats.calc_relative_strength(df)
+        self.assertEqual(result, -1)
+
+    def test_calc_relative_strength_fallback_to_close(self):
+        """Test when 'Adj Close' is missing and function falls back to 'Close'."""
+        df = pd.DataFrame({"Close": [100, 105, 102, 107, 110]})
+        result = self.stats.calc_relative_strength(df)
+        self.assertGreater(result, 0)  # Ensure RS is calculated
+
+    def test_calc_relative_strength_calculation(self):
+        """Test correct RS calculation."""
+        df = pd.DataFrame({"Adj Close": [100, 102, 101, 104, 107]})
+        result = self.stats.calc_relative_strength(df)
+        self.assertGreater(result, 0)  # RS should be > 0 since there are more gains
+
+    def test_calc_relative_strength_all_gains(self):
+        """Test when all price movements are gains (RS should be high)."""
+        df = pd.DataFrame({"Adj Close": [100, 105, 110, 115, 120]})
+        result = self.stats.calc_relative_strength(df)
+        self.assertGreater(result, 1)  # RS should be > 1 since there are no losses
+
+    def test_calc_relative_strength_all_losses(self):
+        """Test when all price movements are losses (RS should be 0 or very low)."""
+        df = pd.DataFrame({"Adj Close": [100, 95, 90, 85, 80]})
+        result = self.stats.calc_relative_strength(df)
+        self.assertEqual(result, 0)  # RS should be 0 because there are no gains
+
+    def test_calc_relative_strength_constant_prices(self):
+        """Test when all prices are the same (RS should be NaN or raise an exception)."""
+        df = pd.DataFrame({"Adj Close": [100, 100, 100, 100, 100]})
+        result = self.stats.calc_relative_strength(df)
+        self.assertTrue(pd.isna(result) or result == 1)  # Expect NaN or zero division handling
+
+
+class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
+
+    def setUp(self):
+        """Initialize the ScreeningStatistics instance."""
+        self.stats = ScreeningStatistics(ConfigManager.tools(),None)
+
+    def test_computeBuySellSignals_none_dataframe(self):
+        """Test when input DataFrame is None."""
+        result = self.stats.computeBuySellSignals(None)
+        self.assertIsNone(result)
+
+    def test_computeBuySellSignals_empty_dataframe(self):
+        """Test when input DataFrame is empty."""
+        df = pd.DataFrame()
+        with pytest.raises(KeyError):
+            result = self.stats.computeBuySellSignals(df)
+            self.assertTrue(df.empty)
+
+    @patch.dict("pkscreener.Imports", {"vectorbt": True})
+    @patch("vectorbt.indicators.MA.run")
+    def test_computeBuySellSignals_with_vectorbt(self, mock_vbt_run):
+        """Test Buy/Sell signals calculation when `vectorbt` is available."""
+        mock_ema = MagicMock()
+        mock_ema.ma_crossed_above.return_value = [True, False, True]
+        mock_ema.ma_crossed_below.return_value = [False, True, False]
+        mock_vbt_run.return_value = mock_ema
+
+        df = pd.DataFrame({
+            "Close": [100, 102, 101],
+            "ATRTrailingStop": [99, 100, 101]
+        })
+
+        result = self.stats.computeBuySellSignals(df)
+        
+        self.assertIn("Buy", result.columns)
+        self.assertIn("Sell", result.columns)
+        self.assertTrue(result["Buy"].iloc[0])  # Check Buy signal is generated
+        self.assertFalse(result["Sell"].iloc[0])  # Ensure no Sell signal
+
+    @patch.dict("pkscreener.Imports", {"vectorbt": False})
+    @patch("PKDevTools.classes.OutputControls.OutputControls.printOutput")
+    @patch("pkscreener.classes.Pktalib.pktalib.EMA", return_value=pd.Series([101, 103, 104]))
+    def test_computeBuySellSignals_without_vectorbt(self, mock_ema, mock_printOutput):
+        """Test Buy/Sell signals calculation when `vectorbt` is missing (fallback to `pktalib`)."""
+        df = pd.DataFrame({
+            "Close": [100, 102, 101],
+            "ATRTrailingStop": [99, 100, 101]
+        })
+
+        result = self.stats.computeBuySellSignals(df)
+        
+        self.assertIn("Buy", result.columns)
+        self.assertIn("Sell", result.columns)
+        self.assertTrue(result["Buy"].iloc[0])  # Check Buy signal is generated
+        self.assertFalse(result["Sell"].iloc[0])  # Ensure no Sell signal
+        mock_printOutput.assert_called()
+
+    def test_computeBuySellSignals_missing_columns(self):
+        """Test when `Close` or `ATRTrailingStop` columns are missing."""
+        df = pd.DataFrame({"Close": [100, 102, 101]})  # Missing `ATRTrailingStop`
+
+        with self.assertRaises(KeyError):
+            self.stats.computeBuySellSignals(df)
+
+    @patch("PKDevTools.classes.OutputControls.OutputControls.printOutput")
+    @patch("pkscreener.classes.ScreeningStatistics.ScreeningStatistics.downloadSaveTemplateJsons")
+    def test_computeBuySellSignals_oserror_retry(self, mock_download, mock_printOutput):
+        """Test that computeBuySellSignals retries after an OSError and downloads necessary files."""
+        df = pd.DataFrame({"Close": [100, 102, 101], "ATRTrailingStop": [99, 100, 101]})
+
+        with patch("vectorbt.indicators.MA.run", side_effect=[OSError("File missing"), df]) as mock_compute:
+            result = self.stats.computeBuySellSignals(df,retry=False)
+        
+        mock_download.assert_called()
+        self.assertIsNone(result)
+
+    @patch("PKDevTools.classes.OutputControls.OutputControls.printOutput")
+    def test_computeBuySellSignals_importerror(self, mock_printOutput):
+        """Test ImportError handling when `vectorbt` is missing."""
+        df = pd.DataFrame({
+            "Close": [100, 102, 101],
+            "ATRTrailingStop": [99, 100, 101]
+        })
+
+        with patch.dict("pkscreener.Imports", {"vectorbt": False}):
+            result = self.stats.computeBuySellSignals(df)
+
+        self.assertIn("Buy", result.columns)
+        self.assertIn("Sell", result.columns)
+        mock_printOutput.assert_called()
+
+    @patch('requests.get')  # Mock the 'requests.get' method
+    @patch('builtins.open', new_callable=mock_open)  # Mock the 'open' function
+    @patch('os.makedirs')  # Mock 'os.makedirs' to prevent actual directory creation
+    def test_download_save_template_jsons_success(self, mock_makedirs, mock_open, mock_requests_get):
+        # Set up the mock response object with desired behavior
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'key': 'value'}
+        mock_requests_get.return_value = mock_response
+
+        # Create an instance of ScreeningStatistics
+        stats = ScreeningStatistics()
+
+        # Call the method under test
+        stats.downloadSaveTemplateJsons('/fake/directory')
+
+        # Assert that the necessary methods were called with expected arguments
+        mock_makedirs.assert_called_once_with('/fake/directory/', exist_ok=True)
+        mock_open.assert_called_with('/fake/directory/seaborn.json', 'w')
+        mock_open().write.assert_called()
+
+    @patch('requests.get')
+    def test_download_save_template_jsons_network_failure(self, mock_requests_get):
+        # Simulate a network failure by setting side effect
+        mock_requests_get.side_effect = Exception('Network error')
+
+        stats = ScreeningStatistics()
+
+        # Call the method and assert that it handles the exception gracefully
+        with self.assertRaises(Exception):
+            stats.downloadSaveTemplateJsons('/fake/directory')
+
+    @patch('requests.get')
+    @patch('builtins.open', new_callable=mock_open)
+    def test_download_save_template_jsons_file_write_error(self, mock_open, mock_requests_get):
+        # Set up the mock response object
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {'key': 'value'}
+        mock_requests_get.return_value = mock_response
+
+        # Simulate a file write error
+        mock_open.side_effect = IOError('File write error')
+
+        stats = ScreeningStatistics()
+
+        # Call the method and assert that it handles the exception gracefully
+        with self.assertRaises(IOError):
+            stats.downloadSaveTemplateJsons('/fake/directory')
+
+    # def test_findATRCross_valid_data(self):
+    #     # Create a DataFrame with known 'Close' prices and expected ATR crossovers
+    #     data = {
+    #         'Close': [100, 105, 102, 108, 107],
+    #         # Add other necessary columns if required by the method
+    #     }
+    #     df = pd.DataFrame(data)
+    #     result = self.stats.findATRCross(df,{},{})
+    #     # Assert that the result contains expected buy/sell signals
+    #     # This will depend on the actual implementation details
+
+    # def test_findATRCross_no_crossovers(self):
+    #     # Create a DataFrame where 'Close' prices do not cross the ATR threshold
+    #     data = {
+    #         'Close': [100, 101, 102, 103, 104],
+    #         # Add other necessary columns if required by the method
+    #     }
+    #     df = pd.DataFrame(data)
+    #     result = self.stats.findATRCross(df)
+    #     # Assert that no buy/sell signals are generated
+    #     # This will depend on the actual implementation details
+
+    # def test_findATRCross_edge_case_single_row(self):
+    #     # Test with a single row DataFrame
+    #     data = {'Close': [100]}
+    #     df = pd.DataFrame(data)
+    #     result = self.stats.findATRCross(df)
+    #     # Assert the method's behavior with minimal data
+    #     # This will depend on the actual implementation details
+
+    # def test_findATRCross_invalid_data(self):
+    #     # Test with a DataFrame missing necessary columns
+    #     data = {'Open': [100, 105, 102, 108, 107]}  # Missing 'Close' column
+    #     df = pd.DataFrame(data)
+    #     with self.assertRaises(KeyError):
+    #         self.stats.findATRCross(df)
 
 # def test_validateShortTermBullish(tools_instance):
 #     # Mock the required functions and classes
