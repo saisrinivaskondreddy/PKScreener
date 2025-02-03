@@ -1659,17 +1659,17 @@ def test_preprocessData_valid_input(tools_instance):
     # Call the preprocessData function with the sample DataFrame
     fullData, trimmedData = tools_instance.preprocessData(df, daysToLookback=9)
     # Assert that the returned dataframes have the expected shape and columns
-    assert fullData.shape == (207, 14)
-    assert trimmedData.shape == (9, 14)
-    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
+    assert fullData.shape == (207, 15)
+    assert trimmedData.shape == (9, 15)
+    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'Volatility','VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
 
     tools_instance.configManager.useEMA = True
     # Call the preprocessData function with the sample DataFrame
     fullData, trimmedData = tools_instance.preprocessData(df, daysToLookback=9)
     # Assert that the returned dataframes have the expected shape and columns
-    assert fullData.shape == (207, 14)
-    assert trimmedData.shape == (9, 14)
-    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
+    assert fullData.shape == (207, 15)
+    assert trimmedData.shape == (9, 15)
+    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'Volatility','VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
 
 def test_preprocessData_empty_input(tools_instance):
     # Create an empty DataFrame for testing
