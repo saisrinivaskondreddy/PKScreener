@@ -337,21 +337,27 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
     if bot_available:
         mns = m0.renderForMenu(asList=True)
         if (PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday()[0]) or ("PKDevTools_Default_Log_Level" in os.environ.keys()) or sys.argv[0].endswith(".py"):
-            mns.append(menu().create(f"MI_{monitorIndex}", "Int. Monitor", 2))
+            mns.append(menu().create(f"MI_{monitorIndex}", "Intraday Monitor", 2))
         if user.username == OWNER_USER:
-            mns.append(menu().create(f"DV_0", ("✅" if not configManager.logsEnabled else "🚫"), 2))
-            mns.append(menu().create(f"DV_1", "🔄", 2))
+            mns.append(menu().create(f"DV_0", ("✅ Enable Logging" if not configManager.logsEnabled else "🚫 Disable Logging"), 2))
+            mns.append(menu().create(f"DV_1", "🔄 Restart Bot", 2))
 
         inlineMenus = []
+        keyboard = []
+        rowIndex = 0
         for mnu in mns:
             if mnu.menuKey[0:2] in TOP_LEVEL_SCANNER_MENUS:
+                rowIndex +=1
                 inlineMenus.append(
                     InlineKeyboardButton(
                         mnu.menuText.split("(")[0],
                         callback_data="C" + str(mnu.menuKey),
                     )
                 )
-        keyboard = [inlineMenus]
+                if rowIndex % 2 == 0:
+                    keyboard.append(inlineMenus)
+                    inlineMenus = []
+        
         reply_markup = InlineKeyboardMarkup(keyboard)
         cmds = m0.renderForMenu(
             selectedMenu=None,
