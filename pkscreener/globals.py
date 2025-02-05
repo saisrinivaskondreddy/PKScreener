@@ -74,7 +74,6 @@ from pkscreener.classes.PKSpreadsheets import PKSpreadsheets
 from PKDevTools.classes.OutputControls import OutputControls
 from PKDevTools.classes.Environment import PKEnvironment
 from pkscreener.classes.CandlePatterns import CandlePatterns
-from pkscreener.classes.Messenger import PKMessenger
 from pkscreener.classes.MenuOptions import (
     level0MenuDict,
     level1_X_MenuDict,
@@ -109,7 +108,6 @@ from pkscreener.classes.PKScheduler import PKScheduler
 from pkscreener.classes.PKScanRunner import PKScanRunner
 from pkscreener.classes.PKMarketOpenCloseAnalyser import PKMarketOpenCloseAnalyser
 from pkscreener.classes.PKPremiumHandler import PKPremiumHandler
-from pkscreener.classes.AssetsManager import PKAssetsManager
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
@@ -190,13 +188,13 @@ def finishScreening(
     if "RUNNER" not in os.environ.keys() or downloadOnly:
         # There's no need to prompt the user to save xls report or to save data locally.
         # This scan must have been triggered by github workflow by a user or scheduled job
-        PKAssetsManager.saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount)
+        saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount)
     if not testBuild and not downloadOnly and not testing and ((userPassedArgs is not None and "|" not in userPassedArgs.options) or userPassedArgs is None):
-        PKAssetsManager.saveNotifyResultsFile(
+        saveNotifyResultsFile(
             screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=user
         )
     if ("RUNNER" in os.environ.keys() and not downloadOnly) or userPassedArgs.log:
-        PKMessenger.sendMessageToTelegramChannel(mediagroup=True,user=userPassedArgs.user)
+        sendMessageToTelegramChannel(mediagroup=True,user=userPassedArgs.user)
 
 def getDownloadChoices(defaultAnswer=None):
     global userPassedArgs
@@ -515,14 +513,14 @@ def handleSecondaryMenuChoices(
 def showSendConfigInfo(defaultAnswer=None, user=None):
     configData = configManager.showConfigFile(defaultAnswer=('Y' if user is not None else defaultAnswer))
     if user is not None:
-        PKMessenger.sendMessageToTelegramChannel(message=Utility.tools.removeAllColorStyles(configData), user=user)
+        sendMessageToTelegramChannel(message=Utility.tools.removeAllColorStyles(configData), user=user)
     if defaultAnswer is None:
         input("Press any key to continue...")
 
 def showSendHelpInfo(defaultAnswer=None, user=None):
     helpData = Utility.tools.showDevInfo(defaultAnswer=('Y' if user is not None else defaultAnswer))
     if user is not None:
-        PKMessenger.sendMessageToTelegramChannel(message=Utility.tools.removeAllColorStyles(helpData), user=user)
+        sendMessageToTelegramChannel(message=Utility.tools.removeAllColorStyles(helpData), user=user)
     if defaultAnswer is None:
         input("Press any key to continue...")
 
@@ -1606,7 +1604,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         if defaultAnswer is None:
             OutputControls().takeUserInput("Press <Enter> to continue...")
         if userPassedArgs is not None and userPassedArgs.user is not None:
-            PKMessenger.sendMessageToTelegramChannel(message=message, user=userPassedArgs.user)
+            sendMessageToTelegramChannel(message=message, user=userPassedArgs.user)
         return None, None
     
     if executeOption == 30 or executeOption == 32:
@@ -1785,7 +1783,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     messageToUser = f"{Utility.tools.removeAllColorStyles(Utility.marketStatus())}\nNifty AI prediction for the Next Day: {pText}. {sText}.{warningText}"
                 else:
                     OutputControls().printOutput(messageToUser)
-                PKMessenger.sendMessageToTelegramChannel(message=messageToUser,user=user)
+                sendMessageToTelegramChannel(message=messageToUser,user=user)
                 if defaultAnswer is None:
                     input("\nPress <Enter> to Continue...\n")
                 return None, None
@@ -2039,7 +2037,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         caption = f"Stocks with dividends/bonus/splits. Samples:<pre>{caption_results}</pre>" #<i>Author is <u><b>NOT</b> a SEBI registered financial advisor</u> and MUST NOT be deemed as one.</i>"
                         png_file = f"PKS_X_12_26_{PKDateUtilities.currentDateTime().strftime('%Y-%m-%d_%H:%M:%S')}"
                         png_ext = ".png"
-                        PKMessenger.sendQuickScanResult(
+                        sendQuickScanResult(
                             menuChoiceHierarchy,
                             user,
                             shareable_strings[0],
@@ -3208,10 +3206,10 @@ def printNotifySaveScreenedResults(
                     finalCaption = f"{caption}.Feel free to share on social media.Open attached image for more. Samples:<pre>{caption_results}</pre>{elapsed_text} {suggestion_text}"
                 if not testing:
                     if PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday()[0]:
-                        kite_file_path, kite_caption = PKAssetsManager.generateKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
+                        kite_file_path, kite_caption = sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user)
                     else:
                         kite_file_path, kite_caption = "Dummy.html", "Dummy"
-                    PKMessenger.sendQuickScanResult(
+                    sendQuickScanResult(
                         f"{reportTitle}{menuChoiceHierarchy}",
                         user,
                         tabulated_results,
@@ -3248,7 +3246,7 @@ def printNotifySaveScreenedResults(
                                     backtestDetail=tabulated_backtest_detail,
                                 )
                                 caption = f"Backtest data for stocks listed in <b>{title}</b> scan results. See more past backtest data at https://pkjmesra.github.io/PKScreener/BacktestReports.html"
-                                PKMessenger.sendMessageToTelegramChannel(
+                                sendMessageToTelegramChannel(
                                     message=None,
                                     document_filePath=pngName + backtestExtension,
                                     caption=caption,
@@ -3275,7 +3273,7 @@ def printNotifySaveScreenedResults(
                 + colorText.END
             )
     elif user is not None and not str(user).startswith("-"):
-        PKMessenger.sendMessageToTelegramChannel(
+        sendMessageToTelegramChannel(
             message=f"No scan results found for {menuChoiceHierarchy}", user=user
         )
     if not testing:
@@ -3285,6 +3283,46 @@ def printNotifySaveScreenedResults(
         Utility.tools.setLastScreenedResults(screenResults, saveResults, f"{runOptionName}_{recordDate if recordDate is not None else ''}")
     scanCycleRunning = False
 
+def sendKiteBasketOrderReviewDetails(saveResultsTrimmed,runOptionName,caption,user):
+    kite_file_path = os.path.join(Archiver.get_user_data_dir(), f"{runOptionName}_Kite_Basket.html")
+    kite_caption=f"Review Kite(Zerodha) Basket order for {runOptionName}  - {caption}"
+    global userPassedArgs
+    if PKDateUtilities.isTradingTime() or userPassedArgs.log: # Only during market hours
+        # Also share the kite_basket html/json file.
+        try:
+            with pd.option_context('mode.chained_assignment', None):
+                kite_basket_df = pd.DataFrame(columns=["product","exchange","tradingsymbol","quantity","transaction_type","order_type","price"], index=saveResultsTrimmed.index)
+                price = (saveResultsTrimmed["LTP"].astype(float)*0.995).round(1) if "LTP" in saveResultsTrimmed.columns else 0
+                kite_basket_df.loc[:,"price"] = price
+                kite_basket_df["quantity"] = 1
+                kite_basket_df["product"] = "MIS"
+                kite_basket_df["exchange"] = "NSE"
+                kite_basket_df["transaction_type"] = "SELL" if "sell" in caption.lower() or "bear" in caption.lower() else "BUY"
+                kite_basket_df["order_type"] = "LIMIT"
+                kite_basket_df.reset_index(inplace=True)
+                kite_basket_df.reset_index(inplace=True, drop=True)
+                kite_basket_df["tradingsymbol"] = kite_basket_df["Stock"]
+                kite_basket_df.drop("Stock", axis=1, inplace=True, errors="ignore")
+                kite_basket_df.to_json(kite_file_path,orient='records',lines=False)
+                lines = ""
+                with open(kite_file_path, "r") as f:
+                    lines = f.read()
+                lines = lines.replace("\"","&quot;").replace("\n","\n,")
+                style = ".center { margin: 0;position: absolute;top: 50%;left: 50%;-ms-transform: translate(-50%, -50%);transform: translate(-50%, -50%);}"
+                htmlContent = f'<html><style>{style}</style><span><form method="post" action="https://kite.zerodha.com/connect/basket" target="_blank"><input type="hidden" name="api_key" value="gcac8p9oowmserd0"><input type="hidden" name="data" value="{lines}"><div class="center"><input type="submit" value="Review Basket Order on Kite" style="width:250px;height:200px;padding: 0.5rem 1rem; font-weight: 700;"></div></form></span></html>'
+                with open(kite_file_path, "w") as f:
+                    f.write(htmlContent)
+                # sendMessageToTelegramChannel(
+                #     message=None,
+                #     document_filePath=kite_file_path,
+                #     caption=kite_caption,
+                #     user=user,
+                # )
+                # os.remove(kite_file_path)
+        except Exception as e:  # pragma: no cover
+            default_logger().debug(e, exc_info=True)
+            pass
+    return kite_file_path, kite_caption
 
 @Halo(text='', spinner='dots')
 def prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, testing, user, pngName, pngExtension, eligible):
@@ -3312,7 +3350,7 @@ def prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, 
                     OutputControls().printOutput(g10kStyledTable)
                 g10kUnStyledTable = Utility.tools.removeAllColorStyles(g10kStyledTable)
                 if not testing and eligible:
-                    PKMessenger.sendQuickScanResult(
+                    sendQuickScanResult(
                         menuChoiceHierarchy,
                         user,
                         g10kStyledTable,
@@ -3323,7 +3361,7 @@ def prepareGrowthOf10kResults(saveResults, selectedChoice, menuChoiceHierarchy, 
                         forceSend=True
                     )
         elif user is not None and eligible and not str(user).startswith("-"):
-            PKMessenger.sendMessageToTelegramChannel(
+            sendMessageToTelegramChannel(
                 message=f"No scan results found for {menuChoiceHierarchy}", user=user
             )
             
@@ -3407,6 +3445,56 @@ def tabulateBacktestResults(saveResults, maxAllowed=0, force=False):
         )
         OutputControls().printOutput(tabulated_backtest_detail)
     return tabulated_backtest_summary, tabulated_backtest_detail
+
+
+def sendQuickScanResult(
+    menuChoiceHierarchy,
+    user,
+    tabulated_results,
+    markdown_results,
+    caption,
+    pngName,
+    pngExtension,
+    addendum=None,
+    addendumLabel=None,
+    backtestSummary="",
+    backtestDetail="",
+    summaryLabel = None,
+    detailLabel = None,
+    legendPrefixText = "",
+    forceSend=False
+):
+    if "PKDevTools_Default_Log_Level" not in os.environ.keys():
+        if (("RUNNER" not in os.environ.keys()) or ("RUNNER" in os.environ.keys() and os.environ["RUNNER"] == "LOCAL_RUN_SCANNER")):
+            return
+    try:
+        if not is_token_telegram_configured():
+            return
+        Utility.tools.tableToImage(
+            markdown_results,
+            tabulated_results,
+            pngName + pngExtension,
+            menuChoiceHierarchy,
+            backtestSummary=backtestSummary,
+            backtestDetail=backtestDetail,
+            addendum=addendum,
+            addendumLabel=addendumLabel,
+            summaryLabel = summaryLabel,
+            detailLabel = detailLabel,
+            legendPrefixText = legendPrefixText
+        )
+        if forceSend:
+            sendMessageToTelegramChannel(
+                message=None,
+                document_filePath=pngName + pngExtension,
+                caption=caption,
+                user=user,
+            )
+            os.remove(pngName + pngExtension)
+    except Exception as e:  # pragma: no cover
+        default_logger().debug(e, exc_info=True)
+        pass
+
 
 def reformatTable(summaryText, headerDict, colored_text, sorting=True):
     if sorting:
@@ -3678,6 +3766,99 @@ def updateBacktestResults(
     elapsed_time = time.time() - start_time
     return backtest_df
 
+
+def saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, loadCount):
+    global userPassedArgs, keyboardInterruptEventFired, download_trials
+    argsIntraday = userPassedArgs is not None and userPassedArgs.intraday is not None
+    intradayConfig = configManager.isIntradayConfig()
+    intraday = intradayConfig or argsIntraday
+    if not keyboardInterruptEventFired and (downloadOnly or (
+        configManager.cacheEnabled and not PKDateUtilities.isTradingTime() and not testing
+    )):
+        OutputControls().printOutput(
+            colorText.GREEN
+            + "  [+] Caching Stock Data for future use, Please Wait... "
+            + colorText.END,
+            end="",
+        )
+        Utility.tools.saveStockData(stockDictPrimary, configManager, loadCount, intraday)
+        if downloadOnly:
+            cache_file = Utility.tools.saveStockData(stockDictPrimary, configManager, loadCount, intraday, downloadOnly=downloadOnly)
+            cacheFileSize = os.stat(cache_file).st_size if os.path.exists(cache_file) else 0
+            if cacheFileSize < 1024*1024*40:
+                try:
+                    from PKDevTools.classes import Archiver
+                    log_file_path = os.path.join(Archiver.get_user_data_dir(), "pkscreener-logs.txt")
+                    message=f"{cache_file} has size: {cacheFileSize}! Something is wrong!"
+                    if os.path.exists(log_file_path):
+                        sendMessageToTelegramChannel(caption=message,document_filePath=log_file_path, user=DEV_CHANNEL_ID)
+                    else:
+                        sendMessageToTelegramChannel(message=message,user=DEV_CHANNEL_ID)
+                except: # pragma: no cover
+                    pass
+                # Let's try again with logging
+                if "PKDevTools_Default_Log_Level" not in os.environ.keys():
+                    launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
+                    launcher = f"python3.12 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
+                    os.system(f"{launcher} -a Y -e -l -d {'-i 1m' if configManager.isIntradayConfig() else ''}")
+                else:
+                    del os.environ['PKDevTools_Default_Log_Level']
+                    sys.exit(0)
+    else:
+        OutputControls().printOutput(colorText.GREEN + "  [+] Skipped Saving!" + colorText.END)
+
+
+def saveNotifyResultsFile(
+    screenResults, saveResults, defaultAnswer, menuChoiceHierarchy, user=None
+):
+    global userPassedArgs, elapsed_time, selectedChoice, media_group_dict,criteria_dateTime
+    if user is None and userPassedArgs.user is not None:
+        user = userPassedArgs.user
+    if ">|" in userPassedArgs.options and not configManager.alwaysExportToExcel:
+        # Let the final results be there. We're mid-way through the screening of some
+        # piped scan. Do not save the intermediate results.
+        return
+    caption = f'<b>{menuChoiceHierarchy.split(">")[-1]}</b>'
+    if screenResults is not None and len(screenResults) >= 1:
+        choices = PKScanRunner.getFormattedChoices(userPassedArgs,selectedChoice)
+        if userPassedArgs.progressstatus is not None:
+            choices = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1]
+        choices = f'{choices.strip()}{"_IA" if userPassedArgs is not None and userPassedArgs.runintradayanalysis else ""}'
+        needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
+        pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0) if needsCalc else None
+        filename = Utility.tools.promptSaveResults(choices,
+            saveResults, defaultAnswer=defaultAnswer,pastDate=pastDate,screenResults=screenResults)
+        # User triggered telegram bot request
+        # Group user Ids are < 0, individual ones are > 0
+        # if filename is not None and user is not None and int(str(user)) > 0:
+        #     sendMessageToTelegramChannel(
+        #         document_filePath=filename, caption=menuChoiceHierarchy, user=user
+        #     )
+        if filename is not None:
+            if "ATTACHMENTS" not in media_group_dict.keys():
+                media_group_dict["ATTACHMENTS"] = []
+            caption = media_group_dict["CAPTION"] if "CAPTION" in media_group_dict.keys() else menuChoiceHierarchy
+            media_group_dict["ATTACHMENTS"].append({"FILEPATH":filename,"CAPTION":caption.replace('&','n')})
+
+        OutputControls().printOutput(
+            colorText.WARN
+            + f"  [+] Notes:\n  [+] 1.Trend calculation is based on 'daysToLookBack'. See configuration.\n  [+] 2.Reduce the console font size to fit all columns on screen.\n  [+] Standard data columns were hidden: {configManager.alwaysHiddenDisplayColumns}. If you want, you can change this in pkscreener.ini"
+            + colorText.END
+        )
+    if userPassedArgs.monitor is None:
+        needsCalc = userPassedArgs is not None and userPassedArgs.backtestdaysago is not None
+        pastDate = PKDateUtilities.nthPastTradingDateStringFromFutureDate(int(userPassedArgs.backtestdaysago) if needsCalc else 0) if criteria_dateTime is None else criteria_dateTime
+        if userPassedArgs.triggertimestamp is None:
+            userPassedArgs.triggertimestamp = int(PKDateUtilities.currentDateTimestamp())
+        OutputControls().printOutput(
+            colorText.GREEN
+            + f"  [+] Screening Completed. Found {len(screenResults) if screenResults is not None else 0} results in {round(elapsed_time,2)} sec. for {colorText.END}{colorText.FAIL}{pastDate}{colorText.END}{colorText.GREEN}. Queue Wait Time:{int(PKDateUtilities.currentDateTimestamp()-userPassedArgs.triggertimestamp-round(elapsed_time,2))}s! Press Enter to Continue.."
+            + colorText.END
+            , enableMultipleLineOutput=True
+        )
+        if defaultAnswer is None:
+            OutputControls().takeUserInput("Press <Enter> to continue...")
+
 def sendGlobalMarketBarometer(userArgs=None):
     from pkscreener.classes import Barometer
     suggestion_text = "Feel free to share on social media.Try @nse_pkscreener_bot for more scans! <i><b><u>You agree that you have read</u></b>:https://pkjmesra.github.io/PKScreener/Disclaimer.txt</i> <b>and accept TOS</b>: https://pkjmesra.github.io/PKScreener/tos.txt <b>STOP using and exit from channel/group, if you do not.</b>"
@@ -3689,7 +3870,7 @@ def sendGlobalMarketBarometer(userArgs=None):
             user = userArgs.user if userArgs is not None else (int(f"-{Channel_Id}") if Channel_Id is not None and len(str(Channel_Id)) > 0 else None)
             gmbFileSize = os.stat(gmbPath).st_size if os.path.exists(gmbPath) else 0
             OutputControls().printOutput(f"Barometer report created with size {gmbFileSize} @ {gmbPath}")
-            PKMessenger.sendMessageToTelegramChannel(
+            sendMessageToTelegramChannel(
                 message=None,
                 photo_filePath=gmbPath,
                 caption=caption,
@@ -3702,11 +3883,98 @@ def sendGlobalMarketBarometer(userArgs=None):
         default_logger().debug(e,exc_info=True)
         pass
 
+def sendMessageToTelegramChannel(
+    message=None, photo_filePath=None, document_filePath=None, caption=None, user=None, mediagroup=False
+):
+    global userPassedArgs, test_messages_queue, media_group_dict
+    if ("RUNNER" not in os.environ.keys() and (userPassedArgs is not None and not userPassedArgs.log)) or (userPassedArgs is not None and userPassedArgs.telegram):
+        return
+    
+    if user is None and userPassedArgs is not None and userPassedArgs.user is not None:
+        user = userPassedArgs.user
+    if not mediagroup:
+        if test_messages_queue is not None:
+            test_messages_queue.append(f"message:{message}\ncaption:{caption}\nuser:{user}\ndocument:{document_filePath}")
+            if len(test_messages_queue) >10:
+                test_messages_queue.pop(0)
+        if user is not None and caption is not None:
+            caption = f"{caption.replace('&','n')}."
+        if message is not None:
+            try:
+                message = message.replace("&", "n").replace("<","*")
+                send_message(message, userID=user)
+            except Exception as e:  # pragma: no cover
+                default_logger().debug(e, exc_info=True)
+        else:
+            message = ""
+        if photo_filePath is not None:
+            try:
+                if caption is not None:
+                    caption = f"{caption.replace('&','n')}"
+                send_photo(photo_filePath, (caption if len(caption) <=1024 else ""), userID=user)
+                # Breather for the telegram API to be able to send the heavy photo
+                sleep(2)
+            except Exception as e:  # pragma: no cover
+                default_logger().debug(e, exc_info=True)
+        if document_filePath is not None:
+            try:
+                if caption is not None and isinstance(caption,str):
+                    caption = f"{caption.replace('&','n')}"
+                send_document(document_filePath, (caption if len(caption) <=1024 else ""), userID=user)
+                # Breather for the telegram API to be able to send the document
+                sleep(2)
+            except Exception as e:  # pragma: no cover
+                default_logger().debug(e, exc_info=True)
+    else:
+        file_paths = []
+        file_captions = []
+        if "ATTACHMENTS" in media_group_dict.keys():
+            attachments = media_group_dict["ATTACHMENTS"]
+            numFiles = len(attachments)
+            if numFiles >= 4:
+                media_group_dict["ATTACHMENTS"] = []
+            for attachment in attachments:
+                file_paths.append(attachment["FILEPATH"])
+                cleanCaption = attachment["CAPTION"].replace('&','n')[:1024]
+                if "<pre>" in cleanCaption and "</pre>" not in cleanCaption:
+                    cleanCaption = f"{cleanCaption[:1018]}</pre>"
+                file_captions.append(cleanCaption)
+            if test_messages_queue is not None:
+                test_messages_queue.append(f"message:{file_captions[-1]}\ncaption:{file_captions[-1]}\nuser:{user}\ndocument:{file_paths[-1]}")
+                if len(test_messages_queue) >10:
+                    test_messages_queue.pop(0)
+            if len(file_paths) > 0 and not userPassedArgs.monitor:
+                resp = send_media_group(user=userPassedArgs.user,
+                                                png_paths=[],
+                                                png_album_caption=None,
+                                                file_paths=file_paths,
+                                                file_captions=file_captions)
+                if resp is not None:
+                    default_logger().debug(resp.text, exc_info=True)
+            caption = f"{str(len(file_captions))} files sent!"
+            message = media_group_dict["CAPTION"].replace('&','n').replace("<","*")[:1024] if "CAPTION" in media_group_dict.keys() else "-"
+        for f in file_paths:
+            try:
+                if "RUNNER" in os.environ.keys():
+                    os.remove(f)
+                elif not f.endswith("xlsx"):
+                    os.remove(f)
+            except: # pragma: no cover
+                pass
+    if user is not None:
+        if str(user) != str(DEV_CHANNEL_ID) and userPassedArgs is not None and not userPassedArgs.monitor:
+            # Send an update to dev channel
+            send_message(
+                f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options.replace(':D','')}]",
+                userID=DEV_CHANNEL_ID,
+            )
+
 def sendTestStatus(screenResults, label, user=None):
     msg = "<b>SUCCESS</b>" if (screenResults is not None and len(screenResults) >= 1) else "<b>FAIL</b>"
-    PKMessenger.sendMessageToTelegramChannel(
+    sendMessageToTelegramChannel(
         message=f"{msg}: Found {len(screenResults) if screenResults is not None else 0} Stocks for {label}", user=user
     )
+
 
 def showBacktestResults(backtest_df:pd.DataFrame, sortKey="Stock", optionalName="backtest_result",choices=None):
     global menuChoiceHierarchy, selectedChoice, userPassedArgs, elapsed_time
