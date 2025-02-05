@@ -463,7 +463,8 @@ def warnAboutDependencies():
             OutputControls().takeUserInput("Press any key to try anyway...")
     
 def runApplication():
-    from pkscreener.globals import main, sendQuickScanResult,sendMessageToTelegramChannel, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions,menuChoiceHierarchy
+    from pkscreener.classes.Messenger import PKMessenger
+    from pkscreener.globals import main, sendGlobalMarketBarometer, updateMenuChoiceHierarchy, isInterrupted, refreshStockData, closeWorkersAndExit, resetUserMenuChoiceOptions,menuChoiceHierarchy
     # From a previous call to main with args, it may have been mutated.
     # Let's stock to the original args passed by user
     try:
@@ -741,7 +742,8 @@ def generateIntradayAnalysisReports(args):
 def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
     import pandas as pd
     from pkscreener.classes import Utility
-    from pkscreener.globals import sendQuickScanResult,showBacktestResults
+    from pkscreener.classes.Messenger import PKMessenger
+    from pkscreener.globals import showBacktestResults
 
     if optionalFinalOutcome_df is not None and not optionalFinalOutcome_df.empty:
         final_df = None
@@ -782,7 +784,7 @@ def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
             from PKDevTools.classes.Environment import PKEnvironment
             Channel_Id, _, _, _ = PKEnvironment().secrets
             if Channel_Id is not None and len(str(Channel_Id)) > 0:
-                sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis (If you would have bought at alert time and sold at end of day or day high)",
+                PKMessenger.sendQuickScanResult(menuChoiceHierarchy="IntradayAnalysis (If you would have bought at alert time and sold at end of day or day high)",
                                         user=int(f"-{Channel_Id}"),
                                         tabulated_results=mark_down,
                                         markdown_results=mark_down,
