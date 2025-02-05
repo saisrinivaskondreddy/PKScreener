@@ -91,9 +91,8 @@ class PKMessenger:
             pass
 
     def sendMessageToTelegramChannel(
-        self,message=None, photo_filePath=None, document_filePath=None, caption=None, user=None, mediagroup=False
+        self,message=None, photo_filePath=None, document_filePath=None, caption=None, user=None, mediagroup=False,userPassedArgs=None, test_messages_queue=None, media_group_dict=None
     ):
-        global userPassedArgs, test_messages_queue, media_group_dict
         if ("RUNNER" not in os.environ.keys() and (userPassedArgs is not None and not userPassedArgs.log)) or (userPassedArgs is not None and userPassedArgs.telegram):
             return
         
