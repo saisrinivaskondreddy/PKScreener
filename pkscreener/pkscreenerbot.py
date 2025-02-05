@@ -357,7 +357,8 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
                 if rowIndex % 2 == 0:
                     keyboard.append(inlineMenus)
                     inlineMenus = []
-        
+        if len(inlineMenus) > 0:
+            keyboard.append(inlineMenus)
         reply_markup = InlineKeyboardMarkup(keyboard)
         cmds = m0.renderForMenu(
             selectedMenu=None,
