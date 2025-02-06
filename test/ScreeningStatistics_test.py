@@ -3060,6 +3060,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
 
     @patch.dict("pkscreener.Imports", {"vectorbt": True})
     @patch("vectorbt.indicators.MA.run")
+    # @patch("builtins.print")
     def test_computeBuySellSignals_with_vectorbt(self, mock_vbt_run):
         """Test Buy/Sell signals calculation when `vectorbt` is available."""
         mock_ema = MagicMock()
@@ -3104,6 +3105,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.stats.computeBuySellSignals(df)
 
+    # @patch("builtins.print")
     @patch("PKDevTools.classes.OutputControls.OutputControls.printOutput")
     @patch("pkscreener.classes.ScreeningStatistics.ScreeningStatistics.downloadSaveTemplateJsons")
     def test_computeBuySellSignals_oserror_retry(self, mock_download, mock_printOutput):
