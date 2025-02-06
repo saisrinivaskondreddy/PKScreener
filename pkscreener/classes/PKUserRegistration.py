@@ -34,7 +34,7 @@ from PKDevTools.classes.ColorText import colorText
 from PKDevTools.classes.Pikey import PKPikey
 from PKDevTools.classes import Archiver
 from PKDevTools.classes.log import default_logger
-from pkscreener.classes import Utility
+from pkscreener.classes import Utility, ConsoleUtility
 from pkscreener.classes.MenuOptions import menus
 
 class ValidationResult(Enum):
@@ -98,7 +98,7 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
                 return ValidationResult.Success
         except: # pragma: no cover
             return ValidationResult.BadUserID
-        Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
+        ConsoleUtility.PKConsoleTools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
         configManager = tools()
         configManager.getConfig(parser)
         if configManager.userID is not None and len(configManager.userID) > 0:
@@ -166,7 +166,7 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
                     configManager.userID = str(PKUserRegistration.userID)
                     configManager.otp = str(PKUserRegistration.otp)
                     configManager.setConfig(parser,default=True,showFileCreatedText=False)
-                    Utility.tools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
+                    ConsoleUtility.PKConsoleTools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
                     return validationReason
         except KeyboardInterrupt:
             raise KeyboardInterrupt

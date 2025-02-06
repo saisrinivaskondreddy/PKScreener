@@ -53,7 +53,7 @@ class TestPKPremiumHandler(unittest.TestCase):
         result = PKPremiumHandler.hasPremium(self.mock_menu)
         self.assertTrue(result, "Non-premium users should pass for a non-premium menu.")
 
-    @patch("pkscreener.classes.Utility.tools.clearScreen")
+    @patch("pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen")
     @patch.object(PKUserRegistration, "validateToken", return_value=(False, ValidationResult.BadOTP))
     @patch.object(PKUserRegistration, "login", return_value=ValidationResult.Success)
     def test_showPremiumDemoOptions_login_attempt(self, mock_login, mock_validateToken, mock_clearScreen):
@@ -61,7 +61,7 @@ class TestPKPremiumHandler(unittest.TestCase):
         result = PKPremiumHandler.showPremiumDemoOptions(self.mock_menu)
         self.assertEqual(result, ValidationResult.Success, "User should log in successfully.")
 
-    @patch("pkscreener.classes.Utility.tools.clearScreen")
+    @patch("pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen")
     @patch.object(PKUserRegistration, "validateToken", return_value=(False, ValidationResult.BadUserID))
     @patch.object(OutputControls, "printOutput")
     @patch("builtins.input", return_value="1")  # Simulate user choosing the demo option
@@ -73,7 +73,7 @@ class TestPKPremiumHandler(unittest.TestCase):
         mock_demo.assert_called_once()
         mock_exit.assert_called_once()
 
-    @patch("pkscreener.classes.Utility.tools.clearScreen")
+    @patch("pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen")
     @patch.object(PKUserRegistration, "validateToken", return_value=(False, ValidationResult.BadUserID))
     @patch.object(OutputControls, "printOutput")
     @patch("builtins.input", return_value="2")  # Simulate user choosing subscription option

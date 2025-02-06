@@ -25,7 +25,7 @@
 """
 import os
 from time import sleep
-from pkscreener.classes import Utility
+from pkscreener.classes import Utility, ImageUtility
 
 from PKDevTools.classes.log import default_logger
 from PKDevTools.classes.Telegram import (
@@ -65,7 +65,7 @@ class PKMessenger:
         try:
             if not is_token_telegram_configured():
                 return
-            Utility.tools.tableToImage(
+            ImageUtility.PKImageTools.tableToImage(
                 markdown_results,
                 tabulated_results,
                 pngName + pngExtension,

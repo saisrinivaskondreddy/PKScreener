@@ -443,9 +443,9 @@ def warnAboutDependencies():
                 + colorText.END
             )
         sleep(1)
+        issueLink = "https://github.com/pkjmesra/PKScreener"
+        issueLink = f"\x1b[97m\x1b]8;;{issueLink}\x1b\\{issueLink}\x1b]8;;\x1b\\\x1b[0m"
         if Imports["pandas_ta"]:
-            issueLink = "https://github.com/pkjmesra/PKScreener"
-            issueLink = f"\x1b[97m\x1b]8;;{issueLink}\x1b\\{issueLink}\x1b]8;;\x1b\\\x1b[0m"
             taLink = "https://github.com/ta-lib/ta-lib-python"
             taLink = f"\x1b[97m\x1b]8;;{taLink}\x1b\\{taLink}\x1b]8;;\x1b\\\x1b[0m"
             OutputControls().printOutput(
@@ -681,7 +681,7 @@ def generateIntradayAnalysisReports(args):
             runOptions.extend(otherMenus)
     import pandas as pd
     optionalFinalOutcome_df = pd.DataFrame()
-    import pkscreener.classes.Utility as Utility
+    from pkscreener.classes import Utility, ConsoleUtility
     # Delete any existing data from the previous run.
     configManager.deleteFileWithPattern(rootDir=Archiver.get_user_data_dir(),pattern="stock_data_*.pkl")
     analysis_index = 1
@@ -741,7 +741,7 @@ def generateIntradayAnalysisReports(args):
 
 def saveSendFinalOutcomeDataframe(optionalFinalOutcome_df):
     import pandas as pd
-    from pkscreener.classes import Utility
+    from pkscreener.classes import Utility, ConsoleUtility
     from pkscreener.classes.Messenger import PKMessenger
     from pkscreener.globals import showBacktestResults
 
@@ -1003,13 +1003,13 @@ def pkscreenercli():
             del os.environ['simulation']
         # Import other dependency here because if we import them at the top
         # multiprocessing behaves in unpredictable ways
-        import pkscreener.classes.Utility as Utility
+        from pkscreener.classes import Utility, ConsoleUtility
 
         configManager.default_logger = default_logger()
         if originalStdOut is None:
             # Clear only if this is the first time it's being called from some
             # loop within workflowtriggers.
-            Utility.tools.clearScreen(userArgs=args, clearAlways=True)
+            ConsoleUtility.PKConsoleTools.clearScreen(userArgs=args, clearAlways=True)
         warnAboutDependencies()
         if args.prodbuild:
             if args.options and len(args.options.split(":")) > 0:

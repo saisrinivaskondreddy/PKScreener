@@ -79,7 +79,7 @@ class TestPKUserRegistration(unittest.TestCase):
         self.assertEqual(reason, ValidationResult.BadOTP)
 
     # @patch("builtins.input", return_value="12345")  # Mock user input for username
-    # @patch("pkscreener.classes.Utility.tools.clearScreen")
+    # @patch("pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen")
     # @patch("PKDevTools.classes.OutputControls.OutputControls.printOutput")
     # @patch("time.sleep")
     # def test_login_success(self, mock_sleep, mock_printOutput, mock_clearScreen, mock_input):
@@ -89,7 +89,7 @@ class TestPKUserRegistration(unittest.TestCase):
     #         self.assertEqual(result, ValidationResult.Success)
 
     @patch("builtins.input", return_value="123456")  # Mock user input for username
-    @patch("pkscreener.classes.Utility.tools.clearScreen")
+    @patch("pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen")
     @patch("PKDevTools.classes.OutputControls.OutputControls.printOutput")
     @patch("time.sleep")
     def test_login_invalid_userID(self, mock_sleep,mock_printOutput, mock_clearScreen, mock_input):
@@ -100,7 +100,7 @@ class TestPKUserRegistration(unittest.TestCase):
                 self.assertEqual(result, ValidationResult.BadUserID)
 
     @patch("builtins.input", return_value="678907")  # Mock OTP input
-    @patch("pkscreener.classes.Utility.tools.clearScreen")
+    @patch("pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen")
     @patch("PKDevTools.classes.OutputControls.OutputControls.printOutput")
     @patch("time.sleep")
     def test_login_invalid_otp(self,mock_sleep, mock_printOutput, mock_clearScreen, mock_input):

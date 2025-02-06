@@ -64,19 +64,19 @@ class MarketStatus(SingletonMixin, metaclass=SingletonType):
     def getMarketStatus(self, progress=None, task_id=0, exchangeSymbol="^NSEI",namedOnly=False):
         lngStatus = ""
         try:
-            if not 'pytest' in sys.modules:
-                suppressLogs = True
-                if "PKDevTools_Default_Log_Level" in os.environ.keys():
-                    suppressLogs = os.environ["PKDevTools_Default_Log_Level"] == str(log.logging.NOTSET)
-                with SuppressOutput(suppress_stdout=suppressLogs, suppress_stderr=suppressLogs):
-                    if progress:
-                        progress[task_id] = {"progress": 0, "total": 1}
-                    _,lngStatus,_ = MarketStatus.nseFetcher.capitalMarketStatus(exchange=exchangeSymbol)
-                    if exchangeSymbol in ["^NSEI","^BSESN"] and not namedOnly:
-                        _,bseStatus,_ = MarketStatus.nseFetcher.capitalMarketStatus(exchange="^BSESN")
-                        lngStatus = f"{lngStatus} | {bseStatus}"
+            # if not 'pytest' in sys.modules:
+            suppressLogs = True
+            if "PKDevTools_Default_Log_Level" in os.environ.keys():
+                suppressLogs = os.environ["PKDevTools_Default_Log_Level"] == str(log.logging.NOTSET)
+            with SuppressOutput(suppress_stdout=suppressLogs, suppress_stderr=suppressLogs):
                 if progress:
-                    progress[task_id] = {"progress": 1, "total": 1}
+                    progress[task_id] = {"progress": 0, "total": 1}
+                _,lngStatus,_ = MarketStatus.nseFetcher.capitalMarketStatus(exchange=exchangeSymbol)
+                if exchangeSymbol in ["^NSEI","^BSESN"] and not namedOnly:
+                    _,bseStatus,_ = MarketStatus.nseFetcher.capitalMarketStatus(exchange="^BSESN")
+                    lngStatus = f"{lngStatus} | {bseStatus}"
+            if progress:
+                progress[task_id] = {"progress": 1, "total": 1}
         except KeyboardInterrupt:
             raise KeyboardInterrupt
         except Exception as e:# pragma: no cover
