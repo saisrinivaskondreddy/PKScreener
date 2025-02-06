@@ -202,7 +202,7 @@ class PKImageTools:
         }
         cleanedUpStyledValues = []
         cellFillColors = []
-        cleanedUpStyledValue = cellStyledValue
+        cleanedUpStyledValue = str(cellStyledValue)
         prefix = ""
         for style in otherStyles:
             cleanedUpStyledValue = cleanedUpStyledValue.replace(style, "")
@@ -227,7 +227,7 @@ class PKImageTools:
         if len(cellFillColors) == 0:
             cellFillColors = [defaultCellFillColor]
         if len(cleanedUpStyledValues) == 0:
-            cleanedUpStyledValues = [cellStyledValue]
+            cleanedUpStyledValues = [str(cellStyledValue)]
         return cellFillColors, cleanedUpStyledValues
 
     @Halo(text='', spinner='dots')
@@ -272,8 +272,8 @@ class PKImageTools:
             stdFont_scanResulttext_width, stdFont_scanResulttext_height = PKImageTools.getsize_multiline(font=stdfont,srcText=table) if len(table) > 0 else (0,0)
             unstyled_backtestsummary = PKImageTools.removeAllColorStyles(backtestSummary)
             unstyled_backtestDetail = PKImageTools.removeAllColorStyles(backtestDetail)
-            stdFont_backtestSummary_text_width,stdFont_backtestSummary_text_height= PKImageTools.getsize_multiline(font=stdfont,srcText=unstyled_backtestsummary) if len(unstyled_backtestsummary) > 0 else (0,0)
-            stdFont_backtestDetail_text_width, stdFont_backtestDetail_text_height = PKImageTools.getsize_multiline(font=stdfont, srcText=unstyled_backtestDetail) if len(unstyled_backtestDetail) > 0 else (0,0)
+            stdFont_backtestSummary_text_width,stdFont_backtestSummary_text_height= PKImageTools.getsize_multiline(font=stdfont,srcText=unstyled_backtestsummary) if (unstyled_backtestsummary is not None and len(unstyled_backtestsummary) > 0) else (0,0)
+            stdFont_backtestDetail_text_width, stdFont_backtestDetail_text_height = PKImageTools.getsize_multiline(font=stdfont, srcText=unstyled_backtestDetail) if (unstyled_backtestDetail is not None and len(unstyled_backtestDetail) > 0) else (0,0)
             artfont_scanResultText_width, _ = PKImageTools.getsize_multiline(font=artfont,srcText=table) if len(table) > 0 else (0,0)
             artfont_backtestSummary_text_width, _ = PKImageTools.getsize_multiline(font= artfont,srcText=backtestSummary) if (backtestSummary is not None and len(backtestSummary)) > 0 else (0,0)
             stdfont_addendumtext_height = 0
@@ -310,12 +310,12 @@ class PKImageTools:
             im_height = int(
                         artfont_arttext_height # Always
                         + 3*stdFont_oneLinelabel_height # Title label # Always
-                        + stdFont_scanResulttext_height + (stdFont_oneLinelabel_height if stdFont_scanResulttext_height > 0 else 0)
-                        + stdFont_backtestSummary_text_height + (stdFont_oneLinelabel_height if stdFont_backtestSummary_text_height > 0 else 0)
-                        + stdFont_backtestDetail_text_height + (stdFont_oneLinelabel_height if stdFont_backtestDetail_text_height > 0 else 0)
+                        + stdFont_scanResulttext_height + (stdFont_oneLinelabel_height if int(stdFont_scanResulttext_height) > 0 else 0)
+                        + stdFont_backtestSummary_text_height + (stdFont_oneLinelabel_height if int(stdFont_backtestSummary_text_height) > 0 else 0)
+                        + stdFont_backtestDetail_text_height + (stdFont_oneLinelabel_height if int(stdFont_backtestDetail_text_height) > 0 else 0)
                         + artfont_repotext_height # Always
                         + artfont_legendtext_height # Always
-                        + stdfont_addendumtext_height + (stdFont_oneLinelabel_height if stdfont_addendumtext_height > 0 else 0)
+                        + stdfont_addendumtext_height + (stdFont_oneLinelabel_height if int(stdfont_addendumtext_height) > 0 else 0)
                     )
             im = Image.new("RGB",(im_width,im_height),bgColor)
             draw = ImageDraw.Draw(im)
