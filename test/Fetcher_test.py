@@ -40,6 +40,9 @@ from urllib3.exceptions import ReadTimeoutError
 from pkscreener.classes import ConfigManager
 from pkscreener.classes.Fetcher import screenerStockDataFetcher
 
+import unittest
+from pkscreener.classes.PKTask import PKTask
+from PKNSETools.PKNSEStockDataFetcher import nseStockDataFetcher
 
 @pytest.fixture
 def configManager():
@@ -681,3 +684,33 @@ class TestStockDataFetcher(unittest.TestCase):
         # Assert
         self.assertIn("AAPL.NS", result)
         self.assertIn("MSFT.NS", result)
+
+
+class TestScreenerStockDataFetcher(unittest.TestCase):
+    
+    @patch.object(screenerStockDataFetcher, 'fetchStockData')
+    def test_fetchStockDataWithArgs_without_task(self, mock_fetchStockData):
+        mock_fetchStockData.return_value = {'price': 100}
+        
+        fetcher = screenerStockDataFetcher()
+        result = fetcher.fetchStockDataWithArgs('AAPL', '1d', '1mo', 'NS')
+        
+        mock_fetchStockData.assert_called_once_with('AAPL', '1d', '1mo', None, 0, 0, 0, exchangeSuffix='NS', printCounter=False)
+        self.assertEqual(result, {'price': 100})
+    
+    @patch.object(screenerStockDataFetcher, 'fetchStockData')
+    def test_fetchStockDataWithArgs_with_task(self, mock_fetchStockData):
+        mock_fetchStockData.return_value = {'price': 200}
+        
+        task = PKTask(1, MagicMock(), ('AAPL', '1d', '1mo', 'NS'),MagicMock())
+        task.progressStatusDict = {}
+        task.resultsDict = {}
+        fetcher = screenerStockDataFetcher()
+        result = fetcher.fetchStockDataWithArgs(task)
+        
+        mock_fetchStockData.assert_called_once_with('AAPL', '1d', '1mo', None, 0, 0, 0, exchangeSuffix='NS', printCounter=False)
+        self.assertEqual(result, {'price': 200})
+        self.assertEqual(task.result, {'price': 200})
+        self.assertEqual(task.progressStatusDict[0], {'progress': 1, 'total': 1})
+        self.assertEqual(task.resultsDict[0], {'price': 200})
+
