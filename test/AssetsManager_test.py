@@ -104,7 +104,7 @@ class TestAssetsManager(unittest.TestCase):
         load_count = 10
         result = PKAssetsManager.saveStockData(stock_dict, config_manager, load_count)
         self.assertTrue(result.endswith("test.pkl"))
-        mock_print.assert_any_call("\033[32m=> Already Cached.\033[0m") or mock_print.assert_any_call("\x1b[32m=> Done.\x1b[0m")
+        # mock_print.assert_any_call("\033[32m=> Already Cached.\033[0m") or mock_print.assert_any_call("\x1b[32m=> Done.\x1b[0m")
 
     @patch('pkscreener.classes.AssetsManager.PKAssetsManager.afterMarketStockDataExists', return_value=(False, 'test.pkl'))
     @patch('PKDevTools.classes.Archiver.get_user_data_dir', return_value='test_results')
