@@ -116,7 +116,7 @@ class PKImageTools:
             plx = int((width - lx)/4)
             ply = int((height - ly)/3)
             sourceImage.paste(logo_img, (plx, ply), logo_img)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except Exception as e: # pragma: no cover
             default_logger().debug(e,exc_info=True)
@@ -364,7 +364,7 @@ class PKImageTools:
                         try:
                             del valueScreenCols[0] # Remove the empty column header at the first position
                             del valueScreenCols[-1] # Remove the empty column header at the last position
-                        except KeyboardInterrupt:
+                        except KeyboardInterrupt: # pragma: no cover
                             raise KeyboardInterrupt
                         except Exception as e:# pragma: no cover
                             default_logger().debug(e, exc_info=True)
@@ -478,7 +478,7 @@ class PKImageTools:
             im = im.resize((int(im.size[0]*PKImageTools.configManager.telegramImageCompressionRatio),int(im.size[1]*PKImageTools.configManager.telegramImageCompressionRatio)), Image.LANCZOS, reducing_gap=2)
             im = PKImageTools.addQuickWatermark(im,xVertical,dataSrc="Yahoo!finance; Morningstar, Inc; National Stock Exchange of India Ltd;TradingHours.com;",dataSrcFontSize=ART_FONT_SIZE)
             im.save(filename, format=PKImageTools.configManager.telegramImageFormat, bitmap_format=PKImageTools.configManager.telegramImageFormat, optimize=True, quality=int(PKImageTools.configManager.telegramImageQualityPercentage))
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except Exception as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)

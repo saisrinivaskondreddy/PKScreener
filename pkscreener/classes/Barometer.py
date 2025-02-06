@@ -136,7 +136,7 @@ def getGlobalMarketBarometerValuation():
         asyncio.get_event_loop().run_until_complete(getScreenshotsForGlobalMarketBarometer())
     except (asyncio.exceptions.IncompleteReadError,asyncio.exceptions.InvalidStateError): # pragma: no cover
         return gmbPath
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         raise KeyboardInterrupt
     except Exception as e: # pragma: no cover
         default_logger().debug(e, exc_info=True)
@@ -168,7 +168,7 @@ def getGlobalMarketBarometerValuation():
         gmbPath = os.path.join(folderPath,"gmb.png")
         srcFileSize = os.stat(gmbPath).st_size if os.path.exists(gmbPath) else 0
         default_logger().debug(f"gmb.png saved at {gmbPath} with size {srcFileSize} bytes")
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         raise KeyboardInterrupt
     except Exception as e: # pragma: no cover
         default_logger().debug(e, exc_info=True)

@@ -77,7 +77,7 @@ class MarketStatus(SingletonMixin, metaclass=SingletonType):
                     lngStatus = f"{lngStatus} | {bseStatus}"
             if progress:
                 progress[task_id] = {"progress": 1, "total": 1}
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except Exception as e:# pragma: no cover
             default_logger().debug(e, exc_info=True)

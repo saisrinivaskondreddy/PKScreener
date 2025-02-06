@@ -134,7 +134,7 @@ class tools:
                 if jsonDict and len(jsonDict) > 0:
                     with open(dealsFile,"w") as f:
                         f.write(json.dumps(jsonDict))
-            except KeyboardInterrupt:
+            except KeyboardInterrupt: # pragma: no cover
                 raise KeyboardInterrupt
             except Exception as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)
@@ -246,7 +246,7 @@ class tools:
                                 # if dl >= filesize:
                                 #     progressbar(1.0)
                         f.close()
-                    except KeyboardInterrupt:
+                    except KeyboardInterrupt: # pragma: no cover
                         raise KeyboardInterrupt
                     except Exception as e:  # pragma: no cover
                         default_logger().debug(e, exc_info=True)
@@ -267,7 +267,7 @@ class tools:
                             )
                         pass
                 model = keras.models.load_model(files[0]) if Imports["keras"] else None
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except Exception as e:  # pragma: no cover
             default_logger().debug(e, exc_info=True)

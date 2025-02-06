@@ -289,7 +289,7 @@ class PKMarketOpenCloseAnalyser:
                     timestamp = datetime.datetime.strptime(tradingDate.strftime("%Y-%m-%d %H:%M:%S"),"%Y-%m-%d %H:%M:%S")
                     df = pd.DataFrame([combinedCandle], columns=df.columns, index=[timestamp])
                     morningIntradayCandle[stock] = df.to_dict("split")
-            except KeyboardInterrupt:
+            except KeyboardInterrupt: # pragma: no cover
                 raise KeyboardInterrupt
             except Exception as e: # pragma: no cover
                 OutputControls().printOutput(f"{stock}:    {e}")

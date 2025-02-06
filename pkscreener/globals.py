@@ -262,7 +262,7 @@ def getScannerMenuChoices(
             indexOption, executeOption = initPostLevel1Execution(
                 indexOption=indexOption, executeOption=executeOption
             )
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         OutputControls().takeUserInput(
             colorText.FAIL
             + "  [+] Press <Enter> to Exit!"
@@ -580,7 +580,7 @@ def initExecution(menuOption=None):
                 return selectedMenu
             elif selectedMenu.menuKey in ["P"]:
                 return selectedMenu
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         raise KeyboardInterrupt
     except Exception as e:  # pragma: no cover
         default_logger().debug(e, exc_info=True)
@@ -642,7 +642,7 @@ def initPostLevel0Execution(
             from pkscreener.classes.MarketStatus import MarketStatus
             MarketStatus().exchange = "^IXIC"
         selectedChoice["1"] = str(indexOption)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         raise KeyboardInterrupt
     except Exception as e:  # pragma: no cover
         default_logger().debug(e, exc_info=True)
@@ -718,7 +718,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
         else:
             executeOption = 0
         selectedChoice["2"] = str(executeOption)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         raise KeyboardInterrupt
     except Exception as e:  # pragma: no cover
         default_logger().debug(e, exc_info=True)
@@ -1888,13 +1888,13 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 daysInPast = PKScanRunner.getBacktestDaysForScan(userPassedArgs, backtestPeriod, menuOption, actualHistoricalDuration)
                 try:
                     listStockCodes, savedStocksCount, pastDate = PKScanRunner.getStocksListForScan(userPassedArgs, menuOption, totalStocksInReview, downloadedRecently, daysInPast) if menuOption not in ["C"] else (listStockCodes, 0, "")
-                except KeyboardInterrupt:
+                except KeyboardInterrupt: # pragma: no cover
                     try:
                         keyboardInterruptEvent.set()
                         keyboardInterruptEventFired = True
                         actualHistoricalDuration = -1
                         break
-                    except KeyboardInterrupt:
+                    except KeyboardInterrupt: # pragma: no cover
                         pass
                     OutputControls().printOutput(
                         colorText.FAIL
@@ -2671,7 +2671,7 @@ def handleMonitorFiveEMA():
                 Utility.tools.alertSound(beeps=5)
             sleep(60)
             first_scan = False
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         input("\nPress <Enter> to Continue...\n")
         return
 
@@ -3658,7 +3658,7 @@ def runScanners(
             screenResults = pd.DataFrame(lstscreen)
             saveResults = pd.DataFrame(lstsave)
 
-    except KeyboardInterrupt:
+    except KeyboardInterrupt: # pragma: no cover
         try:
             global keyboardInterruptEventFired
             keyboardInterruptEvent.set()
@@ -3670,7 +3670,7 @@ def runScanners(
             )
             PKScanRunner.terminateAllWorkers(userPassedArgs=userPassedArgs,consumers=consumers, tasks_queue=tasks_queue,testing=testing)
             logging.shutdown()
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             pass
     except Exception as e: # pragma: no cover
         default_logger().debug(e, exc_info=True)

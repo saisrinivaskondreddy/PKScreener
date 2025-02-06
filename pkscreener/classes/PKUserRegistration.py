@@ -123,7 +123,7 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
         invalidOTP = False
         try:
             otpTest = int(otp)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except Exception as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
@@ -168,7 +168,7 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
                     configManager.setConfig(parser,default=True,showFileCreatedText=False)
                     ConsoleUtility.PKConsoleTools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
                     return validationReason
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except Exception as e: # pragma: n`o cover
             default_logger().debug(e, exc_info=True)

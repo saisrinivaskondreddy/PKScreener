@@ -72,7 +72,7 @@ class PKAssetsManager:
             data = data.fillna(0)
             data = data.replace([np.inf, -np.inf], 0)
             data = ImageUtility.PKImageTools.removeAllColorStyles(data)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except Exception as e: # pragma: no cover
             default_logger().debug(e,exc_info=True)
@@ -131,7 +131,7 @@ class PKAssetsManager:
                 # Close the Pandas Excel writer and output the Excel file.
                 writer.close()
                 isSaved = True
-            except KeyboardInterrupt:
+            except KeyboardInterrupt: # pragma: no cover
                 raise KeyboardInterrupt
             except Exception as e:  # pragma: no cover
                 default_logger().debug(e, exc_info=True)
@@ -152,7 +152,7 @@ class PKAssetsManager:
                     # Close the Pandas Excel writer and output the Excel file.
                     writer.close()
                     isSaved = True
-                except KeyboardInterrupt:
+                except KeyboardInterrupt: # pragma: no cover
                     raise KeyboardInterrupt
                 except Exception as ex:  # pragma: no cover
                     default_logger().debug(ex, exc_info=True)
@@ -220,7 +220,7 @@ class PKAssetsManager:
             if not os.path.isdir(outputFolder):
                 try:
                     os.makedirs(os.path.dirname(f"{outputFolder}{os.sep}"), exist_ok=True)
-                except:
+                except: # pragma: no cover
                     pass
             configManager.deleteFileWithPattern(rootDir=outputFolder)
         cache_file = os.path.join(outputFolder, fileName)
@@ -252,7 +252,7 @@ class PKAssetsManager:
                     + "=> Error while Caching Stock Data."
                     + colorText.END
                 )
-            except KeyboardInterrupt:
+            except KeyboardInterrupt: # pragma: no cover
                 raise KeyboardInterrupt
             except Exception as e:  # pragma: no cover
                 default_logger().debug(e, exc_info=True)
@@ -419,7 +419,7 @@ class PKAssetsManager:
                             else:
                                 if not isTrading:
                                     stockDict[stock] = df_or_dict
-                        except KeyboardInterrupt:
+                        except KeyboardInterrupt: # pragma: no cover
                             raise KeyboardInterrupt
                         except: # pragma: no cover
                                 # Probably, the "stock" got removed from the latest download
@@ -430,7 +430,7 @@ class PKAssetsManager:
                     # else:
                     #     stockDict = stockData
                     stockDataLoaded = True
-            except KeyboardInterrupt:
+            except KeyboardInterrupt: # pragma: no cover
                 raise KeyboardInterrupt
             except pickle.UnpicklingError as e: # pragma: no cover
                 default_logger().debug(e, exc_info=True)
@@ -561,7 +561,7 @@ class PKAssetsManager:
                             shutil.copy(srcFilePath,copyFilePath)
                         # Remove the progress bar now!
                         OutputControls().moveCursorUpLines(1)
-                except KeyboardInterrupt:
+                except KeyboardInterrupt: # pragma: no cover
                     raise KeyboardInterrupt
                 except Exception as e:  # pragma: no cover
                     default_logger().debug(e, exc_info=True)

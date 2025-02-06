@@ -76,9 +76,9 @@ class PKConsoleTools:
             if clearAlways or OutputControls().enableMultipleLineOutput:
                 art = colorText.GREEN + f"{getArtText()}\n" + colorText.END + f"{marketStatus()}"
                 OutputControls().printOutput(art.encode('utf-8').decode(STD_ENCODING), enableMultipleLineOutput=True)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
-        except Exception as e:# pragma: no cover
+        except Exception as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
             pass
 
@@ -151,16 +151,16 @@ class PKConsoleTools:
             if needsWriting:
                 with open(fileName, 'w') as f:
                     f.write(finalStocks)
-        except IOError as e:  # pragma: no cover
+        except IOError as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL
                 + f"{e}\n  [+] Failed to save recently screened result table on disk! Skipping.."
                 + colorText.END
             )
-        except KeyboardInterrupt:
+        except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
-        except Exception as e:# pragma: no cover
+        except Exception as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
             pass
 
@@ -188,7 +188,7 @@ class PKConsoleTools:
                 )
             else:
                 OutputControls().printOutput("Nothing to show here!")
-        except FileNotFoundError as e:  # pragma: no cover
+        except FileNotFoundError as e: # pragma: no cover
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
                 colorText.FAIL
