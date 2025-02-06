@@ -164,14 +164,17 @@ class PKAssetsManager:
                         )
                         + colorText.END
                     )
-                    filePath = os.path.join(tempfile.gettempdir(), filename)
-                    # Create a Pandas Excel writer using XlsxWriter as the engine.
-                    writer = pd.ExcelWriter(filePath, engine='xlsxwriter') # openpyxl throws an error exporting % sign.
-                    # Convert the dataframe to an XlsxWriter Excel object.
-                    df.to_excel(writer, sheet_name=sheetName)
-                    # Close the Pandas Excel writer and output the Excel file.
-                    writer.close()
-                    isSaved = True
+                    try:
+                        filePath = os.path.join(tempfile.gettempdir(), filename)
+                        # Create a Pandas Excel writer using XlsxWriter as the engine.
+                        writer = pd.ExcelWriter(filePath, engine='xlsxwriter') # openpyxl throws an error exporting % sign.
+                        # Convert the dataframe to an XlsxWriter Excel object.
+                        df.to_excel(writer, sheet_name=sheetName)
+                        # Close the Pandas Excel writer and output the Excel file.
+                        writer.close()
+                        isSaved = True
+                    except Exception as ex:  # pragma: no cover
+                        pass
             OutputControls().printOutput(
                 (colorText.GREEN if isSaved else colorText.FAIL)
                 + (("  [+] Results saved to %s" % filePath) if isSaved else "  [+] Failed saving results into Excel file!")
@@ -215,7 +218,10 @@ class PKAssetsManager:
         if downloadOnly:
             outputFolder = outputFolder.replace(f"results{os.sep}Data","actions-data-download")
             if not os.path.isdir(outputFolder):
-                os.makedirs(os.path.dirname(f"{outputFolder}{os.sep}"), exist_ok=True)
+                try:
+                    os.makedirs(os.path.dirname(f"{outputFolder}{os.sep}"), exist_ok=True)
+                except:
+                    pass
             configManager.deleteFileWithPattern(rootDir=outputFolder)
         cache_file = os.path.join(outputFolder, fileName)
         if not os.path.exists(cache_file) or forceSave or (loadCount >= 0 and len(stockDict) > (loadCount + 1)):

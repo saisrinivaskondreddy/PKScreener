@@ -587,7 +587,9 @@ class PKImageTools:
             pass
         return roundValue
     
-    def stockNameFromDecoratedName(stockName): 
+    def stockNameFromDecoratedName(stockName):
+        if stockName is None:
+            raise TypeError
         cleanName = PKImageTools.removeAllColorStyles(stockName.replace("\x1B]8;;",""))
         decoratedParts = cleanName.split("\x1B\\")
         if len(decoratedParts) > 1:
