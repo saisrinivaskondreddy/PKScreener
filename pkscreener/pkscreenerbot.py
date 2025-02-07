@@ -143,13 +143,13 @@ INDEX_SKIP_MENUS_10_TO_15 = ["W","E","M","Z","N","0","1","2","3","4","5","6","7"
 SCANNER_SKIP_MENUS_1_TO_6 = ["0","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_7_TO_12 = ["0","1","2","3","4","5","6","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_13_TO_18 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
-SCANNER_SKIP_MENUS_19_TO_25 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","22","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
+SCANNER_SKIP_MENUS_19_TO_25 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_26_TO_31 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","32","33","34","35","36","37","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_32_TO_37 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","38","39","40","41","42","43","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_SKIP_MENUS_38_TO_43 = ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","44","45","M","Z",str(MAX_MENU_OPTION)]
 SCANNER_MENUS_WITH_NO_SUBMENUS = ["1","2","3","10","11","12","13","14","15","16","17","18","19","20","21","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"]
-SCANNER_MENUS_WITH_SUBMENU_SUPPORT = ["6", "7", "21", "33"]
-SCANNER_SUBMENUS_CHILDLEVEL_SUPPORT = {"6":[ "7","10"], "7":[ "3","6","9"],}
+SCANNER_MENUS_WITH_SUBMENU_SUPPORT = ["6", "7", "21","22","30","32","33","40"]
+SCANNER_SUBMENUS_CHILDLEVEL_SUPPORT = {"6":[ "7","10"], "7":[ "3","6","7","9"],}
 
 INDEX_COMMANDS_SKIP_MENUS_SCANNER = ["W", "E", "M", "Z", "S"]
 INDEX_COMMANDS_SKIP_MENUS_BACKTEST = ["W", "E", "M", "Z", "S", "N", "0", "15"]
@@ -686,10 +686,19 @@ def XScanners(update: Update, context: CallbackContext) -> str:
     DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
     return START_ROUTES
 
+def getinlineMenuListRow(keyboardRows=[]):
+    for list in keyboardRows:
+        if len(list) <= 7:
+            return list
 
 def Level2(update: Update, context: CallbackContext) -> str:
     """Show new choice of buttons"""
-    inlineMenus = []
+    keyboardRows = []
+    index = 0
+    while index <= 10:
+        keyboardRows.append([])
+        index += 1
+
     menuText = "Hmm...It looks like you caught us taking a break! Try again later :-)"
     mns = []
     updateCarrier = None
@@ -730,6 +739,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
     if selection[len(selection)-1].upper() == "H": # Home button
         start(update, context)
         return START_ROUTES
+    
     if len(selection) == 2 and selection[0] in ["X","B"] and selection[1] in ["P1","P2","P3"]:
         nextOption = ""
         if selection[1] == "P2":
@@ -765,15 +775,13 @@ def Level2(update: Update, context: CallbackContext) -> str:
         )
         mns.append(menu().create("H", "Home", 2))
         mns.append(menu().create(f"{nextOption}", "More Options", 2))
-        inlineMenus = []
         query.answer()
         for mnu in mns:
-            inlineMenus.append(
-                InlineKeyboardButton(
-                    mnu.menuKey, callback_data=str(f"C{selection[0]}_{mnu.menuKey}")
-                )
-            )
-        keyboard = [inlineMenus]
+            activeInlineRow = getinlineMenuListRow(keyboardRows)
+            activeInlineRow.append(
+                InlineKeyboardButton(mnu.menuKey, callback_data=str(f"C{selection[0]}_{mnu.menuKey}")))
+
+        keyboard = keyboardRows
         reply_markup = InlineKeyboardMarkup(keyboard)
         if query.message.text == menuText:
             menuText = f"{PKDateUtilities.currentDateTime()}:\n{menuText}"
@@ -834,16 +842,18 @@ def Level2(update: Update, context: CallbackContext) -> str:
             mns.append(menu().create("P3", "More Options", 2))
             mns.append(menu().create("H", "Home", 2))
         elif selection[2] == "P3":
+            skipMenusP3 = ["22" if selection[0] in ["X","B"] else 'M'] # #22 not in X, but should be available in P
+            skipMenusP3.extend(SCANNER_SKIP_MENUS_19_TO_25)
             menuText = m2.renderForMenu(
                 m1.find(selection[1]),
-                skip=SCANNER_SKIP_MENUS_19_TO_25,
+                skip=skipMenusP3,
                 renderStyle=MenuRenderStyle.STANDALONE,
             )
             menuText = menuText + "\n\nP4 > More Options"
             menuText = menuText + "\nH > Home"
             mns = m2.renderForMenu(
                 m1.find(selection[1]),
-                skip=SCANNER_SKIP_MENUS_19_TO_25,
+                skip=skipMenusP3,
                 asList=True,
                 renderStyle=MenuRenderStyle.STANDALONE,
             )
@@ -903,14 +913,17 @@ def Level2(update: Update, context: CallbackContext) -> str:
                 menuText = m3.renderForMenu(
                     m2.find(selection[2]),
                     renderStyle=MenuRenderStyle.STANDALONE,
-                    skip=["0"],
+                    skip=["0","M","Z"],
                 )
                 mns = m3.renderForMenu(
                     m2.find(selection[2]),
                     asList=True,
                     renderStyle=MenuRenderStyle.STANDALONE,
-                    skip=["0"],
+                    skip=["0","M","Z"],
                 )
+                menuText = f"{menuText}\n\nH > Home"
+                menuText = f"{menuText}\n\nClick /start if you want to restart the session."
+                mns.append(menu().create("H", "Home", 2))
             else:
                 if selection[2] == "4":  # Last N days
                     selection.extend(["D", ""])
@@ -929,46 +942,109 @@ def Level2(update: Update, context: CallbackContext) -> str:
     optionChoices = ""
     if len(selection) <= 3 and mns is not None:
         for mnu in mns:
-            inlineMenus.append(
+            activeInlineRow = getinlineMenuListRow(keyboardRows)
+            activeInlineRow.append(
                 InlineKeyboardButton(
                     mnu.menuKey,
                     callback_data="C" + str(f"{preSelection}_{mnu.menuKey}"),
                 )
             )
-        keyboard = [inlineMenus]
+        keyboard = keyboardRows
         reply_markup = InlineKeyboardMarkup(keyboard)
     elif len(selection) >= 4:
+        if len(selection) == 4:
+            if selection[2] in SCANNER_SUBMENUS_CHILDLEVEL_SUPPORT.keys() and selection[3] in SCANNER_SUBMENUS_CHILDLEVEL_SUPPORT[selection[2]]:
+                m0.renderForMenu(
+                    selectedMenu=None,
+                    skip=TOP_LEVEL_SCANNER_SKIP_MENUS,
+                    asList=True,
+                    renderStyle=MenuRenderStyle.STANDALONE,
+                )
+                selectedMenu = m0.find(selection[0].upper())
+                m1.renderForMenu(
+                    selectedMenu=selectedMenu,
+                    skip=(
+                        INDEX_COMMANDS_SKIP_MENUS_SCANNER
+                        if ("x_" in preSelection.lower() or "p_" in preSelection.lower())
+                        else INDEX_COMMANDS_SKIP_MENUS_BACKTEST
+                    ),
+                    asList=True,
+                    renderStyle=MenuRenderStyle.STANDALONE,
+                )
+                selectedMenu = m1.find(selection[1].upper())
+                m2.renderForMenu(
+                    selectedMenu=selectedMenu,
+                    skip=UNSUPPORTED_COMMAND_MENUS,
+                    asList=True,
+                    renderStyle=MenuRenderStyle.STANDALONE,
+                )
+                if selection[2] in SCANNER_MENUS_WITH_SUBMENU_SUPPORT:
+                    selectedMenu = m2.find(selection[2].upper())
+                    m3.renderForMenu(
+                        selectedMenu=selectedMenu,
+                        skip=["0","M","Z"],
+                        asList=True,
+                        renderStyle=MenuRenderStyle.STANDALONE,
+                    )
+                    selectedMenu = m3.find(selection[3].upper())
+                    menuText = m4.renderForMenu(
+                        selectedMenu=selectedMenu,
+                        renderStyle=MenuRenderStyle.STANDALONE,
+                        skip=["0","M","Z"],
+                    )
+                    mns = m4.renderForMenu(
+                        selectedMenu=selectedMenu,
+                        asList=True,
+                        renderStyle=MenuRenderStyle.STANDALONE,
+                        skip=["0","M","Z"],
+                    )
+                    menuText = f"{menuText}\n\nH > Home"
+                    mns.append(menu().create("H", "Home", 3))
+                    menuText = f"{menuText}\n\nClick /start if you want to restart the session."
+            if mns is not None:
+                for mnu in mns:
+                    activeInlineRow = getinlineMenuListRow(keyboardRows)
+                    activeInlineRow.append(InlineKeyboardButton(mnu.menuKey,callback_data="C" + str(f"{preSelection}_{mnu.menuKey}"),))
+                keyboard = keyboardRows
+                reply_markup = InlineKeyboardMarkup(keyboard)
+            if len(mns) == 0:
+                menuText = ''
+        elif len(selection) > 4:
+            menuText = ''
+
         if selection[0] in 'P' and len(selection[3]) == 0:
             selection[3] = '12' # All stocks
-
-        optionChoices = (
-            f"{selection[0]} > {selection[1]} > {selection[2]} > {selection[3]}"
-        )
-        expectedTime = f"{'10 to 15' if '> 15' in optionChoices else '1 to 2'}"
-        menuText = f"Thank you for choosing {optionChoices.replace(' >  > ','')}. You will receive the notification/results in about {expectedTime} minutes. It generally takes 1-2 minutes for NSE (2000+) stocks and 10-15 minutes for NASDAQ (7300+).\n\nPKScreener had been free for a long time, but owing to cost/budgeting issues, only a basic set of features will always remain free for everyone. Consider donating to help cover the basic server costs or subscribe to premium, if not subscribed yet:\n\nUPI (India): PKScreener@APL \n\nor\nhttps://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra"
-
-        reply_markup = default_markup(inlineMenus)
-        options = ":".join(selection)
-        shouldSendUpdate = launchScreener(
-            options=options,
-            user=query.from_user,
-            context=context,
-            optionChoices=optionChoices,
-            update=update,
-        )
-        if not shouldSendUpdate:
-            DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
-            return START_ROUTES
-    try:
-        if optionChoices != "" and Channel_Id is not None and len(str(Channel_Id)) > 0:
-            context.bot.send_message(
-                chat_id=int(f"-{Channel_Id}"),
-                text=f"Name: <b>{query.from_user.first_name}</b>, Username:@{query.from_user.username} with ID: <b>@{str(query.from_user.id)}</b> submitted scan request <b>{optionChoices}</b> to the bot!",
-                parse_mode="HTML",
+        
+        if menuText is None or len(menuText) == 0:
+            optionChoices = (
+                f"{selection[0]} > {selection[1]} > {selection[2]} > {selection[3]}"
             )
-    except Exception as e:# pragma: no cover
-        logger.error(e)
-        start(update, context)
+            optionChoices = f"{optionChoices}{f' > {selection[4]}' if len(selection) > 4 else ''}"
+            expectedTime = f"{'10 to 15' if '> 15' in optionChoices else '1 to 2'}"
+            menuText = f"Thank you for choosing {optionChoices.replace(' >  > ','')}. You will receive the notification/results in about {expectedTime} minutes. It generally takes 1-2 minutes for NSE (2000+) stocks and 10-15 minutes for NASDAQ (7300+).\n\nPKScreener had been free for a long time, but owing to cost/budgeting issues, only a basic set of features will always remain free for everyone. Consider donating to help cover the basic server costs or subscribe to premium, if not subscribed yet:\n\nUPI (India): PKScreener@APL \n\nor\nhttps://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra"
+
+            reply_markup = default_markup([])
+            options = ":".join(selection)
+            shouldSendUpdate = launchScreener(
+                options=options,
+                user=query.from_user,
+                context=context,
+                optionChoices=optionChoices,
+                update=update,
+            )
+            if not shouldSendUpdate:
+                DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+                return START_ROUTES
+        try:
+            if optionChoices != "" and Channel_Id is not None and len(str(Channel_Id)) > 0:
+                context.bot.send_message(
+                    chat_id=int(f"-{Channel_Id}"),
+                    text=f"Name: <b>{query.from_user.first_name}</b>, Username:@{query.from_user.username} with ID: <b>@{str(query.from_user.id)}</b> submitted scan request <b>{optionChoices}</b> to the bot!",
+                    parse_mode="HTML",
+                )
+        except Exception as e:# pragma: no cover
+            logger.error(e)
+            start(update, context)
     menuText =  menuText.replace("\n     ","\n").replace("\n    ","\n").replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"")
     if not str(optionChoices.upper()).startswith("B"):
         sendUpdatedMenu(
@@ -1464,7 +1540,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                     selectedMenu=selectedMenu,
                     asList=True,
                     renderStyle=MenuRenderStyle.STANDALONE,
-                    skip=["0"],
+                    skip=["0","M","Z"],
                 )
                 for cmd in cmds:
                     cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
@@ -1513,7 +1589,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                         selectedMenu = m2.find(selection[2].upper())
                         m3.renderForMenu(
                             selectedMenu=selectedMenu,
-                            skip=["0"],
+                            skip=["0","M","Z"],
                             asList=True,
                             renderStyle=MenuRenderStyle.STANDALONE,
                         )
@@ -1522,7 +1598,7 @@ def command_handler(update: Update, context: CallbackContext) -> None:
                             selectedMenu=selectedMenu,
                             asList=True,
                             renderStyle=MenuRenderStyle.STANDALONE,
-                            skip=["0"],
+                            skip=["0","M","Z"],
                         )
                         for cmd in cmds:
                             cmdText = f"{cmdText}\n\n{cmd.commandTextKey()} for {cmd.commandTextLabel()}"
@@ -1713,7 +1789,7 @@ def addCommandsForMenuItems(application):
                         selectedMenu=selectedMenu,
                         asList=True,
                         renderStyle=MenuRenderStyle.STANDALONE,
-                        skip=["0"],
+                        skip=["0","M","Z"],
                     )
                     for mnu3 in cmds3:
                         p3 = mnu3.menuKey.upper()
@@ -1726,13 +1802,14 @@ def addCommandsForMenuItems(application):
                                 selectedMenu=selectedMenu,
                                 asList=True,
                                 renderStyle=MenuRenderStyle.STANDALONE,
-                                skip=["0"],
+                                skip=["0","M","Z"],
                             )
-                            for mnu4 in cmds4:
-                                p4 = mnu4.menuKey.upper()
-                                application.add_handler(
-                                    CommandHandler(f"{p0}_{p1}_{p2}_{p3}_{p4}", command_handler)
-                                )
+                            if cmds4 is not None and len(cmds4) > 0:
+                                for mnu4 in cmds4:
+                                    p4 = mnu4.menuKey.upper()
+                                    application.add_handler(
+                                        CommandHandler(f"{p0}_{p1}_{p2}_{p3}_{p4}", command_handler)
+                                    )
 
 # def send_stuff(context: CallbackContext):
 #   job = context.job

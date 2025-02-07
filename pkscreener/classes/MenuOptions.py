@@ -800,12 +800,15 @@ class menus:
                                                  skip=skip,
                                                  subOnly=Pin_MenuDict_Keys)
     
-    def renderCandleStickPatterns(self,skip=[]):
+    def renderCandleStickPatterns(self,skip=[],asList=False,renderStyle=None):
         return self.renderMenuFromDictionary(dict=CANDLESTICK_DICT,
                                                  exceptionKeys=["0","M"],
                                                  coloredValues=(["0"]),
                                                  defaultMenu="0",
-                                                 renderStyle=MenuRenderStyle.TWO_PER_ROW,
+                                                 asList=asList,
+                                                 renderStyle=renderStyle
+                                                    if renderStyle is not None
+                                                    else MenuRenderStyle.TWO_PER_ROW,
                                                  optionText="  [+] Would you like to filter by a specific Candlestick pattern? Select filter:",
                                                  skip=skip)
     
@@ -1101,6 +1104,8 @@ class menus:
                                                          renderStyle=renderStyle,
                                                          skip=skip, 
                                                          parent=selectedMenu)
+                if selectedMenu.parent.menuKey == "7" and selectedMenu.menuKey == "7":
+                    return self.renderCandleStickPatterns(asList=asList,renderStyle=renderStyle,skip=skip)
                 if selectedMenu.parent.menuKey == "7" and selectedMenu.menuKey == "9":
                     return self.renderMenuFromDictionary(dict=level4_X_ChartPattern_MASignalMenuDict,
                                                          exceptionKeys=["0"],
