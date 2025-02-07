@@ -24,25 +24,22 @@
 """
 import os
 import warnings
-import unittest
-
-from unittest import mock
-from unittest.mock import ANY, MagicMock, patch
-
 warnings.simplefilter("ignore", DeprecationWarning)
 warnings.simplefilter("ignore", FutureWarning)
 import pandas as pd
-import pytest
-from PKDevTools.classes.Fetcher import StockDataEmptyException
 from requests.exceptions import ConnectTimeout, ReadTimeout
 from urllib3.exceptions import ReadTimeoutError
 
+import unittest
+from unittest import mock
+from unittest.mock import ANY, MagicMock, patch
+import pytest
+
+from PKDevTools.classes.Fetcher import StockDataEmptyException
+
 from pkscreener.classes import ConfigManager
 from pkscreener.classes.Fetcher import screenerStockDataFetcher
-
-import unittest
 from pkscreener.classes.PKTask import PKTask
-from PKNSETools.PKNSEStockDataFetcher import nseStockDataFetcher
 
 @pytest.fixture
 def configManager():
@@ -605,7 +602,7 @@ def test_postURL_retry_enable_cache_uninstall(tools_instance, configManager):
 #                         mock_clear_cache.assert_not_called()
 
 
-class TestStockDataFetcher(unittest.TestCase):
+class TestStockDataFetcher1(unittest.TestCase):
 
     @patch('yfinance.Tickers')
     def test_get_stats_valid_ticker(self, mock_tickers):
@@ -686,7 +683,7 @@ class TestStockDataFetcher(unittest.TestCase):
         self.assertIn("MSFT.NS", result)
 
 
-class TestScreenerStockDataFetcher(unittest.TestCase):
+class TestScreenerStockDataFetcher2(unittest.TestCase):
     
     @patch.object(screenerStockDataFetcher, 'fetchStockData')
     def test_fetchStockDataWithArgs_without_task(self, mock_fetchStockData):
@@ -714,3 +711,42 @@ class TestScreenerStockDataFetcher(unittest.TestCase):
         self.assertEqual(task.progressStatusDict[0], {'progress': 1, 'total': 1})
         self.assertEqual(task.resultsDict[0], {'price': 200})
 
+class TestScreenerStockDataFetcher3(unittest.TestCase):
+    
+    @patch("yfinance.download")
+    def test_fetchStockData_success(self, mock_yf_download):
+        mock_df = pd.DataFrame({"Open": [100], "Close": [105]})
+        mock_yf_download.return_value = mock_df
+        
+        fetcher = screenerStockDataFetcher()
+        data = fetcher.fetchStockData("AAPL", "1d", "1m")
+        
+        self.assertFalse(data.empty)
+        self.assertIn("Open", data.columns)
+        self.assertIn("Close", data.columns)
+    
+    @patch("yfinance.download")
+    def test_fetchStockData_no_data(self, mock_yf_download):
+        mock_yf_download.return_value = pd.DataFrame()
+        
+        fetcher = screenerStockDataFetcher()
+        with self.assertRaises(StockDataEmptyException):
+            fetcher.fetchStockData("AAPL", "1d", "1m", printCounter=True)
+    
+    @patch("yfinance.download")
+    def test_fetchStockData_list_of_tickers(self, mock_yf_download):
+        mock_df = pd.DataFrame({("AAPL", "Open"): [100], ("AAPL", "Close"): [105]})
+        mock_df.columns = pd.MultiIndex.from_tuples(mock_df.columns)
+        mock_yf_download.return_value = mock_df
+        
+        fetcher = screenerStockDataFetcher()
+        data = fetcher.fetchStockData(["AAPL", "MSFT"], "1d", "1m")
+        
+        self.assertFalse(data.empty)
+    
+    @patch("yfinance.download", side_effect=Exception("Download failed"))
+    def test_fetchStockData_exception(self, mock_yf_download):
+        fetcher = screenerStockDataFetcher()
+        data = fetcher.fetchStockData("AAPL", "1d", "1m")
+        
+        self.assertIsNone(data)
