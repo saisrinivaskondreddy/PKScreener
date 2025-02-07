@@ -181,7 +181,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             except Exception as e:  # pragma: no cover
                 default_logger().debug(e, exc_info=True)
                 pass
-        if len(data) == 0 and printCounter:
+        if (data is None or len(data) == 0) and printCounter:
             OutputControls().printOutput(
                 colorText.FAIL
                 + "=> Failed to fetch!"

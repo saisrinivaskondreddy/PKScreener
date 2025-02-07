@@ -274,22 +274,23 @@ def test_fetchStockData_positive(configManager, tools_instance):
 
 def test_fetchStockData_negative(configManager, tools_instance):
     with patch("yfinance.download") as mock_download:
-        mock_download.return_value = pd.DataFrame()
-        tools_instance.fetchStockData(
-            "AAPL", "1d", "1m", None, 0, 0, 1, printCounter=True
-        )
-        mock_download.assert_called_once_with(
-            tickers="AAPL.NS",
-            period="1d",
-            interval="1m",
-            proxy=None,
-            progress=False,
-            timeout=configManager.generalTimeout/4,
-            rounding=True,
-            group_by='ticker', 
-            start=None, 
-            end=None
-        )
+        with pytest.raises(StockDataEmptyException):
+            mock_download.return_value = pd.DataFrame()
+            tools_instance.fetchStockData(
+                "AAPL", "1d", "1m", None, 0, 0, 1, printCounter=True
+            )
+            mock_download.assert_called_once_with(
+                tickers="AAPL.NS",
+                period="1d",
+                interval="1m",
+                proxy=None,
+                progress=False,
+                timeout=configManager.generalTimeout/4,
+                rounding=True,
+                group_by='ticker', 
+                start=None, 
+                end=None
+            )
         yfd_df = pd.DataFrame({"A":[1,2,3]})
         mock_download.return_value = yfd_df
         result = tools_instance.fetchStockData(
