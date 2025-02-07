@@ -172,6 +172,7 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "ATR Cross | Low RSI (<=40)                                         ",  # 33
     "Bullish Today x PDO/PDC | High Momentum | ATR Cross                ",  # 34
     "Bullish Today x PDO/PDC | Breaking out now                         ",  # 35
+    "High Momentum | ATR Cross | Super Gainers                          ",  # 36
 ]
 PREDEFINED_SCAN_MENU_KEYS = [str(x) for x in range(1,len(PREDEFINED_SCAN_MENU_TEXTS)+1,1)]
 level2_P_MenuDict = {}
@@ -217,6 +218,7 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:27:>|X:0:5:0:40:i 1m:'",             # 33
     "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:31:>|X:0:27:'",           # 34
     "--systemlaunched -a y -e -o 'X:12:33:2:>|X:0:23:'",                    # 35
+    "--systemlaunched -a y -e -o 'X:12:31:>|X:0:27:>|X:0:42:'",             # 36
 ]
 PREDEFINED_PIPED_MENU_ANALYSIS_OPTIONS = []
 PREDEFINED_PIPED_MENU_OPTIONS = {}
@@ -365,12 +367,14 @@ level2_X_MenuDict = {
     "39": "IPO-Lifetime First day bullish break     ",
     "40": "Price Action                             ",
     "41": "Pivot Points                             ",
+    "42": "Super Gainers                            ",
+    "43": "Super Losers                             ",
     "50": "Show Last Screened Results               ",
 
     "M": "Back to the Top/Main menu                 ",
     "Z": "Exit (Ctrl + C)                           ",
 }
-MAX_SUPPORTED_MENU_OPTION = 41
+MAX_SUPPORTED_MENU_OPTION = 43
 MAX_MENU_OPTION = 50
 
 level3_X_Reversal_MenuDict = {

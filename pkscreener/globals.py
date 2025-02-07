@@ -776,7 +776,7 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
             sortKey = ["ATR"] if "ATR" in screenResults.columns else ["Volume"]
             ascending = [False]
         elif executeOption == 31: # DEEL Momentum
-            sortKey = ["Volume"]
+            sortKey = ["%Chng"]
             ascending = [False]
         try:
             try:
@@ -1640,7 +1640,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         # Ensure we have the template JSONs from vectorBt
         screener.shouldLog = userPassedArgs.log
         screener.computeBuySellSignals(None)
-
+    if executeOption == 31: # DEEL Momentum
+        maLength = 0
+        if userPassedArgs.options is None:
+            beStrict = input(colorText.WARN + f"Strictly show only high momentum stocks and ignore SMA enforcement? ({colorText.GREEN}Optimal:N{colorText.END}, Default=Y). Choose Y or N:") or "N"
+            if beStrict.lower().startswith("y"):
+                maLength = 1
     if executeOption == 33:
         selectedMenu = m2.find(str(executeOption))
         if len(options) >= 4:
@@ -1727,6 +1732,25 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             return None, None
         selectedChoice["4"] = str(priceDirection)
         reversalOption = (priceDirection == "2")
+
+    if executeOption == 42: # Super Gainer
+        maLength = 10
+        if userPassedArgs.options is None:
+            maLength = input(colorText.WARN + f"Minimum Percent change to select as super gainers? ({colorText.GREEN}Optimal:15{colorText.END}, Default=10). Enter a number:") or 10
+            if not str(maLength).isnumeric():
+                maLength = 10
+            else:
+                maLength = float(maLength)
+    if executeOption == 43: # Super Losers
+        maLength = -10
+        if userPassedArgs.options is None:
+            maLength = input(colorText.WARN + f"Minimum Percent change to select as super losers? ({colorText.GREEN}Optimal:-10{colorText.END}, Default=-10). Enter a negative number:") or -10
+            if not str(maLength).isnumeric():
+                maLength = -10
+            else:
+                maLength = float(maLength)
+                if maLength > 0:
+                    maLength = 0 - maLength
 
     if executeOption == MAX_MENU_OPTION:
         ConsoleUtility.PKConsoleTools.getLastScreenedResults(defaultAnswer)

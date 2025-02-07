@@ -1428,7 +1428,7 @@ class ScreeningStatistics:
         return recent["Open"].iloc[0] > recent["Close"].iloc[1]
 
     # Find DEEL Momentum
-    def findHighMomentum(self, df):
+    def findHighMomentum(self, df, strict=False):
         #https://chartink.com/screener/deel-momentum-rsi-14-mfi-14-cci-14
         if df is None or len(df) < 2:
             return False
@@ -1445,7 +1445,25 @@ class ScreeningStatistics:
         rsi = recent["RSI"].iloc[1]
         mfi = mfis.tail(1).iloc[0]
         cci = ccis.tail(1).iloc[0]
-        hasDeelMomentum = percentChange >= 1 and ((rsi>= 68 and mfi >= 68 and cci >= 110) or (rsi>= 50 and mfi >= 50 and recent["Close"].iloc[1] >= sma7.iloc[1] and recent["Close"].iloc[1] >= sma20.iloc[1]))
+        # Percent Change >= 1%
+        # The filter checks if the current daily closing price is greater than the 
+        # closing price from one day ago, increased by 1%. This means the current 
+        # price should be at least 1% higher than the price from the previous day.
+        # CCI > 110
+        # A CCI value above 100 suggests that the stock's price is at least 10% 
+        # higher than its average price over the past 14 days, reflecting strong 
+        # upward momentum.
+        # MFI > 68
+        # MFI value above 68 suggests that the stock is experiencing strong buying 
+        # pressure, indicating a potential overbought condition.
+        # RSI > 68
+        # RSI above 68 indicates that the stock is overbought, suggesting that it 
+        # has increased by more than 68% from its average price over the last 14 days.
+        deelMomentum1 = percentChange >= 1 and (rsi>= 68 and mfi >= 68 and cci >= 110)
+        deelMomentum2 = (rsi>= 50 and mfi >= 50 and recent["Close"].iloc[1] >= sma7.iloc[1] and 
+                          recent["Close"].iloc[1] >= sma20.iloc[1]) and not strict
+        hasDeelMomentum = deelMomentum1 or deelMomentum2
+                         
         # if self.shouldLog:
         #     self.default_logger.debug(data.head(10))
         return hasDeelMomentum
@@ -1906,6 +1924,17 @@ class ScreeningStatistics:
         cond5 = cond4 and (recent["Volume"].iloc[0] > recent["SMAV10"].iloc[0] * 0.75)
         return cond5
     
+    def findSuperGainersLosers(self, df, percentChangeRequired=15, gainer=True):
+        if df is None or len(df) < 2:
+            return False
+        data = df.copy()
+        data = data.fillna(0)
+        data = data.replace([np.inf, -np.inf], 0)
+        data = data[::-1]  # Reverse the dataframe so that its the oldest date first
+        recent = data.tail(2)
+        percentChange = round((recent["Close"].iloc[1] - recent["Close"].iloc[0]) *100/recent["Close"].iloc[0],1)
+        return percentChange >= percentChangeRequired if gainer else percentChange <= percentChangeRequired
+
     #@measure_time
     # Find out trend for days to lookback
     def findTrend(self, df, screenDict, saveDict, daysToLookback=None, stockName=""):
