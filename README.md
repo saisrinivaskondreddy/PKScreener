@@ -353,7 +353,7 @@ After you have finished the run, go to that copied path, zip the contents of the
 [Downloads-badge]: https://static.pepy.tech/personalized-badge/pkscreener?period=total&units=international_system&left_color=black&right_color=brightgreen&left_text=Total%20Downloads
 [Downloads]: https://pepy.tech/project/pkscreener
 [Latest-Downloads-badge]: https://img.shields.io/github/downloads-pre/pkjmesra/pkscreener/latest/total?logo=github
-[Coverage-Status-badge]: https://coveralls.io/repos/github/pkjmesra/PKScreener/badge.svg
+[Coverage-Status-badge]: https://coveralls.io/repos/github/pkjmesra/PKScreener/badge.svg?kill_cache=1
 [Coverage-Status]: https://coveralls.io/github/pkjmesra/PKScreener?branch=main
 [codecov-badge]: https://codecov.io/gh/pkjmesra/PKScreener/branch/main/graph/badge.svg
 [codecov]: https://codecov.io/gh/pkjmesra/PKScreener
