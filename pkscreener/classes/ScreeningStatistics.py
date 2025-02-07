@@ -1052,6 +1052,8 @@ class ScreeningStatistics:
         lowRow = reversedData[reversedData["Low"] == majorLow]
         anchored_date = lowRow.index[0]
         avwap = pktalib.AVWAP(df=reversedData,anchored_date=anchored_date)
+        if 'anchored_VWAP' not in reversedData.keys():
+            reversedData.loc[:,'anchored_VWAP'] =avwap
         recentOpen = reversedData["Open"].tail(1).head(1).iloc[0]
         recentClose = reversedData["Close"].tail(1).head(1).iloc[0]
         recentLow = reversedData["Low"].tail(1).head(1).iloc[0]

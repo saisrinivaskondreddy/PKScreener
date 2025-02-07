@@ -3345,3 +3345,126 @@ class TestCupAndHandleDetection(unittest.TestCase):
         random_df.set_index('Date', inplace=True)
         _,points = self.screener.find_cup_and_handle(random_df)
         self.assertIsNone(points, "No cup pattern exists, should return None.")
+
+
+class TestScreeningStatistics1(unittest.TestCase):
+    
+    def setUp(self):
+        self.screening_stats = ScreeningStatistics()
+
+    def test_calc_relative_strength_valid_data(self):
+        df = pd.DataFrame({
+            'Adj Close': [100, 102, 101, 103, 105]
+        })
+        result = self.screening_stats.calc_relative_strength(df)
+        self.assertGreater(result, 0)
+    
+    def test_calc_relative_strength_no_data(self):
+        df = pd.DataFrame()
+        result = self.screening_stats.calc_relative_strength(df)
+        self.assertEqual(result, -1)
+    
+    def test_calc_relative_strength_missing_close_column(self):
+        df = pd.DataFrame({
+            'Close': [100, 102, 101, 103, 105]
+        })
+        result = self.screening_stats.calc_relative_strength(df)
+        self.assertGreater(result, 0)
+
+    def test_computeBuySellSignals_valid_data(self):
+        df = pd.DataFrame({
+            'Close': [100, 102, 104, 106, 108],
+            'ATRTrailingStop': [99, 101, 103, 105, 107]
+        })
+        result = self.screening_stats.computeBuySellSignals(df)
+        self.assertIn("Buy", result.columns)
+        self.assertIn("Sell", result.columns)
+    
+    def test_computeBuySellSignals_missing_columns(self):
+        df = pd.DataFrame({
+            'Close': [100, 102, 104, 106, 108],
+            'ATRTrailingStop': [99, 101, 103, 105, 107]
+        })
+        result = self.screening_stats.computeBuySellSignals(df)
+        self.assertIsNotNone(result)
+    
+    @patch("pkscreener.classes.Pktalib.pktalib.EMA", return_value=np.array([100, 101, 102, 103, 104]))
+    def test_computeBuySellSignals_with_mocked_ema(self, mock_ema):
+        df = pd.DataFrame({
+            'Close': [100, 102, 104, 106, 108],
+            'ATRTrailingStop': [99, 101, 103, 105, 107]
+        })
+        result = self.screening_stats.computeBuySellSignals(df)
+        self.assertIn("Buy", result.columns)
+        self.assertIn("Sell", result.columns)
+
+    @patch("pkscreener.classes.Pktalib.pktalib.ATR", return_value=pd.Series([1.5, 2.0, 2.5, 3.0, 3.5]))
+    def test_findATRCross(self, mock_atr):
+        df = pd.DataFrame({
+            'High': [105, 106, 107, 108, 109],
+            'Low': [95, 96, 97, 98, 99],
+            'Close': [100, 102, 104, 106, 108],
+            'Open': [105, 106, 107, 108, 109],
+            'RSI': [56, 54, 53, 52, 51],
+            'RSIi': [50, 52, 54, 56, 58],
+            'Volume': [1000, 1200, 1300, 1400, 1500]
+        })
+        saveDict = {}
+        screenDict = {}
+        result = self.screening_stats.findATRCross(df, saveDict, screenDict)
+        self.assertTrue(result.dtype == bool)
+        self.assertIn("ATR", saveDict)
+        self.assertIn("ATR", screenDict)
+
+    @patch("pkscreener.classes.Pktalib.pktalib.ATR", return_value=pd.Series([1.5, 2.0, 2.5, 3.0, 3.5]))
+    def test_findATRTrailingStops(self, mock_atr):
+        df = pd.DataFrame({
+            'High': [105, 106, 107, 108, 109],
+            'Low': [95, 96, 97, 98, 99],
+            'Close': [100, 102, 104, 106, 108],
+            'Volume': [1000, 1200, 1300, 1400, 1500]
+        })
+        saveDict = {}
+        screenDict = {}
+        result = self.screening_stats.findATRTrailingStops(df, saveDict=saveDict, screenDict=screenDict)
+        self.assertTrue(result.dtype == bool)
+        self.assertIn("B/S", saveDict)
+        self.assertIn("B/S", screenDict)
+
+    @patch("pkscreener.classes.Pktalib.pktalib.BBANDS", return_value=(pd.Series([110] * 30), pd.Series([105] * 30), pd.Series([100] * 30)))
+    @patch("pkscreener.classes.Pktalib.pktalib.KeltnersChannel", return_value=(pd.Series([99] * 30), pd.Series([113] * 30)))
+    def test_findBbandsSqueeze(self, mock_bbands, mock_keltners):
+        df = pd.DataFrame({
+            'High': [108] * 30,
+            'Low': [98] * 30,
+            'Close': [103] * 30
+        })
+        saveDict = {}
+        screenDict = {}
+        result = self.screening_stats.findBbandsSqueeze(df, screenDict, saveDict)
+        self.assertIsInstance(result, bool)
+        self.assertIn("Pattern", saveDict)
+        self.assertIn("Pattern", screenDict)
+
+    @patch("pkscreener.classes.Pktalib.pktalib.AVWAP", return_value=pd.Series([102] * 30))
+    @patch("pkscreener.classes.ConfigManager.tools")
+    def test_findBullishAVWAP(self, mock_config,mock_avwap):
+        df = pd.DataFrame({
+            'High': [108] * 30,
+            'Low': [98] * 30,
+            'Close': [103] * 30,
+            'Open': [98] * 30,
+            'Volume': [1000] * 30
+        })
+        saveDict = {}
+        screenDict = {}
+        self.screening_stats.configManager = mock_config
+        self.screening_stats.configManager.volumeRatio = 0.5
+        self.screening_stats.configManager.anchoredAVWAPPercentage = 1
+        result = self.screening_stats.findBullishAVWAP(df, screenDict, saveDict)
+        self.assertTrue(result.dtype == bool)
+        self.assertIn("AVWAP", saveDict)
+        self.assertIn("AVWAP", screenDict)
+        self.assertIn("Anchor", saveDict)
+        self.assertIn("Anchor", screenDict)
+
