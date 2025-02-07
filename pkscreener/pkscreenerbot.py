@@ -507,6 +507,85 @@ def XDevModeHandler(update: Update, context: CallbackContext) -> str:
             start(update, context,chosenBotMenuOption=f"{resp.status_code}: {resp.text}")
     return START_ROUTES
 
+def PScanners(update: Update, context: CallbackContext) -> str:
+    """Show new choice of buttons"""
+    updateCarrier = None
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
+    query = update.callback_query
+    if query is None:
+        start(update, context)
+        return START_ROUTES
+    data = query.data.upper().replace("C", "")
+    if data[0:2] not in TOP_LEVEL_SCANNER_MENUS:
+        # Someone is trying to send commands we do not support
+        return start(update, context)
+    global bot_available
+    if not bot_available:
+        # Bot is running but is running in unavailable mode.
+        # Sometimes, either the payment does not go through or 
+        # it takes time to process the last month's payment if
+        # done in the past 24 hours while the last date was today.
+        # If that happens, we won't be able to run bots or scanners
+        # without incurring heavy charges. Let's run in the 
+        # unavailable mode instead until this gets fixed.
+        start(update, context)
+        return START_ROUTES
+    
+    ########################### Scanners ##############################
+    midSkip = "13" if data == "P" else "N"
+    skipMenus = [midSkip]
+    skipMenus.extend(PIPED_SCAN_SKIP_COMMAND_MENUS)
+    # Create the menu text labels
+    menuText = (
+        m1.renderForMenu(
+            m0.find(data),
+            skip=skipMenus,
+            renderStyle=MenuRenderStyle.STANDALONE,
+        )
+        .replace("     ", "")
+        .replace("    ", "")
+        .replace("  ", "")
+        .replace("\t", "")
+        .replace(colorText.FAIL,"").replace(colorText.END,"").replace(colorText.WHITE,"")
+    )
+    menuText = f"{menuText}\n\nH > Home"
+    # menuText = f"{menuText}\n\nP2 > More Options"
+
+    # Create the menu buttons
+    mns = m1.renderForMenu(
+        m0.find(data),
+        skip=skipMenus,
+        asList=True,
+    )
+    mns.append(menu().create("H", "Home", 2))
+    # mns.append(menu().create("P2", "Next", 2))
+    inlineMenus = []
+    query.answer()
+    for mnu in mns:
+        inlineMenus.append(
+            InlineKeyboardButton(
+                mnu.menuKey, callback_data=str(f"{query.data}_{mnu.menuKey}")
+            )
+        )
+    keyboard = [inlineMenus]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if query.message.text == menuText:
+        menuText = f"{PKDateUtilities.currentDateTime()}:\n{menuText}"
+    menuText = f"{menuText}\n\nClick /start if you want to restart the session."
+    query.edit_message_text(text=menuText, reply_markup=reply_markup)
+    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+    return START_ROUTES
+
 def XScanners(update: Update, context: CallbackContext) -> str:
     """Show new choice of buttons"""
     updateCarrier = None
@@ -1725,6 +1804,7 @@ def runpkscreenerbot(availability=True) -> None:
             START_ROUTES: [
                 CallbackQueryHandler(XScanners, pattern="^" + str("CX") + "$"),
                 CallbackQueryHandler(XScanners, pattern="^" + str("CB") + "$"),
+                CallbackQueryHandler(PScanners, pattern="^" + str("CP") + "$"),
                 CallbackQueryHandler(XScanners, pattern="^" + str("CMI_")),
                 CallbackQueryHandler(XDevModeHandler, pattern="^" + str("CDV_")),
                 # CallbackQueryHandler(XScanners, pattern="^" + str("CG") + "$"),

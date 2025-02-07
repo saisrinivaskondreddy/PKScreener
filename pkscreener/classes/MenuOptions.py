@@ -169,7 +169,7 @@ PREDEFINED_SCAN_MENU_TEXTS = [
     "VCP | Super-Confluence                                             ",  # 30
     "Bullish Today x PDO/PDC | VCP                                      ",  # 31
     "Intraday(15m) VCP | Breaking out now                               ",  # 32
-    "ATR Cross | Low RSI (<=40)                                         ",  # 33
+    "ATR Cross | Low RSI (40 or lower)                                  ",  # 33
     "Bullish Today x PDO/PDC | High Momentum | ATR Cross                ",  # 34
     "Bullish Today x PDO/PDC | Breaking out now                         ",  # 35
     "High Momentum | ATR Cross | Super Gainers                          ",  # 36
