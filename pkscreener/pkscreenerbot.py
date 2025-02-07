@@ -938,6 +938,9 @@ def Level2(update: Update, context: CallbackContext) -> str:
         keyboard = [inlineMenus]
         reply_markup = InlineKeyboardMarkup(keyboard)
     elif len(selection) >= 4:
+        if selection[0] in 'P' and len(selection[3]) == 0:
+            selection[3] = '12' # All stocks
+
         optionChoices = (
             f"{selection[0]} > {selection[1]} > {selection[2]} > {selection[3]}"
         )

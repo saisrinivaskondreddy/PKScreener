@@ -1070,10 +1070,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         selPredefinedOption = None
         selIndexOption = None
         if len(options) >= 3:
-            predefinedOption = str(options[1])
-            selPredefinedOption = str(options[2])
+            predefinedOption = str(options[1]) if str(options[1]).isnumeric() else '1'
+            selPredefinedOption = str(options[2]) if str(options[2]).isnumeric() else '1'
             if len(options) >= 4:
-                selIndexOption = str(options[3])
+                selIndexOption = str(options[3]) if str(options[3]).isnumeric() else '12'
         selectedChoice["0"] = "P"
         updateMenuChoiceHierarchy()
         selectedMenu = m0.find(menuOption)
@@ -2343,7 +2343,11 @@ def loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption):
                     exchangeSuffix = "" if (indexOption == 15 or (configManager.defaultIndex == 15 and indexOption == 0)) else ".NS",
                     userDownloadOption = menuOption
             )
-    if menuOption not in ["C"] and (userPassedArgs.monitor is not None or "|" in userPassedArgs.options or (":33:3:" in userPassedArgs.options or ":32:" in userPassedArgs.options or ":38:" in userPassedArgs.options)) :#not configManager.isIntradayConfig() and configManager.calculatersiintraday:
+    if menuOption not in ["C"] and (userPassedArgs.monitor is not None or \
+                                    ("|" in userPassedArgs.options and ':i' in userPassedArgs.options) or \
+                                    (":33:3:" in userPassedArgs.options or \
+                                     ":32:" in userPassedArgs.options or \
+                                        ":38:" in userPassedArgs.options)) :#not configManager.isIntradayConfig() and configManager.calculatersiintraday:
         prevDuration = configManager.duration
         prevPeriod = configManager.period
         candleDuration = (userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else ("1m" if configManager.duration.endswith("d") else configManager.duration))
