@@ -155,7 +155,7 @@ INDEX_COMMANDS_SKIP_MENUS_SCANNER = ["W", "E", "M", "Z", "S"]
 INDEX_COMMANDS_SKIP_MENUS_BACKTEST = ["W", "E", "M", "Z", "S", "N", "0", "15"]
 PIPED_SCAN_SKIP_COMMAND_MENUS =["2", "3", "M", "0", "4"]
 PIPED_SCAN_SKIP_INDEX_MENUS =["W","N","E","S","0","Z","M","15"]
-UNSUPPORTED_COMMAND_MENUS =["22","42","M","Z","0",str(MAX_MENU_OPTION)]
+UNSUPPORTED_COMMAND_MENUS =["22","M","Z","0",str(MAX_MENU_OPTION)]
 SUPPORTED_COMMAND_MENUS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"]
 
 def initializeIntradayTimer():
