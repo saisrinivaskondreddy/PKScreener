@@ -3955,7 +3955,7 @@ def sendMessageToTelegramChannel(
                 sleep(2)
             except Exception as e:  # pragma: no cover
                 default_logger().debug(e, exc_info=True)
-    else:
+    else: # Media group message
         file_paths = []
         file_captions = []
         if "ATTACHMENTS" in media_group_dict.keys():
@@ -3991,6 +3991,7 @@ def sendMessageToTelegramChannel(
                     os.remove(f)
             except: # pragma: no cover
                 pass
+        handleAlertSubscriptions(user,message)
     if user is not None:
         if str(user) != str(DEV_CHANNEL_ID) and userPassedArgs is not None and not userPassedArgs.monitor:
             # Send an update to dev channel
@@ -3998,7 +3999,37 @@ def sendMessageToTelegramChannel(
                 f"Responded back to userId:{user} with {caption}.{message} [{userPassedArgs.options.replace(':D','')}]",
                 userID=DEV_CHANNEL_ID,
             )
-
+def handleAlertSubscriptions(user,message):
+    """
+    Handles user subscriptions to automated alerts for a given Scan type/category/menu/submenu.
+    # Case 1
+    If user is not subscribed, user is given a prompt to subscribe only to that specific scan.
+    # Case 2
+    If user is already subscribed, user is informed about the same along with all other subscriptions he may have.
+    """
+    if user is not None and "|" in message:
+        if int(user) > 0:
+            # Individual user
+            scanId = message.split("|")[0].replace("*b>","").strip()
+            from PKDevTools.classes.DBManager import DBManager
+            dbManager = DBManager()
+            if dbManager.url is not None and dbManager.token is not None:
+                alertUser = dbManager.alertsForUser(int(user))
+                # Case 1
+                if alertUser is None or len(alertUser.scannerJobs) == 0 or str(scanId) not in alertUser.scannerJobs:
+                    reply_markup = {
+                        "inline_keyboard": [
+                            [{"text": f"Yes! Subscribe", "callback_data": f"SUB_{scanId}"}]
+                        ],
+                    }
+                    send_message(message=f"Would you like to subscribe to this ({scanId}) automated scan alert for a day during market hours (NSE - IST timezone)? You will need to pay ₹ {'40' if str(scanId).upper().startswith('P') else '31'} (One time) for automated alerts to {scanId} all day on the day of subscription.",
+                        userID=int(user),
+                        reply_markup=reply_markup)
+                elif alertUser is not None and len(alertUser.scannerJobs) > 0 and str(scanId) in alertUser.scannerJobs:
+                    # Case 2
+                    send_message(message=f"Thank you for subscribing to (<b>{scanId}</b>) automated scan alert! We truly hope you are enjoying the alerts! You will continue to receive alerts for the duration of NSE Market hours for today. For any feedback, drop a note to @ItsOnlyPK.",
+                        userID=int(user),)
+            
 def sendTestStatus(screenResults, label, user=None):
     msg = "<b>SUCCESS</b>" if (screenResults is not None and len(screenResults) >= 1) else "<b>FAIL</b>"
     sendMessageToTelegramChannel(

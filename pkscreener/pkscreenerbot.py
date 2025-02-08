@@ -215,7 +215,7 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
         if len(args) > 0: # UTR
             matchedTran = PKGmailReader.matchUTR(utr=args[0])
             if matchedTran is not None:
-                updatedResults = f"We have found the following transaction for the provided UTR:\n{matchedTran}\n\nYour subscription is being enabled soon!\n\nPlease check with /OTP in the next couple of minutes!\n\n"
+                updatedResults = f"We have found the following transaction for the provided UTR:\n{matchedTran}\n\nYour subscription is being enabled soon!\n\nPlease check with /OTP in the next couple of minutes!\n\nThank you for trusting PKScreener!"
                 workflow_name = "w18-workflow-sub-data.yml"
                 subtype = "add"
                 userid = user.id
@@ -585,6 +585,79 @@ def PScanners(update: Update, context: CallbackContext) -> str:
     query.edit_message_text(text=menuText, reply_markup=reply_markup)
     DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
     return START_ROUTES
+
+def subscribeToScannerAlerts(update: Update, context: CallbackContext) -> str:
+    """Show Subscription options, check if user has paid or already subscribed"""
+    updateCarrier = None
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
+    query = update.callback_query
+    if query is None:
+        start(update, context)
+        return START_ROUTES
+    scanId = query.data.upper().replace("SUB_", "").strip()
+    global bot_available
+    if not bot_available:
+        # Bot is running but is running in unavailable mode.
+        # Sometimes, either the payment does not go through or 
+        # it takes time to process the last month's payment if
+        # done in the past 24 hours while the last date was today.
+        # If that happens, we won't be able to run bots or scanners
+        # without incurring heavy charges. Let's run in the 
+        # unavailable mode instead until this gets fixed.
+        start(update, context)
+        return START_ROUTES
+    dbManager = DBManager()
+    alertUser = dbManager.alertsForUser(int(user.id))
+    inlineMenus = []
+    query.answer()
+    menuText = ""
+    requiredBalance = 40 if str(scanId).upper().startswith("P") else 31
+    payWall = "Please pay to subscribe:\n\n1. Using UPI(India) to PKScreener@APL \nor\n2. Proudly sponsor: https://github.com/sponsors/pkjmesra?frequency=recurring&sponsor=pkjmesra\n\nPlease drop a message to @ItsOnlyPK along with UTR and Scan details on Telegram after paying to enable subscription manually or use \n\n/check UPI_UTR_HERE_After_Making_Payment to share transaction reference number to automatically update your balance after making payment via UPI\n! After that you can try re-subscribing!"
+    if alertUser is not None and alertUser.balance >= 0:
+        # User has some balance
+        if len(alertUser.scannerJobs) > 0:
+            # User is already subscribed to some alerts
+            if str(scanId) in alertUser.scannerJobs:
+                menuText = f"You are already subscribed to {scanId} ! Alerts will be delivered as and when they are raised."
+            else:
+                if  alertUser.balance < requiredBalance:
+                    # Insufficient balance
+                    menuText = f"You need at least ₹ {requiredBalance} to subscribe to {scanId} ! Your current balance ₹ {alertUser.balance} is insufficient. {payWall}"
+                else:
+                    # Sufficient balance to subscribe to scanId
+                    subscribed = dbManager.updateAlertSubscriptionModel(user.id,requiredBalance,scanId)
+                    if subscribed:
+                        menuText = f"You have been added to receive the alerts for {scanId}. Please note that it is valid only for today during Market Hours and resets right after that. You will need to re-subscribe again if you need it on the next day. Thank you for trusting PKScreener!"
+                    else:
+                        menuText = "We encountered an error updating your subscription! Please reach out to @ItsOnlyPK on Telegram with your UTR and subscription scanner details."
+    
+    elif alertUser is None or alertUser.balance == 0:
+        # Either user is not subscribed or has 0 balance
+        menuText = f"You need at least ₹ {requiredBalance} to subscribe to {scanId} ! {payWall}"
+
+    inlineMenus.append(
+            InlineKeyboardButton(
+                "Start", callback_data="start"
+            )
+        )
+    keyboard = [inlineMenus]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if query.message.text == menuText:
+        menuText = f"{PKDateUtilities.currentDateTime()}:\n{menuText}"
+    menuText = f"{menuText}\n\nClick /start if you want to restart the session."
+    query.edit_message_text(text=menuText, reply_markup=reply_markup)
+    return START_ROUTES
+        
 
 def XScanners(update: Update, context: CallbackContext) -> str:
     """Show new choice of buttons"""
@@ -1876,6 +1949,30 @@ def runpkscreenerbot(availability=True) -> None:
     # ^ means "start of line/string"
     # $ means "end of line/string"
     # So ^ABC$ will only allow 'ABC'
+    # conv_handler = ConversationHandler(
+    #     entry_points=[CommandHandler("start", start),
+    #                   CommandHandler("otp", otp),
+    #                   CommandHandler("check", matchUTR)],
+    #     states={
+    #         START_ROUTES: [
+    #             CallbackQueryHandler(XScanners, pattern="^" + str("CX") + "$"),
+    #             CallbackQueryHandler(XScanners, pattern="^" + str("CB") + "$"),
+    #             CallbackQueryHandler(PScanners, pattern="^" + str("CP") + "$"),
+    #             CallbackQueryHandler(XScanners, pattern="^" + str("CMI_")),
+    #             CallbackQueryHandler(XDevModeHandler, pattern="^" + str("CDV_")),
+    #             # CallbackQueryHandler(XScanners, pattern="^" + str("CG") + "$"),
+    #             CallbackQueryHandler(Level2, pattern="^" + str("CX_")),
+    #             CallbackQueryHandler(Level2, pattern="^" + str("CB_")),
+    #             CallbackQueryHandler(Level2, pattern="^" + str("CP_")),
+    #             CallbackQueryHandler(subscribeToScannerAlerts, pattern="^" + str("SUB_")),
+    #             # CallbackQueryHandler(Level2, pattern="^" + str("CG_")),
+    #             CallbackQueryHandler(end, pattern="^" + str("CZ") + "$"),
+    #             CallbackQueryHandler(start, pattern="^"),
+    #         ],
+    #         END_ROUTES: [],
+    #     },
+    #     fallbacks=[CommandHandler("start", start)],
+    # )
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start),
                       CommandHandler("otp", otp),
@@ -1891,6 +1988,7 @@ def runpkscreenerbot(availability=True) -> None:
                 CallbackQueryHandler(Level2, pattern="^" + str("CX_")),
                 CallbackQueryHandler(Level2, pattern="^" + str("CB_")),
                 CallbackQueryHandler(Level2, pattern="^" + str("CP_")),
+                CallbackQueryHandler(subscribeToScannerAlerts, pattern="^" + str("SUB_")),
                 # CallbackQueryHandler(Level2, pattern="^" + str("CG_")),
                 CallbackQueryHandler(end, pattern="^" + str("CZ") + "$"),
                 CallbackQueryHandler(start, pattern="^"),
@@ -1899,8 +1997,12 @@ def runpkscreenerbot(availability=True) -> None:
         },
         fallbacks=[CommandHandler("start", start)],
     )
-    dispatcher.add_handler(CommandHandler("otp", otp))
-    dispatcher.add_handler(CommandHandler("check", matchUTR))
+    for handler in conv_handler.entry_points:
+        dispatcher.add_handler(handler)
+    for handler in conv_handler.states[START_ROUTES]:
+        dispatcher.add_handler(handler)
+    # dispatcher.add_handler(CommandHandler("otp", otp))
+    # dispatcher.add_handler(CommandHandler("check", matchUTR))
     dispatcher.add_handler(CommandHandler("help", help_command))
     dispatcher.add_handler(
         MessageHandler(Filters.text & ~Filters.command, help_command)
@@ -1909,7 +2011,7 @@ def runpkscreenerbot(availability=True) -> None:
     # application.add_handler(MessageHandler(filters.COMMAND, command_handler))
     # Add ConversationHandler to application that will be used for handling updates
     addCommandsForMenuItems(dispatcher)
-    dispatcher.add_handler(conv_handler)
+    # dispatcher.add_handler(conv_handler)
     # ...and the error handler
     dispatcher.add_error_handler(error_handler)
     if bot_available:
