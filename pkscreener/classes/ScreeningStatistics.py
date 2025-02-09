@@ -3365,7 +3365,7 @@ class ScreeningStatistics:
     #@measure_time
     # Validate Lorentzian Classification signal
     def validateLorentzian(self, df, screenDict, saveDict, lookFor=3,stock=None):
-        if df is None or len(df) == 0:
+        if df is None or len(df) < 20:
             return False
         data = df.copy()
         # lookFor: 1-Buy, 2-Sell, 3-Any

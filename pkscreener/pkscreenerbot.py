@@ -209,9 +209,13 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
     
     if bot_available:
         msg = update.effective_message
-        m = re.match("\s*/([0-9a-zA-Z-]+)\s*(.*)", msg.text)
-        cmd = m.group(1).lower()
-        args = [arg for arg in re.split("\s+", m.group(2)) if len(arg)]
+        try:
+            m = re.match(r"\s*/([0-9a-zA-Z-]+)\s*(.*)", msg.text)
+            cmd = m.group(1).lower()
+            args = [arg for arg in re.split(r"\s+", m.group(2)) if len(arg)]
+        except:
+            pass
+            return start(update,context)
         if len(args) > 0: # UTR
             matchedTran = PKGmailReader.matchUTR(utr=args[0])
             if matchedTran is not None:
@@ -1381,9 +1385,13 @@ def command_handler(update: Update, context: CallbackContext) -> None:
         start(update, context)
         return START_ROUTES
     msg = update.effective_message
-    m = re.match("\s*/([0-9a-zA-Z_-]+)\s*(.*)", msg.text)
-    cmd = m.group(1).lower()
-    args = [arg for arg in re.split("\s+", m.group(2)) if len(arg)]
+    try:
+        m = re.match(r"\s*/([0-9a-zA-Z_-]+)\s*(.*)", msg.text)
+        cmd = m.group(1).lower()
+        args = [arg for arg in re.split(r"\s+", m.group(2)) if len(arg)]
+    except:
+        pass
+        return start(update,context)
     if cmd.startswith("cx_") or cmd.startswith("cb_") or cmd.startswith("cg_"):
         Level2(update=update, context=context)
         return START_ROUTES
