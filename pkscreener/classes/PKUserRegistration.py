@@ -53,8 +53,8 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
     def populateSavedUserCreds(self):
         configManager = tools()
         configManager.getConfig(parser)
-        PKUserRegistration.userID = configManager.userID
-        PKUserRegistration.otp = configManager.otp
+        PKUserRegistration().userID = configManager.userID
+        PKUserRegistration().otp = configManager.otp
 
     @property
     def userID(self):
@@ -77,13 +77,13 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
         try:
             if "RUNNER" in os.environ.keys():
                 return True, ValidationResult.Success
-            PKPikey.removeSavedFile(f"{PKUserRegistration.userID}")
-            resp = Utility.tools.tryFetchFromServer(cache_file=f"{PKUserRegistration.userID}.pdf",directory="results/Data",hideOutput=True, branchName="SubData")
+            PKPikey.removeSavedFile(f"{PKUserRegistration().userID}")
+            resp = Utility.tools.tryFetchFromServer(cache_file=f"{PKUserRegistration().userID}.pdf",directory="results/Data",hideOutput=True, branchName="SubData")
             if resp is None or resp.status_code != 200:
                 return False, ValidationResult.BadUserID
-            with open(os.path.join(Archiver.get_user_data_dir(),f"{PKUserRegistration.userID}.pdf"),"wb",) as f:
+            with open(os.path.join(Archiver.get_user_data_dir(),f"{PKUserRegistration().userID}.pdf"),"wb",) as f:
                 f.write(resp.content)
-            if not PKPikey.openFile(f"{PKUserRegistration.userID}.pdf",PKUserRegistration.otp):
+            if not PKPikey.openFile(f"{PKUserRegistration().userID}.pdf",PKUserRegistration().otp):
                 return False, ValidationResult.BadOTP
             return True, ValidationResult.Success
         except: # pragma: no cover
@@ -149,8 +149,8 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
                 pass
             if userUsedUserID:
                 OutputControls().printOutput(f"{colorText.GREEN}[+] Please wait!{colorText.END}\n[+] {colorText.WARN}Validating the OTP. You can press Ctrl+C to exit!{colorText.END}")
-                PKUserRegistration.userID = usernameInt
-                PKUserRegistration.otp = otp
+                PKUserRegistration().userID = usernameInt
+                PKUserRegistration().otp = otp
 
                 validationResult,validationReason = PKUserRegistration.validateToken()
                 if not validationResult and validationReason == ValidationResult.BadUserID:
@@ -163,8 +163,8 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
                     return PKUserRegistration.login(trialCount=trialCount+1)
                 if validationResult and validationReason == ValidationResult.Success:
                     # Remember the userID for future login
-                    configManager.userID = str(PKUserRegistration.userID)
-                    configManager.otp = str(PKUserRegistration.otp)
+                    configManager.userID = str(PKUserRegistration().userID)
+                    configManager.otp = str(PKUserRegistration().otp)
                     configManager.setConfig(parser,default=True,showFileCreatedText=False)
                     ConsoleUtility.PKConsoleTools.clearScreen(userArgs=None, clearAlways=True, forceTop=True)
                     return validationReason
