@@ -4,8 +4,8 @@
 | [![MADE-IN-INDIA][MADE-IN-INDIA-badge]][MADE-IN-INDIA] | [![GitHub release (latest by date)][GitHub release (latest by date)-badge]][GitHub release (latest by date)] | [![Downloads][Downloads-badge]][Downloads] | ![latest download][Latest-Downloads-badge]  | [![Docker Pulls][Docker Pulls-badge]][Docker Status] |
 | :-------------: | :-----------------: | :-----------------: | :-----------------: | :-----------------: |
 | Platforms | [![Windows][Windows-badge]][Windows] | [![Linux(x64)][Linux-badge_x64]][Linux_x64] [![Linux(arm64)][Linux-badge_arm64]][Linux_arm64] | [![Mac OS(x64)][Mac OS-badge_x64]][Mac OS_x64] [![Mac OS(arm64)][Mac OS-badge_arm64]][Mac OS_arm64] | [![Docker Status][Docker Status-badge]][Docker Status] |
-| Package / Docs | [![Documentation][Documentation-badge]][Documentation] | [![PyPI][pypi-badge]][pypi] | [![is wheel][wheel-badge]][pypi] | ![github license][github-license] |
-| Tests | [![CodeFactor][Codefactor-badge]][Codefactor] | [![Coverage Status][Coverage-Status-badge]][Coverage-Status] | [![codecov][codecov-badge]][codecov] | [![After Market][After Market-badge]][After Market] |
+| Package / Docs | [![Documentation][Documentation-badge]][Documentation] [![OpenSSF Best Practices][OpenSSF-Badge]][OpenSSF-pkscreener]  | [![PyPI][pypi-badge]][pypi] | [![is wheel][wheel-badge]][pypi] | ![github license][github-license] |
+| Tests/Code-Quality | [![CodeFactor][Codefactor-badge]][Codefactor] | [![Coverage Status][Coverage-Status-badge]][Coverage-Status] | [![codecov][codecov-badge]][codecov] | [![After Market][After Market-badge]][After Market] |
 
 ## What is PKScreener?
 | Telegram Alerts | Nifty AI Prediction | Scheduling Cron Jobs | On-Demand Telegram Bot | Backtesting / Growth of 10k|
@@ -372,6 +372,8 @@ After you have finished the run, go to that copied path, zip the contents of the
 [New Release]: https://github.com/pkjmesra/PKScreener/actions/workflows/w1-workflow-build-matrix.yml
 [Docker-Build-badge]: https://github.com/pkjmesra/PKScreener/actions/workflows/w15-docker-image.yml/badge.svg
 [Docker-Build]: https://github.com/pkjmesra/PKScreener/actions/workflows/w15-docker-image.yml
+[OpenSSF-Badge]:https://www.bestpractices.dev/projects/10011/badge
+[OpenSSF-pkscreener]: https://www.bestpractices.dev/projects/10011
 
 <!-- [![Docker Build][Docker-Build-badge]][Docker-Build] [![PKScreener Test - New Features][New Features-badge]][New Features] [![w9. After-Market Data Gen][After Market-badge]][After Market] [![1. PKScreener Build - New Release][New Release-badge]][New Release] [![Documentation][Documentation-badge]][Documentation]
 
