@@ -102,6 +102,12 @@ from telegram.ext import (
     Filters,
     CallbackContext
 )
+from PKDevTools.classes.Singleton import SingletonType, SingletonMixin
+
+class PKLocalCache(SingletonMixin, metaclass=SingletonType):
+    def __init__(self):
+        super(PKLocalCache, self).__init__()
+        self.registeredIDs = []
 
 # Enable logging
 logging.basicConfig(
@@ -159,6 +165,21 @@ PIPED_SCAN_SKIP_COMMAND_MENUS =["2", "3", "M", "0", "4"]
 PIPED_SCAN_SKIP_INDEX_MENUS =["W","N","E","S","0","Z","M","15"]
 UNSUPPORTED_COMMAND_MENUS =["22","M","Z","0",str(MAX_MENU_OPTION)]
 SUPPORTED_COMMAND_MENUS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"]
+
+def registerUser(user,forceFetch=False):
+    otpValue, subsModel,subsValidity,alertUser = 0,0,None,None
+    if user is not None and (user.id not in PKLocalCache().registeredIDs or forceFetch):
+        dbManager = DBManager()
+        otpValue, subsModel,subsValidity,alertUser = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+        if str(otpValue).strip() != '0' and user.id not in PKLocalCache().registeredIDs:
+            PKLocalCache().registeredIDs.append(alertUser.userid)
+    return otpValue, subsModel,subsValidity,alertUser
+
+def loadRegisteredUsers():
+    dbManager = DBManager()
+    users = dbManager.getUsers(fieldName="userid")
+    userIDs = [user.userid for user in users]
+    PKLocalCache().registeredIDs.extend(userIDs)
 
 def initializeIntradayTimer():
     try:
@@ -340,7 +361,7 @@ def start(update: Update, context: CallbackContext, updatedResults=None, monitor
             text=f"Name: {user.first_name}, Username:@{user.username} with ID: {str(user.id)} started using the bot!\n{chosenBotMenuOption}",
             parse_mode="HTML",
         )
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+    registerUser(user)
     # Tell ConversationHandler that we're in state `FIRST` now
     return START_ROUTES
 
@@ -516,7 +537,7 @@ def PScanners(update: Update, context: CallbackContext) -> str:
     reply_markup = InlineKeyboardMarkup(keyboard)
     menuText = f"{menuText}\nClick /start if you want to restart the session."
     editMessageText(query=query,editedText=menuText,reply_markup=reply_markup)
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+    registerUser(user)
     return START_ROUTES
 
 def viewSubscriptionOptions(update:Update,context:CallbackContext,sendOTP=False):
@@ -547,12 +568,13 @@ def viewSubscriptionOptions(update:Update,context:CallbackContext,sendOTP=False)
     if bot_available:
         try:
             otpValue = 0
+            alertUser = None
             dbManager = DBManager()
-            otpValue, subsModel,subsValidity = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+            otpValue, subsModel,subsValidity,alertUser = registerUser(user,forceFetch=True)
         except Exception as e: # pragma: no cover
             logger.error(e)
             pass
-        userText = f"\nUserID: <b>{user.id}</b>"
+        userText = f"<b>UserID</b> : <code>{user.id}</code>"
         try:
             subscriptionModelNames = "\n<pre>Following basic and premium subscription models are available. Premium subscription allows for unlimited premium scans:\n"
             for name,value in PKUserSusbscriptions().subscriptionKeyValuePairs.items():
@@ -571,11 +593,11 @@ def viewSubscriptionOptions(update:Update,context:CallbackContext,sendOTP=False)
             pass
         if sendOTP:
             if otpValue == 0:
-                updatedResults = f"We are having difficulty generating OTP for your {userText}. Please try again later."
+                updatedResults = f"We are having difficulty generating OTP for your {userText}. Please try again later or reach out to @ItsOnlyPK."
             else:
-                updatedResults = f"Please use your {userText} \nwith the following OTP to login to PKScreener:\n<b>{otpValue}</b>\n\nYour current subscription : <b>{subscriptionModelName}</b>. {subscriptionModelNames}"
+                updatedResults = f"Please use the following to login to PKScreener:\n{userText}\n<b>OTP</b>     : <code>{otpValue}</code>\n\nCurrent subscription : <b>{subscriptionModelName}</b>.\nCurrent alerts balance: <b>₹ {alertUser.balance if alertUser is not None else 0}</b>. {subscriptionModelNames}"
         else:
-            updatedResults = f"Your current subscription : <b>{subscriptionModelName}</b>. {subscriptionModelNames}"
+            updatedResults = f"Current subscription: <b>{subscriptionModelName}</b>.\nCurrent alerts balance: <b>₹ {alertUser.balance if alertUser is not None else 0}</b>. {subscriptionModelNames}"
     if hasattr(updateCarrier, "reply_text"):
         updateCarrier.reply_text(text=sanitiseTexts(updatedResults), reply_markup=default_markup(user=user),parse_mode="HTML")
     elif hasattr(updateCarrier, "edit_message_text"):
@@ -640,7 +662,7 @@ def subscribeToScannerAlerts(update: Update, context: CallbackContext) -> str:
     
     elif alertUser is None or alertUser.balance == 0:
         # Either user is not subscribed or has 0 balance
-        menuText = f"You need at least <b>₹ {requiredBalance}</b> to subscribe to <b>{scanId} alerts for a day</b> ! {payWall}"
+        menuText = f"You need at least <b>₹ {requiredBalance}</b> to subscribe to <b>{scanId} alerts for a day</b> ! Your current balance <b>₹ 0</b> is <b>insufficient</b>. {payWall}"
 
     menuText = f"{menuText}\nClick /start if you want to restart the session."
     editMessageText(query=query,editedText=sanitiseTexts(menuText),reply_markup=default_markup(user=user))
@@ -742,7 +764,7 @@ def XScanners(update: Update, context: CallbackContext) -> str:
     reply_markup = InlineKeyboardMarkup(keyboard)
     menuText = f"{menuText}\nClick /start if you want to restart the session."
     editMessageText(query=query,editedText=sanitiseTexts(menuText),reply_markup=reply_markup)
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+    registerUser(user)
     return START_ROUTES
 
 def getinlineMenuListRow(keyboardRows=[]):
@@ -1128,7 +1150,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
                 update=update,
             )
             if not shouldSendUpdate:
-                DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+                registerUser(user)
                 return START_ROUTES
         try:
             if optionChoices != "" and Channel_Id is not None and len(str(Channel_Id)) > 0:
@@ -1147,7 +1169,7 @@ def Level2(update: Update, context: CallbackContext) -> str:
         )
         scanRequest = optionChoices.replace(" ", "").replace(">", "_").replace(":","_").replace("_D","").upper()
         sendSubscriptionOption(update,context,scanRequest)
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+    registerUser(user)
     return START_ROUTES
 
 def default_markup(user=None,monitorIndex=0):
@@ -1315,7 +1337,7 @@ def BBacktests(update: Update, context: CallbackContext) -> str:
     responseText = "Backtesting NOT implemented yet in this Bot!\n\n\nYou can use backtesting by downloading the software from https://github.com/pkjmesra/PKScreener/"
     responseText = f"{responseText}\nClick /start if you want to restart the session."
     editMessageText(query=query,editedText=sanitiseTexts(responseText),reply_markup=default_markup(user=user))
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
+    registerUser(user)
     return START_ROUTES
 
 def sendSubscriptionOption(update:Update,context:CallbackContext,scanId):
@@ -1867,8 +1889,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
             context.bot.send_message(
                 chat_id=int(f"-{Channel_Id}"), text=message, parse_mode="HTML"
             )
-    DBManager().getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
-
+    registerUser(user)
 
 def _shouldAvoidResponse(update):
     sentFrom = []
@@ -2091,6 +2112,7 @@ def runpkscreenerbot(availability=True) -> None:
     if bot_available:
         # Run the intraday monitor
         initializeIntradayTimer()
+        loadRegisteredUsers()
     # Run the bot until the user presses Ctrl-C
     # application.run_polling(allowed_updates=Update.ALL_TYPES)
     # Start the Bot
