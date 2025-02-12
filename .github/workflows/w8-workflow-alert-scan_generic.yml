@@ -196,6 +196,7 @@ jobs:
 
     - name: Run Scan on Ubuntu
       shell: bash
+      timeout-minutes: 360
       if: startsWith(runner.os, 'Linux')
       env:
         RUNNER : "GitHub_Actions"
