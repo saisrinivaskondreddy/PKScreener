@@ -571,6 +571,10 @@ def viewSubscriptionOptions(update:Update,context:CallbackContext,sendOTP=False)
             alertUser = None
             dbManager = DBManager()
             otpValue, subsModel,subsValidity,alertUser = registerUser(user,forceFetch=True)
+            scannerJobsSubscribed = ""
+            if alertUser is not None and len(alertUser.scannerJobs) > 0:
+                scannerJobsSubscribed = ", ".join(alertUser.scannerJobs)
+                scannerJobsSubscribed = f"Subscribed to [{scannerJobsSubscribed}]"
         except Exception as e: # pragma: no cover
             logger.error(e)
             pass
@@ -595,9 +599,9 @@ def viewSubscriptionOptions(update:Update,context:CallbackContext,sendOTP=False)
             if otpValue == 0:
                 updatedResults = f"We are having difficulty generating OTP for your {userText}. Please try again later or reach out to @ItsOnlyPK."
             else:
-                updatedResults = f"Please use the following to login to PKScreener:\n{userText}\n<b>OTP</b>     : <code>{otpValue}</code>\n\nCurrent subscription : <b>{subscriptionModelName}</b>.\nCurrent alerts balance: <b>₹ {alertUser.balance if alertUser is not None else 0}</b>. {subscriptionModelNames}"
+                updatedResults = f"Please use the following to login to PKScreener:\n{userText}\n<b>OTP</b>     : <code>{otpValue}</code>\n\nCurrent subscription : <b>{subscriptionModelName}</b>.\nCurrent alerts balance: <b>₹ {alertUser.balance if alertUser is not None else 0}</b> {scannerJobsSubscribed}. {subscriptionModelNames}"
         else:
-            updatedResults = f"Current subscription: <b>{subscriptionModelName}</b>.\nCurrent alerts balance: <b>₹ {alertUser.balance if alertUser is not None else 0}</b>. {subscriptionModelNames}"
+            updatedResults = f"Current subscription: <b>{subscriptionModelName}</b>.\nCurrent alerts balance: <b>₹ {alertUser.balance if alertUser is not None else 0}</b> {scannerJobsSubscribed}. {subscriptionModelNames}"
     if hasattr(updateCarrier, "reply_text"):
         updateCarrier.reply_text(text=sanitiseTexts(updatedResults), reply_markup=default_markup(user=user),parse_mode="HTML")
     elif hasattr(updateCarrier, "edit_message_text"):
