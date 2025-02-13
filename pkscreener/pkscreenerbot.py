@@ -672,12 +672,13 @@ def kickOffScannerJobIfNotKickedOff(scanId,user,dbManager,requiredBalance,alertU
     # Sufficient balance to subscribe to scanId
     needsNewJobKickedOff = False
     menuText = ""
+    subscribed = False
     subscribedUsers = dbManager.usersForScannerJobId(scannerJobId=scanId)
     if subscribedUsers is None or len(subscribedUsers) == 0:
         # This is the first user who's requesting this scanner
         needsNewJobKickedOff = True
-        if alertUser is None or str(scanId) not in alertUser.scannerJobs:
-            subscribed = dbManager.updateAlertSubscriptionModel(user.id,requiredBalance,scanId)
+    if alertUser is None or str(scanId) not in alertUser.scannerJobs:
+        subscribed = dbManager.updateAlertSubscriptionModel(user.id,requiredBalance,scanId)
     if subscribed:
         menuText = f"You have been added to receive the alerts for {scanId}. Please note that it is valid only for today during Market Hours and resets right after that. You will need to re-subscribe again if you need it on the next day. Thank you for trusting PKScreener!"
         if needsNewJobKickedOff:
