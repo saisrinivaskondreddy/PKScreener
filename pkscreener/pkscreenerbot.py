@@ -658,7 +658,7 @@ def subscribeToScannerAlerts(update: Update, context: CallbackContext) -> str:
         if len(alertUser.scannerJobs) > 0:
             # User is already subscribed to some alerts
             if str(scanId) in alertUser.scannerJobs:
-                menuText = f"You are already subscribed to {scanId} ! Alerts will be delivered as and when they are raised."
+                menuText = f"You are already subscribed to {scanId} ! Alerts will be delivered as and when they are raised during market hours on a market-open day. <b>You need to subscribe every morning for any spcific alert.</b>"
                 kickOffScannerJobIfNotKickedOff(scanId,user,dbManager,requiredBalance,alertUser)
             else:
                 if  alertUser.balance < requiredBalance:
@@ -692,7 +692,7 @@ def kickOffScannerJobIfNotKickedOff(scanId,user,dbManager,requiredBalance,alertU
     if alertUser is None or str(scanId) not in alertUser.scannerJobs:
         subscribed = dbManager.updateAlertSubscriptionModel(user.id,requiredBalance,scanId)
     if subscribed:
-        menuText = f"You have been added to receive the alerts for {scanId}. Please note that it is valid only for today during Market Hours and resets right after that. You will need to re-subscribe again if you need it on the next day. Thank you for trusting PKScreener!"
+        menuText = f"You have been added to receive the alerts for <b>{scanId}</b>. Please note that it is valid only for today during Market Hours and resets right after that. <b>You will need to re-subscribe again if you need it on the next market open day</b>. Thank you for trusting PKScreener!"
         if needsNewJobKickedOff:
             run_workflow(f"{scanId}_{user.id}", str(user.id), f'--systemlaunched -a y -m {str(scanId).upper().replace("_",":")}', workflowType="S")
     else:
