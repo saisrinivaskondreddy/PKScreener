@@ -172,7 +172,7 @@ def registerUser(user,forceFetch=False):
         dbManager = DBManager()
         otpValue, subsModel,subsValidity,alertUser = dbManager.getOTP(user.id,user.username,f"{user.first_name} {user.last_name}",validityIntervalInSeconds=configManager.otpInterval)
         if str(otpValue).strip() != '0' and user.id not in PKLocalCache().registeredIDs:
-            PKLocalCache().registeredIDs.append(alertUser.userid)
+            PKLocalCache().registeredIDs.append(user.id)
     return otpValue, subsModel,subsValidity,alertUser
 
 def loadRegisteredUsers():
