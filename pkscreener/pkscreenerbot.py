@@ -181,6 +181,13 @@ def loadRegisteredUsers():
     userIDs = [user.userid for user in users]
     PKLocalCache().registeredIDs.extend(userIDs)
 
+def isInMarketHours():
+    now = PKDateUtilities.currentDateTime()
+    marketStartTime = PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().openHour,minute=MarketHours().openMinute)
+    marketCloseTime = PKDateUtilities.currentDateTime(simulate=True,hour=MarketHours().closeHour,minute=MarketHours().closeMinute)
+    # We are in between market open and close hours
+    return not PKDateUtilities.isTodayHoliday()[0] and now >= marketStartTime and now <= marketCloseTime
+
 def initializeIntradayTimer():
     try:
         if (not PKDateUtilities.isTodayHoliday()[0]):
@@ -674,7 +681,12 @@ def kickOffScannerJobIfNotKickedOff(scanId,user,dbManager,requiredBalance,alertU
     menuText = ""
     subscribed = False
     subscribedUsers = dbManager.usersForScannerJobId(scannerJobId=scanId)
-    if subscribedUsers is None or len(subscribedUsers) == 0:
+    isMarketOpen = True
+    try:
+        isMarketOpen = isInMarketHours()
+    except:
+        pass
+    if subscribedUsers is None or len(subscribedUsers) == 0 and isMarketOpen:
         # This is the first user who's requesting this scanner
         needsNewJobKickedOff = True
     if alertUser is None or str(scanId) not in alertUser.scannerJobs:
