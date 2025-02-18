@@ -1271,6 +1271,48 @@ def Level2(update: Update, context: CallbackContext) -> str:
     registerUser(user)
     return START_ROUTES
 
+def handleHousekeeping(update: Update, context: CallbackContext) -> str:
+    updateCarrier = None
+    menuText = "Not implemented yet..."
+    shouldSendUpdate = False
+    if update is None:
+        return
+    else:
+        if update.callback_query is not None:
+            updateCarrier = update.callback_query
+        if update.message is not None:
+            updateCarrier = update.message
+        if updateCarrier is None:
+            return
+    # Get user that sent /start and log his name
+    user = updateCarrier.from_user
+    query = update.callback_query
+    query.answer()
+    preSelection = (query.data.upper().replace("C", ""))
+    selection = preSelection.split("_")[1]
+    if query is None:
+        start(update, context)
+        return START_ROUTES
+    reply_markup = default_markup(user)
+    dbMgr = DBManager()
+    if selection == "GAU":
+        userIds = dbMgr.getUsers(fieldName="userId")
+        if userIds is not None:
+            menuText = f"Number of all registered users in the DB: {len(userIds)}"
+    elif selection == "GAS":
+        scanners = dbMgr.scannerJobsWithActiveUsers()
+        if scanners is not None:
+            if len(scanners) > 0:
+                menuText = f"Number of all scans running today in the DB: {len(scanners)}"
+                for scanner in scanners:
+                    scanID = scanner.scannerId
+                    subUsers = ", ".join(scanner.userIds)
+                    menuText = f"{menuText}\nScanner: {scanID} : Users: {subUsers}"
+            else:
+                menuText = "No users are subscribed for alerts today!"
+    editMessageText(query=query,editedText=menuText,reply_markup=reply_markup)
+    return START_ROUTES
+
 def default_markup(user=None,monitorIndex=0):
     mns = m0.renderForMenu(selectedMenu=None,
             skip=TOP_LEVEL_SCANNER_SKIP_MENUS[:len(TOP_LEVEL_SCANNER_SKIP_MENUS)-1],
@@ -1279,14 +1321,22 @@ def default_markup(user=None,monitorIndex=0):
         )
     if (PKDateUtilities.isTradingTime() and not PKDateUtilities.isTodayHoliday()[0]) or ("PKDevTools_Default_Log_Level" in os.environ.keys()) or sys.argv[0].endswith(".py"):
         mns.append(menu().create(f"MI_{monitorIndex}", "👩‍💻 🚀 Intraday Monitor", 2))
+    hskMenus = []
     if user is not None and user.username == OWNER_USER:
-        mns.append(menu().create(f"DV_0", ("✅ Enable Logging" if not configManager.logsEnabled else "🚫 Disable Logging"), 2))
-        mns.append(menu().create(f"DV_1", "🔄 Restart Bot", 2))
+        hskMenus.append(menu().create(f"DV_0", ("✅ Enable Logging" if not configManager.logsEnabled else "🚫 Disable Logging"), 2))
+        hskMenus.append(menu().create(f"DV_1", "🔄 Restart Bot", 2))
+        hskMenus.append(menu().create(f"HSK_GAU", "Get Active Users", 2))
+        hskMenus.append(menu().create(f"HSK_GAP", "Get Paying Users", 2))
+        hskMenus.append(menu().create(f"HSK_GAS", "Get Alerting Users", 2))
+        hskMenus.append(menu().create(f"HSK_EUS", "Enable User Subs", 2))
+        hskMenus.append(menu().create(f"HSK_DUS", "Disable User Subs", 2))
+        hskMenus.append(menu().create(f"HSK_UUB", "Update User Balance", 2))
+
     keyboard = []
     inlineMenus = []
     lastRowMenus = []
     rowIndex = 0
-    iconDict = {"X":"🕵️‍♂️ 🔍 ","B":"📈 🎯 ","P":"🧨 💥 ","MI":"","DV":"","VS":"🔔 📣 ","start":"🟢 🏁 "}
+    iconDict = {"X":"🕵️‍♂️ 🔍 ","B":"📈 🎯 ","P":"🧨 💥 ","MI":"","DV":"","VS":"🔔 📣 ","start":"🟢 🏁 ", "HS":"🕵️‍♂️ "}
     for mnu in mns:
         if mnu.menuKey[0:2] in TOP_LEVEL_SCANNER_MENUS:
             rowIndex +=1
@@ -1314,6 +1364,21 @@ def default_markup(user=None,monitorIndex=0):
     if len(inlineMenus) > 0:
         keyboard.append(inlineMenus)
     keyboard.append(lastRowMenus)
+    rowIndex = 0
+    inlineMenus = []
+    for hskMenu in hskMenus:
+        rowIndex +=1
+        inlineMenus.append(
+            InlineKeyboardButton(
+                iconDict.get(str(hskMenu.menuKey[0:2])) + hskMenu.menuText.split("(")[0],
+                callback_data="C" + str(hskMenu.menuKey),
+            )
+        )
+        if rowIndex % 2 == 0:
+            keyboard.append(inlineMenus)
+            inlineMenus = []
+    if len(inlineMenus) > 0:
+        keyboard.append(inlineMenus)
     reply_markup = InlineKeyboardMarkup(keyboard)
     return reply_markup
 
@@ -2184,6 +2249,7 @@ def runpkscreenerbot(availability=True) -> None:
                 CallbackQueryHandler(subscribeToScannerAlerts, pattern="^" + str("SUB_")),
                 CallbackQueryHandler(viewSubscriptionOptions, pattern="^" + str("VS_")),
                 CallbackQueryHandler(cancelAlertSubscription, pattern="^" + str("CAN_")),
+                CallbackQueryHandler(handleHousekeeping, pattern="^" + str("CHSK_")),
                 # CallbackQueryHandler(Level2, pattern="^" + str("CG_")),
                 CallbackQueryHandler(end, pattern="^" + str("CZ") + "$"),
                 CallbackQueryHandler(start, pattern="^"),
