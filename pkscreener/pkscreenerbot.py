@@ -165,6 +165,7 @@ PIPED_SCAN_SKIP_COMMAND_MENUS =["2", "3", "M", "0", "4"]
 PIPED_SCAN_SKIP_INDEX_MENUS =["W","N","E","S","0","Z","M","15"]
 UNSUPPORTED_COMMAND_MENUS =["22","M","Z","0",str(MAX_MENU_OPTION)]
 SUPPORTED_COMMAND_MENUS = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45"]
+user_states = {}
 
 def registerUser(user,forceFetch=False):
     otpValue, subsModel,subsValidity,alertUser = 0,0,None,None
@@ -213,6 +214,32 @@ def sanitiseTexts(text):
         return text[:MAX_MSG_LENGTH]
     return text
 
+def updateSubscription(userid,subvalue,subtype = "add"):
+    workflow_name = "w18-workflow-sub-data.yml"
+    branch = "main"
+    updatedResults = None
+    try:
+        workflow_postData  = (
+            '{"ref":"'
+            + branch
+            + '","inputs":{"userid":"'
+            + f"{userid}"
+            + '","subtype":"'
+            + f"{subtype}"
+            + '","subvalue":"'
+            + f"{subvalue}"
+            + '"}}'
+        )
+        ghp_token = PKEnvironment().allSecrets["PKG"]
+        resp = run_workflow(workflowType="O",repo="PKScreener",owner="pkjmesra",branch=branch,ghp_token=ghp_token,workflow_name=workflow_name,workflow_postData=workflow_postData)
+        if resp is not None and resp.status_code != 204:
+            updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolve."
+    except Exception as e:
+        logger.error(e)
+        updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolve."
+        pass
+    return updatedResults
+
 def matchUTR(update: Update, context: CallbackContext) -> str:
     global bot_available
     updateCarrier = None
@@ -250,27 +277,10 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
             matchedTran = PKGmailReader.matchUTR(utr=args[0])
             if matchedTran is not None:
                 updatedResults = f"We have found the following transaction for the provided UTR:\n{matchedTran}\n\nYour subscription is being enabled soon!\n\nPlease check with /OTP in the next couple of minutes!\n\nThank you for trusting PKScreener!"
-                workflow_name = "w18-workflow-sub-data.yml"
-                subtype = "add"
-                userid = user.id
-                branch = "main"
                 try:
-                    subvalue = int(float(matchedTran.get("amountPaid")))
-                    workflow_postData  = (
-                        '{"ref":"'
-                        + branch
-                        + '","inputs":{"userid":"'
-                        + f"{userid}"
-                        + '","subtype":"'
-                        + f"{subtype}"
-                        + '","subvalue":"'
-                        + f"{subvalue}"
-                        + '"}}'
-                    )
-                    ghp_token = PKEnvironment().allSecrets["PKG"]
-                    resp = run_workflow(workflowType="O",repo="PKScreener",owner="pkjmesra",branch=branch,ghp_token=ghp_token,workflow_name=workflow_name,workflow_postData=workflow_postData)
-                    if resp is not None and resp.status_code != 204:
-                        updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolve."
+                    results = updateSubscription(user.id,int(float(matchedTran.get("amountPaid"))))
+                    if results is not None:
+                        updatedResults = results
                 except Exception as e:
                     logger.error(e)
                     updatedResults = f"{updatedResults} Uh oh! We ran into a problem enabling your subscription.\nPlease reach out to @ItsOnlyPK to resolve."
@@ -1296,9 +1306,22 @@ def handleHousekeeping(update: Update, context: CallbackContext) -> str:
     reply_markup = default_markup(user)
     dbMgr = DBManager()
     if selection == "GAU":
-        userIds = dbMgr.getUsers(fieldName="userId")
-        if userIds is not None:
-            menuText = f"Number of all registered users in the DB: {len(userIds)}"
+        activeUsers = dbMgr.getUsers(fieldName="userId")
+        if activeUsers is not None:
+            menuText = f"Number of all registered users in the DB: {len(activeUsers)}"
+    elif selection == "GAP":
+        payingUsers = dbMgr.getPayingUsers()
+        if payingUsers is not None and len(payingUsers) > 0:
+            menuText = "Here are all the paying users:"
+            menuText = f"{menuText}\n{"UserID".ljust(10,'#')} : {"Subs.".ljust(5,'#')} : {"Bal.".ljust(5,'#')}"
+            for payingUser in payingUsers:
+                menuText = f"{menuText}\n{str(payingUser.userid).ljust(10,'#')} : {str(payingUser.subscriptionmodel).ljust(5,'#')} : {str(payingUser.balance).ljust(5,'#')}"
+    elif selection == "UUB":
+        user_states[user.id] = f"{selection}_awaiting_input_1"  # Set user state
+        menuText = "Please enter a userID for whom to update balance:"
+    elif selection in ["EUS", "DUS"]:
+        user_states[user.id] = f"{selection}_awaiting_input_1"  # Set user state
+        menuText = "Please enter a userID for whom to update subscription:"
     elif selection == "GAS":
         scanners = dbMgr.scannerJobsWithActiveUsers()
         if scanners is not None:
@@ -2029,6 +2052,22 @@ def help_command(update: Update, context: CallbackContext) -> None:
             return
     # Get user that sent /start and log his name
     user = updateCarrier.from_user
+
+    if user.id in user_states:
+        if "_awaiting_input_1" in user_states[user.id]:
+            hskCmd = user_states[user.id].split("_")[0]
+            user_states[user.id] = f"{hskCmd}_awaiting_input_2_{updateCarrier.text}"
+            update.message.reply_text(f"{'Balance' if hskCmd == 'UUB' else 'Subscription'} to be updated for entered userID: {updateCarrier.text} ✅\nPlease enter the {'Balance' if hskCmd == 'UUB' else 'Subscription'} value:")
+            return START_ROUTES
+        elif "_awaiting_input_2_" in user_states[user.id]:
+            hskCmd = user_states[user.id].split("_")[0]
+            userID = user_states[user.id].split("_")[-1]
+            results = updateSubscription(int(userID),float(updateCarrier.text),subtype="remove" if hskCmd=="DUS" else "add")
+            if results is None:
+                update.message.reply_text(f"✅ {'Balance' if hskCmd == 'UUB' else 'Subscription'} update for userID: {userID} with balance value: {updateCarrier.text} triggered!\nPlease check with Get Paying users in a few minutes!")
+            # Clear user state
+            del user_states[user.id]
+            return START_ROUTES
 
     cmds = m0.renderForMenu(
         selectedMenu=None,
