@@ -2053,7 +2053,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
     # Get user that sent /start and log his name
     user = updateCarrier.from_user
 
-    if user.id in user_states:
+    if user.id in user_states and user.id == OWNER_USER:
         if "_awaiting_input_1" in user_states[user.id]:
             hskCmd = user_states[user.id].split("_")[0]
             user_states[user.id] = f"{hskCmd}_awaiting_input_2_{updateCarrier.text}"
