@@ -2064,7 +2064,7 @@ def help_command(update: Update, context: CallbackContext) -> None:
             userID = user_states[user.id].split("_")[-1]
             results = updateSubscription(int(userID),float(updateCarrier.text),subtype="remove" if hskCmd=="DUS" else "add")
             if results is None:
-                update.message.reply_text(f"✅ {'Balance' if hskCmd == 'UUB' else 'Subscription'} update for userID: {userID} with balance value: {updateCarrier.text} triggered!\nPlease check with Get Paying users in a few minutes!")
+                update.message.reply_text(f"✅ {'Balance' if hskCmd == 'UUB' else 'Subscription'} update for userID: {userID} with {'Balance' if hskCmd == 'UUB' else 'Subscription'} value: {updateCarrier.text} triggered!\nPlease check with Get Paying users in a few minutes!")
             # Clear user state
             del user_states[user.id]
             return START_ROUTES
