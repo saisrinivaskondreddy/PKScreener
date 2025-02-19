@@ -89,7 +89,6 @@ def decorator(func):
 
     return new_func
 
-
 # print = decorator(print) # current file
 def disableSysOut(input=True, disable=True):
     global printenabled,originalStdOut, original__stdout
