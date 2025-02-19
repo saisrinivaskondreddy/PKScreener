@@ -1545,7 +1545,7 @@ def sendSubscriptionOption(update:Update,context:CallbackContext,scanId):
             [{"text": f"Yes! Subscribe", "callback_data": f"SUB_{scanId}"}]
         ],
     }
-    message=f"Would you like to subscribe to this (<b>{scanId}</b>) automated scan alert for a day during market hours (NSE - IST timezone)? You will need to pay <b>₹ {'40' if str(scanId).upper().startswith('P') else '31'} (One time per day)</b> for automated alerts to only <b>{scanId}</b> all day on the day of subscription."
+    message=f"🔴 <b>Please check your current alerts, balance and subscriptions using /OTP before subscribing for alerts</b>.🔴 If you are not already subscribed to this alert, would you like to subscribe to this (<b>{scanId}</b>) automated scan alert for a day during market hours (NSE - IST timezone)? You will need to pay ₹ {'40' if str(scanId).upper().startswith('P') else '31'} (One time) for automated alerts to <b>{scanId}</b> all day on the day of subscription. 🔴 If you say <b>Yes</b>, the corresponding charges will be deducted from your alerts balance!🔴"
     if len(str(scanId).strip()) > 0 and not str(scanId).startswith("B"):
         context.bot.send_message(
             chat_id=user.id, text=message, reply_markup=reply_markup, parse_mode="HTML"
