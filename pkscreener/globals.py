@@ -1887,7 +1887,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 pass
             
         loadCount = len(stockDictPrimary) if stockDictPrimary is not None else 0
-
+        # Let's use screening only for the stocks for which we could get the data.
+        OutputControls().printOutput(f"{colorText.GREEN}  [+] Adding {len(list(stockDictPrimary.keys()))} stocks out of {len(listStockCodes)} to the queue...{colorText.END}")
+        listStockCodes = list(stockDictPrimary.keys()) if stockDictPrimary is not None and not downloadOnly else listStockCodes
         if downloadOnly:
             OutputControls().printOutput(
                 colorText.WARN
