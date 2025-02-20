@@ -265,8 +265,10 @@ class PKAssetsManager:
         return cache_file
 
     @Halo(text='  [+] Downloading fresh data from Data Providers...', spinner='dots')
-    def downloadLatestData(stockDict,configManager,stockCodes=[],exchangeSuffix=".NS",downloadOnly=False):
-        numStocksPerIteration = (int(len(stockCodes)/int(len(stockCodes)/10)) if len(stockCodes) >= 10 else len(stockCodes)) + 1
+    def downloadLatestData(stockDict,configManager,stockCodes=[],exchangeSuffix=".NS",downloadOnly=False,numStocksPerIteration=0):
+        # if numStocksPerIteration == 0:
+        maxParallelProcesses = 17
+        numStocksPerIteration = (int(len(stockCodes)/int(len(stockCodes)/maxParallelProcesses)) if len(stockCodes) >= maxParallelProcesses else len(stockCodes)) + 1
         queueCounter = 0
         iterations = int(len(stockCodes)/numStocksPerIteration) + 1
         tasksList = []
@@ -293,10 +295,10 @@ class PKAssetsManager:
                                         minAcceptableCompletionPercentage=(100 if downloadOnly else 100),
                                         showProgressBars=configManager.logsEnabled)
             for task in tasksList:
-                if task.result is not None:
+                if task.result is not None and isinstance(task.result,pd.DataFrame) and not task.result.empty:
                     for stock in task.userData:
                         taskResult = task.result.get(f"{stock}{exchangeSuffix}")
-                        if taskResult is not None:
+                        if taskResult is not None and isinstance(taskResult,pd.DataFrame) and not taskResult.empty:
                             stockDict[stock] = taskResult.to_dict("split")
                             processedStocks.append(stock)
         leftOutStocks = list(set(stockCodes)-set(processedStocks))
@@ -332,10 +334,10 @@ class PKAssetsManager:
         # stockCodes is not None mandates that we start our work based on the downloaded data from yesterday
         if (stockCodes is not None and len(stockCodes) > 0) and (isTrading or downloadOnly):
             recentDownloadFromOriginAttempted = True
-            stockDict, leftOutStocks = PKAssetsManager.downloadLatestData(stockDict,configManager,stockCodes,exchangeSuffix=exchangeSuffix,downloadOnly=downloadOnly)
+            stockDict, leftOutStocks = PKAssetsManager.downloadLatestData(stockDict,configManager,stockCodes,exchangeSuffix=exchangeSuffix,downloadOnly=downloadOnly,numStocksPerIteration=len(stockCodes) if stockCodes is not None else 0)
             if len(leftOutStocks) > int(len(stockCodes)*0.05):
                 # More than 5 % of stocks are still remaining
-                stockDict, _ = PKAssetsManager.downloadLatestData(stockDict,configManager,leftOutStocks,exchangeSuffix=exchangeSuffix,downloadOnly=downloadOnly)
+                stockDict, _ = PKAssetsManager.downloadLatestData(stockDict,configManager,leftOutStocks,exchangeSuffix=exchangeSuffix,downloadOnly=downloadOnly,numStocksPerIteration=len(leftOutStocks) if leftOutStocks is not None else 0)
             # return stockDict
         if downloadOnly or isTrading:
             # We don't want to download from local stale pkl file or stale file at server
@@ -366,7 +368,7 @@ class PKAssetsManager:
                 + colorText.END
             )
         if not stockDataLoaded and not recentDownloadFromOriginAttempted:
-            stockDict, _ = PKAssetsManager.downloadLatestData(stockDict,configManager,stockCodes,exchangeSuffix=exchangeSuffix,downloadOnly=downloadOnly)
+            stockDict, _ = PKAssetsManager.downloadLatestData(stockDict,configManager,stockCodes,exchangeSuffix=exchangeSuffix,downloadOnly=downloadOnly,numStocksPerIteration=len(stockCodes) if stockCodes is not None else 0)
         # See if we need to save stock data
         stockDataLoaded = stockDataLoaded or (len(stockDict) > 0 and (len(stockDict) != initialLoadCount))
         if stockDataLoaded:
