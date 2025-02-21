@@ -1891,7 +1891,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         savedOrDownloadedKeys = list(stockDictPrimary.keys())
         missingStocks = set(listStockCodes) - set(savedOrDownloadedKeys)
         OutputControls().printOutput(f"{colorText.GREEN}  [+] Adding {len(listStockCodes)-len(missingStocks)} stocks out of {len(listStockCodes)} to the queue...{colorText.END}")
-        listStockCodes = (set(listStockCodes)-set(missingStocks)) if not downloadOnly else listStockCodes
+        listStockCodes = list(set(listStockCodes)-set(missingStocks)) if not downloadOnly else listStockCodes
         if downloadOnly:
             OutputControls().printOutput(
                 colorText.WARN
