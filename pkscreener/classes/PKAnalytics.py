@@ -35,8 +35,8 @@ import json
 import time
 from PKDevTools.classes.Fetcher import fetcher
 from PKDevTools.classes.Utils import random_user_agent
-from PKDevTools.classes.PKDateUtilities import PKDateUtilities
-from PKDevTools.classes import Archiver
+# from PKDevTools.classes.PKDateUtilities import PKDateUtilities
+# from PKDevTools.classes import Archiver
 from PKDevTools.classes.Singleton import SingletonType, SingletonMixin
 from PKDevTools.classes.pubsub.publisher import PKUserService
 from PKDevTools.classes.pubsub.subscriber import notification_service
@@ -91,7 +91,7 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
             pass
         return data
     
-    def send_event(self,event_name):
+    def send_event(self,event_name,params={}):
         event_params = {
             "user_id": self.userName,
             "os": self.os,
@@ -100,6 +100,9 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
             "elapsed_time": str(time.time() - self.start_time),
             "is_Runner": self.isRunner
         }
+        if len(params) > 0:
+            for key in params:
+                event_params[key] = params[key]
         if self.isRunner:
             try:
                 owner = os.popen('git ls-remote --get-url origin | cut -d/ -f4').read().replace("\n","")
