@@ -110,6 +110,7 @@ from pkscreener.classes.PKScanRunner import PKScanRunner
 from pkscreener.classes.PKMarketOpenCloseAnalyser import PKMarketOpenCloseAnalyser
 from pkscreener.classes.PKPremiumHandler import PKPremiumHandler
 from pkscreener.classes.AssetsManager import PKAssetsManager
+from pkscreener.classes.PKAnalytics import PKAnalyticsService
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
@@ -214,6 +215,7 @@ def getDownloadChoices(defaultAnswer=None):
                 + colorText.END
                 + " already exists. Exiting as user chose not to replace it!"
             )
+            PKAnalyticsService().send_event("app_exit")
             sys.exit(0)
         else:
             pattern = f"{'intraday_' if intraday else ''}stock_data_*.pkl"
@@ -268,6 +270,7 @@ def getScannerMenuChoices(
             + "  [+] Press <Enter> to Exit!"
             + colorText.END
         )
+        PKAnalyticsService().send_event("app_exit")
         sys.exit(0)
     except Exception as e:  # pragma: no cover
         default_logger().debug(e, exc_info=True)
@@ -573,6 +576,7 @@ def initExecution(menuOption=None):
                     + "  [+] Press <Enter> to Exit!"
                     + colorText.END
                 )
+                PKAnalyticsService().send_event("app_exit")
                 sys.exit(0)
             elif selectedMenu.menuKey in ["B", "C", "G", "H", "U", "T", "S", "E", "X", "Y", "M", "D", "I", "L","F"]:
                 ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
@@ -679,6 +683,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
             if indexOption == "S":
                 ensureMenusLoaded("X",indexOption,executeOption)
                 if not PKPremiumHandler.hasPremium(selectedMenu):
+                    PKAnalyticsService().send_event("app_exit")
                     sys.exit(0)
                 indexKeys = level1_index_options_sectoral.keys()
                 stockIndexCode = input(
@@ -917,6 +922,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         mkt_monitor_dict = mp_manager.dict()
         # Let's start monitoring the market monitor
         startMarketMonitor(mkt_monitor_dict,keyboardInterruptEvent)
+        PKAnalyticsService().send_event("market_monitor_started")
         
     keyboardInterruptEventFired = False
     if stockDictPrimary is None:
@@ -947,12 +953,15 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if menuOption in ["F", "M", "S", "B", "G", "C", "P", "D"] or selectedMenu.isPremium:
         ensureMenusLoaded(menuOption,indexOption,executeOption)
         if not PKPremiumHandler.hasPremium(selectedMenu):
+            PKAnalyticsService().send_event(f"non_premium_user_{menuOption}")
+            PKAnalyticsService().send_event("app_exit")
             sys.exit(0)
     if menuOption in ["M", "D", "I", "L", "F"]:
         launcher = f'"{sys.argv[0]}"' if " " in sys.argv[0] else sys.argv[0]
         launcher = f"python3.12 {launcher}" if (launcher.endswith(".py\"") or launcher.endswith(".py")) else launcher
         if menuOption in ["M"]:
             OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener in monitoring mode. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} --systemlaunched -a Y -m 'X'{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit monitoring mode.{colorText.END}")
+            PKAnalyticsService().send_event(f"monitor_{menuOption}")
             sleep(2)
             os.system(f"{launcher} --systemlaunched -a Y -m 'X'")
         elif menuOption in ["D"]:
@@ -963,11 +972,13 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().printOutput(colorText.END, end="")
             if selDownloadOption.upper() == "D":
                 OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to Download daily OHLC data. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -d{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
+                PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                 sleep(2)
                 os.system(f"{launcher} -a Y -e -d")
                 return None, None
             elif selDownloadOption.upper() == "I":
                 OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to Download intraday OHLC data. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -d -i 1m{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
+                PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                 sleep(2)
                 os.system(f"{launcher} -a Y -e -d -i 1m")
                 return None, None
@@ -975,6 +986,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 selectedMenu = m1.find(selDownloadOption.upper())
                 ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
                 m2.renderForMenu(selectedMenu)
+                PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                 selDownloadOption = input(colorText.FAIL + "  [+] Select option: ") or "12"
                 OutputControls().printOutput(colorText.END, end="")
                 filePrefix = "Download"
@@ -986,6 +998,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     + ".csv"
                 )
                 filePath = os.path.join(Archiver.get_user_indices_dir(), filename)
+                PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                 if selDownloadOption.upper() == "15":
                     nasdaq = PKNasdaqIndexFetcher(configManager)
                     _,nasdaq_df = nasdaq.fetchNasdaqIndexConstituents()
@@ -998,6 +1011,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     input(f"{colorText.GREEN}Press any key to continue...{colorText.END}")
                     return None, None
                 elif selDownloadOption.upper() == "M":
+                    PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                     return None, None
                 else:
                     fileContents = fetcher.fetchFileFromHostServer(filePath=filePath,tickerOption=int(selDownloadOption),fileContents="")
@@ -1022,12 +1036,14 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     + PKDateUtilities.currentDateTime().strftime("%d-%m-%y_%H.%M.%S")
                     + ".csv"
                 )
+                PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                 filePath = os.path.join(Archiver.get_user_reports_dir(), filename)
                 if selDownloadOption.upper() == "M":
                     return None, None
                 else:
                     indexOption = int(selDownloadOption)
                     if indexOption > 0 and indexOption <= 14:
+                        PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                         shouldSuppress = not OutputControls().enableMultipleLineOutput
                         with SuppressOutput(suppress_stderr=shouldSuppress, suppress_stdout=shouldSuppress):
                             listStockCodes = fetcher.fetchStockCodes(indexOption, stockCode=None)
@@ -1043,12 +1059,15 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                             OutputControls().printOutput(f"{colorText.FAIL}We encountered an error. Please try again!{colorText.END}")
                         input(f"{colorText.GREEN}Press any key to continue...{colorText.END}")
             elif selDownloadOption.upper() == "M":
+                PKAnalyticsService().send_event(f"{menuOption}_{selDownloadOption.upper()}")
                 return None, None
         elif menuOption in ["L"]:
+            PKAnalyticsService().send_event(f"{menuOption}")
             OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener to collect logs. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -l{colorText.END}\n{colorText.WARN}Press Ctrl + C to exit at any time.{colorText.END}")
             sleep(2)
             os.system(f"{launcher} -a Y -l")
         if menuOption in ["F"]:
+            PKAnalyticsService().send_event(f"{menuOption}")
             indexOption = 0
             selectedChoice["0"] = "F"
             selectedChoice["1"] = "0"
@@ -1149,6 +1168,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     # We've been launched in monitor mode. Get rid of -e -o
                     scannerOptionQuoted = scannerOptionQuoted.replace("-e -o","-m")
                 OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}{colorText.END}")
+                PKAnalyticsService().send_event(f"{scannerOptionQuoted.replace(':','_')}")
                 sleep(2)
                 os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}")
                 OutputControls().printOutput(
@@ -1482,8 +1502,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 elif str(filterOption).upper() in ["M"]:
                     return None, None
                 selectedChoice["4"] = filterOption
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
 
     if executeOption == 8:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if len(options) >= 5:
             if "".join(str(options[3]).split(".")).isdecimal():
                 minRSI = int(options[3])
@@ -1503,6 +1525,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().takeUserInput("Press <Enter> to continue...")
             return None, None
     if executeOption == 9:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if len(options) >= 4:
             if str(options[3]).isnumeric():
                 volumeRatio = float(options[3])
@@ -1521,6 +1544,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             configManager.volumeRatio = float(volumeRatio)
     if executeOption == 12:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         candleDuration = userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else ("15m")
         configManager.toggleConfig(candleDuration=candleDuration)
         global nValueForMenu 
@@ -1538,6 +1562,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             selectedChoice["3"] = str(popOption)
         if popOption in [1,2,4]:
+            PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}_{popOption}")
             updateMenuChoiceHierarchy()
             screenResults = getMFIStats(popOption)
             if menuOption in ["X"]:
@@ -1573,6 +1598,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             selectedChoice["3"] = str(popOption)
         updateMenuChoiceHierarchy()
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}_{popOption}")
         screenResults = getPerformanceStats()
         if menuOption in ["X"]:
             printNotifySaveScreenedResults(
@@ -1591,6 +1617,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             listStockCodes = ",".join(list(screenResults.index))
     if executeOption == 26:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         dividend_df, bonus_df, stockSplit_df = mstarFetcher.getCorporateActions()
         ca_dfs = [dividend_df, bonus_df, stockSplit_df]
         listStockCodes = []
@@ -1600,6 +1627,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             ]
             listStockCodes.extend(list(df["Stock"]))
     if executeOption == 29 and not PKDateUtilities.isTradingTime():
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         message = "\n[👉🏻] Bid/Ask build up report can only be generated during trading hours."
         OutputControls().printOutput(
             colorText.FAIL
@@ -1613,6 +1641,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         return None, None
     
     if executeOption == 30 or executeOption == 32:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         selectedMenu = m2.find(str(executeOption))
         if len(options) >= 4:
             if str(options[3]).isnumeric():
@@ -1631,6 +1660,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             selectedChoice["3"] = str(maLength)
 
     if executeOption == 30:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if userPassedArgs.options is None:
             ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
             atrSensitivity = input(colorText.WARN + f"Enter the ATR Trailing Stop Sensitivity (Multiplier) value ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.atrTrailingStopSensitivity}):") or configManager.atrTrailingStopSensitivity
@@ -1644,12 +1674,14 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         screener.shouldLog = userPassedArgs.log
         screener.computeBuySellSignals(None)
     if executeOption == 31: # DEEL Momentum
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         maLength = 0
         if userPassedArgs.options is None:
             beStrict = input(colorText.WARN + f"Strictly show only high momentum stocks and ignore SMA enforcement? ({colorText.GREEN}Optimal:N{colorText.END}, Default=Y). Choose Y or N:") or "N"
             if beStrict.lower().startswith("y"):
                 maLength = 1
     if executeOption == 33:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         selectedMenu = m2.find(str(executeOption))
         if len(options) >= 4:
             if str(options[3]).isnumeric():
@@ -1670,10 +1702,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             userPassedArgs.maxdisplayresults = max(configManager.maxdisplayresults,2000)
             
     if executeOption == 34:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if userPassedArgs.options is None:
             configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
             configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
     if executeOption == 40:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
         selectedMenu = m2.find(str(executeOption))
         m3.renderForMenu(selectedMenu=selectedMenu)
@@ -1709,6 +1743,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         insideBarToLookback = smas.split(",")
         selectedChoice["5"] = str(smas)
     if executeOption == 41:
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
         selectedMenu = m2.find(str(executeOption))
         m3.renderForMenu(selectedMenu=selectedMenu)
@@ -1737,6 +1772,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         reversalOption = (priceDirection == "2")
 
     if executeOption == 42: # Super Gainer
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         maLength = 10
         if userPassedArgs.options is None:
             maLength = input(colorText.WARN + f"Minimum Percent change to select as super gainers? ({colorText.GREEN}Optimal:15{colorText.END}, Default=10). Enter a number:") or 10
@@ -1745,6 +1781,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             else:
                 maLength = float(maLength)
     if executeOption == 43: # Super Losers
+        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         maLength = -10
         if userPassedArgs.options is None:
             maLength = input(colorText.WARN + f"Minimum Percent change to select as super losers? ({colorText.GREEN}Optimal:-10{colorText.END}, Default=-10). Enter a negative number:") or -10
@@ -1754,7 +1791,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 maLength = float(maLength)
                 if maLength > 0:
                     maLength = 0 - maLength
-
+    
     if executeOption == MAX_MENU_OPTION:
         ConsoleUtility.PKConsoleTools.getLastScreenedResults(defaultAnswer)
         return None, None
@@ -1770,6 +1807,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if str(indexOption).isnumeric() and int(indexOption) > 1 and executeOption <= MAX_SUPPORTED_MENU_OPTION:
         ensureMenusLoaded(menuOption,indexOption,executeOption)
         if not PKPremiumHandler.hasPremium(m2.find(str(executeOption).upper())):
+            PKAnalyticsService().send_event("app_exit")
             sys.exit(0)
     if (
         not str(indexOption).isnumeric() and str(indexOption).upper() in ["W", "E", "M", "N", "Z", "S"]
@@ -1781,6 +1819,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         try:
             if str(indexOption).upper() in ["W", "E", "S"]:
                 if not PKPremiumHandler.hasPremium(m1.find(str(indexOption).upper())):
+                    PKAnalyticsService().send_event("app_exit")
                     sys.exit(0)
             if indexOption == "W":
                 listStockCodes = fetcher.fetchWatchlist()
@@ -1790,6 +1829,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                         + f"  [+] Please create the watchlist.xlsx file in {os.getcwd()} and Restart the Program!"
                         + colorText.END
                     )
+                    PKAnalyticsService().send_event("app_exit")
                     sys.exit(0)
             elif indexOption == "N":
                 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -1824,6 +1864,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     + "  [+] Press <Enter> to Exit!"
                     + colorText.END
                 )
+                PKAnalyticsService().send_event("app_exit")
                 sys.exit(0)
             elif indexOption == "E":
                 return handleMonitorFiveEMA()
@@ -1885,7 +1926,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             except: # pragma: no cover
                 stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption)
                 pass
-            
+        PKAnalyticsService().send_event('_'.join(selectedChoice.keys()))
         loadCount = len(stockDictPrimary) if stockDictPrimary is not None else 0
         # Let's use screening only for the stocks for which we could get the data.
         savedOrDownloadedKeys = list(stockDictPrimary.keys())
@@ -2179,6 +2220,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().printOutput(colorText.END, end="")
             ensureMenusLoaded(menuOption,indexOption,executeOption)
             if not PKPremiumHandler.hasPremium(m0.find(str(pinOption).upper())):
+                PKAnalyticsService().send_event("app_exit")
                 sys.exit(0)
             if pinOption in ["1","2"]:
                 if pinOption in ["2"]:
@@ -2489,6 +2531,7 @@ def addOrRunPipedMenus():
         slicewindowParam = f" --slicewindow {userPassedArgs.slicewindow}" if userPassedArgs.slicewindow else ""
         fnameParam = f" --fname {resultsContentsEncoded}" if resultsContentsEncoded else ""
         OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}{colorText.END}")
+        PKAnalyticsService().send_event(f"{scannerOptionQuoted.replace(':','_')}")
         sleep(2)
         os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}")
         userPassedArgs.pipedmenus = None
@@ -2508,7 +2551,6 @@ def addOrRunPipedMenus():
 def describeUser():
     if not configManager.enableUsageAnalytics:
         return
-    from pkscreener.classes.PKAnalytics import PKAnalyticsService
     service = PKAnalyticsService()
     func_args = None
     task = PKTask("Usage Analytics",
@@ -2736,6 +2778,7 @@ def handleExitRequest(executeOption):
             + "  [+] Press <Enter> to Exit!"
             + colorText.END
         )
+        PKAnalyticsService().send_event("app_exit")
         sys.exit(0)
 
 def handleMenu_XBG(menuOption, indexOption, executeOption):
@@ -3840,6 +3883,7 @@ def saveDownloadedData(downloadOnly, testing, stockDictPrimary, configManager, l
                     os.system(f"{launcher} -a Y -e -l -d {'-i 1m' if configManager.isIntradayConfig() else ''}")
                 else:
                     del os.environ['PKDevTools_Default_Log_Level']
+                    PKAnalyticsService().send_event("app_exit")
                     sys.exit(0)
     else:
         OutputControls().printOutput(colorText.GREEN + "  [+] Skipped Saving!" + colorText.END)
@@ -3915,6 +3959,7 @@ def sendGlobalMarketBarometer(userArgs=None):
             )
             os.remove(gmbPath)
         else:
+            PKAnalyticsService().send_event("app_exit")
             sys.exit(0)
     except Exception as e: # pragma: no cover
         default_logger().debug(e,exc_info=True)
