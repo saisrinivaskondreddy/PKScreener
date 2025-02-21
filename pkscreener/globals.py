@@ -1168,7 +1168,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     # We've been launched in monitor mode. Get rid of -e -o
                     scannerOptionQuoted = scannerOptionQuoted.replace("-e -o","-m")
                 OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}{colorText.END}")
-                PKAnalyticsService().send_event(f"{scannerOptionQuoted.replace(':','_')}")
                 sleep(2)
                 os.system(f"{launcher} {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}")
                 OutputControls().printOutput(
@@ -1502,10 +1501,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 elif str(filterOption).upper() in ["M"]:
                     return None, None
                 selectedChoice["4"] = filterOption
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
 
     if executeOption == 8:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if len(options) >= 5:
             if "".join(str(options[3]).split(".")).isdecimal():
                 minRSI = int(options[3])
@@ -1525,7 +1522,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().takeUserInput("Press <Enter> to continue...")
             return None, None
     if executeOption == 9:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if len(options) >= 4:
             if str(options[3]).isnumeric():
                 volumeRatio = float(options[3])
@@ -1544,7 +1540,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             configManager.volumeRatio = float(volumeRatio)
     if executeOption == 12:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         candleDuration = userPassedArgs.intraday if (userPassedArgs is not None and userPassedArgs.intraday is not None) else ("15m")
         configManager.toggleConfig(candleDuration=candleDuration)
         global nValueForMenu 
@@ -1562,7 +1557,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             selectedChoice["3"] = str(popOption)
         if popOption in [1,2,4]:
-            PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}_{popOption}")
             updateMenuChoiceHierarchy()
             screenResults = getMFIStats(popOption)
             if menuOption in ["X"]:
@@ -1598,7 +1592,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             selectedChoice["3"] = str(popOption)
         updateMenuChoiceHierarchy()
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}_{popOption}")
         screenResults = getPerformanceStats()
         if menuOption in ["X"]:
             printNotifySaveScreenedResults(
@@ -1617,7 +1610,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         else:
             listStockCodes = ",".join(list(screenResults.index))
     if executeOption == 26:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         dividend_df, bonus_df, stockSplit_df = mstarFetcher.getCorporateActions()
         ca_dfs = [dividend_df, bonus_df, stockSplit_df]
         listStockCodes = []
@@ -1627,7 +1619,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             ]
             listStockCodes.extend(list(df["Stock"]))
     if executeOption == 29 and not PKDateUtilities.isTradingTime():
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         message = "\n[👉🏻] Bid/Ask build up report can only be generated during trading hours."
         OutputControls().printOutput(
             colorText.FAIL
@@ -1641,7 +1632,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         return None, None
     
     if executeOption == 30 or executeOption == 32:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         selectedMenu = m2.find(str(executeOption))
         if len(options) >= 4:
             if str(options[3]).isnumeric():
@@ -1660,7 +1650,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             selectedChoice["3"] = str(maLength)
 
     if executeOption == 30:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if userPassedArgs.options is None:
             ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
             atrSensitivity = input(colorText.WARN + f"Enter the ATR Trailing Stop Sensitivity (Multiplier) value ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.atrTrailingStopSensitivity}):") or configManager.atrTrailingStopSensitivity
@@ -1674,14 +1663,12 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         screener.shouldLog = userPassedArgs.log
         screener.computeBuySellSignals(None)
     if executeOption == 31: # DEEL Momentum
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         maLength = 0
         if userPassedArgs.options is None:
             beStrict = input(colorText.WARN + f"Strictly show only high momentum stocks and ignore SMA enforcement? ({colorText.GREEN}Optimal:N{colorText.END}, Default=Y). Choose Y or N:") or "N"
             if beStrict.lower().startswith("y"):
                 maLength = 1
     if executeOption == 33:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         selectedMenu = m2.find(str(executeOption))
         if len(options) >= 4:
             if str(options[3]).isnumeric():
@@ -1702,12 +1689,10 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             userPassedArgs.maxdisplayresults = max(configManager.maxdisplayresults,2000)
             
     if executeOption == 34:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         if userPassedArgs.options is None:
             configManager.anchoredAVWAPPercentage = input(colorText.WARN + f"Enter the anchored-VWAP percentage gap from close price ({colorText.GREEN}Optimal:1{colorText.END}, Current={configManager.anchoredAVWAPPercentage}):") or configManager.anchoredAVWAPPercentage
             configManager.setConfig(ConfigManager.parser,default=True,showFileCreatedText=False)
     if executeOption == 40:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
         selectedMenu = m2.find(str(executeOption))
         m3.renderForMenu(selectedMenu=selectedMenu)
@@ -1743,7 +1728,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         insideBarToLookback = smas.split(",")
         selectedChoice["5"] = str(smas)
     if executeOption == 41:
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         ConsoleUtility.PKConsoleTools.clearScreen(forceTop=True)
         selectedMenu = m2.find(str(executeOption))
         m3.renderForMenu(selectedMenu=selectedMenu)
@@ -1772,7 +1756,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         reversalOption = (priceDirection == "2")
 
     if executeOption == 42: # Super Gainer
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         maLength = 10
         if userPassedArgs.options is None:
             maLength = input(colorText.WARN + f"Minimum Percent change to select as super gainers? ({colorText.GREEN}Optimal:15{colorText.END}, Default=10). Enter a number:") or 10
@@ -1781,7 +1764,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             else:
                 maLength = float(maLength)
     if executeOption == 43: # Super Losers
-        PKAnalyticsService().send_event(f"{menuOption}_{indexOption}_{executeOption}")
         maLength = -10
         if userPassedArgs.options is None:
             maLength = input(colorText.WARN + f"Minimum Percent change to select as super losers? ({colorText.GREEN}Optimal:-10{colorText.END}, Default=-10). Enter a negative number:") or -10
@@ -1926,7 +1908,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             except: # pragma: no cover
                 stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly, listStockCodes, menuOption, indexOption)
                 pass
-        PKAnalyticsService().send_event('_'.join(selectedChoice.keys()))
         loadCount = len(stockDictPrimary) if stockDictPrimary is not None else 0
         # Let's use screening only for the stocks for which we could get the data.
         savedOrDownloadedKeys = list(stockDictPrimary.keys())
@@ -2531,7 +2512,6 @@ def addOrRunPipedMenus():
         slicewindowParam = f" --slicewindow {userPassedArgs.slicewindow}" if userPassedArgs.slicewindow else ""
         fnameParam = f" --fname {resultsContentsEncoded}" if resultsContentsEncoded else ""
         OutputControls().printOutput(f"{colorText.GREEN}Launching PKScreener with piped scanners. If it does not launch, please try with the following:{colorText.END}\n{colorText.FAIL}{launcher} -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}{colorText.END}")
-        PKAnalyticsService().send_event(f"{scannerOptionQuoted.replace(':','_')}")
         sleep(2)
         os.system(f"{launcher} --systemlaunched -a Y -e -o {scannerOptionQuoted}{requestingUser}{enableLog}{backtestParam}{runIntradayAnalysisParam}{enableTelegramMode}{stockListParam}{slicewindowParam}{fnameParam}")
         userPassedArgs.pipedmenus = None
@@ -2888,7 +2868,7 @@ def updateMenuChoiceHierarchy():
     if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
         runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
     reportTitle = f"{runOptionName} | {reportTitle}" if runOptionName is not None else reportTitle
-
+    PKAnalyticsService().send_event(runOptionName)
     OutputControls().printOutput(
         colorText.FAIL
         + f"  [+] You chose: {reportTitle} "
