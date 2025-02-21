@@ -100,6 +100,14 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
             "elapsed_time": str(time.time() - self.start_time),
             "is_Runner": self.isRunner
         }
+        if self.isRunner:
+            try:
+                owner = os.popen('git ls-remote --get-url origin | cut -d/ -f4').read().replace("\n","")
+                repo = os.popen('git ls-remote --get-url origin | cut -d/ -f5').read().replace(".git","").replace("\n","")
+                event_params["repo_owner"] = owner
+                event_params["repo"] = repo
+            except:
+                pass
         for key in self.locationInfo.keys():
             if key not in ["readme"]:
                 event_params[key] = self.locationInfo[key]
