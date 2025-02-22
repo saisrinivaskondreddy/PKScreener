@@ -71,6 +71,7 @@ from pkscreener.classes.MenuOptions import MenuRenderStyle, menu, menus,MAX_MENU
 from pkscreener.classes.WorkflowManager import run_workflow
 import pkscreener.classes.ConfigManager as ConfigManager
 from pkscreener.classes.PKAnalytics import PKAnalyticsService
+from PKDevTools.classes.FunctionTimeouts import ping
 try:
     from PKDevTools.classes.DBManager import DBManager
     from PKDevTools.classes.UserSubscriptions import PKUserSusbscriptions
@@ -2256,7 +2257,7 @@ def addCommandsForMenuItems(application):
 #     message_id=job.context.message_id
 #   )
 
-
+@ping(interval=300,instance=PKAnalyticsService())
 def runpkscreenerbot(availability=True) -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.

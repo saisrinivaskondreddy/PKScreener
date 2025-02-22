@@ -46,7 +46,6 @@ from pkscreener.classes.ConfigManager import tools, parser
 class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
     def __init__(self):
         super(PKAnalyticsService, self).__init__()
-        self.username = ""
         self.locationInfo = ""
         self.os = platform.system()
         self.os_version = platform.release()
@@ -54,6 +53,7 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
         self.start_time = time.time()
         self.isRunner = "RUNNER" in os.environ.keys()
         self.onefile = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+        self.username = f"Unidentified-{self.os}"
         self.configManager = tools()
         self.configManager.getConfig(parser)
 
@@ -72,19 +72,19 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
 
     def getUserName(self):
         try:
-            username = os.getlogin()
-            if username is None or len(username) == 0:
-                username = os.environ.get('username') if platform.startswith("win") else os.environ.get("USER")
-                if username is None or len(username) == 0:
-                    username = os.environ.get('USERPROFILE')
-                    if username is None or len(username) == 0:
-                        username = os.path.expandvars("%userprofile%") if platform.startswith("win") else getpass.getuser()
+            self.username = os.getlogin()
+            if self.username is None or len(self.username) == 0:
+                self.username = os.environ.get('username') if platform.startswith("win") else os.environ.get("USER")
+                if self.username is None or len(self.username) == 0:
+                    self.username = os.environ.get('USERPROFILE')
+                    if self.username is None or len(self.username) == 0:
+                        self.username = os.path.expandvars("%userprofile%") if platform.startswith("win") else getpass.getuser()
         except KeyboardInterrupt: # pragma: no cover
             raise KeyboardInterrupt
         except: # pragma: no cover
-            username = f"Unidentified-{self.os}"
+            self.username = f"Unidentified-{self.os}"
             pass
-        return username
+        return self.username
 
     def getApproxLocationInfo(self):
         try:
@@ -103,7 +103,7 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
         if isinstance(self.locationInfo,str):
             self.collectMetrics()
         event_params = {
-            "user_id": self.username,
+            "user_id": str(self.username),
             "os": self.os,
             "os_version": self.os_version,
             "app_version": self.app_version,
