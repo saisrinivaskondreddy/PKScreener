@@ -268,7 +268,7 @@ class PKAssetsManager:
     def had_rate_limit_errors():
         """Checks if any stored errors are YFRateLimitError."""
         err = ",".join(list(shared._ERRORS.values()))
-        hitRateLimit = "YFRateLimitError" in err
+        hitRateLimit = "YFRateLimitError" in err or "Too Many Requests" in err
         if hitRateLimit:
             OutputControls().printOutput(
                 colorText.FAIL

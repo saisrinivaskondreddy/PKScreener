@@ -35,13 +35,19 @@ import yfinance as yf
 from yfinance import shared
 # from yfinance.const import USER_AGENTS
 from PKDevTools.classes.Utils import USER_AGENTS
-from yfinance.data import YfData
 import random
-from yfinance.exceptions import YFPricesMissingError, YFInvalidPeriodError, YFRateLimitError
-# class YFPricesMissingError(Exception):
-#     pass
-# class YFInvalidPeriodError(Exception):
-#     pass
+from yfinance.version import version as yfVersion
+if yfVersion == "0.2.28":
+    from yfinance.data import TickerData as YfData
+    class YFPricesMissingError(Exception):
+        pass
+    class YFInvalidPeriodError(Exception):
+        pass
+    class YFRateLimitError(Exception):
+        pass
+else:
+    from yfinance.data import YfData
+    from yfinance.exceptions import YFPricesMissingError, YFInvalidPeriodError, YFRateLimitError
 from concurrent.futures import ThreadPoolExecutor
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
 from PKDevTools.classes.ColorText import colorText
@@ -123,8 +129,9 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         data = None
         with SuppressOutput(suppress_stdout=(not printCounter), suppress_stderr=(not printCounter)):
             try:
-                # YfData.user_agent_headers = {
-                #     'User-Agent': random.choice(USER_AGENTS)}
+                if yfVersion == "0.2.28":
+                    YfData.user_agent_headers = {
+                        'User-Agent': random.choice(USER_AGENTS)}
                 data = yf.download(
                     tickers=stockCode,
                     period=period,
@@ -136,7 +143,8 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                     timeout=self.configManager.generalTimeout/4,
                     start=start,
                     end=end,
-                    auto_adjust=True
+                    auto_adjust=True,
+                    threads=len(stockCode) if not isinstance(stockCode,str) else True
                 )
                 if isinstance(stockCode,str):
                     if (data is None or data.empty):
@@ -165,25 +173,26 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                             # we'd have received a multiindex dataframe
                             listStockCodes = multiIndex.get_level_values(0)
                             data = data.get(listStockCodes[0])
-                else:
-                    if (data is None or data.empty):
-                        if len(shared._ERRORS) > 0:
-                            default_logger().debug(shared._ERRORS)
-                        for ticker in shared._ERRORS:
-                            err = shared._ERRORS.get(ticker)
-                            if "YFRateLimitError" in err:
-                                if attempt <= 2:
-                                    default_logger().debug(f"YFRateLimitError Hit! Going for attempt : {attempt+1}")
+                # else:
+                #     if (data is None or data.empty):
+                #         if len(shared._ERRORS) > 0:
+                #             default_logger().debug(shared._ERRORS)
+                #         for ticker in shared._ERRORS:
+                #             err = shared._ERRORS.get(ticker)
+                #             if "YFRateLimitError" in err:
+                #                 if attempt <= 2:
+                #                     default_logger().debug(f"YFRateLimitError Hit! Going for attempt : {attempt+1}")
                                     # sleep(attempt*2) # Exponential backoff
                                     # return self.fetchStockData(stockCode=stockCode,period=period,duration=duration,printCounter=printCounter, start=start,end=end,screenResultsCounter=screenResultsCounter,screenCounter=screenCounter,totalSymbols=totalSymbols,exchangeSuffix=exchangeSuffix,attempt=attempt+1)
             except (KeyError,YFPricesMissingError) as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)
                 pass
             except YFRateLimitError as e:
-                if attempt <= 2:
-                    default_logger().debug(f"YFRateLimitError Hit! Going for attempt : {attempt+1}")
+                # if attempt <= 2:
+                #     default_logger().debug(f"YFRateLimitError Hit! Going for attempt : {attempt+1}")
                     # sleep(attempt*2) # Exponential backoff
                     # return self.fetchStockData(stockCode=stockCode,period=period,duration=duration,printCounter=printCounter, start=start,end=end,screenResultsCounter=screenResultsCounter,screenCounter=screenCounter,totalSymbols=totalSymbols,exchangeSuffix=exchangeSuffix,attempt=attempt+1)
+                pass
             except (YFInvalidPeriodError,Exception) as e: # pragma: no cover
                 default_logger().debug(e,exc_info=True)                    
         if printCounter and type(screenCounter) != int:
