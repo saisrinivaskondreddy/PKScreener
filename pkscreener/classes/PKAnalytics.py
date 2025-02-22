@@ -92,8 +92,10 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
         return data
     
     def send_event(self,event_name,params={}):
+        if isinstance(self.locationInfo,str):
+            self.collectMetrics()
         event_params = {
-            "user_id": self.userName,
+            "user_id": self.username,
             "os": self.os,
             "os_version": self.os_version,
             "app_version": self.app_version,

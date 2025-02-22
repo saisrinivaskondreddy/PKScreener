@@ -1427,7 +1427,7 @@ def launchScreener(options, user, context, optionChoices, update):
         userSubs = isUserSubscribed(user)
         try:
             PKAnalyticsService().send_event("bot_scan",{"bot_userid":str(user.id), "bot_username":str(user.username),"scan_id":str(scanRequest),"user_subscribed":userSubs})
-        except:
+        except Exception as e:
             pass
         if not userSubs:
             basicSubscriptions = ["X_0","X_N","X_1_"]
