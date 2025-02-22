@@ -25,6 +25,7 @@
 """
 
 import os
+import sys
 # import base64
 from sys import platform
 import platform
@@ -41,7 +42,7 @@ from PKDevTools.classes.Singleton import SingletonType, SingletonMixin
 from PKDevTools.classes.pubsub.publisher import PKUserService
 from PKDevTools.classes.pubsub.subscriber import notification_service
 from pkscreener.classes import VERSION
-
+from pkscreener.classes.ConfigManager import tools, parser
 class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
     def __init__(self):
         super(PKAnalyticsService, self).__init__()
@@ -52,9 +53,14 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
         self.app_version = VERSION
         self.start_time = time.time()
         self.isRunner = "RUNNER" in os.environ.keys()
+        self.onefile = getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS')
+        self.configManager = tools()
+        self.configManager.getConfig(parser)
 
     def collectMetrics(self,user=None):
         try:
+            if not self.configManager.enableUsageAnalytics:
+                return
             self.userName = self.getUserName()
             metrics = self.getApproxLocationInfo()
             self.locationInfo = metrics
@@ -92,6 +98,8 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
         return data
     
     def send_event(self,event_name,params={}):
+        if not self.configManager.enableUsageAnalytics:
+            return
         if isinstance(self.locationInfo,str):
             self.collectMetrics()
         event_params = {
@@ -100,7 +108,9 @@ class PKAnalyticsService(SingletonMixin, metaclass=SingletonType):
             "os_version": self.os_version,
             "app_version": self.app_version,
             "elapsed_time": str(time.time() - self.start_time),
-            "is_Runner": self.isRunner
+            "is_runner": self.isRunner,
+            "is_container": str(os.environ.get("PKSCREENER_DOCKER", "")).lower() in ("yes", "y", "on", "true", "1"),
+            "one_file_bundle": self.onefile
         }
         if len(params) > 0:
             for key in params:

@@ -311,7 +311,8 @@ argParser.add_argument(
     help="runs and tests all options",
     required=False,
 )
-
+from PKDevTools.classes.FunctionTimeouts import ping
+from pkscreener.classes.PKAnalytics import PKAnalyticsService
 def csv_split(s):
     return list(csv.reader([s], delimiter=' '))[0]
 
@@ -918,6 +919,7 @@ def updateConfig(args):
             configManager.duration = "1d"
             configManager.setConfig(ConfigManager.parser,default=True, showFileCreatedText=False)
 
+@ping(interval=60,instance=PKAnalyticsService())
 def pkscreenercli():
     global originalStdOut, args
     if sys.platform.startswith("darwin"):

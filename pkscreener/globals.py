@@ -625,6 +625,7 @@ def initPostLevel0Execution(
             str(indexOption).upper() in ["S", "E", "W"]:
             ensureMenusLoaded(menuOption,indexOption,executeOption)
             if not PKPremiumHandler.hasPremium(m1.find(str(indexOption).upper())):
+                PKAnalyticsService().send_event(f"non_premium_user_{menuOption}_{indexOption}_{executeOption}")
                 return None, None
         if indexOption == "" or indexOption is None:
             indexOption = int(configManager.defaultIndex)
@@ -679,10 +680,11 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
             )
             selectedMenu = m1.find(indexOption)
             m2.renderForMenu(selectedMenu=selectedMenu, skip=skip)
-            stockIndexCode = "18"
+            stockIndexCode = str(len(level1_index_options_sectoral.keys()))
             if indexOption == "S":
                 ensureMenusLoaded("X",indexOption,executeOption)
                 if not PKPremiumHandler.hasPremium(selectedMenu):
+                    PKAnalyticsService().send_event(f"non_premium_user_X_{indexOption}_{executeOption}")
                     PKAnalyticsService().send_event("app_exit")
                     sys.exit(0)
                 indexKeys = level1_index_options_sectoral.keys()
@@ -711,6 +713,7 @@ def initPostLevel1Execution(indexOption, executeOption=None, skip=[], retrial=Fa
                 OutputControls().printOutput(colorText.END, end="")
             ensureMenusLoaded("X",indexOption,executeOption)
             if not PKPremiumHandler.hasPremium(m2.find(str(executeOption))):
+                PKAnalyticsService().send_event(f"non_premium_user_X_{indexOption}_{executeOption}")
                 return None, None
             if executeOption == "":
                 executeOption = 1
@@ -922,7 +925,6 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         mkt_monitor_dict = mp_manager.dict()
         # Let's start monitoring the market monitor
         startMarketMonitor(mkt_monitor_dict,keyboardInterruptEvent)
-        PKAnalyticsService().send_event("market_monitor_started")
         
     keyboardInterruptEventFired = False
     if stockDictPrimary is None:
@@ -953,7 +955,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if menuOption in ["F", "M", "S", "B", "G", "C", "P", "D"] or selectedMenu.isPremium:
         ensureMenusLoaded(menuOption,indexOption,executeOption)
         if not PKPremiumHandler.hasPremium(selectedMenu):
-            PKAnalyticsService().send_event(f"non_premium_user_{menuOption}")
+            PKAnalyticsService().send_event(f"non_premium_user_{menuOption}_{indexOption}_{executeOption}")
             PKAnalyticsService().send_event("app_exit")
             sys.exit(0)
     if menuOption in ["M", "D", "I", "L", "F"]:
@@ -1789,6 +1791,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
     if str(indexOption).isnumeric() and int(indexOption) > 1 and executeOption <= MAX_SUPPORTED_MENU_OPTION:
         ensureMenusLoaded(menuOption,indexOption,executeOption)
         if not PKPremiumHandler.hasPremium(m2.find(str(executeOption).upper())):
+            PKAnalyticsService().send_event(f"non_premium_user_{menuOption}_{indexOption}_{executeOption}")
             PKAnalyticsService().send_event("app_exit")
             sys.exit(0)
     if (
@@ -1801,6 +1804,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         try:
             if str(indexOption).upper() in ["W", "E", "S"]:
                 if not PKPremiumHandler.hasPremium(m1.find(str(indexOption).upper())):
+                    PKAnalyticsService().send_event(f"non_premium_user_{menuOption}_{indexOption}_{executeOption}")
                     PKAnalyticsService().send_event("app_exit")
                     sys.exit(0)
             if indexOption == "W":
@@ -2201,6 +2205,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
             OutputControls().printOutput(colorText.END, end="")
             ensureMenusLoaded(menuOption,indexOption,executeOption)
             if not PKPremiumHandler.hasPremium(m0.find(str(pinOption).upper())):
+                PKAnalyticsService().send_event(f"non_premium_user_pin_{menuOption}_{indexOption}_{executeOption}_{pinOption}")
                 PKAnalyticsService().send_event("app_exit")
                 sys.exit(0)
             if pinOption in ["1","2"]:
@@ -2868,7 +2873,8 @@ def updateMenuChoiceHierarchy():
     if ((":0:" in runOptionName or "_0_" in runOptionName) and userPassedArgs.progressstatus is not None) or userPassedArgs.progressstatus is not None:
         runOptionName = userPassedArgs.progressstatus.split("=>")[0].split("  [+] ")[1].strip()
     reportTitle = f"{runOptionName} | {reportTitle}" if runOptionName is not None else reportTitle
-    PKAnalyticsService().send_event(runOptionName)
+    if len(runOptionName) >= 5:
+        PKAnalyticsService().send_event(runOptionName)
     OutputControls().printOutput(
         colorText.FAIL
         + f"  [+] You chose: {reportTitle} "
