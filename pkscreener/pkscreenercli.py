@@ -933,6 +933,11 @@ def pkscreenercli():
                 OutputControls().printOutput(e)
                 traceback.print_exc()
             pass
+        # finally:
+        #     import threading
+        #     from pkscreener.globals import tryLoadDataOnBackgroundThread
+        #     ping_thread = threading.Thread(target=tryLoadDataOnBackgroundThread, daemon=True)
+        #     ping_thread.start()
     try:
         removeOldInstances()
         OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis),enableUserInput=(args is None or args.answerdefault is None)).printOutput("",end="\r")
