@@ -282,9 +282,11 @@ class PKMarketOpenCloseAnalyser:
                 with pd.option_context('mode.chained_assignment', None):
                     df.dropna(axis=0, how="all", inplace=True)
                 if df is not None and len(df) > 0:
+                    close = PKMarketOpenCloseAnalyser.getMorningClose(df)
+                    adjClose = df["Adj Close"][-1] if "Adj Close" in df.columns else close
                     combinedCandle = {"Open":PKMarketOpenCloseAnalyser.getMorningOpen(df), "High":max(df["High"]), 
-                                    "Low":min(df["Low"]),"Close":PKMarketOpenCloseAnalyser.getMorningClose(df),
-                                    "Adj Close":df["Adj Close"][-1],"Volume":sum(df["Volume"])}
+                                    "Low":min(df["Low"]),"Close":close,
+                                    "Adj Close":adjClose,"Volume":sum(df["Volume"])}
                     tradingDate = df.index[-1] #PKDateUtilities.tradingDate()
                     timestamp = datetime.datetime.strptime(tradingDate.strftime("%Y-%m-%d %H:%M:%S"),"%Y-%m-%d %H:%M:%S")
                     df = pd.DataFrame([combinedCandle], columns=df.columns, index=[timestamp])
