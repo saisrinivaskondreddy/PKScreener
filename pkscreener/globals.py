@@ -1874,7 +1874,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     
                 if str(menuOption).upper() == "C":
                     stockDictPrimary,endOfdayCandles = PKMarketOpenCloseAnalyser.getStockDataForSimulation()
-                    if stockDictPrimary is None or endOfdayCandles is None:
+                    if stockDictPrimary is None or endOfdayCandles is None or len(stockDictPrimary) < 1 or len(endOfdayCandles) < 1:
                         OutputControls().printOutput(f"Cannot proceed! Stock data is unavailable. Please check the error logs/messages !")
                         return None, None
                     if indexOption > 0:

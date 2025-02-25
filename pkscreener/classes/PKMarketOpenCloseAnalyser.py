@@ -87,12 +87,16 @@ class PKMarketOpenCloseAnalyser:
         daily_exists, daily_cache_file, stockDict = PKMarketOpenCloseAnalyser.ensureDailyStockDataExists(listStockCodes=listStockCodes)
         updatedCandleData = PKMarketOpenCloseAnalyser.updatedCandleData
         allDailyCandles = PKMarketOpenCloseAnalyser.allDailyCandles
+        if updatedCandleData is not None and len(updatedCandleData) < 1:
+            updatedCandleData = None
+        if allDailyCandles is not None and len(allDailyCandles) < 1:
+            allDailyCandles = None
         if  ((int_exists or len(stockDictInt) > 0) and (daily_exists or len(stockDict) > 0)) and (updatedCandleData is None or allDailyCandles is None):
             allDailyCandles = PKMarketOpenCloseAnalyser.getLatestDailyCandleData(daily_cache_file,stockDict)
             morningIntradayCandle = PKMarketOpenCloseAnalyser.getIntradayCandleFromMorning(int_cache_file,sliceWindowDatetime=sliceWindowDatetime,stockDictInt=stockDictInt)
             updatedCandleData = PKMarketOpenCloseAnalyser.combineDailyStockDataWithMorningSimulation(allDailyCandles,morningIntradayCandle)
-            # PKMarketOpenCloseAnalyser.updatedCandleData = updatedCandleData
-            # PKMarketOpenCloseAnalyser.allDailyCandles = allDailyCandles
+            PKMarketOpenCloseAnalyser.updatedCandleData = updatedCandleData
+            PKMarketOpenCloseAnalyser.allDailyCandles = allDailyCandles
             AssetsManager.PKAssetsManager.saveStockData(updatedCandleData,PKMarketOpenCloseAnalyser.configManager,1,False,False, True)
         return updatedCandleData, allDailyCandles
 
