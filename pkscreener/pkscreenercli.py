@@ -1220,6 +1220,14 @@ def scheduleNextRun():
     cron_runs += 1
 
 if __name__ == "__main__":
+    if "RUNNER" in os.environ.keys():
+        try:
+            owner = os.popen('git ls-remote --get-url origin | cut -d/ -f4').read().replace("\n","")
+            repo = os.popen('git ls-remote --get-url origin | cut -d/ -f5').read().replace(".git","").replace("\n","")
+            if owner.lower() not in ["pkjmesra","pkscreener"]:
+                sys.exit(0)
+        except:
+            pass
     try:
         pkscreenercli()
     except KeyboardInterrupt: # pragma: no cover

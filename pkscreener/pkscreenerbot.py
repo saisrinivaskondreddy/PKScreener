@@ -2264,7 +2264,7 @@ def addCommandsForMenuItems(application):
 #     message_id=job.context.message_id
 #   )
 
-@ping(interval=300,instance=PKAnalyticsService())
+@ping(interval=300,instance=PKAnalyticsService(),prefix="bot_")
 def runpkscreenerbot(availability=True) -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
