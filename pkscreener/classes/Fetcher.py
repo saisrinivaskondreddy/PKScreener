@@ -57,6 +57,7 @@ from PKDevTools.classes.SuppressOutput import SuppressOutput
 from PKNSETools.PKNSEStockDataFetcher import nseStockDataFetcher
 from pkscreener.classes.PKTask import PKTask
 from PKDevTools.classes.OutputControls import OutputControls
+from PKDevTools.classes import Archiver
 # This Class Handles Fetching of Stock Data over the internet
 
 from requests import Session
@@ -77,7 +78,7 @@ yf_limiter = Limiter(
 yf_session = CachedLimiterSession(
    limiter=yf_limiter,
    bucket_class=MemoryQueueBucket,
-   backend=SQLiteCache("yfinance.cache"),
+   backend=SQLiteCache(db_path=os.path.join(Archiver.get_user_data_dir(),"yfinance.cache")),
 )
 class screenerStockDataFetcher(nseStockDataFetcher):
     _tickersInfoDict={}

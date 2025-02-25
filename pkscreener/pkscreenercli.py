@@ -933,7 +933,10 @@ def pkscreenercli():
                 OutputControls().printOutput(e)
                 traceback.print_exc()
             pass
-        # finally:
+        finally:
+            from PKDevTools.classes.PKBackupRestore import restore_backup
+            restore_backup()
+            sleep(1)
         #     import threading
         #     from pkscreener.globals import tryLoadDataOnBackgroundThread
         #     ping_thread = threading.Thread(target=tryLoadDataOnBackgroundThread, daemon=True)

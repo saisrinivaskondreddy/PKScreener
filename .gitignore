@@ -49,3 +49,4 @@ pkscreener/*.txt
 *.sh
 .github/
 *.cache
+!results/Data/yfinance.cache.zip
