@@ -2291,6 +2291,7 @@ def runpkscreenerbot(availability=True) -> None:
         states={
             START_ROUTES: [
                 CallbackQueryHandler(XScanners, pattern="^" + str("CX") + "$"),
+                CallbackQueryHandler(otp, pattern="^" + str("OTP") + "$"),
                 CallbackQueryHandler(XScanners, pattern="^" + str("CB") + "$"),
                 CallbackQueryHandler(PScanners, pattern="^" + str("CP") + "$"),
                 CallbackQueryHandler(XScanners, pattern="^" + str("CMI_")),
