@@ -1897,7 +1897,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 userPassedArgs.options = (f"{userPassedArgs.options}:" if len(userPassedArgs.options) > 0  else '') + f"{selectedChoice[choice]}"
         if userPassedArgs.pipedmenus is not None:
             return addOrRunPipedMenus()
-
+        
+        loadedStockData = loadedStockData and stockDictPrimary is not None and len(stockDictPrimary) > 0
         if (menuOption in ["X", "B", "G", "S", "F"] and not loadedStockData) or (
             # not downloadOnly
             # and not PKDateUtilities.isTradingTime()

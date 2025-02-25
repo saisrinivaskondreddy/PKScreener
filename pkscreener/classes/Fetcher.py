@@ -26,7 +26,7 @@
 import os
 import sys
 import warnings
-
+import logging
 from time import sleep
 warnings.simplefilter("ignore", DeprecationWarning)
 warnings.simplefilter("ignore", FutureWarning)
@@ -59,7 +59,26 @@ from pkscreener.classes.PKTask import PKTask
 from PKDevTools.classes.OutputControls import OutputControls
 # This Class Handles Fetching of Stock Data over the internet
 
+from requests import Session
+from requests_cache import CacheMixin, SQLiteCache
+from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
+from pyrate_limiter import Duration, RequestRate, Limiter
+class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
+   pass
 
+# https://help.yahooinc.com/dsp-api/docs/rate-limits
+# Define multiple rate limits
+TRY_FACTOR = 50
+yf_limiter = Limiter(
+    RequestRate(60*TRY_FACTOR, Duration.MINUTE),      # Max 60 requests per minute
+    RequestRate(360*TRY_FACTOR, Duration.HOUR),       # Max 360 requests per hour
+    RequestRate(8000*TRY_FACTOR, Duration.DAY)        # Max 8000 requests per day
+)
+yf_session = CachedLimiterSession(
+   limiter=yf_limiter,
+   bucket_class=MemoryQueueBucket,
+   backend=SQLiteCache("yfinance.cache"),
+)
 class screenerStockDataFetcher(nseStockDataFetcher):
     _tickersInfoDict={}
     def fetchStockDataWithArgs(self, *args):
@@ -132,6 +151,10 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                 if yfVersion == "0.2.28":
                     YfData.user_agent_headers = {
                         'User-Agent': random.choice(USER_AGENTS)}
+                if "PKDevTools_Default_Log_Level" in os.environ.keys():
+                    from yfinance import utils
+                    yflogger = utils.get_yf_logger()
+                    yflogger.setLevel(int(os.environ.get("PKDevTools_Default_Log_Level"),logging.DEBUG))
                 data = yf.download(
                     tickers=stockCode,
                     period=period,
@@ -144,7 +167,8 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                     start=start,
                     end=end,
                     auto_adjust=True,
-                    threads=len(stockCode) if not isinstance(stockCode,str) else True
+                    threads=len(stockCode) if not isinstance(stockCode,str) else True,
+                    session=yf_session
                 )
                 if isinstance(stockCode,str):
                     if (data is None or data.empty):
@@ -188,6 +212,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                 default_logger().debug(e,exc_info=True)
                 pass
             except YFRateLimitError as e:
+                default_logger().debug(f"YFRateLimitError Hit! \n{e}")
                 # if attempt <= 2:
                 #     default_logger().debug(f"YFRateLimitError Hit! Going for attempt : {attempt+1}")
                     # sleep(attempt*2) # Exponential backoff

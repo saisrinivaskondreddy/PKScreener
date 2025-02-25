@@ -562,7 +562,7 @@ class PKAssetsManager:
                         f"Stock data cache file:{cache_file} on server has length ->{filesize} {'Mb' if chunksize >= MB else ('Kb' if chunksize >= KB else 'bytes')}"
                     )
             if not retrial and not stockDataLoaded:
-                    # Don't try for more than once.
+                # Don't try for more than once.
                 stockDict = PKAssetsManager.loadStockData(
                         stockDict,
                         configManager,
