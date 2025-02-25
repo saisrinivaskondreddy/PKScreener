@@ -1361,7 +1361,8 @@ def default_markup(user=None,monitorIndex=0):
     inlineMenus = []
     lastRowMenus = []
     rowIndex = 0
-    iconDict = {"X":"🕵️‍♂️ 🔍 ","B":"📈 🎯 ","P":"🧨 💥 ","MI":"","DV":"","VS":"🔔 📣 ","start":"🟢 🏁 ", "HS":"🕵️‍♂️ "}
+    # https://emojidb.org/otp-emojis
+    iconDict = {"X":"🕵️‍♂️ 🔍 ","B":"📈 🎯 ","P":"🧨 💥 ","MI":"","DV":"","VS":"🔔 📣 ","start":"🟢 🏁 ", "HS":"🕵️‍♂️ ","otp":"🔐 "}
     for mnu in mns:
         if mnu.menuKey[0:2] in TOP_LEVEL_SCANNER_MENUS:
             rowIndex +=1
@@ -1384,6 +1385,12 @@ def default_markup(user=None,monitorIndex=0):
         InlineKeyboardButton(
             iconDict.get("start") + "Start",
             callback_data="start",
+        )
+    )
+    lastRowMenus.append(
+        InlineKeyboardButton(
+            iconDict.get("otp") + "Get OTP",
+            callback_data="OTP",
         )
     )
     if len(inlineMenus) > 0:
