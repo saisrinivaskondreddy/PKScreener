@@ -132,6 +132,7 @@ class PKAssetsManager:
                 df.to_excel(writer, sheet_name=sheetName[-31:]) # sheetname cannot be beyond 31 character
                 # Close the Pandas Excel writer and output the Excel file.
                 writer.close()
+                df.to_csv(filePath.replace(".xlsx",".csv"))
                 isSaved = True
             except KeyboardInterrupt: # pragma: no cover
                 raise KeyboardInterrupt
