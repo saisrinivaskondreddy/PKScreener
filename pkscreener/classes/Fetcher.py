@@ -69,7 +69,7 @@ class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
 
 # https://help.yahooinc.com/dsp-api/docs/rate-limits
 # Define multiple rate limits
-TRY_FACTOR = 50
+TRY_FACTOR = 1
 yf_limiter = Limiter(
     RequestRate(60*TRY_FACTOR, Duration.MINUTE),      # Max 60 requests per minute
     RequestRate(360*TRY_FACTOR, Duration.HOUR),       # Max 360 requests per hour
@@ -156,6 +156,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                     from yfinance import utils
                     yflogger = utils.get_yf_logger()
                     yflogger.setLevel(int(os.environ.get("PKDevTools_Default_Log_Level"),logging.DEBUG))
+                    yf.enable_debug_mode()
                 data = yf.download(
                     tickers=stockCode,
                     period=period,

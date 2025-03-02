@@ -283,8 +283,8 @@ class PKAssetsManager:
     def downloadLatestData(stockDict,configManager,stockCodes=[],exchangeSuffix=".NS",downloadOnly=False,numStocksPerIteration=0):
         shared._ERRORS.clear()  # Clear previous errors
         # if numStocksPerIteration == 0:
-        maxParallelProcesses = 17
-        numStocksPerIteration = (int(len(stockCodes)/int(len(stockCodes)/maxParallelProcesses)) if len(stockCodes) >= maxParallelProcesses else len(stockCodes)) + 1
+        # maxParallelProcesses = 17
+        numStocksPerIteration = 100 #(int(len(stockCodes)/int(len(stockCodes)/maxParallelProcesses)) if len(stockCodes) >= maxParallelProcesses else len(stockCodes)) + 1
         queueCounter = 0
         iterations = int(len(stockCodes)/numStocksPerIteration) + 1
         tasksList = []
