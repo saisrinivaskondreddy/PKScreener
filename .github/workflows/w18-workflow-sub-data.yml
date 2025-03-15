@@ -55,7 +55,8 @@ on:
         default: '0'
 
   schedule:
-  - cron: '29 * * * *'
+  - cron: '29 8 * * *'
+  #- cron: '29 * * * *'
 
 run-name: ${{ inputs.name || 'Sub Data Gen'}}
 
