@@ -124,7 +124,7 @@ jobs:
       shell: cmd
       run: |
         cd pkscreener/
-        python3 pkscreenerbot.py
+        python3 pkscreenerbot.py --bot --botavailable
 
     - name: Delete this workflow run
       shell: bash
