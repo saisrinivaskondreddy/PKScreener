@@ -321,6 +321,9 @@ After you have finished the run, go to that copied path, zip the contents of the
 * The Author(s), the software and any related/unrelated entity will not be held liable for your own investing decisions or losses. The authors or this softfware does not make any claim about the correctness of the results.
 * This screener began as a [fork](https://github.com/pranjal-joshi/Screeni-py) but has since added a lot of additional scanners, backtesting, Telegram bots, Alerts and a number of modifications and improvements.
 
+## Product, Marketing & Finance Interns:
+If you are a 3rd year or final year engineering graduate or pursuing masters in technology/engineering, have an eye for detail into product marketing, like building features and socialising about it and are looking for an internship opportunity, please reach out to PKScreener[dot]In[at]gmail[dot]com
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=pkjmesra/pkscreener&type=Date)](https://star-history.com/#pkjmesra/pkscreener&Date)
