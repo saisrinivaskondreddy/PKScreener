@@ -1315,9 +1315,9 @@ def handleHousekeeping(update: Update, context: CallbackContext) -> str:
         payingUsers = dbMgr.getPayingUsers()
         if payingUsers is not None and len(payingUsers) > 0:
             menuText = "Here are all the paying users:"
-            menuText = f"{menuText}\n{"UserID".ljust(10,'#')} : {"Subs.".ljust(5,'#')} : {"Bal.".ljust(5,'#')}"
+            menuText = f"{menuText}\n{"UserID".ljust(10,'#')} : {"UserName".ljust(10,'#')} : {"Subs.".ljust(5,'#')} : {"Bal.".ljust(5,'#')}"
             for payingUser in payingUsers:
-                menuText = f"{menuText}\n{str(payingUser.userid).ljust(10,'#')} : {str(payingUser.subscriptionmodel).ljust(5,'#')} : {str(payingUser.balance).ljust(5,'#')}"
+                menuText = f"{menuText}\n{str(payingUser.userid).ljust(10,'#')} : {str(payingUser.username).ljust(10,'#')} : {str(payingUser.subscriptionmodel).ljust(5,'#')} : {str(payingUser.balance).ljust(5,'#')}"
     elif selection == "UUB":
         user_states[user.id] = f"{selection}_awaiting_input_1"  # Set user state
         menuText = "Please enter a userID for whom to update balance:"
