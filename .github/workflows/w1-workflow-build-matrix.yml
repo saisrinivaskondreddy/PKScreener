@@ -131,6 +131,7 @@ jobs:
               python3 -m pip install --upgrade pip
               pip3 uninstall -y PKNSETools
               pip3 uninstall -y PKDevTools
+              pip3.12 install https://github.com/pkjmesra/libsql-python/releases/download/released/libsql-0.1.6-cp312-cp312-win_amd64.whl
               pip3 install -r requirements.txt
               pip3 install -r requirements-dev.txt
               pip3 install .
