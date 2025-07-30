@@ -57,9 +57,9 @@ userDemoMenuDict = {
 level0MenuDict = {
     "F": "Find a stock in scanners",
     "M": "Monitor Intraday",
-    "S": "Strategies",
-    "B": "Backtests",
-    "G": "Growth of 10k",
+    # "S": "Strategies",
+    # "B": "Backtests",
+    # "G": "Growth of 10k",
     "C": "Analyse morning vs close outcomes",
     "P": "Piped Scanners",
     "D": "Data Downloads",
