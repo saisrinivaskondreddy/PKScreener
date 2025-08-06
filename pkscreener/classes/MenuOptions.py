@@ -188,7 +188,7 @@ PREDEFINED_SCAN_MENU_VALUES =[
     "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:29:'",                   # 5
     "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:0:27:>|X:12:30:1:'",       # 6
     "--systemlaunched -a y -e -o 'X:12:9:2.5:>|X:12:30:1:'",                # 7
-    "--systemlaunched -a y -e -o 'X:12:31:>|X:0:27:'",                      # 8
+    "--systemlaunched -a y -e -o 'X:12:27:>|X:0:31:'",                      # 8
     "--systemlaunched -a y -e -o 'X:12:31:>|X:0:30:1:'",                    # 9
     "--systemlaunched -a y -e -o 'X:12:27:>|X:0:30:1:'",                    # 10
     "--systemlaunched -a y -e -o 'X:12:7:6:1:>|X:0:5:0:54: i 1m'",          # 11
