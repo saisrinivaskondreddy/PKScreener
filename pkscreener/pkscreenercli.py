@@ -426,6 +426,7 @@ def setupLogger(shouldLog=False, trace=False):
     OutputControls().printOutput(colorText.GREEN + f"  [+] {log_file_path}"+colorText.END)
     OutputControls().printOutput(colorText.FAIL + "  [+] If you need to share, open this folder, copy and zip the log file to share.\n" + colorText.END)
     # logger = multiprocessing.log_to_stderr(log.logging.DEBUG)
+    os.environ["PKDevTools_Default_Log_Level"] = str(log.logging.DEBUG)
     log.setup_custom_logger(
         "pkscreener",
         log.logging.DEBUG,
@@ -433,7 +434,6 @@ def setupLogger(shouldLog=False, trace=False):
         log_file_path=log_file_path,
         filter=None,
     )
-    os.environ["PKDevTools_Default_Log_Level"] = str(log.logging.DEBUG)
 
 def warnAboutDependencies():
     if not Imports["talib"]:
