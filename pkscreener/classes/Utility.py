@@ -85,8 +85,8 @@ def marketStatus():
     # scheduleTasks(tasksList=[task])
     if lngStatus == "":
         lngStatus = MarketStatus().getMarketStatus(exchangeSymbol="^IXIC" if configManager.defaultIndex == 15 else "^NSEI")
-    if "Close" in lngStatus and nseStatus == "Open":
-        lngStatus = lngStatus.replace("Closed","Open")
+    if "close" in lngStatus and nseStatus == "open":
+        lngStatus = lngStatus.replace("Closed","open")
     if len(next_bell) > 0 and next_bell not in lngStatus:
         lngStatus = f"{lngStatus} | Next Bell: {colorText.WARN}{next_bell.replace('T',' ').split('+')[0]}{colorText.END}"
     return (lngStatus +"\n") if lngStatus is not None else "\n"
@@ -141,7 +141,7 @@ class tools:
                 pass
 
     @Halo(text='', spinner='dots')
-    def tryFetchFromServer(cache_file,repoOwner="pkjmesra",repoName="PKScreener",directory="actions-data-download",hideOutput=False,branchName="actions-data-download"):
+    def tryFetchFromServer(cache_file,repoOwner="pkjmesra",repoName="PKScreener",directory="results/Data",hideOutput=False,branchName="refs/heads/actions-data-download"):
         if not hideOutput:
             OutputControls().printOutput(
                         colorText.FAIL

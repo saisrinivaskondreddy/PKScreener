@@ -917,7 +917,7 @@ class StockScreener:
         durationFrequency = "T" if candleDurationFrequency=="m" else ("H" if candleDurationFrequency=="h" else ("M" if candleDurationFrequency=="mo" else ("W" if candleDurationFrequency=="wk" else "T")))
         if int(candleDuration) >= 1 and (candleDurationFrequency in ["m","h","mo","wk"]):
             data = data.resample(f'{candleDuration}{durationFrequency}', offset='15min').agg(ohlc_dict)
-            data = data[data["High"]>0] # resampling can introduce 0 value rows for non-market hours
+            data = data[data["high"]>0] # resampling can introduce 0 value rows for non-market hours
         if backtestDuration == 0:
             fullData, processedData = screener.preprocessData(
                     data, daysToLookback=configManager.effectiveDaysToLookback
@@ -1130,7 +1130,7 @@ class StockScreener:
             "52Wk-L",
             "RSI",
             "RSIi",
-            "Volume",
+            "volume",
             "22-Pd",
             "Consol.",
             "Breakout",
@@ -1148,7 +1148,7 @@ class StockScreener:
             "52Wk-L": 0,
             "RSI": 0,
             "RSIi": 0,
-            "Volume": "",
+            "volume": "",
             "22-Pd": "",
             "Consol.": "Range:0%",
             "Breakout": "BO: 0 R: 0",
@@ -1166,7 +1166,7 @@ class StockScreener:
             "52Wk-L": 0,
             "RSI": 0,
             "RSIi": 0,
-            "Volume": "",
+            "volume": "",
             "22-Pd": "",
             "Consol.": "Range:0%",
             "Breakout": "BO: 0 R: 0",

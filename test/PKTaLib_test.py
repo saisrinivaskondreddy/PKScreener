@@ -171,7 +171,7 @@ class TestPktalib(unittest.TestCase):
         self.assertEqual(len(result), 1000)
 
     def test_MACD(self):
-        result = pktalib.MACD(self.large_df["Close"], 10, 18, 9)
+        result = pktalib.MACD(self.large_df["close"], 10, 18, 9)
         self.assertEqual(len(result), 3)
         for df in result:
             df = df.replace('nan', np.nan)
@@ -188,7 +188,7 @@ class TestPktalib(unittest.TestCase):
         self.assertTrue(len(result) > 0)
 
     def test_MFI(self):
-        result = pktalib.MFI(self.large_df['High'], self.large_df['Low'], self.large_df['Close'],self.large_df["Volume"])
+        result = pktalib.MFI(self.large_df['High'], self.large_df['Low'], self.large_df['Close'],self.large_df["volume"])
         self.assertEqual(len(result), len(self.large_df))
         result = result.replace('nan', np.nan)
         result = result.dropna()
@@ -238,7 +238,7 @@ class TestPktalib(unittest.TestCase):
         pp_map = {"1":"PP","2":"S1","3":"S2","4":"S3","5":"R1","6":"R2","7":"R3"}
         for pivotPoint in pp_map.keys():
             ppToCheck = pp_map[str(pivotPoint)]
-            result = pktalib.get_ppsr_df(self.large_df["High"],self.large_df["Low"],self.large_df["Close"],ppToCheck)
+            result = pktalib.get_ppsr_df(self.large_df["high"],self.large_df["low"],self.large_df["close"],ppToCheck)
             self.assertEqual(len(result), len(self.large_df))
             result = result.replace('nan', np.nan)
             result = result.dropna()
@@ -251,7 +251,7 @@ class TestPktalib(unittest.TestCase):
             'Date': pd.date_range(start='2023-01-01', periods=8)
         })
         df.set_index('Date', inplace=True)
-        result = pktalib.CDLCUPANDHANDLE(None,df["High"],None,None)
+        result = pktalib.CDLCUPANDHANDLE(None,df["high"],None,None)
         self.assertTrue(result)
-        result = pktalib.CDLCUPANDHANDLE(None,df["High"].tail(6),None,None)
+        result = pktalib.CDLCUPANDHANDLE(None,df["high"].tail(6),None,None)
         self.assertFalse(result)

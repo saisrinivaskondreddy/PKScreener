@@ -103,7 +103,7 @@ class pktalib:
         # identify potential areas of support and resistance more accurately 
         # and make better trading decisions.
         with pd.option_context('mode.chained_assignment', None):
-            df["VWAP_D"] = pktalib.VWAP(high=df["High"],low=df["Low"],close=df["Close"],volume=df["Volume"],anchor="D")
+            df["VWAP_D"] = pktalib.VWAP(high=df["high"],low=df["low"],close=df["close"],volume=df["volume"],anchor="D")
             # If we create a column 'typical_price', it should be identical with 'VWAP_D'
             df['typical_price'] = (df['High'] + df['Low'] + df['Close'])/3
             tpp_d = ((df['High'] + df['Low'] + df['Close'])*df['Volume'])/3
@@ -358,7 +358,7 @@ class pktalib:
         import pandas_ta as ta
 
         sti = ta.supertrend(
-            df["High"], df["Low"], df["Close"], length=length, multiplier=multiplier
+            df["high"], df["low"], df["close"], length=length, multiplier=multiplier
         )
         # trend, direction, long, short
         # SUPERT_7_3.0  SUPERTd_7_3.0  SUPERTl_7_3.0  SUPERTs_7_3.0

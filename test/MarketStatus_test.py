@@ -61,9 +61,9 @@ class TestMarketStatus(unittest.TestCase):
         MarketStatus.nseFetcher = mock_fetcher
         
         result = self.market_status.getMarketStatus(exchangeSymbol="^NSEI")
-        self.assertTrue("Open" in result or "Close" in result)
+        self.assertTrue("Open" in result or "close" in result)
         self.assertIn("marketStatus", self.market_status.attributes)
-        self.assertTrue("Open" in self.market_status.marketStatus or "Close" in self.market_status.marketStatus)
+        self.assertTrue("Open" in self.market_status.marketStatus or "close" in self.market_status.marketStatus)
 
     @patch('PKNSETools.PKNSEStockDataFetcher.nseStockDataFetcher.capitalMarketStatus', side_effect=Exception("Fetch Error"))
     def test_getMarketStatus_exception(self, mock_capitalMarketStatus):
@@ -82,7 +82,7 @@ class TestMarketStatus(unittest.TestCase):
         progress = {}
         result = self.market_status.getMarketStatus(progress=progress, task_id=1, exchangeSymbol="^NSEI")
         
-        self.assertTrue("Open" in result or "Close" in result)
+        self.assertTrue("Open" in result or "close" in result)
         # self.assertIn(1, progress)
         # self.assertEqual(progress[1], {"progress": 1, "total": 1})
 

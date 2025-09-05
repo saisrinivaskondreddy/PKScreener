@@ -56,13 +56,13 @@ def tools_instance(configManager, default_logger):
 
 def test_positive_case_find52WeekHighBreakout(tools_instance):
     df = pd.DataFrame({
-        "High": [50, 60, 70, 80, 90, 100]  # Assuming recent high is 100
+        "high": [50, 60, 70, 80, 90, 100]  # Assuming recent high is 100
     })
     assert tools_instance.find52WeekHighBreakout(df) == False
 
 def test_negative_case_find52WeekHighBreakout(tools_instance):
     df = pd.DataFrame({
-        "High": [50, 60, 70, 80, 90, 80]  # Assuming recent high is 80
+        "high": [50, 60, 70, 80, 90, 80]  # Assuming recent high is 80
     })
     assert tools_instance.find52WeekHighBreakout(df) == False
 
@@ -72,30 +72,30 @@ def test_empty_dataframe_find52WeekHighBreakout(tools_instance):
 
 def test_dataframe_with_nan_find52WeekHighBreakout(tools_instance):
     df = pd.DataFrame({
-        "High": [50, 60, np.nan, 80, 90, 100]  # Assuming recent high is 100
+        "high": [50, 60, np.nan, 80, 90, 100]  # Assuming recent high is 100
     })
     assert tools_instance.find52WeekHighBreakout(df) == False
 
 def test_dataframe_with_inf_find52WeekHighBreakout(tools_instance):
     df = pd.DataFrame({
-        "High": [50, 60, np.inf, 80, 90, 100]  # Assuming recent high is 100
+        "high": [50, 60, np.inf, 80, 90, 100]  # Assuming recent high is 100
     })
     assert tools_instance.find52WeekHighBreakout(df) == False
 
 def test_find52WeekHighBreakout_positive(tools_instance):
-    data = pd.DataFrame({"High": [110, 60, 70, 80, 90, 100]})
+    data = pd.DataFrame({"high": [110, 60, 70, 80, 90, 100]})
     assert tools_instance.find52WeekHighBreakout(data) == True
 
 
 def test_find52WeekHighBreakout_negative(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, 80, 60, 60, 40, 100, 110, 120, 50, 170]})
+    data = pd.DataFrame({"high": [50, 60, 80, 60, 60, 40, 100, 110, 120, 50, 170]})
     assert tools_instance.find52WeekHighBreakout(data) == False
 
 
 def test_find52WeekHighBreakout_edge(tools_instance):
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 50,
                 60,
                 70,
@@ -119,45 +119,45 @@ def test_find52WeekHighBreakout_edge(tools_instance):
 
 
 def test_find52WeekHighBreakout_nan_values(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, np.nan, 80, 90, 100]})
+    data = pd.DataFrame({"high": [50, 60, np.nan, 80, 90, 100]})
     assert tools_instance.find52WeekHighBreakout(data) == False
 
 
 def test_find52WeekHighBreakout_inf_values(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, np.inf, 80, 90, 100]})
+    data = pd.DataFrame({"high": [50, 60, np.inf, 80, 90, 100]})
     assert tools_instance.find52WeekHighBreakout(data) == False
 
 
 def test_find52WeekHighBreakout_negative_inf_values(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, -np.inf, 80, 90, 100]})
+    data = pd.DataFrame({"high": [50, 60, -np.inf, 80, 90, 100]})
     assert tools_instance.find52WeekHighBreakout(data) == False
 
 
 def test_find52WeekHighBreakout_last1WeekHigh_greater(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, 70, 80, 90, 100]})
+    data = pd.DataFrame({"high": [50, 60, 70, 80, 90, 100]})
     assert tools_instance.find52WeekHighBreakout(data) == False
 
 
 def test_find52WeekHighBreakout_previousWeekHigh_greater(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, 70, 80, 90, 100]})
+    data = pd.DataFrame({"high": [50, 60, 70, 80, 90, 100]})
     assert tools_instance.find52WeekHighBreakout(data) == False
 
 
 def test_find52WeekHighBreakout_full52WeekHigh_greater(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, 70, 80, 90, 100]})
+    data = pd.DataFrame({"high": [50, 60, 70, 80, 90, 100]})
     assert tools_instance.find52WeekHighBreakout(data) == False
 
 
 # Positive test case for find52WeekLowBreakout function
 def test_find52WeekLowBreakout_positive(tools_instance):
-    data = pd.DataFrame({"Low": [10, 20, 30, 40, 50]})
+    data = pd.DataFrame({"low": [10, 20, 30, 40, 50]})
     result = tools_instance.find52WeekLowBreakout(data)
     assert result == True
 
 
 # Negative test case for find52WeekLowBreakout function
 def test_find52WeekLowBreakout_negative(tools_instance):
-    data = pd.DataFrame({"Low": [50, 40, 30, 20, 10]})
+    data = pd.DataFrame({"low": [50, 40, 30, 20, 10]})
     result = tools_instance.find52WeekLowBreakout(data)
     assert result == False
 
@@ -166,7 +166,7 @@ def test_find52WeekLowBreakout_negative(tools_instance):
 def test_find52WeekLowBreakout_edge(tools_instance):
     data = pd.DataFrame(
         {
-            "Low": [
+            "low": [
                 10,
                 20,
                 30,
@@ -195,8 +195,8 @@ def test_find52WeekLowBreakout_edge(tools_instance):
 
 def test_find52WeekHighLow_positive_case(tools_instance):
     df = pd.DataFrame({
-        "High": [100, 60, 70, 80, 90, 100],  # Assuming recent high is 100
-        "Low": [5, 30, 20, 10, 5, 5]  # Assuming recent low is 40
+        "high": [100, 60, 70, 80, 90, 100],  # Assuming recent high is 100
+        "low": [5, 30, 20, 10, 5, 5]  # Assuming recent low is 40
     })
     saveDict = {}
     screenDict = {}
@@ -207,8 +207,8 @@ def test_find52WeekHighLow_positive_case(tools_instance):
     assert screenDict["52Wk-L"] == f"{colorText.FAIL}5.00{colorText.END}"
 
     df = pd.DataFrame({
-        "High": [90, 60, 70, 80, 90, 100],  # Assuming recent high is 90
-        "Low": [110, 130, 120, 110, 115, 100]  # Assuming recent low is 110
+        "high": [90, 60, 70, 80, 90, 100],  # Assuming recent high is 90
+        "low": [110, 130, 120, 110, 115, 100]  # Assuming recent low is 110
     })
     saveDict = {}
     screenDict = {}
@@ -219,8 +219,8 @@ def test_find52WeekHighLow_positive_case(tools_instance):
     assert screenDict["52Wk-L"] == f"{colorText.WARN}100.00{colorText.END}"
 
     df = pd.DataFrame({
-        "High": [50, 60, 70, 80, 90, 100],  # Assuming recent high is 50
-        "Low": [40, 30, 20, 10, 5, 0]  # Assuming recent low is 40
+        "high": [50, 60, 70, 80, 90, 100],  # Assuming recent high is 50
+        "low": [40, 30, 20, 10, 5, 0]  # Assuming recent low is 40
     })
     saveDict = {}
     screenDict = {}
@@ -232,8 +232,8 @@ def test_find52WeekHighLow_positive_case(tools_instance):
 
 def test_find52WeekHighLow_negative_case(tools_instance):
     df = pd.DataFrame({
-        "High": [50, 60, 70, 80, 90, 80],  # Assuming recent high is 80
-        "Low": [40, 30, 20, 10, 5, 10]  # Assuming recent low is 10
+        "high": [50, 60, 70, 80, 90, 80],  # Assuming recent high is 80
+        "low": [40, 30, 20, 10, 5, 10]  # Assuming recent low is 10
     })
     saveDict = {}
     screenDict = {}
@@ -249,26 +249,26 @@ def test_find52WeekHighLow_negative_case(tools_instance):
 
 def test_find52WeekLowBreakout_positive_case(tools_instance):
     df = pd.DataFrame({
-        "Low": [50, 60, 70, 80, 90, 0]  # Assuming recent low is 0
+        "low": [50, 60, 70, 80, 90, 0]  # Assuming recent low is 0
     })
     assert tools_instance.find52WeekLowBreakout(df) == False
 
 def test_find52WeekLowBreakout_negative_case(tools_instance):
     df = pd.DataFrame({
-        "Low": [50, 60, 70, 80, 90, 10]  # Assuming recent low is 10
+        "low": [50, 60, 70, 80, 90, 10]  # Assuming recent low is 10
     })
     assert tools_instance.find52WeekLowBreakout(df) == False
 
 # Positive test case for find10DaysLowBreakout function
 def test_find10DaysLowBreakout_positive(tools_instance):
-    data = pd.DataFrame({"Low": [10, 20, 30, 40, 50]})
+    data = pd.DataFrame({"low": [10, 20, 30, 40, 50]})
     result = tools_instance.find10DaysLowBreakout(data)
     assert result == True
 
 
 # Negative test case for find10DaysLowBreakout function
 def test_find10DaysLowBreakout_negative(tools_instance):
-    data = pd.DataFrame({"Low": [50, 40, 30, 20, 10]})
+    data = pd.DataFrame({"low": [50, 40, 30, 20, 10]})
     result = tools_instance.find10DaysLowBreakout(data)
     assert result == False
 
@@ -277,7 +277,7 @@ def test_find10DaysLowBreakout_negative(tools_instance):
 def test_find10DaysLowBreakout_edge(tools_instance):
     data = pd.DataFrame(
         {
-            "Low": [
+            "low": [
                 10,
                 20,
                 30,
@@ -307,14 +307,14 @@ def test_find10DaysLowBreakout_edge(tools_instance):
 
 # Positive test case for findAroonBullishCrossover function
 def test_findAroonBullishCrossover_positive(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, 70, 80, 90], "Low": [10, 20, 30, 40, 50]})
+    data = pd.DataFrame({"high": [50, 60, 70, 80, 90], "low": [10, 20, 30, 40, 50]})
     result = tools_instance.findAroonBullishCrossover(data)
     assert result == False
 
 
 # Negative test case for findAroonBullishCrossover function
 def test_findAroonBullishCrossover_negative(tools_instance):
-    data = pd.DataFrame({"High": [90, 80, 70, 60, 50], "Low": [50, 40, 30, 20, 10]})
+    data = pd.DataFrame({"high": [90, 80, 70, 60, 50], "low": [50, 40, 30, 20, 10]})
     result = tools_instance.findAroonBullishCrossover(data)
     assert result == False
 
@@ -323,7 +323,7 @@ def test_findAroonBullishCrossover_negative(tools_instance):
 def test_findAroonBullishCrossover_edge(tools_instance):
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -345,7 +345,7 @@ def test_findAroonBullishCrossover_edge(tools_instance):
                 190,
                 200,
             ],
-            "Low": [
+            "low": [
                 50,
                 40,
                 30,
@@ -375,20 +375,20 @@ def test_findAroonBullishCrossover_edge(tools_instance):
 def test_positive_case_findBreakingoutNow(tools_instance):
     df = pd.DataFrame({
         "Open": [50, 60, 70, 80, 90, 100],
-        "Close": [55, 65, 75, 85, 95, 105]
+        "close": [55, 65, 75, 85, 95, 105]
     })
     assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
     df = pd.DataFrame({
         "Open": [100,100,100,100,100,100,100,100,100,100,100,100],
-        "Close": [130,110,110,110,110,110,110,110,110,110,110,110,]
+        "close": [130,110,110,110,110,110,110,110,110,110,110,110,]
     })
     assert tools_instance.findBreakingoutNow(df,df,{},{}) == True
 
 def test_negative_case_findBreakingoutNow(tools_instance):
     df = pd.DataFrame({
         "Open": [50, 60, 70, 80, 90, 80],
-        "Close": [55, 65, 75, 85, 95, 85]
+        "close": [55, 65, 75, 85, 95, 85]
     })
     assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
@@ -399,21 +399,21 @@ def test_empty_dataframe_findBreakingoutNow(tools_instance):
 def test_dataframe_with_nan_findBreakingoutNow(tools_instance):
     df = pd.DataFrame({
         "Open": [50, 60, np.nan, 80, 90, 100],
-        "Close": [55, 65, np.nan, 85, 95, 105]
+        "close": [55, 65, np.nan, 85, 95, 105]
     })
     assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
 def test_dataframe_with_inf_findBreakingoutNow(tools_instance):
     df = pd.DataFrame({
         "Open": [50, 60, np.inf, 80, 90, 100],
-        "Close": [55, 65, np.inf, 85, 95, 105]
+        "close": [55, 65, np.inf, 85, 95, 105]
     })
     assert tools_instance.findBreakingoutNow(df,df,{},{}) == False
 
 
 # Positive test case for findBreakoutValue function
 def test_findBreakoutValue_positive(tools_instance):
-    data = pd.DataFrame({"High": [50, 60, 70, 80, 90], "Close": [40, 50, 60, 70, 80]})
+    data = pd.DataFrame({"high": [50, 60, 70, 80, 90], "close": [40, 50, 60, 70, 80]})
     screenDict = {}
     saveDict = {"Stock": "SBIN"}
     daysToLookback = 5
@@ -427,8 +427,8 @@ def test_findBreakoutValue_positive(tools_instance):
 def test_findBreakoutValue_negative(tools_instance):
     data = pd.DataFrame(
         {
-            "High": [90, 80, 70, 60, 50],
-            "Close": [80, 70, 60, 50, 40],
+            "high": [90, 80, 70, 60, 50],
+            "close": [80, 70, 60, 50, 40],
             "Open": [80, 70, 60, 50, 40],
         }
     )
@@ -445,7 +445,7 @@ def test_findBreakoutValue_negative(tools_instance):
 def test_findBreakoutValue_edge(tools_instance):
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -489,7 +489,7 @@ def test_findBreakoutValue_edge(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -523,10 +523,10 @@ def test_findBreakoutValue_edge(tools_instance):
 
 def test_positive_case_findNR4Day(tools_instance):
     df = pd.DataFrame({
-        "Volume": [60000, 70000, 80000, 90000, 100000],
-        "Close": [10, 9, 8, 7, 6],
-        "High": [11, 10, 9, 8, 7],
-        "Low": [9, 8, 7, 6, 5],
+        "volume": [60000, 70000, 80000, 90000, 100000],
+        "close": [10, 9, 8, 7, 6],
+        "high": [11, 10, 9, 8, 7],
+        "low": [9, 8, 7, 6, 5],
         "SMA10": [8, 7, 6, 5, 4],
         "SMA50": [7, 6, 5, 4, 3],
         "SMA200": [6, 5, 4, 3, 2]
@@ -535,10 +535,10 @@ def test_positive_case_findNR4Day(tools_instance):
 
 def test_negative_case_findNR4Day(tools_instance):
     df = pd.DataFrame({
-        "Volume": [40000, 50000, 60000, 70000, 80000],
-        "Close": [10, 9, 8, 7, 6],
-        "High": [11, 10, 9, 8, 7],
-        "Low": [9, 8, 7, 6, 5],
+        "volume": [40000, 50000, 60000, 70000, 80000],
+        "close": [10, 9, 8, 7, 6],
+        "high": [11, 10, 9, 8, 7],
+        "low": [9, 8, 7, 6, 5],
         "SMA10": [8, 7, 6, 5, 4],
         "SMA50": [7, 6, 5, 4, 3],
         "SMA200": [6, 5, 4, 3, 2]
@@ -551,10 +551,10 @@ def test_empty_dataframe_findNR4Day(tools_instance):
 
 def test_dataframe_with_nan_findNR4Day(tools_instance):
     df = pd.DataFrame({
-        "Volume": [60000, 70000, np.nan, 90000, 100000],
-        "Close": [10, 9, np.nan, 7, 6],
-        "High": [11, 10, np.nan, 8, 7],
-        "Low": [9, 8, np.nan, 6, 5],
+        "volume": [60000, 70000, np.nan, 90000, 100000],
+        "close": [10, 9, np.nan, 7, 6],
+        "high": [11, 10, np.nan, 8, 7],
+        "low": [9, 8, np.nan, 6, 5],
         "SMA10": [8, 7, np.nan, 5, 4],
         "SMA50": [7, 6, np.nan, 4, 3],
         "SMA200": [6, 5, np.nan, 3, 2]
@@ -563,10 +563,10 @@ def test_dataframe_with_nan_findNR4Day(tools_instance):
 
 def test_dataframe_with_inf_findNR4Day(tools_instance):
     df = pd.DataFrame({
-        "Volume": [60000, 70000, np.inf, 90000, 100000],
-        "Close": [10, 9, np.inf, 7, 6],
-        "High": [11, 10, np.inf, 8, 7],
-        "Low": [9, 8, np.inf, 6, 5],
+        "volume": [60000, 70000, np.inf, 90000, 100000],
+        "close": [10, 9, np.inf, 7, 6],
+        "high": [11, 10, np.inf, 8, 7],
+        "low": [9, 8, np.inf, 6, 5],
         "SMA10": [8, 7, np.inf, 5, 4],
         "SMA50": [7, 6, np.inf, 4, 3],
         "SMA200": [6, 5, np.inf, 3, 2]
@@ -579,7 +579,7 @@ def test_findBullishIntradayRSIMACD_positive():
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -623,7 +623,7 @@ def test_findBullishIntradayRSIMACD_positive():
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -660,7 +660,7 @@ def test_findNR4Day_positive():
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -704,7 +704,7 @@ def test_findNR4Day_positive():
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -726,7 +726,7 @@ def test_findNR4Day_positive():
                 20,
                 10,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -748,7 +748,7 @@ def test_findNR4Day_positive():
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -783,7 +783,7 @@ def test_findReversalMA_positive(tools_instance):
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -827,7 +827,7 @@ def test_findReversalMA_positive(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -849,7 +849,7 @@ def test_findReversalMA_positive(tools_instance):
                 20,
                 10,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -871,7 +871,7 @@ def test_findReversalMA_positive(tools_instance):
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -904,7 +904,7 @@ def test_findTrend_positive(tools_instance):
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -948,7 +948,7 @@ def test_findTrend_positive(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -970,7 +970,7 @@ def test_findTrend_positive(tools_instance):
                 20,
                 10,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -992,7 +992,7 @@ def test_findTrend_positive(tools_instance):
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -1091,7 +1091,7 @@ def test_findTrendlines_positive(tools_instance):
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -1135,7 +1135,7 @@ def test_findTrendlines_positive(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -1157,7 +1157,7 @@ def test_findTrendlines_positive(tools_instance):
                 20,
                 10,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -1179,7 +1179,7 @@ def test_findTrendlines_positive(tools_instance):
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -1213,7 +1213,7 @@ def test_getCandleType_positive(tools_instance):
     # Mocking the dailyData
     dailyData = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -1257,7 +1257,7 @@ def test_getCandleType_positive(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -1279,7 +1279,7 @@ def test_getCandleType_positive(tools_instance):
                 20,
                 10,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -1301,7 +1301,7 @@ def test_getCandleType_positive(tools_instance):
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -1338,7 +1338,7 @@ def test_getNiftyPrediction_positive(tools_instance):
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -1382,7 +1382,7 @@ def test_getNiftyPrediction_positive(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -1404,7 +1404,7 @@ def test_getNiftyPrediction_positive(tools_instance):
                 20,
                 10,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -1426,7 +1426,7 @@ def test_getNiftyPrediction_positive(tools_instance):
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -1509,7 +1509,7 @@ def test_preprocessData_positive(tools_instance):
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -1553,7 +1553,7 @@ def test_preprocessData_positive(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200.1,
                 190.1,
                 180.1,
@@ -1575,7 +1575,7 @@ def test_preprocessData_positive(tools_instance):
                 20.1,
                 10.1,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -1597,7 +1597,7 @@ def test_preprocessData_positive(tools_instance):
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -1694,7 +1694,7 @@ def test_validate15MinutePriceVolumeBreakout_positive(tools_instance):
     # Mocking the data
     data = pd.DataFrame(
         {
-            "High": [
+            "high": [
                 10,
                 20,
                 30,
@@ -1738,7 +1738,7 @@ def test_validate15MinutePriceVolumeBreakout_positive(tools_instance):
                 20,
                 10,
             ],
-            "Close": [
+            "close": [
                 200,
                 190,
                 180,
@@ -1760,7 +1760,7 @@ def test_validate15MinutePriceVolumeBreakout_positive(tools_instance):
                 20,
                 10,
             ],
-            "Low": [
+            "low": [
                 200,
                 190,
                 180,
@@ -1782,7 +1782,7 @@ def test_validate15MinutePriceVolumeBreakout_positive(tools_instance):
                 20,
                 10,
             ],
-            "Volume": [
+            "volume": [
                 200,
                 190,
                 180,
@@ -1812,9 +1812,9 @@ def test_validate15MinutePriceVolumeBreakout_positive(tools_instance):
 
 def test_positive_case_findPotentialBreakout(tools_instance):
     df = pd.DataFrame({
-        "Volume": [100000, 90000, 80000, 70000, 60000],
-        "Close": [10, 9, 8, 7, 6],
-        "High": [11, 10, 9, 8, 7]
+        "volume": [100000, 90000, 80000, 70000, 60000],
+        "close": [10, 9, 8, 7, 6],
+        "high": [11, 10, 9, 8, 7]
     })
     screenDict = {}
     saveDict = {"Breakout": ""}
@@ -1824,14 +1824,14 @@ def test_positive_case_findPotentialBreakout(tools_instance):
 
     daysToLookback = 30
     df = pd.DataFrame({
-        "Volume": [100000, 90000, 80000, 70000, 60000],
-        "Close": [120, 9, 8, 7, 6],
-        "High": [110, 10, 9, 8, 7]
+        "volume": [100000, 90000, 80000, 70000, 60000],
+        "close": [120, 9, 8, 7, 6],
+        "high": [110, 10, 9, 8, 7]
     })
     df_lastrow = pd.DataFrame({
-        "Volume": [80000],
-        "Close": [120],
-        "High": [111]
+        "volume": [80000],
+        "close": [120],
+        "high": [111]
     })
     df = pd.concat([df]*46, ignore_index=True)
     screenDict = {"Breakout":""}
@@ -1848,9 +1848,9 @@ def test_positive_case_findPotentialBreakout(tools_instance):
 
 def test_negative_case_findPotentialBreakout(tools_instance):
     df = pd.DataFrame({
-        "Volume": [100000, 90000, 80000, 70000, 60000],
-        "Close": [6, 7, 8, 9, 10],
-        "High": [7, 8, 9, 10, 11]
+        "volume": [100000, 90000, 80000, 70000, 60000],
+        "close": [6, 7, 8, 9, 10],
+        "high": [7, 8, 9, 10, 11]
     })
     screenDict = {}
     saveDict = {"Breakout": ""}
@@ -1868,9 +1868,9 @@ def test_empty_dataframe_findPotentialBreakout(tools_instance):
 
 def test_dataframe_with_nan_findPotentialBreakout(tools_instance):
     df = pd.DataFrame({
-        "Volume": [100000, 90000, np.nan, 70000, 60000],
-        "Close": [10, 9, np.nan, 7, 6],
-        "High": [11, 10, np.nan, 8, 7]
+        "volume": [100000, 90000, np.nan, 70000, 60000],
+        "close": [10, 9, np.nan, 7, 6],
+        "high": [11, 10, np.nan, 8, 7]
     })
     screenDict = {}
     saveDict = {"Breakout": ""}
@@ -1880,9 +1880,9 @@ def test_dataframe_with_nan_findPotentialBreakout(tools_instance):
 
 def test_dataframe_with_inf_findPotentialBreakout(tools_instance):
     df = pd.DataFrame({
-        "Volume": [100000, 90000, np.inf, 70000, 60000],
-        "Close": [10, 9, np.inf, 7, 6],
-        "High": [11, 10, np.inf, 8, 7]
+        "volume": [100000, 90000, np.inf, 70000, 60000],
+        "close": [10, 9, np.inf, 7, 6],
+        "high": [11, 10, np.inf, 8, 7]
     })
     screenDict = {}
     saveDict = {"Breakout": ""}
@@ -1892,13 +1892,13 @@ def test_dataframe_with_inf_findPotentialBreakout(tools_instance):
 
 def test_positive_case_validateBullishForTomorrow(tools_instance):
     df = pd.DataFrame({
-        "Close": [10, 11, 12, 13, 14],
+        "close": [10, 11, 12, 13, 14],
     })
     assert tools_instance.validateBullishForTomorrow(df) == False
 
 def test_negative_case_validateBullishForTomorrow(tools_instance):
     df = pd.DataFrame({
-        "Close": [14, 13, 12, 11, 10],
+        "close": [14, 13, 12, 11, 10],
     })
     assert tools_instance.validateBullishForTomorrow(df) == False
 
@@ -1908,13 +1908,13 @@ def test_empty_dataframe_validateBullishForTomorrow(tools_instance):
 
 def test_dataframe_with_nan_validateBullishForTomorrow(tools_instance):
     df = pd.DataFrame({
-        "Close": [10, 11, np.nan, 13, 14],
+        "close": [10, 11, np.nan, 13, 14],
     })
     assert tools_instance.validateBullishForTomorrow(df) == False
 
 def test_dataframe_with_inf_validateBullishForTomorrow(tools_instance):
     df = pd.DataFrame({
-        "Close": [10, 11, np.inf, 13, 14],
+        "close": [10, 11, np.inf, 13, 14],
     })
     assert tools_instance.validateBullishForTomorrow(df) == False
 
@@ -2593,8 +2593,8 @@ def test_validateConsolidation():
 #     # Mocking the data
 #     data = MagicMock()
 #     data[::-1].head.return_value =()
-#     data[::-1].min()["Close"].return_value = 100
-#     data[::-1].max()["Close"].return_value = 200
+#     data[::-1].min()["close"].return_value = 100
+#     data[::-1].max()["close"].return_value = 200
 #     data.head().iloc[0].return_value = 150
 
 #     # Create an instance of the tools class
@@ -2608,8 +2608,8 @@ def test_validateConsolidation():
 #     # Mocking the data
 #     data = MagicMock()
 #     data[::-1].head.return_value = MagicMock()
-#     data[::-1].min()["Close"].return_value = 100
-#     data[::-1].max()["Close"].return_value = 200
+#     data[::-1].min()["close"].return_value = 100
+#     data[::-1].max()["close"].return_value = 200
 #     data.head().iloc[0].return_value = 250
 
 #     # Create an instance of the tools class
@@ -2622,7 +2622,7 @@ def test_validateConsolidation():
 # def test_validateLowestVolume_positive():
 #     # Mocking the data
 #     data = MagicMock()
-#     data.describe()["Volume"]["min"].return_value = 100
+#     data.describe()["volume"]["min"].return_value = 100
 #     data.head().iloc[0].return_value = 100
 
 #     # Create an instance of the tools class
@@ -2635,7 +2635,7 @@ def test_validateConsolidation():
 # def test_validateLowestVolume_negative():
 #     # Mocking the data
 #     data = MagicMock()
-#     data.describe()["Volume"]["min"].return_value = 100
+#     data.describe()["volume"]["min"].return_value = 100
 #     data.head().iloc[0].return_value = 200
 
 #     # Create an instance of the tools class
@@ -2647,7 +2647,7 @@ def test_validateConsolidation():
 
 # Positive test case for validateLTP function
 def test_validateLTP_positive(tools_instance):
-    data = pd.DataFrame({"Close": [100, 110, 120]})
+    data = pd.DataFrame({"close": [100, 110, 120]})
     screenDict = {}
     saveDict = {}
     result, verifyStageTwo = tools_instance.validateLTP(
@@ -2661,7 +2661,7 @@ def test_validateLTP_positive(tools_instance):
 
 # Negative test case for validateLTP function
 def test_validateLTP_negative(tools_instance):
-    data = pd.DataFrame({"Close": [90, 95, 100]})
+    data = pd.DataFrame({"close": [90, 95, 100]})
     screenDict = {}
     saveDict = {}
     result, verifyStageTwo = tools_instance.validateLTP(
@@ -2675,7 +2675,7 @@ def test_validateLTP_negative(tools_instance):
 
 # Positive test case for validateMACDHistogramBelow0 function
 def test_validateMACDHistogramBelow0_positive(tools_instance):
-    data = pd.DataFrame({"Close": [100, 110, 120]})
+    data = pd.DataFrame({"close": [100, 110, 120]})
     result = tools_instance.validateMACDHistogramBelow0(data)
     assert result == False
 
@@ -2699,7 +2699,7 @@ def test_validateMACDHistogramBelow0_positive(tools_instance):
 
 # Negative test case for validateMomentum function
 def test_validateMomentum_negative(tools_instance):
-    data = pd.DataFrame({"Close": [100, 90, 80], "Open": [110, 100, 90]})
+    data = pd.DataFrame({"close": [100, 90, 80], "Open": [110, 100, 90]})
     screenDict = {}
     saveDict = {}
     result = tools_instance.validateMomentum(data, screenDict, saveDict)
@@ -2746,14 +2746,14 @@ def test_validateMomentum_negative(tools_instance):
 
 # Positiveed function
 def test_validateNewlyListed_positive(tools_instance):
-    data = pd.DataFrame({"Close": [100, 110, 120]})
+    data = pd.DataFrame({"close": [100, 110, 120]})
     result = tools_instance.validateNewlyListed(data, daysToLookback="2d")
     assert result == False
 
 
 # Negative test case for validateNewlyListed function
 def test_validateNewlyListed_negative(tools_instance):
-    data = pd.DataFrame({"Close": [100]})
+    data = pd.DataFrame({"close": [100]})
     result = tools_instance.validateNewlyListed(data, daysToLookback="2d")
     assert result == True
 
@@ -2762,13 +2762,13 @@ def test_validateNewlyListed_negative(tools_instance):
 def mock_data():
     return pd.DataFrame(
         {
-            "Close": [100, 105, 110, 115],
+            "close": [100, 105, 110, 115],
             "RSI": [60, 65, 70, 75],
             "FASTK": [30, 40, 50, 60],
             "Open": [95, 100, 105, 110],
-            "High": [105, 110, 115, 120],
-            "Low": [95, 100, 105, 110],
-            "Volume": [1000, 2000, 3000, 4000],
+            "high": [105, 110, 115, 120],
+            "low": [95, 100, 105, 110],
+            "volume": [1000, 2000, 3000, 4000],
             "VolMA": [1500, 2000, 2500, 3000],
         }
     )
@@ -2784,7 +2784,7 @@ def mock_save_dict():
     return {}
 
 def test_validatePriceRisingByAtLeast2Percent_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
-    mock_data["Close"] = [115, 110, 105, 100]
+    mock_data["close"] = [115, 110, 105, 100]
     assert tools_instance.validatePriceRisingByAtLeast2Percent(mock_data, mock_screen_dict, mock_save_dict) == True
     assert mock_screen_dict["%Chng"] == '\x1b[32m4.5% (4.8%, 5.0%)\x1b[0m'
     assert mock_save_dict["%Chng"] == '4.5% (4.8%, 5.0%)'
@@ -2794,7 +2794,7 @@ def test_validatePriceRisingByAtLeast2Percent_positive(mock_data, mock_screen_di
 def test_validatePriceRisingByAtLeast2Percent_negative(
     mock_data, mock_screen_dict, mock_save_dict, tools_instance
 ):
-    mock_data["Close"] = [100, 105, 110, 112]
+    mock_data["close"] = [100, 105, 110, 112]
     assert (
         tools_instance.validatePriceRisingByAtLeast2Percent(
             mock_data, mock_screen_dict, mock_save_dict
@@ -2912,7 +2912,7 @@ def test_validateNarrowRange(tools_instance):
     assert saveDict['Pattern'] == 'NR4' if not isTrading else "Buy-NR4"
 
 # def test_validateVCP_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
-#     # mock_data["High"] = [205, 210, 215, 220]
+#     # mock_data["high"] = [205, 210, 215, 220]
 #     assert tools_instance.validateVCP(mock_data, mock_screen_dict, mock_save_dict, "Stock A", 3, 3) == False
 #     assert mock_screen_dict["Pattern"] == "\033[32mVCP (BO: 115.0)\033[0m"
 #     assert mock_save_dict["Pattern"] == "VCP (BO: 115.0)"
@@ -2921,7 +2921,7 @@ def test_validateNarrowRange(tools_instance):
 def test_validateVCP_negative(
     mock_data, mock_screen_dict, mock_save_dict, tools_instance
 ):
-    mock_data["High"] = [105, 110, 115, 120]
+    mock_data["high"] = [105, 110, 115, 120]
     assert (
         tools_instance.validateVCP(
             mock_data, mock_screen_dict, mock_save_dict, "Stock A", 3, 3
@@ -2934,19 +2934,19 @@ def test_validateVCP_negative(
 
 def test_validateVolume_positive(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
     assert tools_instance.validateVolume(mock_data, mock_screen_dict, mock_save_dict, 2.5) == (False,True)
-    assert mock_screen_dict["Volume"] == 0.67
-    assert mock_save_dict["Volume"] == 0.67
+    assert mock_screen_dict["volume"] == 0.67
+    assert mock_save_dict["volume"] == 0.67
     mock_data.loc[0, "VolMA"] = 1000
-    mock_data.loc[0, "Volume"] = 2500
+    mock_data.loc[0, "volume"] = 2500
     assert tools_instance.validateVolume(mock_data, mock_screen_dict, mock_save_dict, 2.5,1000) == (True, True)
-    assert mock_screen_dict["Volume"] == 2.5
-    assert mock_save_dict["Volume"] == 2.5
+    assert mock_screen_dict["volume"] == 2.5
+    assert mock_save_dict["volume"] == 2.5
 
 def test_validateVolume_negative(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
-    mock_data["Volume"] = [1000, 2000, 3000, 3500]
+    mock_data["volume"] = [1000, 2000, 3000, 3500]
     assert tools_instance.validateVolume(mock_data, mock_screen_dict, mock_save_dict, 2.5) == (False, True)
-    assert mock_screen_dict["Volume"] == 0.67
-    assert mock_save_dict["Volume"] == 0.67
+    assert mock_screen_dict["volume"] == 0.67
+    assert mock_save_dict["volume"] == 0.67
     mock_data.loc[0, "VolMA"] = 0
     assert tools_instance.validateVolume(mock_data, mock_screen_dict, mock_save_dict, 2.5,10000) == (False, False)
 
@@ -2969,18 +2969,18 @@ def test_validateVolumeSpreadAnalysis_datalength_lessthan2(mock_data, mock_scree
 
 def test_validateVolumeSpreadAnalysis_open_less_than_close(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
     mock_data.loc[1, "Open"] = 100
-    mock_data.loc[1, "Close"] = 110
+    mock_data.loc[1, "close"] = 110
     assert tools_instance.validateVolumeSpreadAnalysis(mock_data, mock_screen_dict, mock_save_dict) == False
     assert mock_screen_dict.get("Pattern") == None
     assert mock_save_dict.get("Pattern") == None
 
 def test_validateVolumeSpreadAnalysis_spread0_lessthan_spread1(mock_data, mock_screen_dict, mock_save_dict, tools_instance):
     mock_data.loc[1, "Open"] = 120
-    mock_data.loc[1, "Close"] = 100
+    mock_data.loc[1, "close"] = 100
     mock_data.loc[0, "Open"] = 110
-    mock_data.loc[0, "Close"] = 100
-    mock_data.loc[0, "Volume"] = mock_data.iloc[0]["VolMA"] + 1000
-    mock_data.loc[1, "Volume"] = mock_data["Volume"].iloc[0] -1000
+    mock_data.loc[0, "close"] = 100
+    mock_data.loc[0, "volume"] = mock_data.iloc[0]["VolMA"] + 1000
+    mock_data.loc[1, "volume"] = mock_data["volume"].iloc[0] -1000
     assert tools_instance.validateVolumeSpreadAnalysis(mock_data, mock_screen_dict, mock_save_dict) == True
     assert mock_screen_dict.get("Pattern") == colorText.GREEN + "Demand Rise" + colorText.END 
     assert mock_save_dict.get("Pattern") == 'Demand Rise'
@@ -3011,7 +3011,7 @@ class TestScreeningStatistics_calc_relative_strength(unittest.TestCase):
 
     def test_calc_relative_strength_fallback_to_close(self):
         """Test when 'Adj Close' is missing and function falls back to 'Close'."""
-        df = pd.DataFrame({"Close": [100, 105, 102, 107, 110]})
+        df = pd.DataFrame({"close": [100, 105, 102, 107, 110]})
         result = self.stats.calc_relative_strength(df)
         self.assertGreater(result, 0)  # Ensure RS is calculated
 
@@ -3073,7 +3073,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
         mock_vbt_run.return_value = mock_ema
 
         df = pd.DataFrame({
-            "Close": [100, 102, 101],
+            "close": [100, 102, 101],
             "ATRTrailingStop": [99, 100, 101]
         })
 
@@ -3090,7 +3090,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
     def test_computeBuySellSignals_without_vectorbt(self, mock_ema, mock_printOutput):
         """Test Buy/Sell signals calculation when `vectorbt` is missing (fallback to `pktalib`)."""
         df = pd.DataFrame({
-            "Close": [100, 102, 101],
+            "close": [100, 102, 101],
             "ATRTrailingStop": [99, 100, 101]
         })
 
@@ -3104,7 +3104,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
 
     def test_computeBuySellSignals_missing_columns(self):
         """Test when `Close` or `ATRTrailingStop` columns are missing."""
-        df = pd.DataFrame({"Close": [100, 102, 101]})  # Missing `ATRTrailingStop`
+        df = pd.DataFrame({"close": [100, 102, 101]})  # Missing `ATRTrailingStop`
 
         with self.assertRaises(KeyError):
             self.stats.computeBuySellSignals(df)
@@ -3117,7 +3117,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
     @patch("pkscreener.classes.ScreeningStatistics.ScreeningStatistics.downloadSaveTemplateJsons")
     def test_computeBuySellSignals_oserror_retry(self, mock_download, mock_printOutput):
         """Test that computeBuySellSignals retries after an OSError and downloads necessary files."""
-        df = pd.DataFrame({"Close": [100, 102, 101], "ATRTrailingStop": [99, 100, 101]})
+        df = pd.DataFrame({"close": [100, 102, 101], "ATRTrailingStop": [99, 100, 101]})
 
         with patch("vectorbt.indicators.MA.run", side_effect=[OSError("File missing"), df]) as mock_compute:
             result = self.stats.computeBuySellSignals(df,retry=False)
@@ -3129,7 +3129,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
     def test_computeBuySellSignals_importerror(self, mock_printOutput):
         """Test ImportError handling when `vectorbt` is missing."""
         df = pd.DataFrame({
-            "Close": [100, 102, 101],
+            "close": [100, 102, 101],
             "ATRTrailingStop": [99, 100, 101]
         })
 
@@ -3323,21 +3323,21 @@ class TestCupAndHandleDetection(unittest.TestCase):
     def test_reject_v_shaped_cup(self):
         """Ensure sharp V-bottoms are not detected as valid cups."""
         v_shaped_df = self.df.copy()
-        v_shaped_df.iloc[10:30, v_shaped_df.columns.get_loc("Close")] = 85  # Sharp bottom
+        v_shaped_df.iloc[10:30, v_shaped_df.columns.get_loc("close")] = 85  # Sharp bottom
         _,points = self.screener.find_cup_and_handle(v_shaped_df)
         self.assertIsNone(points, "V-bottom shape should be rejected.")
 
     def test_handle_depth_constraint(self):
         """Ensure the handle does not drop too much (more than 50% of cup depth)."""
         deep_handle_df = self.df.copy()
-        deep_handle_df.iloc[60:65, deep_handle_df.columns.get_loc("Close")] -= 5  # Excessive handle drop
+        deep_handle_df.iloc[60:65, deep_handle_df.columns.get_loc("close")] -= 5  # Excessive handle drop
         _,points = self.screener.find_cup_and_handle(deep_handle_df)
         self.assertIsNone(points, "Pattern should be rejected due to a deep handle.")
 
     def test_no_breakout_rejection(self):
         """Ensure patterns without a breakout are rejected."""
         no_breakout_df = self.df.copy()
-        no_breakout_df.iloc[-5:, no_breakout_df.columns.get_loc("Close")] = 100  # No breakout
+        no_breakout_df.iloc[-5:, no_breakout_df.columns.get_loc("close")] = 100  # No breakout
         _,points = self.screener.find_cup_and_handle(no_breakout_df)
         self.assertIsNone(points, "Pattern should be rejected without a breakout.")
 

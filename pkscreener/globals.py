@@ -320,7 +320,7 @@ def getSummaryCorrectnessOfStrategy(resultdf, summaryRequired=True):
                     )
                 )
             detaildf = detaildf.replace(np.nan, "", regex=True)
-            detaildf.loc[:, "Volume"] = detaildf.loc[:, "Volume"].apply(
+            detaildf.loc[:, "volume"] = detaildf.loc[:, "volume"].apply(
                 lambda x: Utility.tools.formatRatio(x, configManager.volumeRatio)
             )
             detaildf.sort_values(
@@ -754,7 +754,7 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
             saveResults['RSI'] = saveResults['RSI'].astype(str) + "/" + saveResults['RSIi'].astype(str)
             screenResults.rename(columns={"RSI": "RSI/i"},inplace=True)
             saveResults.rename(columns={"RSI": "RSI/i"},inplace=True)
-        sortKey = ["Volume"] if "RSI" not in menuChoiceHierarchy else ("RSIi" if (isTrading or "RSIi" in saveResults.columns) else "RSI")
+        sortKey = ["volume"] if "RSI" not in menuChoiceHierarchy else ("RSIi" if (isTrading or "RSIi" in saveResults.columns) else "RSI")
         ascending = [False if "RSI" not in menuChoiceHierarchy else True]
         if executeOption == 21:
             if reversalOption in [3,5,6,7]:
@@ -769,20 +769,20 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
                     sortKey = ["SuperConfSort"]
                     ascending = [False]
                 else:
-                    sortKey = ["Volume"]
+                    sortKey = ["volume"]
                     ascending = [False]
             elif reversalOption in [4]:
                 if "deviationScore" in saveResults.columns:
                     sortKey = ["deviationScore"]
                     ascending = [True]
                 else:
-                    sortKey = ["Volume"]
+                    sortKey = ["volume"]
                     ascending = [False]
         elif executeOption == 23:
-            sortKey = ["bbands_ulr_ratio_max5"] if "bbands_ulr_ratio_max5" in screenResults.columns else ["Volume"]
+            sortKey = ["bbands_ulr_ratio_max5"] if "bbands_ulr_ratio_max5" in screenResults.columns else ["volume"]
             ascending = [False]
         elif executeOption == 27: # ATR Cross
-            sortKey = ["ATR"] if "ATR" in screenResults.columns else ["Volume"]
+            sortKey = ["ATR"] if "ATR" in screenResults.columns else ["volume"]
             ascending = [False]
         elif executeOption == 31: # DEEL Momentum
             sortKey = ["%Chng"]
@@ -826,10 +826,10 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
             saveResults.set_index("Stock", inplace=True)
         screenResults['Volume'] = screenResults['Volume'].astype(str)
         saveResults['Volume'] = saveResults['Volume'].astype(str)
-        screenResults.loc[:, "Volume"] = screenResults.loc[:, "Volume"].apply(
+        screenResults.loc[:, "volume"] = screenResults.loc[:, "volume"].apply(
             lambda x: Utility.tools.formatRatio(float(ImageUtility.PKImageTools.removeAllColorStyles(x)), volumeRatio) if len(str(x).strip()) > 0 else ''
         )
-        saveResults.loc[:, "Volume"] = saveResults.loc[:, "Volume"].apply(
+        saveResults.loc[:, "volume"] = saveResults.loc[:, "volume"].apply(
             lambda x: str(x) + "x"
         )
         screenResults.rename(
@@ -2336,7 +2336,7 @@ def analysisFinalResults(screenResults,saveResults,optionalFinalOutcome_df,runOp
         analysis_df = screenResults.copy()
     else:
         analysis_df = pd.DataFrame()
-    index_columns = ["Stock","%Chng","Volume","Pattern","MA-Signal","Trend(22Prds)","Trend","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
+    index_columns = ["Stock","%Chng","volume","Pattern","MA-Signal","Trend(22Prds)","Trend","LTP","LTP@Alert","AlertTime","SqrOff","SqrOffLTP","SqrOffDiff","EoDDiff","DayHighTime","DayHigh","DayHighDiff"]
     final_index_columns = []
     firstScanKey = userPassedArgs.options.split(">|")[0]
     for column in index_columns:
@@ -2474,7 +2474,7 @@ def FinishBacktestDataCleanup(backtest_df, df_xray):
                 "22": "22-Pd",
                 "30": "30-Pd",
                 "T": "Trend",
-                "V": "Volume",
+                "V": "volume",
                 "M": "MA-Signal",
             }
     if configManager.enablePortfolioCalculations:
@@ -3266,10 +3266,10 @@ def printNotifySaveScreenedResults(
                             caption_df.loc[:, "%Chng"] = caption_df.loc[:, "%Chng"].apply(
                                 lambda x: f'{int(round(float(x.split(" ")[0].replace("%","")),0))}%'
                             )
-                            caption_df.loc[:, "Volume"] = caption_df.loc[:, "Volume"].apply(
+                            caption_df.loc[:, "volume"] = caption_df.loc[:, "volume"].apply(
                                 lambda x: f'{int(round(float(x.replace("x","")),0))}x' if (len(x.replace("x","").strip()) > 0 and not pd.isna(float(x.replace("x","")))) else ''
                             )
-                            caption_df.rename(columns={"%Chng": "Ch%","Volume":"Vol"}, inplace=True)
+                            caption_df.rename(columns={"%Chng": "Ch%","volume":"Vol"}, inplace=True)
                     except: # pragma: no cover
                         cols = [list(saveResultsTrimmed.columns)[0]]
                         cols.extend(list(saveResultsTrimmed.columns[5:]))
@@ -3705,11 +3705,11 @@ def runScanners(
                 if result is not None:
                     if not userPassedArgs.monitor and len(lstscreen) > 0 and userPassedArgs is not None and userPassedArgs.options.split(":")[2] in ["29"]:
                         scr_df = pd.DataFrame(lstscreen)
-                        existingColumns = ["Stock","%Chng","LTP","Volume"]
+                        existingColumns = ["Stock","%Chng","LTP","volume"]
                         newColumns = ["BidQty","AskQty","LwrCP","UprCP","VWAP","DayVola","Del(%)"]
                         existingColumns.extend(newColumns)
                         scr_df = scr_df[existingColumns]
-                        scr_df.sort_values(by=["Volume","BidQty"], ascending=False, inplace=True)
+                        scr_df.sort_values(by=["volume","BidQty"], ascending=False, inplace=True)
                         tabulated_results = colorText.miniTabulator().tb.tabulate(
                                 scr_df,
                                 headers="keys",

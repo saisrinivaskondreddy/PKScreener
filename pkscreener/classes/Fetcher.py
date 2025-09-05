@@ -128,6 +128,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         exchangeSuffix=".NS",
         attempt = 0
     ):
+        """
         if isinstance(stockCode,list):
             if len(exchangeSuffix) > 0:
                 stockCode = [(f"{x}{exchangeSuffix}" if (not x.endswith(exchangeSuffix) and not x.startswith("^")) else x) for x in stockCode]
@@ -146,7 +147,9 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             end = None
             # if duration == "1m" and period == "1d":
             #     period = "5d" # Download 1m data for the last 5 days
+        """
         data = None
+        """
         with SuppressOutput(suppress_stdout=(not printCounter), suppress_stderr=(not printCounter)):
             try:
                 if yfVersion == "0.2.28":
@@ -262,6 +265,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
                 end="\r",
                 flush=True,
             )
+        """
         return data
 
     # Get Daily Nifty 50 Index:
