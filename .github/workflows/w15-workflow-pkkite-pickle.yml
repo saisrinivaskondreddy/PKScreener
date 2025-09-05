@@ -132,11 +132,6 @@ jobs:
         EOF
         
         echo "Created .env.dev file with secrets"
-
-    - name: Execute pkkite.py script
-      run: |
-        python PKBrokers/pkbrokers/kite/examples/pkkite.py --pickle
-
     - name: Create session file
       run: |
         echo ${{ secrets.TEL_SESSION_DATA }} | base64 -d > user_session.session
@@ -147,6 +142,10 @@ jobs:
         chmod 600 user_session.session
         cd ../../../..
         pwd
+
+    - name: Execute pkkite.py script
+      run: |
+        python PKBrokers/pkbrokers/kite/examples/pkkite.py --pickle
 
     - name: Handle script output
       run: |
