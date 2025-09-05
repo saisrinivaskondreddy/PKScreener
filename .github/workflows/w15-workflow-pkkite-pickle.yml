@@ -144,8 +144,16 @@ jobs:
         pwd
 
     - name: Execute pkkite.py script
+      env:
+        PYTHONUNBUFFERED: 1  # Force unbuffered output
+        PKDevTools_Default_Log_Level: ${{ env.PKDevTools_Default_Log_Level }}
       run: |
-        python PKBrokers/pkbrokers/kite/examples/pkkite.py --pickle
+        python PKBrokers/pkbrokers/kite/examples/pkkite.py --pickle --verbose 2>&1 | while IFS= read -r line; do
+          # Print timestamp with each log line for better debugging
+          echo "[$(date '+%Y-%m-%d %H:%M:%S')] $line"
+        done
+        EXIT_CODE=${PIPESTATUS[0]}
+        echo "pkkite exited with code $EXIT_CODE"
 
     - name: Handle script output
       run: |
