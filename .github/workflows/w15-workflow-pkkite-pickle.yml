@@ -36,7 +36,9 @@ jobs:
         cd PKBrokers
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
+        pip install .
         cd ..
+        pip install pkbrokers
 
     - name: List directory structure (for debugging)
       run: |
