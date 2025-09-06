@@ -73,7 +73,7 @@ from pkscreener.classes.MarketMonitor import MarketMonitor
 #             '%Chng': ['1% (up)', '2% (up)'],
 #             '52Wk-H': [200, 2900],
 #             'RSI': [70, 65],
-#             'Volume': [1000, 2000]
+#             "volume": [1000, 2000]
 #         })
 #         self.market_monitor.refresh(screen_df=screen_df, screenOptions='Monitor1', chosenMenu='Menu1')
 #         self.assertFalse(self.market_monitor.monitor_df.empty)
@@ -149,7 +149,7 @@ class TestMarketMonitor2(unittest.TestCase):
             'LTP': [150, 2800, 300],
             '%Chng': ['1.5%', '2.0%', '3.0%'],
             '52Wk-H': [160, 2900, 310],
-            'Volume': [1000, 2000, 1500],
+            "volume": [1000, 2000, 1500],
             'RSI': [45, 46, 64],
         }
         df = pd.DataFrame(data)
@@ -164,7 +164,7 @@ class TestMarketMonitor2(unittest.TestCase):
             'LTP': [150, 2800, 300],
             '%Chng': ['1.5%', '2.0%', '3.0%'],
             '52Wk-H': [160, 2900, 310],
-            'Volume': [1000, 2000, 1500],
+            "volume": [1000, 2000, 1500],
             'RSI': [45, 46, 64],
         }
         df = pd.DataFrame(data)
@@ -202,7 +202,7 @@ class TestMarketMonitor2(unittest.TestCase):
             'LTP': [150, 2800],
             '%Chng': ['1.5%', '2.0%'],
             '52Wk-H': [160, 2900],
-            'Volume': [1000, 2000],
+            "volume": [1000, 2000],
             'RSI': [45, 46],
         }
         df = pd.DataFrame(data)

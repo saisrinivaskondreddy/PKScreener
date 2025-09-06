@@ -75,7 +75,7 @@ def backtest(
         return backTestedData
     data = data.head(max(calcPeriods) + 1)
     # Let's check the returns for the given strategy over a period ranging from 1 period to 30 periods.
-    # columns=['Stock', 'Date', 'Volume', 'Trend', 'MA-Signal', 'LTP', '52Wk-H',
+    # columns=['Stock', 'Date', "volume", 'Trend', 'MA-Signal', 'LTP', '52Wk-H',
     #          '52Wk-L', '1-Pd', '2-Pd', '3-Pd', '4-Pd', '5-Pd', '10-Pd', '15-Pd',
     #          '22-Pd', '30-Pd', 'Consol.', 'Breakout', 'RSI', 'Pattern', 'CCI',
     #          'LTP1', 'Growth1', 'LTP2', 'Growth2', 'LTP3', 'Growth3', 'LTP4',

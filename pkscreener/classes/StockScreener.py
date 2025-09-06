@@ -905,12 +905,12 @@ class StockScreener:
         fullData = None
         processedData = None
         ohlc_dict = {
-            'Open':'first',
-            'High':'max',
-            'Low':'min',
-            'Close':'last',
+            "open":'first',
+            "high":'max',
+            "low":'min',
+            "close":'last',
             'Adj Close': 'last',
-            'Volume':'sum'
+            "volume":'sum'
         }
         candleDuration = self.configManager.candleDurationInt
         candleDurationFrequency = self.configManager.candleDurationFrequency

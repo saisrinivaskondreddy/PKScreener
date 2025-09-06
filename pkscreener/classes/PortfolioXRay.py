@@ -399,7 +399,7 @@ def statScanCalculationForPatterns(*args, **kwargs):
     return scanResults
 
 def ensureColumnsExist(saveResults):
-    columns = ['Stock', 'Date', 'Volume', 'Trend', 'MA-Signal', 'LTP', '52Wk-H',
+    columns = ['Stock', 'Date', "volume", 'Trend', 'MA-Signal', 'LTP', '52Wk-H',
                '52Wk-L', '1-Pd', '2-Pd', '3-Pd', '4-Pd', '5-Pd', '10-Pd', '15-Pd',
                '22-Pd', '30-Pd', 'Consol.', 'Breakout', 'RSI', 'Pattern', 'CCI',
                'LTP1', 'Growth1', 'LTP2', 'Growth2', 'LTP3', 'Growth3', 'LTP4',

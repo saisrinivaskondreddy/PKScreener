@@ -130,11 +130,11 @@ def test_findPattern_cupNhandle(candle_patterns):
     dict = {}
     saveDict = {}
     df = pd.DataFrame({
-            'Open': np.random.rand(1000) * 100,
-            'High': np.random.rand(1000) * 100,
-            'Low': np.random.rand(1000) * 100,
-            'Close': np.random.rand(1000) * 100,
-            'Volume': np.random.randint(1, 1000, size=1000),
+            "open": np.random.rand(1000) * 100,
+            "high": np.random.rand(1000) * 100,
+            "low": np.random.rand(1000) * 100,
+            "close": np.random.rand(1000) * 100,
+            "volume": np.random.randint(1, 1000, size=1000),
             'Date': pd.date_range(start='2023-01-01', periods=1000)
         })
     df.set_index('Date', inplace=True)

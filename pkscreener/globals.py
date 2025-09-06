@@ -824,8 +824,8 @@ def labelDataForPrinting(screenResults, saveResults, configManager, volumeRatio,
             screenResults.set_index("Stock", inplace=True)
         if "Stock" in saveResults.columns:
             saveResults.set_index("Stock", inplace=True)
-        screenResults['Volume'] = screenResults['Volume'].astype(str)
-        saveResults['Volume'] = saveResults['Volume'].astype(str)
+        screenResults["volume"] = screenResults["volume"].astype(str)
+        saveResults["volume"] = saveResults["volume"].astype(str)
         screenResults.loc[:, "volume"] = screenResults.loc[:, "volume"].apply(
             lambda x: Utility.tools.formatRatio(float(ImageUtility.PKImageTools.removeAllColorStyles(x)), volumeRatio) if len(str(x).strip()) > 0 else ''
         )
@@ -3259,7 +3259,7 @@ def printNotifySaveScreenedResults(
                             with pd.option_context('mode.chained_assignment', None):
                                 caption_df.rename(columns={"DayHighDiff": "Hgh","EoDDiff":"EoD"}, inplace=True)
                         else:
-                            caption_df = saveResultsTrimmed[['LTP','%Chng','Volume']].head(configManager.telegramSampleNumberRows)
+                            caption_df = saveResultsTrimmed[['LTP','%Chng',"volume"]].head(configManager.telegramSampleNumberRows)
                             caption_df.loc[:, "LTP"] = caption_df.loc[:, "LTP"].apply(
                                 lambda x: str(int(round(float(x),0)))
                             )

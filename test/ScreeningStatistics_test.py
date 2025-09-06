@@ -1021,7 +1021,7 @@ def test_findTrend_positive(tools_instance):
 
 def test_findTrend_valid_input(tools_instance):
     # Create a sample DataFrame for testing
-    df = pd.DataFrame({'Close': [10, 15, 20, 25, 30, 35, 40, 45, 50]})
+    df = pd.DataFrame({"close": [10, 15, 20, 25, 30, 35, 40, 45, 50]})
 
     # Define the expected trend for the given DataFrame
     expected_trend = 'Unknown'
@@ -1044,7 +1044,7 @@ def test_findTrend_empty_input(tools_instance):
 
 def test_findTrend_insufficient_data(tools_instance):
     # Create a DataFrame with less than the required number of days
-    df = pd.DataFrame({'Close': [10, 15, 20]})
+    df = pd.DataFrame({"close": [10, 15, 20]})
 
     # Call the findTrend function with the insufficient DataFrame
     result = tools_instance.findTrend(df, {}, {})
@@ -1054,13 +1054,13 @@ def test_findTrend_insufficient_data(tools_instance):
 
 def test_findTrend_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'Close': ['a', 'b', 'c']})
+    df = pd.DataFrame({"close": ['a', 'b', 'c']})
     # Call the findTrend function with the invalid DataFrame
     tools_instance.findTrend(df, {}, {}) == 'Unknown'
 
 def test_findTrend_tops_data(tools_instance):
     # Create a DataFrame with less than the required number of days
-    df = pd.DataFrame({'Close': [10, 15, 20]})
+    df = pd.DataFrame({"close": [10, 15, 20]})
     with patch("numpy.rad2deg",return_value=0):
         assert tools_instance.findTrend(df, {}, {}) == 'Unknown'
     with patch("numpy.rad2deg",return_value=30):
@@ -1650,18 +1650,18 @@ def test_preprocessData_positive(tools_instance):
 
 def test_preprocessData_valid_input(tools_instance):
     # Create a sample DataFrame for testing
-    df = pd.DataFrame({'Close': [10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45, 50],
-                       'Volume': [100, 200, 300, 400, 500, 600, 700, 800, 900],
-                       'High': [12.0, 18, 22, 28, 32, 38, 42, 48, 52],
-                       'Low': [8.0, 12, 16, 20, 24, 28, 32, 36, 40],
-                       'Open': [8.0, 12, 16, 20, 24, 28, 32, 36, 40]})
+    df = pd.DataFrame({"close": [10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 45, 50],
+                       "volume": [100, 200, 300, 400, 500, 600, 700, 800, 900],
+                       "high": [12.0, 18, 22, 28, 32, 38, 42, 48, 52],
+                       "low": [8.0, 12, 16, 20, 24, 28, 32, 36, 40],
+                       "open": [8.0, 12, 16, 20, 24, 28, 32, 36, 40]})
     df = pd.concat([df]*23, ignore_index=True)
     # Call the preprocessData function with the sample DataFrame
     fullData, trimmedData = tools_instance.preprocessData(df, daysToLookback=9)
     # Assert that the returned dataframes have the expected shape and columns
     assert fullData.shape == (207, 15)
     assert trimmedData.shape == (9, 15)
-    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'Volatility','VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
+    assert list(fullData.columns) == ["close", "volume", "high", "low", "open", 'SMA', 'LMA', 'SSMA', 'SSMA20', 'Volatility','VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
 
     tools_instance.configManager.useEMA = True
     # Call the preprocessData function with the sample DataFrame
@@ -1669,7 +1669,7 @@ def test_preprocessData_valid_input(tools_instance):
     # Assert that the returned dataframes have the expected shape and columns
     assert fullData.shape == (207, 15)
     assert trimmedData.shape == (9, 15)
-    assert list(fullData.columns) == ['Close', 'Volume', 'High', 'Low', 'Open', 'SMA', 'LMA', 'SSMA', 'SSMA20', 'Volatility','VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
+    assert list(fullData.columns) == ["close", "volume", "high", "low", "open", 'SMA', 'LMA', 'SSMA', 'SSMA20', 'Volatility','VolMA', 'RSI', 'CCI', 'FASTK', 'FASTD']
 
 def test_preprocessData_empty_input(tools_instance):
     # Create an empty DataFrame for testing
@@ -1682,7 +1682,7 @@ def test_preprocessData_empty_input(tools_instance):
 
 def test_preprocessData_insufficient_data(tools_instance):
     # Create a DataFrame with less than the required number of days
-    df = pd.DataFrame({'Close': [10, 15, 20]})
+    df = pd.DataFrame({"close": [10, 15, 20]})
 
     # Call the preprocessData function with the insufficient DataFrame
     df1,df2 = tools_instance.preprocessData(df)
@@ -1920,18 +1920,18 @@ def test_dataframe_with_inf_validateBullishForTomorrow(tools_instance):
 
 def test_validateHigherHighsHigherLowsHigherClose_invalid_input(tools_instance):
     # Create a sample DataFrame for testing
-    df = pd.DataFrame({'High': [10, 15, 20, 25,10, 15, 20, 25],
-                       'Low': [5, 10, 15, 20,5, 10, 15, 20],
-                       'Close': [12, 18, 22, 28,12, 18, 22, 28]})
+    df = pd.DataFrame({"high": [10, 15, 20, 25,10, 15, 20, 25],
+                       "low": [5, 10, 15, 20,5, 10, 15, 20],
+                       "close": [12, 18, 22, 28,12, 18, 22, 28]})
 
     # Call the validateHigherHighsHigherLowsHigherClose function with the sample DataFrame
     assert tools_instance.validateHigherHighsHigherLowsHigherClose(df) == False
 
 def test_validateHigherHighsHigherLowsHigherClose_valid_input(tools_instance):
     # Create a sample DataFrame with invalid data
-    df = pd.DataFrame({'High': [25, 20, 15, 10,5, 15, 20, 25],
-                       'Low': [25, 20, 15, 10,5, 10, 15, 20],
-                       'Close': [25, 20, 15, 10,5, 18, 22, 28]})
+    df = pd.DataFrame({"high": [25, 20, 15, 10,5, 15, 20, 25],
+                       "low": [25, 20, 15, 10,5, 10, 15, 20],
+                       "close": [25, 20, 15, 10,5, 18, 22, 28]})
     df = pd.concat([df]*20, ignore_index=True)
     # Call the validateHigherHighsHigherLowsHigherClose function with the invalid DataFrame
     assert tools_instance.validateHigherHighsHigherLowsHigherClose(df) == True
@@ -1947,18 +1947,18 @@ def test_validateHigherHighsHigherLowsHigherClose_empty_input(tools_instance):
 
 def test_validateHigherHighsHigherLowsHigherClose_insufficient_data(tools_instance):
     # Create a DataFrame with less than the required number of days
-    df = pd.DataFrame({'High': [10, 15],
-                       'Low': [5, 10],
-                       'Close': [12, 18]})
+    df = pd.DataFrame({"high": [10, 15],
+                       "low": [5, 10],
+                       "close": [12, 18]})
 
     # Call the validateHigherHighsHigherLowsHigherClose function with the insufficient DataFrame
     assert tools_instance.validateHigherHighsHigherLowsHigherClose(df) == False
 
 def test_validateHigherHighsHigherLowsHigherClose_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'High': ['a', 'b', 'c','c'],
-                       'Low': ['d', 'e', 'f','f'],
-                       'Close': ['g', 'h', 'i','i']})
+    df = pd.DataFrame({"high": ['a', 'b', 'c','c'],
+                       "low": ['d', 'e', 'f','f'],
+                       "close": ['g', 'h', 'i','i']})
 
     # Call the validateHigherHighsHigherLowsHigherClose function with the invalid DataFrame
     with pytest.raises(Exception):
@@ -1967,10 +1967,10 @@ def test_validateHigherHighsHigherLowsHigherClose_exception(tools_instance):
 
 def test_validateInsideBar_valid_input(tools_instance):
     # Create a sample DataFrame for testing
-    df = pd.DataFrame({'High': [10, 15, 20, 25, 50, 35, 40, 45, 50],
-                       'Low': [45, 40, 35, 30, 25, 30, 35, 40, 45],
-                       'Open': [12, 18, 22, 28, 32, 44, 42, 43, 44],
-                       'Close': [32, 38, 32, 28, 32, 38, 42, 48, 52]})
+    df = pd.DataFrame({"high": [10, 15, 20, 25, 50, 35, 40, 45, 50],
+                       "low": [45, 40, 35, 30, 25, 30, 35, 40, 45],
+                       "open": [12, 18, 22, 28, 32, 44, 42, 43, 44],
+                       "close": [32, 38, 32, 28, 32, 38, 42, 48, 52]})
     saveDict = {"Trend":"Weak Up","MA-Signal":"50MA-Support"}
     # Define the expected pattern
     expected_pattern = 'Inside Bar (5)'
@@ -2000,10 +2000,10 @@ def test_validateInsideBar_valid_input(tools_instance):
 
 def test_validateInsideBar_invalid_input(tools_instance):
     # Create a sample DataFrame with invalid data
-    df = pd.DataFrame({'High': [10, 15, 20, 25, 30, 35, 40, 45, 50],
-                       'Low': [45, 40, 35, 30, 25, 30, 35, 40, 45],
-                       'Open': [12, 18, 22, 28, 32, 38, 42, 48, 52],
-                       'Close': [32, 38, 32, 28, 32, 38, 42, 48, 52]})
+    df = pd.DataFrame({"high": [10, 15, 20, 25, 30, 35, 40, 45, 50],
+                       "low": [45, 40, 35, 30, 25, 30, 35, 40, 45],
+                       "open": [12, 18, 22, 28, 32, 38, 42, 48, 52],
+                       "close": [32, 38, 32, 28, 32, 38, 42, 48, 52]})
     saveDict = {"Trend":"Weak Up","MA-Signal":"50MA-Support"}
     # Call the validateInsideBar function with the invalid DataFrame
     result = tools_instance.validateInsideBar(df, {}, saveDict, chartPattern=1, daysToLookback=5)
@@ -2021,10 +2021,10 @@ def test_validateInsideBar_empty_input(tools_instance):
 
 def test_validateInsideBar_insufficient_data(tools_instance):
     # Create a DataFrame with less than the required number of days
-    df = pd.DataFrame({'High': [10, 15, 20],
-                       'Low': [5, 10, 15],
-                       'Open': [12, 18, 22],
-                       'Close': [12, 18, 22]})
+    df = pd.DataFrame({"high": [10, 15, 20],
+                       "low": [5, 10, 15],
+                       "open": [12, 18, 22],
+                       "close": [12, 18, 22]})
 
     # Call the validateInsideBar function with the insufficient DataFrame
     with pytest.raises(KeyError):
@@ -2032,10 +2032,10 @@ def test_validateInsideBar_insufficient_data(tools_instance):
 
 def test_validateInsideBar_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'High': ['a', 'b', 'c'],
-                       'Low': ['d', 'e', 'f'],
-                       'Open': ['g', 'h', 'i'],
-                       'Close': ['j', 'k', 'l']})
+    df = pd.DataFrame({"high": ['a', 'b', 'c'],
+                       "low": ['d', 'e', 'f'],
+                       "open": ['g', 'h', 'i'],
+                       "close": ['j', 'k', 'l']})
 
     # Call the validateInsideBar function with the invalid DataFrame
     with pytest.raises(Exception):
@@ -2043,18 +2043,18 @@ def test_validateInsideBar_exception(tools_instance):
 
 def test_validateIpoBase_valid_input(tools_instance):
     # Create a sample DataFrame for testing
-    df = pd.DataFrame({'Open': [10, 15, 20, 12],
-                       'Close': [12, 18, 22, 28],
-                       'High': [12, 15, 12, 15]})
+    df = pd.DataFrame({"open": [10, 15, 20, 12],
+                       "close": [12, 18, 22, 28],
+                       "high": [12, 15, 12, 15]})
     saveDict = {}
     # Call the validateIpoBase function with the sample DataFrame
     result = tools_instance.validateIpoBase('stock', df, {}, saveDict, percentage=0.3)
     # Assert that the function returns True
     assert result == True
     assert saveDict["Pattern"] == 'IPO Base (0.0 %)'
-    df = pd.DataFrame({'Open': [10, 15, 20, 12],
-                       'Close': [12.1, 18, 22, 28],
-                       'High': [12, 15, 12, 15]})
+    df = pd.DataFrame({"open": [10, 15, 20, 12],
+                       "close": [12.1, 18, 22, 28],
+                       "high": [12, 15, 12, 15]})
     result = tools_instance.validateIpoBase('stock', df, {}, saveDict, percentage=0.3)
     # Assert that the function returns True
     assert result == True
@@ -2062,18 +2062,18 @@ def test_validateIpoBase_valid_input(tools_instance):
 
 def test_validateIpoBase_invalid_input(tools_instance):
     # Create a sample DataFrame with invalid data
-    df = pd.DataFrame({'Open': [10, 15, 20, 25],
-                       'Close': [30, 35, 40, 45],
-                       'High': [30, 35, 40, 45]})
+    df = pd.DataFrame({"open": [10, 15, 20, 25],
+                       "close": [30, 35, 40, 45],
+                       "high": [30, 35, 40, 45]})
 
     # Call the validateIpoBase function with the invalid DataFrame
     result = tools_instance.validateIpoBase('stock', df, {}, {}, percentage=0.3)
 
     # Assert that the function returns False
     assert result == False
-    df = pd.DataFrame({'Open': [13, 15, 20, 13],
-                       'Close': [8.1, 18, 22, 28],
-                       'High': [12, 15, 12, 15]})
+    df = pd.DataFrame({"open": [13, 15, 20, 13],
+                       "close": [8.1, 18, 22, 28],
+                       "high": [12, 15, 12, 15]})
     assert tools_instance.validateIpoBase('stock', df, {}, {}, percentage=0.3) == False
 
 def test_validateIpoBase_empty_input(tools_instance):
@@ -2086,9 +2086,9 @@ def test_validateIpoBase_empty_input(tools_instance):
 
 def test_validateIpoBase_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'Open': ['a', 'b', 'c'],
-                       'Close': ['d', 'e', 'f'],
-                       'High': ['g', 'h', 'i']})
+    df = pd.DataFrame({"open": ['a', 'b', 'c'],
+                       "close": ['d', 'e', 'f'],
+                       "high": ['g', 'h', 'i']})
 
     # Call the validateIpoBase function with the invalid DataFrame
     with pytest.raises(Exception):
@@ -2096,11 +2096,11 @@ def test_validateIpoBase_exception(tools_instance):
 
 def test_validateLorentzian_buy_signal(tools_instance):
     # Create a sample DataFrame with a buy signal
-    df = pd.DataFrame({'Open': [10, 15, 20, 25]*5,
-                       'Close': [12, 18, 22, 28]*5,
-                       'High': [12, 18, 22, 28]*5,
-                       'Low': [8, 12, 16, 20]*5,
-                       'Volume': [100, 200, 300, 400]*5})
+    df = pd.DataFrame({"open": [10, 15, 20, 25]*5,
+                       "close": [12, 18, 22, 28]*5,
+                       "high": [12, 18, 22, 28]*5,
+                       "low": [8, 12, 16, 20]*5,
+                       "volume": [100, 200, 300, 400]*5})
 
     # Call the validateLorentzian function with the sample DataFrame and lookFor=1 (Buy)
     screenDict = {}
@@ -2118,11 +2118,11 @@ def test_validateLorentzian_buy_signal(tools_instance):
 
 def test_validateLorentzian_sell_signal(tools_instance):
     # Create a sample DataFrame with a sell signal
-    df = pd.DataFrame({'Open': [10, 15, 20, 25]*5,
-                       'Close': [12, 18, 22, 28]*5,
-                       'High': [12, 18, 22, 28]*5,
-                       'Low': [8, 12, 16, 20]*5,
-                       'Volume': [100, 200, 300, 400]*5})
+    df = pd.DataFrame({"open": [10, 15, 20, 25]*5,
+                       "close": [12, 18, 22, 28]*5,
+                       "high": [12, 18, 22, 28]*5,
+                       "low": [8, 12, 16, 20]*5,
+                       "volume": [100, 200, 300, 400]*5})
 
     # Call the validateLorentzian function with the sample DataFrame and lookFor=2 (Sell)
     screenDict = {}
@@ -2142,11 +2142,11 @@ def test_validateLorentzian_sell_signal(tools_instance):
 
 def test_validateLorentzian_no_signal(tools_instance):
     # Create a sample DataFrame without any signals
-    df = pd.DataFrame({'Open': [10, 15, 20, 25]*5,
-                       'Close': [12, 18, 22, 28]*5,
-                       'High': [12, 18, 22, 28]*5,
-                       'Low': [8, 12, 16, 20]*5,
-                       'Volume': [100, 200, 300, 400]*5})
+    df = pd.DataFrame({"open": [10, 15, 20, 25]*5,
+                       "close": [12, 18, 22, 28]*5,
+                       "high": [12, 18, 22, 28]*5,
+                       "low": [8, 12, 16, 20]*5,
+                       "volume": [100, 200, 300, 400]*5})
 
     # Call the validateLorentzian function with the sample DataFrame and lookFor=3 (Any)
     screenDict = {}
@@ -2160,11 +2160,11 @@ def test_validateLorentzian_no_signal(tools_instance):
 
 def test_validateLorentzian_exception(tools_instance):
     # Create a sample DataFrame that raises an exception
-    df = pd.DataFrame({'Open': ['a', 'b', 'c', 'd']*5,
-                       'Close': ['e', 'f', 'g', 'h']*5,
-                       'High': ['i', 'j', 'k', 'l']*5,
-                       'Low': ['m', 'n', 'o', 'p']*5,
-                       'Volume': ['q', 'r', 's', 't']*5})
+    df = pd.DataFrame({"open": ['a', 'b', 'c', 'd']*5,
+                       "close": ['e', 'f', 'g', 'h']*5,
+                       "high": ['i', 'j', 'k', 'l']*5,
+                       "low": ['m', 'n', 'o', 'p']*5,
+                       "volume": ['q', 'r', 's', 't']*5})
 
     # Call the validateLorentzian function with the invalid DataFrame
     screenDict = {}
@@ -2178,8 +2178,8 @@ def test_validateLorentzian_exception(tools_instance):
 
 def test_validateLowerHighsLowerLows_valid_input(tools_instance):
     # Create a sample DataFrame with lower highs, lower lows, and higher RSI
-    df = pd.DataFrame({'High': [7, 8, 9, 10]*5,
-                       'Low': [2, 3, 4, 5]*5,
+    df = pd.DataFrame({"high": [7, 8, 9, 10]*5,
+                       "low": [2, 3, 4, 5]*5,
                        'RSI': [50, 55, 60, 65]*5})
 
     # Call the validateLowerHighsLowerLows function with the sample DataFrame
@@ -2190,8 +2190,8 @@ def test_validateLowerHighsLowerLows_valid_input(tools_instance):
 
 def test_validateLowerHighsLowerLows_invalid_input(tools_instance):
     # Create a sample DataFrame without lower highs or lower lows
-    df = pd.DataFrame({'High': [10, 12, 8, 7],
-                       'Low': [5, 6, 3, 2],
+    df = pd.DataFrame({"high": [10, 12, 8, 7],
+                       "low": [5, 6, 3, 2],
                        'RSI': [60, 55, 50, 45]})
 
     # Call the validateLowerHighsLowerLows function with the sample DataFrame
@@ -2202,8 +2202,8 @@ def test_validateLowerHighsLowerLows_invalid_input(tools_instance):
 
 def test_validateLowerHighsLowerLows_no_higher_RSI(tools_instance):
     # Create a sample DataFrame without higher RSI
-    df = pd.DataFrame({'High': [10, 9, 8, 7],
-                       'Low': [5, 4, 3, 2],
+    df = pd.DataFrame({"high": [10, 9, 8, 7],
+                       "low": [5, 4, 3, 2],
                        'RSI': [40, 35, 30, 25]})
 
     # Call the validateLowerHighsLowerLows function with the sample DataFrame
@@ -2222,8 +2222,8 @@ def test_validateLowerHighsLowerLows_empty_input(tools_instance):
 
 def test_validateLowerHighsLowerLows_insufficient_data(tools_instance):
     # Create a DataFrame with less than the required number of days
-    df = pd.DataFrame({'High': [10, 9],
-                       'Low': [5, 4],
+    df = pd.DataFrame({"high": [10, 9],
+                       "low": [5, 4],
                        'RSI': [60, 55]})
 
     # Call the validateLowerHighsLowerLows function with the insufficient DataFrame
@@ -2231,8 +2231,8 @@ def test_validateLowerHighsLowerLows_insufficient_data(tools_instance):
 
 def test_validateLowerHighsLowerLows_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'High': ['a', 'b', 'c', 'd'],
-                       'Low': ['e', 'f', 'g', 'h'],
+    df = pd.DataFrame({"high": ['a', 'b', 'c', 'd'],
+                       "low": ['e', 'f', 'g', 'h'],
                        'RSI': ['i', 'j', 'k', 'l']})
 
     # Call the validateLowerHighsLowerLows function with the invalid DataFrame
@@ -2241,7 +2241,7 @@ def test_validateLowerHighsLowerLows_exception(tools_instance):
 
 def test_validateLowestVolume_valid_input(tools_instance):
     # Create a sample DataFrame with lowest volume
-    df = pd.DataFrame({'Volume': [70, 80, 90, 100, 110, 120, 130]})
+    df = pd.DataFrame({"volume": [70, 80, 90, 100, 110, 120, 130]})
 
     # Call the validateLowestVolume function with the sample DataFrame and daysForLowestVolume=7
     result = tools_instance.validateLowestVolume(df, daysForLowestVolume=7)
@@ -2251,7 +2251,7 @@ def test_validateLowestVolume_valid_input(tools_instance):
 
 def test_validateLowestVolume_invalid_input(tools_instance):
     # Create a sample DataFrame without lowest volume
-    df = pd.DataFrame({'Volume': [100, 200, 150, 120, 80, 90, 110]})
+    df = pd.DataFrame({"volume": [100, 200, 150, 120, 80, 90, 110]})
 
     # Call the validateLowestVolume function with the sample DataFrame and daysForLowestVolume=7
     result = tools_instance.validateLowestVolume(df, daysForLowestVolume=7)
@@ -2268,14 +2268,14 @@ def test_validateLowestVolume_empty_input(tools_instance):
 
 def test_validateLowestVolume_insufficient_data(tools_instance):
     # Create a DataFrame with less than the required number of days
-    df = pd.DataFrame({'Volume': [100, 200]})
+    df = pd.DataFrame({"volume": [100, 200]})
 
     # Call the validateLowestVolume function with the insufficient DataFrame
     assert tools_instance.validateLowestVolume(df, daysForLowestVolume=7) == False
 
 def test_validateLowestVolume_nan_value(tools_instance):
     # Create a sample DataFrame with NaN value in Volume
-    df = pd.DataFrame({'Volume': [100, 200, np.nan, 120, 80, 90, 70]})
+    df = pd.DataFrame({"volume": [100, 200, np.nan, 120, 80, 90, 70]})
 
     # Call the validateLowestVolume function with the sample DataFrame and daysForLowestVolume=7
     result = tools_instance.validateLowestVolume(df, daysForLowestVolume=7)
@@ -2285,7 +2285,7 @@ def test_validateLowestVolume_nan_value(tools_instance):
 
 def test_validateLowestVolume_none_value(tools_instance):
     # Create a sample DataFrame with NaN value in Volume
-    df = pd.DataFrame({'Volume': [100, 200, np.nan, 120, 80, 90, 70]})
+    df = pd.DataFrame({"volume": [100, 200, np.nan, 120, 80, 90, 70]})
 
     # Call the validateLowestVolume function with the sample DataFrame and daysForLowestVolume=7
     result = tools_instance.validateLowestVolume(df, daysForLowestVolume=None)
@@ -2295,7 +2295,7 @@ def test_validateLowestVolume_none_value(tools_instance):
 
 def test_validateLowestVolume_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'Volume': ['a', 'b', 'c', 'd', 'e', 'f', 'g']})
+    df = pd.DataFrame({"volume": ['a', 'b', 'c', 'd', 'e', 'f', 'g']})
 
     # Call the validateLowestVolume function with the invalid DataFrame
     with pytest.raises(Exception):
@@ -2303,7 +2303,7 @@ def test_validateLowestVolume_exception(tools_instance):
 
 def test_validateLTP_valid_input(tools_instance):
     # Create a sample DataFrame with a valid LTP
-    df = pd.DataFrame({'Close': [10, 15, 20, 25]})
+    df = pd.DataFrame({"close": [10, 15, 20, 25]})
 
     # Call the validateLTP function with the sample DataFrame and minLTP=10, maxLTP=25
     screenDict = {}
@@ -2318,7 +2318,7 @@ def test_validateLTP_valid_input(tools_instance):
 
 def test_validateLTP_invalid_input(tools_instance):
     # Create a sample DataFrame with an invalid LTP
-    df = pd.DataFrame({'Close': [10, 15, 20, 25]})
+    df = pd.DataFrame({"close": [10, 15, 20, 25]})
 
     # Call the validateLTP function with the sample DataFrame and minLTP=30, maxLTP=40
     screenDict = {}
@@ -2333,7 +2333,7 @@ def test_validateLTP_invalid_input(tools_instance):
 
 def test_validateLTP_verifyStageTwo(tools_instance):
     # Create a sample DataFrame with more than 250 rows and an invalid LTP for verifyStageTwo
-    df = pd.DataFrame({'Close': [10, 15, 20, 25] * 100})
+    df = pd.DataFrame({"close": [10, 15, 20, 25] * 100})
 
     # Call the validateLTP function with the sample DataFrame and minLTP=10, maxLTP=25
     screenDict = {}
@@ -2357,7 +2357,7 @@ def test_validateLTP_empty_input(tools_instance):
 
 def test_validateLTP_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'Close': ['a', 'b', 'c', 'd']})
+    df = pd.DataFrame({"close": ['a', 'b', 'c', 'd']})
 
     # Call the validateLTP function with the invalid DataFrame
     with pytest.raises(Exception):
@@ -2365,7 +2365,7 @@ def test_validateLTP_exception(tools_instance):
 
 def test_findUptrend_valid_input_downtrend(tools_instance):
     # Create a sample DataFrame with an uptrend
-    df = pd.DataFrame({'Close': [10, 15, 20, 25, 30, 35, 40, 45, 50]*50})
+    df = pd.DataFrame({"close": [10, 15, 20, 25, 30, 35, 40, 45, 50]*50})
     screenDict = {"Trend":""}
     saveDict = {"Trend":""}
     result = tools_instance.findUptrend(df, screenDict, saveDict, testing=False,stock="SBIN")
@@ -2375,7 +2375,7 @@ def test_findUptrend_valid_input_downtrend(tools_instance):
 
 def test_findUptrend_uptrend(tools_instance):
     # Create a sample DataFrame with a downtrend
-    df = pd.DataFrame({'Close': [50, 45, 40, 35, 30, 25, 20, 15, 10]*50})
+    df = pd.DataFrame({"close": [50, 45, 40, 35, 30, 25, 20, 15, 10]*50})
 
     # Call the findUptrend function with the sample DataFrame
     screenDict = {"Trend":""}
@@ -2397,7 +2397,7 @@ def test_findUptrend_empty_input(tools_instance):
 
 def test_findUptrend_insufficient_data(tools_instance):
     # Create a DataFrame with less than 300 rows
-    df = pd.DataFrame({'Close': [10, 15, 20, 25]})
+    df = pd.DataFrame({"close": [10, 15, 20, 25]})
 
     # Call the findUptrend function with the insufficient DataFrame
     result = tools_instance.findUptrend(df, {"Trend":""}, {"Trend":""}, testing=False,stock="SBIN")
@@ -2407,7 +2407,7 @@ def test_findUptrend_insufficient_data(tools_instance):
 
 def test_findUptrend_testing_mode(tools_instance):
     # Create a sample DataFrame
-    df = pd.DataFrame({'Close': [10, 15, 20, 25, 30, 35, 40, 45, 50]})
+    df = pd.DataFrame({"close": [10, 15, 20, 25, 30, 35, 40, 45, 50]})
 
     # Call the findUptrend function with testing=True
     result = tools_instance.findUptrend(df, {"Trend":""}, {"Trend":""}, testing=True,stock="SBIN")
@@ -2417,7 +2417,7 @@ def test_findUptrend_testing_mode(tools_instance):
 
 def test_findUptrend_exception(tools_instance):
     # Create a DataFrame with invalid data that will raise an exception
-    df = pd.DataFrame({'Close': ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']})
+    df = pd.DataFrame({"close": ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']})
 
     # Call the findUptrend function with the invalid DataFrame
     assert tools_instance.findUptrend(df, {"Trend":""}, {"Trend":""}, testing=False,stock="SBIN") == (False,ANY,0)
@@ -2425,11 +2425,11 @@ def test_findUptrend_exception(tools_instance):
 # # Positive test case for validateBullishForTomorrow function
 # def test_validateBullishForTomorrow_positive(tools_instance):
 #     # Mocking the data
-#     data = pd.DataFrame({'High': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200],
-#                          'Open': [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
-#                          'Close': [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
-#                          'Low': [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
-#                          'Volume': [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],})
+#     data = pd.DataFrame({"high": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200],
+#                          "open": [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
+#                          "close": [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
+#                          "low": [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],
+#                          "volume": [200, 190, 180, 170, 160, 150, 140, 130, 120, 110, 100, 90, 80, 70, 60, 50, 40, 30, 20, 10],})
 
 #     # Call the function and assert the result
 #     assert tools_instance.validateBullishForTomorrow(data) == True
@@ -2484,14 +2484,14 @@ def test_validateCCI():
 def test_validateConfluence():
     tool = ScreeningStatistics(None, None)
     # Test case 1: SMA and LMA are within specified percentage and SMA is greater than LMA
-    df = pd.DataFrame({'SMA': [50], 'LMA': [45], 'Close': [100]})
+    df = pd.DataFrame({'SMA': [50], 'LMA': [45], "close": [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
     assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == False
 
     # Test case 2: SMA and LMA are within specified percentage and SMA is less than LMA
-    df = pd.DataFrame({'SMA': [50], 'LMA': [45], 'Close': [100]})
+    df = pd.DataFrame({'SMA': [50], 'LMA': [45], "close": [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
@@ -2499,21 +2499,21 @@ def test_validateConfluence():
     # assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (5.0%)' + colorText.END
 
     # Test case 3: SMA and LMA are not within specified percentage
-    df = pd.DataFrame({'SMA': [50], 'LMA': [60], 'Close': [100]})
+    df = pd.DataFrame({'SMA': [50], 'LMA': [60], "close": [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
     assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == False
 
     # Test case 4: SMA and LMA are equal
-    df = pd.DataFrame({'SMA': [50], 'LMA': [50], 'Close': [100]})
+    df = pd.DataFrame({'SMA': [50], 'LMA': [50], "close": [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
     assert tool.validateConfluence(None, df, screenDict, saveDict, percentage) == False
     # assert screenDict['MA-Signal'] == colorText.GREEN + 'Confluence (0.0%)' + colorText.END
 
-    df = pd.DataFrame({'SMA': [45], 'LMA': [49], 'Close': [100]})
+    df = pd.DataFrame({'SMA': [45], 'LMA': [49], "close": [100]})
     screenDict = {}
     saveDict = {}
     percentage = 0.1
@@ -2523,7 +2523,7 @@ def test_validateConfluence():
 def test_validateConsolidation():
     tool = ScreeningStatistics(None, None)
     # Test case 1: High and low close prices within specified percentage
-    df = pd.DataFrame({'Close': [100, 95]})
+    df = pd.DataFrame({"close": [100, 95]})
     screenDict = {}
     saveDict = {}
     percentage = 10
@@ -2531,7 +2531,7 @@ def test_validateConsolidation():
     assert screenDict['Consol.'] == colorText.GREEN + 'Range:5.0%' + colorText.END
 
     # Test case 2: High and low close prices not within specified percentage
-    df = pd.DataFrame({'Close': [100, 80]})
+    df = pd.DataFrame({"close": [100, 80]})
     screenDict = {}
     saveDict = {}
     percentage = 10
@@ -2539,7 +2539,7 @@ def test_validateConsolidation():
     assert screenDict['Consol.'] == colorText.FAIL + 'Range:20.0%' + colorText.END
 
     # Test case 3: High and low close prices are equal
-    df = pd.DataFrame({'Close': [100, 100]})
+    df = pd.DataFrame({"close": [100, 100]})
     screenDict = {}
     saveDict = {}
     percentage = 10
@@ -2682,13 +2682,13 @@ def test_validateMACDHistogramBelow0_positive(tools_instance):
 
 # # Negative test case for validateMACDHistogramBelow0 function
 # def test_validateMACDHistogramBelow0_negative(tools_instance):
-#     data = pd.DataFrame({'Close': [100, 90, 80]})
+#     data = pd.DataFrame({"close": [100, 90, 80]})
 #     result = tools.validateMACDHistogramBelow0(data)
 #     assert result == True
 
 # # Positive test case for validateMomentum function
 # def test_validateMomentum_positive(tools_instance):
-#     data = pd.DataFrame({'Close': [100, 110, 120], 'Open': [90, 100, 110]})
+#     data = pd.DataFrame({"close": [100, 110, 120], "open": [90, 100, 110]})
 #     screenDict = {}
 #     saveDict = {}
 #     result = tools_instance.validateMomentum(data, screenDict, saveDict)
@@ -2708,7 +2708,7 @@ def test_validateMomentum_negative(tools_instance):
 
 # # Positive test case for validateMovingAverages function
 # def test_validateMovingAverages_positive(tools_instance):
-#     data = pd.DataFrame({'Close': [100, 110, 120], 'SMA': [90, 100, 110], 'LMA': [80, 90, 100]})
+#     data = pd.DataFrame({"close": [100, 110, 120], 'SMA': [90, 100, 110], 'LMA': [80, 90, 100]})
 #     screenDict = {}
 #     saveDict = {}
 #     result = tools_instance.validateMovingAverages(data, screenDict, saveDict)
@@ -2717,7 +2717,7 @@ def test_validateMomentum_negative(tools_instance):
 
 # # Negative test case for validateMovingAverages function
 # def test_validateMovingAverages_negative(tools_instance):
-#     data = pd.DataFrame({'Close': [100, 90, 80], 'SMA': [110, 100, 90], 'LMA': [120, 110, 100]})
+#     data = pd.DataFrame({"close": [100, 90, 80], 'SMA': [110, 100, 90], 'LMA': [120, 110, 100]})
 #     screenDict = {}
 #     saveDict = {}
 #     result = tools_instance.validateMovingAverages(data, screenDict, saveDict)
@@ -2727,7 +2727,7 @@ def test_validateMomentum_negative(tools_instance):
 
 # # Positive test case for validateNarrowRange function
 # def test_validateNarrowRange_positive(tools_instance):
-#     data = pd.DataFrame({'Close': [100, 110, 120, 130]})
+#     data = pd.DataFrame({"close": [100, 110, 120, 130]})
 #     screenDict = {}
 #     saveDict = {}
 #     result = tools_instance.validateNarrowRange(data, screenDict, saveDict, nr=3)
@@ -2737,7 +2737,7 @@ def test_validateMomentum_negative(tools_instance):
 
 # # Negative test case for validateNarrowRange function
 # def test_validateNarrowRange_negative(tools_instance):
-#     data = pd.DataFrame({'Close': [100, 110, 120, 130]})
+#     data = pd.DataFrame({"close": [100, 110, 120, 130]})
 #     screenDict = {}
 #     saveDict = {}
 #     result = tools_instance.validateNarrowRange(data, screenDict, saveDict, nr=2)
@@ -2847,7 +2847,7 @@ def test_validateMomentum(tools_instance):
     patch('pandas.DataFrame.debug')
 
     # Create a test case
-    df = pd.DataFrame({'Open': [1.1, 2, 3], 'High': [4.1, 5, 6], 'Low': [7.1, 8, 9], 'Close': [10.1, 11, 12], 'Volume': [13, 14, 15]})
+    df = pd.DataFrame({"open": [1.1, 2, 3], "high": [4.1, 5, 6], "low": [7.1, 8, 9], "close": [10.1, 11, 12], "volume": [13, 14, 15]})
     df = pd.concat([df]*150, ignore_index=True)
     screenDict = {}
     saveDict = {}
@@ -2871,7 +2871,7 @@ def test_validateLTPForPortfolioCalc(tools_instance):
     patch('pandas.DataFrame.debug')
 
     # Create a test case
-    df = pd.DataFrame({'Open': [1, 2, 3], 'High': [4, 5, 6], 'Low': [7, 8, 9], 'Close': [10, 11, 12], 'Volume': [13, 14, 15]})
+    df = pd.DataFrame({"open": [1, 2, 3], "high": [4, 5, 6], "low": [7, 8, 9], "close": [10, 11, 12], "volume": [13, 14, 15]})
     df = pd.concat([df]*150, ignore_index=True)
     screenDict = {}
     saveDict = {}
@@ -2898,7 +2898,7 @@ def test_validateNarrowRange(tools_instance):
     # Create a test case
     isTrading = PKDateUtilities.isTradingTime()
     closeValue = 10.1 if isTrading else 11
-    df = pd.DataFrame({'Open': [1.1, 2, 3], 'High': [4.1, 5, 6], 'Low': [7.1, 8, 9], 'Close': [10.1, closeValue , 12], 'Volume': [13, 14, 15]})
+    df = pd.DataFrame({"open": [1.1, 2, 3], "high": [4.1, 5, 6], "low": [7.1, 8, 9], "close": [10.1, closeValue , 12], "volume": [13, 14, 15]})
     df = pd.concat([df]*150, ignore_index=True)
     screenDict = {}
     saveDict = {}
@@ -3010,7 +3010,7 @@ class TestScreeningStatistics_calc_relative_strength(unittest.TestCase):
         self.assertEqual(result, -1)
 
     def test_calc_relative_strength_fallback_to_close(self):
-        """Test when 'Adj Close' is missing and function falls back to 'Close'."""
+        """Test when 'Adj Close' is missing and function falls back to "close"."""
         df = pd.DataFrame({"close": [100, 105, 102, 107, 110]})
         result = self.stats.calc_relative_strength(df)
         self.assertGreater(result, 0)  # Ensure RS is calculated
@@ -3141,7 +3141,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
         mock_printOutput.assert_called()
 
     @patch('requests.get')  # Mock the 'requests.get' method
-    @patch('builtins.open', new_callable=mock_open)  # Mock the 'open' function
+    @patch('builtins.open', new_callable=mock_open)  # Mock the "open" function
     @patch('os.makedirs')  # Mock 'os.makedirs' to prevent actual directory creation
     def test_download_save_template_jsons_success(self, mock_makedirs, mock_open, mock_requests_get):
         # Set up the mock response object with desired behavior
@@ -3191,9 +3191,9 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
             stats.downloadSaveTemplateJsons('/fake/directory')
 
     # def test_findATRCross_valid_data(self):
-    #     # Create a DataFrame with known 'Close' prices and expected ATR crossovers
+    #     # Create a DataFrame with known "close" prices and expected ATR crossovers
     #     data = {
-    #         'Close': [100, 105, 102, 108, 107],
+    #         "close": [100, 105, 102, 108, 107],
     #         # Add other necessary columns if required by the method
     #     }
     #     df = pd.DataFrame(data)
@@ -3202,9 +3202,9 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
     #     # This will depend on the actual implementation details
 
     # def test_findATRCross_no_crossovers(self):
-    #     # Create a DataFrame where 'Close' prices do not cross the ATR threshold
+    #     # Create a DataFrame where "close" prices do not cross the ATR threshold
     #     data = {
-    #         'Close': [100, 101, 102, 103, 104],
+    #         "close": [100, 101, 102, 103, 104],
     #         # Add other necessary columns if required by the method
     #     }
     #     df = pd.DataFrame(data)
@@ -3214,7 +3214,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
 
     # def test_findATRCross_edge_case_single_row(self):
     #     # Test with a single row DataFrame
-    #     data = {'Close': [100]}
+    #     data = {"close": [100]}
     #     df = pd.DataFrame(data)
     #     result = self.stats.findATRCross(df)
     #     # Assert the method's behavior with minimal data
@@ -3222,7 +3222,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
 
     # def test_findATRCross_invalid_data(self):
     #     # Test with a DataFrame missing necessary columns
-    #     data = {'Open': [100, 105, 102, 108, 107]}  # Missing 'Close' column
+    #     data = {"open": [100, 105, 102, 108, 107]}  # Missing "close" column
     #     df = pd.DataFrame(data)
     #     with self.assertRaises(KeyError):
     #         self.stats.findATRCross(df)
@@ -3239,7 +3239,7 @@ class TestScreeningStatistics_computeBuySellSignals(unittest.TestCase):
 #     patch('pandas.DataFrame.debug')
 
 #     # Create a test case
-#     df = pd.DataFrame({'Open': [1.0, 2.0, 3.0], 'High': [4.1, 5.1, 6.1], 'Low': [7.1, 8.1, 9.1], 'Close': [10.1, 11.1, 120.1], 'Volume': [13.1, 14.1, 15.1]})
+#     df = pd.DataFrame({"open": [1.0, 2.0, 3.0], "high": [4.1, 5.1, 6.1], "low": [7.1, 8.1, 9.1], "close": [10.1, 11.1, 120.1], "volume": [13.1, 14.1, 15.1]})
 #     df = pd.concat([df]*150, ignore_index=True)
 #     ichi = pd.DataFrame({"ISA_9":[100,100,100],"ISB_26":[90,90,90],"IKS_26":[110,110,110],"ITS_9":[111,111,111]})
 #     ichi = pd.concat([ichi]*150, ignore_index=True)
@@ -3298,8 +3298,8 @@ class TestCupAndHandleDetection(unittest.TestCase):
             np.linspace(2200, 3000, 5)    # Breakout volume spike
         ])
 
-        self.df = pd.DataFrame({'Date': dates, 'Close': close_prices, 'Volume': volume})
-        self.df['Volatility'] = self.df['Close'].rolling(window=20).std()
+        self.df = pd.DataFrame({'Date': dates, "close": close_prices, "volume": volume})
+        self.df['Volatility'] = self.df["close"].rolling(window=20).std()
         self.df.set_index('Date', inplace=True)
         self.screener = ScreeningStatistics(ConfigManager.tools(),None)
 
@@ -3311,11 +3311,11 @@ class TestCupAndHandleDetection(unittest.TestCase):
     def test_dynamic_order_calculation(self):
         """Test if the order parameter adjusts based on volatility."""
         high_vol_df = self.df.copy()
-        high_vol_df['Close'] += np.random.normal(0, 15, len(high_vol_df))  # Add artificial volatility
+        high_vol_df["close"] += np.random.normal(0, 15, len(high_vol_df))  # Add artificial volatility
         high_order = self.screener.get_dynamic_order(high_vol_df)
         
         low_vol_df = self.df.copy()
-        low_vol_df['Close'] += np.random.normal(0, 1, len(low_vol_df))  # Reduce volatility
+        low_vol_df["close"] += np.random.normal(0, 1, len(low_vol_df))  # Reduce volatility
         low_order = self.screener.get_dynamic_order(low_vol_df)
 
         self.assertGreaterEqual(high_order, low_order, "Higher volatility should increase order parameter.")
@@ -3345,10 +3345,10 @@ class TestCupAndHandleDetection(unittest.TestCase):
         """Ensure detection doesn't falsely identify a pattern when there's no cup formation."""
         random_df = pd.DataFrame({
             'Date': pd.date_range(start="2023-01-01", periods=100, freq='D'),
-            'Close': np.random.uniform(90, 110, 100),
-            'Volume': np.random.uniform(1500, 2500, 100)
+            "close": np.random.uniform(90, 110, 100),
+            "volume": np.random.uniform(1500, 2500, 100)
         })
-        random_df['Volatility'] = random_df['Close'].rolling(window=20).std()
+        random_df['Volatility'] = random_df["close"].rolling(window=20).std()
         random_df.set_index('Date', inplace=True)
         _,points = self.screener.find_cup_and_handle(random_df)
         self.assertIsNone(points, "No cup pattern exists, should return None.")
@@ -3373,14 +3373,14 @@ class TestScreeningStatistics1(unittest.TestCase):
     
     def test_calc_relative_strength_missing_close_column(self):
         df = pd.DataFrame({
-            'Close': [100, 102, 101, 103, 105]
+            "close": [100, 102, 101, 103, 105]
         })
         result = self.screening_stats.calc_relative_strength(df)
         self.assertGreater(result, 0)
 
     def test_computeBuySellSignals_valid_data(self):
         df = pd.DataFrame({
-            'Close': [100, 102, 104, 106, 108],
+            "close": [100, 102, 104, 106, 108],
             'ATRTrailingStop': [99, 101, 103, 105, 107]
         })
         result = self.screening_stats.computeBuySellSignals(df)
@@ -3389,7 +3389,7 @@ class TestScreeningStatistics1(unittest.TestCase):
     
     def test_computeBuySellSignals_missing_columns(self):
         df = pd.DataFrame({
-            'Close': [100, 102, 104, 106, 108],
+            "close": [100, 102, 104, 106, 108],
             'ATRTrailingStop': [99, 101, 103, 105, 107]
         })
         result = self.screening_stats.computeBuySellSignals(df)
@@ -3398,7 +3398,7 @@ class TestScreeningStatistics1(unittest.TestCase):
     @patch("pkscreener.classes.Pktalib.pktalib.EMA", return_value=np.array([100, 101, 102, 103, 104]))
     def test_computeBuySellSignals_with_mocked_ema(self, mock_ema):
         df = pd.DataFrame({
-            'Close': [100, 102, 104, 106, 108],
+            "close": [100, 102, 104, 106, 108],
             'ATRTrailingStop': [99, 101, 103, 105, 107]
         })
         result = self.screening_stats.computeBuySellSignals(df)
@@ -3408,13 +3408,13 @@ class TestScreeningStatistics1(unittest.TestCase):
     @patch("pkscreener.classes.Pktalib.pktalib.ATR", return_value=pd.Series([1.5, 2.0, 2.5, 3.0, 3.5]))
     def test_findATRCross(self, mock_atr):
         df = pd.DataFrame({
-            'High': [105, 106, 107, 108, 109],
-            'Low': [95, 96, 97, 98, 99],
-            'Close': [100, 102, 104, 106, 108],
-            'Open': [105, 106, 107, 108, 109],
+            "high": [105, 106, 107, 108, 109],
+            "low": [95, 96, 97, 98, 99],
+            "close": [100, 102, 104, 106, 108],
+            "open": [105, 106, 107, 108, 109],
             'RSI': [56, 54, 53, 52, 51],
             'RSIi': [50, 52, 54, 56, 58],
-            'Volume': [1000, 1200, 1300, 1400, 1500]
+            "volume": [1000, 1200, 1300, 1400, 1500]
         })
         saveDict = {}
         screenDict = {}
@@ -3426,10 +3426,10 @@ class TestScreeningStatistics1(unittest.TestCase):
     @patch("pkscreener.classes.Pktalib.pktalib.ATR", return_value=pd.Series([1.5, 2.0, 2.5, 3.0, 3.5]))
     def test_findATRTrailingStops(self, mock_atr):
         df = pd.DataFrame({
-            'High': [105, 106, 107, 108, 109],
-            'Low': [95, 96, 97, 98, 99],
-            'Close': [100, 102, 104, 106, 108],
-            'Volume': [1000, 1200, 1300, 1400, 1500]
+            "high": [105, 106, 107, 108, 109],
+            "low": [95, 96, 97, 98, 99],
+            "close": [100, 102, 104, 106, 108],
+            "volume": [1000, 1200, 1300, 1400, 1500]
         })
         saveDict = {}
         screenDict = {}
@@ -3442,9 +3442,9 @@ class TestScreeningStatistics1(unittest.TestCase):
     @patch("pkscreener.classes.Pktalib.pktalib.KeltnersChannel", return_value=(pd.Series([99] * 30), pd.Series([113] * 30)))
     def test_findBbandsSqueeze(self, mock_bbands, mock_keltners):
         df = pd.DataFrame({
-            'High': [108] * 30,
-            'Low': [98] * 30,
-            'Close': [103] * 30
+            "high": [108] * 30,
+            "low": [98] * 30,
+            "close": [103] * 30
         })
         saveDict = {}
         screenDict = {}
@@ -3457,11 +3457,11 @@ class TestScreeningStatistics1(unittest.TestCase):
     @patch("pkscreener.classes.ConfigManager.tools")
     def test_findBullishAVWAP(self, mock_config,mock_avwap):
         df = pd.DataFrame({
-            'High': [108] * 30,
-            'Low': [98] * 30,
-            'Close': [103] * 30,
-            'Open': [98] * 30,
-            'Volume': [1000] * 30
+            "high": [108] * 30,
+            "low": [98] * 30,
+            "close": [103] * 30,
+            "open": [98] * 30,
+            "volume": [1000] * 30
         })
         saveDict = {}
         screenDict = {}

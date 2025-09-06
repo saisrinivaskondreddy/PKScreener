@@ -68,16 +68,16 @@ class TestPKMarketOpenCloseAnalyser(unittest.TestCase):
 
     def test_getMorningOpen(self):
         df = pd.DataFrame({
-            'Open': [None, None, 100, 110],
-            'Close': [None, None, 105, 115]
+            "open": [None, None, 100, 110],
+            "close": [None, None, 105, 115]
         })
         open_price = PKMarketOpenCloseAnalyser.getMorningOpen(df)
         self.assertEqual(open_price, 100)
 
     def test_getMorningClose(self):
         df = pd.DataFrame({
-            'Open': [90, 95, None, None],
-            'Close': [None, None, 105, 110]
+            "open": [90, 95, None, None],
+            "close": [None, None, 105, 110]
         })
         close_price = PKMarketOpenCloseAnalyser.getMorningClose(df)
         self.assertEqual(close_price, 110)
@@ -116,10 +116,10 @@ class TestPKMarketOpenCloseAnalyser(unittest.TestCase):
         })
 
         updatedCandleData = {
-            'AAPL': {'data': [[None, None, None, 152]], 'columns': ['Open', 'High', 'Low', 'Close'], 'index': [None]}
+            'AAPL': {'data': [[None, None, None, 152]], 'columns': ["open", "high", "low", "close"], 'index': [None]}
         }
         allDailyCandles = {
-            'AAPL': {'data': [[None, None, None, 155]], 'columns': ['Open', 'High', 'Low', 'Close'], 'index': [None]}
+            'AAPL': {'data': [[None, None, None, 155]], 'columns': ["open", "high", "low", "close"], 'index': [None]}
         }
 
         save_df, screen_df = PKMarketOpenCloseAnalyser.diffMorningCandleDataWithLatestDailyCandleData(screen_df, save_df, updatedCandleData, allDailyCandles,"RunOptionName",['AAPL'])
