@@ -32,7 +32,7 @@ import pandas as pd
 import numpy as np
 from halo import Halo
 from alive_progress import alive_bar
-from yfinance import shared
+# from yfinance import shared
 
 from PKDevTools.classes.log import default_logger
 from PKDevTools.classes import Archiver
@@ -248,8 +248,9 @@ class PKAssetsManager:
         return cache_file
 
     def had_rate_limit_errors():
+        return False
         """Checks if any stored errors are YFRateLimitError."""
-        err = ",".join(list(shared._ERRORS.values()))
+        err = "" #",".join(list(shared._ERRORS.values()))
         hitRateLimit = "YFRateLimitError" in err or "Too Many Requests" in err or "429" in err
         if hitRateLimit:
             OutputControls().printOutput(
