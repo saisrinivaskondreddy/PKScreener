@@ -694,7 +694,7 @@ class StockScreener:
                             screener.validateCCI(
                                 processedData, screeningDictionary, saveDictionary, minRSI, maxRSI
                             )
-                        if isNotMonitoringDashboard and executeOption != 21 and backtestDuration == 0:
+                        if configManager.enableAdditionalTrendFilters and isNotMonitoringDashboard and executeOption != 21 and backtestDuration == 0:
                             # We don't need to have MFI or fair value data for backtesting because those
                             # are anyways only available for days in the past.
                             # For executeOption 21, we'd have already got the mfiStake and fairValueDiff
