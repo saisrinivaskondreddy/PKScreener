@@ -968,7 +968,7 @@ class ScreeningStatistics:
                     + colorText.END
                 )
                 return not alreadyBrokenout
-            noOfHigherShadows = len(data[data.High > maxClose])
+            noOfHigherShadows = len(data[data.high > maxClose])
             if daysToLookback / noOfHigherShadows <= 3:
                 saveDict["Breakout"] = "BO: " + str(maxHigh) + " R: 0"
                 if recentClose >= maxHigh:
@@ -1216,7 +1216,7 @@ class ScreeningStatistics:
         data['Date'] = data['Date'].apply(lambda x : x.strftime('%Y-%m-%d'))
         data['Close_ch'] = data["close"].shift(+1)
         data['rpv'] = ((data["close"] / data['Close_ch']) - 1) * data["volume"]
-        data['SMA50_Volume'] = data.Volume.rolling(50).mean()
+        data['SMA50_Volume'] = data.volume.rolling(50).mean()
         data['SMA50_rpv'] = data.rpv.rolling(50).mean()
 
         T = 0
@@ -1836,7 +1836,7 @@ class ScreeningStatistics:
             bearishMAReversal = dataCopy["maRev"].iloc[0] <= dataCopy["maRev"].iloc[1] and \
                 dataCopy["maRev"].iloc[1] <= dataCopy["maRev"].iloc[2] and \
                     dataCopy["maRev"].iloc[2] > dataCopy["maRev"].iloc[3]
-            isRecentCloseWithinPercentRange = dataCopy.equals(dataCopy[(dataCopy.Close >= (dataCopy.maRev - (dataCopy.maRev * percentage))) & (dataCopy.Close <= (dataCopy.maRev + (dataCopy.maRev * percentage)))])
+            isRecentCloseWithinPercentRange = dataCopy.equals(dataCopy[(dataCopy.close >= (dataCopy.maRev - (dataCopy.maRev * percentage))) & (dataCopy.close <= (dataCopy.maRev + (dataCopy.maRev * percentage)))])
             if (isRecentCloseWithinPercentRange and bullishClose and bullishMAReversal) or \
                 (isRecentCloseWithinPercentRange and not bullishClose and bearishMAReversal):
                 hasReversals = True
@@ -2088,7 +2088,7 @@ class ScreeningStatistics:
         color = 'tab:green'
         xdate = [x.date() for x in data.index]
         ax1.set_xlabel('Date', color=color)
-        ax1.plot(xdate, data.Close, label="close", color=color)
+        ax1.plot(xdate, data.close, label="close", color=color)
         ax1.tick_params(axis='x', labelcolor=color)
 
         ax2 = ax1.twiny() # ax2 and ax1 will have common y axis and different x axis, twiny
@@ -2533,26 +2533,26 @@ class ScreeningStatistics:
 
             with SuppressOutput(suppress_stderr=True, suppress_stdout=True):
                 if "sell" in data_list[cnt]:
-                    streched = d[(d.Low > d["5EMA"]) & (d.Low - d["5EMA"] > 0.5)]
-                    streched["SL"] = streched.High
+                    streched = d[(d.low > d["5EMA"]) & (d.low - d["5EMA"] > 0.5)]
+                    streched["SL"] = streched.high
                     validate = d[
-                        (d.Low.shift(1) > d["5EMA"].shift(1))
-                        & (d.Low.shift(1) - d["5EMA"].shift(1) > 0.5)
+                        (d.low.shift(1) > d["5EMA"].shift(1))
+                        & (d.low.shift(1) - d["5EMA"].shift(1) > 0.5)
                     ]
                     old_index = validate.index
                 else:
-                    mask = (d.High < d["5EMA"]) & (d["5EMA"] - d.High > 0.5)  # Buy
+                    mask = (d.high < d["5EMA"]) & (d["5EMA"] - d.high > 0.5)  # Buy
                     streched = d[mask]
-                    streched["SL"] = streched.Low
+                    streched["SL"] = streched.low
                     validate = d.loc[mask.shift(1).fillna(False)]
                     old_index = validate.index
             tgt = pd.DataFrame(
                 (
-                    validate.Close.reset_index(drop=True)
+                    validate.close.reset_index(drop=True)
                     - (
                         (
                             streched.SL.reset_index(drop=True)
-                            - validate.Close.reset_index(drop=True)
+                            - validate.close.reset_index(drop=True)
                         )
                         * risk_reward
                     )
@@ -2570,9 +2570,9 @@ class ScreeningStatistics:
             validate = validate.tail(len(old_index))
             validate = validate.set_index(old_index)
             if "sell" in data_list[cnt]:
-                final = validate[validate.Close < validate["5EMA"]].tail(1)
+                final = validate[validate.close < validate["5EMA"]].tail(1)
             else:
-                final = validate[validate.Close > validate["5EMA"]].tail(1)
+                final = validate[validate.close > validate["5EMA"]].tail(1)
 
             if data_list[cnt] not in last_signal:
                 last_signal[data_list[cnt]] = final
@@ -3298,10 +3298,10 @@ class ScreeningStatistics:
                     data = orgData.head(i)
                     refCandle = data.tail(1)
                     if (
-                        (len(data.High[data.High > refCandle.High.item()]) == 0)
-                        and (len(data.Low[data.Low < refCandle.Low.item()]) == 0)
-                        and (len(data.Open[data.Open > refCandle.High.item()]) == 0)
-                        and (len(data.Close[data.Close < refCandle.Low.item()]) == 0)
+                        (len(data.high[data.high > refCandle.high.item()]) == 0)
+                        and (len(data.low[data.low < refCandle.low.item()]) == 0)
+                        and (len(data.open[data.open > refCandle.high.item()]) == 0)
+                        and (len(data.close[data.close < refCandle.low.item()]) == 0)
                     ):
                         screenDict["Pattern"] = (
                             saved[0]
@@ -3320,10 +3320,10 @@ class ScreeningStatistics:
                     data = orgData.head(i)
                     refCandle = data.tail(1)
                     if (
-                        (len(data.High[data.High > refCandle.High.item()]) == 0)
-                        and (len(data.Low[data.Low < refCandle.Low.item()]) == 0)
-                        and (len(data.Open[data.Open > refCandle.High.item()]) == 0)
-                        and (len(data.Close[data.Close < refCandle.Low.item()]) == 0)
+                        (len(data.high[data.high > refCandle.high.item()]) == 0)
+                        and (len(data.low[data.low < refCandle.low.item()]) == 0)
+                        and (len(data.open[data.open > refCandle.high.item()]) == 0)
+                        and (len(data.close[data.close < refCandle.low.item()]) == 0)
                     ):
                         screenDict["Pattern"] = (
                             saved[0]
