@@ -38,7 +38,7 @@ import pkscreener.classes.Utility as Utility
 from pkscreener import Imports
 from pkscreener.classes.Pktalib import pktalib
 from PKDevTools.classes.OutputControls import OutputControls
-from PKDevTools.classes import Archiver
+from PKDevTools.classes import Archiver, log
 from PKNSETools.morningstartools import Stock
 
 if sys.version_info >= (3, 11):
@@ -90,6 +90,18 @@ class ScreeningStatistics:
         self.configManager = configManager
         self.default_logger = default_logger
         self.shouldLog = shouldLog
+        self.setupLogger(self.default_logger.level)
+
+    def setupLogger(self, log_level):
+        if log_level > 0:
+            os.environ["PKDevTools_Default_Log_Level"] = str(log_level)
+        log.setup_custom_logger(
+            "pkscreener",
+            log_level,
+            trace=False,
+            log_file_path="pkscreener-logs.txt",
+            filter=None,
+        )
 
     def calc_relative_strength(self,df:pd.DataFrame):
         if df is None or len(df) <= 1:
