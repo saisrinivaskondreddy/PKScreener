@@ -1823,7 +1823,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 prediction, pText, sText = screener.getNiftyPrediction(
                     df=fetcher.fetchLatestNiftyDaily(proxyServer=fetcher.proxyServer)
                 )
-                warningText = "\nNifty AI prediction works best if you request after market is closed. It may not be accurate while market is still open!" if "Open" in Utility.marketStatus() else ""
+                warningText = "\nNifty AI prediction works best if you request after market is closed. It may not be accurate while market is still open!" if "open" in Utility.marketStatus() else ""
                 try:
                     todayHoliday, todayOccassion = PKDateUtilities.isHoliday(PKDateUtilities.currentDateTime())
                     nextWeekday = PKDateUtilities.nextWeekday()

@@ -1049,6 +1049,7 @@ class StockScreener:
             else:
                 data.rename(columns={"index": "Date"}, inplace=True)
             data.set_index("Date", inplace=True)
+            data.index = pd.to_datetime(data.index)
         except: # pragma: no cover
             pass
         if ((shouldCache and not self.isTradingTime and (hostData is None  or hostDataLength == 0)) or downloadOnly) \
