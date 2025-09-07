@@ -1917,9 +1917,11 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         loadCount = len(stockDictPrimary) if stockDictPrimary is not None else 0
         # Let's use screening only for the stocks for which we could get the data.
         savedOrDownloadedKeys = list(stockDictPrimary.keys())
-        # missingStocks = set(listStockCodes) - set(savedOrDownloadedKeys)
-        OutputControls().printOutput(f"{colorText.GREEN}  [+] Adding {len(savedOrDownloadedKeys)} stocks out of {len(savedOrDownloadedKeys)} to the queue...{colorText.END}")
-        listStockCodes = savedOrDownloadedKeys #list(set(listStockCodes)-set(missingStocks)) if not downloadOnly else listStockCodes
+        missingStocks = set(listStockCodes) - set([ x.replace("-BE","").replace("-BZ","") for x in savedOrDownloadedKeys ])
+        # print(missingStocks)
+        # default_logger().debug(missingStocks)
+        OutputControls().printOutput(f"{colorText.GREEN}  [+] Adding {len(savedOrDownloadedKeys)-len(missingStocks)} stocks out of {len(savedOrDownloadedKeys)} to the queue...{colorText.END}")
+        listStockCodes = list(set(savedOrDownloadedKeys)-set(missingStocks)) if not downloadOnly else savedOrDownloadedKeys
         if downloadOnly:
             OutputControls().printOutput(
                 colorText.WARN
