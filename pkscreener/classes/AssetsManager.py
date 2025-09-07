@@ -469,7 +469,7 @@ class PKAssetsManager:
             MB = KB * 1024
             chunksize = MB if serverBytes >= MB else (KB if serverBytes >= KB else 1)
             filesize = int( serverBytes / chunksize)
-            if filesize > 40 and chunksize == MB: # Saved data can't be in KBs. Something definitely went wrong. It should be upward of 40MB
+            if filesize > 20 and chunksize == MB: # Saved data can't be in KBs. Something definitely went wrong. It should be upward of 40MB
                 bar, spinner = Utility.tools.getProgressbarStyle()
                 try:
                     f = open(
