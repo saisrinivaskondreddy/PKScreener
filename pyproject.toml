@@ -1,0 +1,66 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "setuptools_scm[toml]>=3.4"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pkscreener"
+dynamic = ["version"]
+description = "A Python-based stock screener for NSE, India with alerts to Telegram Channel (pkscreener)"
+readme = "README.md"
+requires-python = ">=3.12"
+license = {file = "LICENSE"}
+authors = [
+    {name = "pkjmesra", email = "pkjmesra@gmail.com"}
+]
+keywords = ["NSE", "Technical Indicators", "Scanning", "Stock Scanners"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "requests>=2.28.0",
+    "pandas>=1.5.0",
+    "numpy>=1.21.0",
+    "python-dateutil>=2.8.0",
+    "pytz>=2022.0",
+    "advanced_ta"
+]
+
+[project.urls]
+Homepage = "https://github.com/pkjmesra/pkscreener"
+Download = "https://github.com/pkjmesra/pkscreener/archive/v{version}.zip"
+
+[project.scripts]
+pkscreener = "pkscreener.pkscreenercli:pkscreenercli"
+pkbot = "pkscreener.pkscreenerbot:runpkscreenerbot"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+packages = {find = {where = ["."]}}
+
+[tool.setuptools.package-data]
+pkscreener = [
+    "*.ini",
+    "courbd.ttf",
+    "LICENSE.txt",
+    "README.txt",
+    "requirements.txt",
+    "Disclaimer.txt",
+    "LogoWM.png"
+]
+
+[tool.setuptools.packages.find]
+exclude = ["docs", "test", "*.github*", "*.dist*", "build*"]
+
+# For dynamic versioning using setuptools_scm
+[tool.setuptools_scm]
+write_to = "pkscreener/_version.py"
+write_to_template = '__version__ = "{version}"\n'
