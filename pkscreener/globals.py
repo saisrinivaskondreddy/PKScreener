@@ -1819,10 +1819,23 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     PKAnalyticsService().send_event("app_exit")
                     sys.exit(0)
             elif indexOption == "N":
+                import pandas as pd
                 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-                prediction, pText, sText = screener.getNiftyPrediction(
-                    df=fetcher.fetchLatestNiftyDaily(proxyServer=fetcher.proxyServer)
-                )
+                if stockDictPrimary is None or (len(stockDictPrimary.keys()) == 0):
+                    stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly=False, listStockCodes=["NIFTY 50"], menuOption=menuOption,indexOption=indexOption)
+                hostData = stockDictPrimary.get("NIFTY 50") if (stockDictPrimary is not None and len(stockDictPrimary) > 0) else None
+                columns = hostData["columns"]
+                data = pd.DataFrame(
+                        hostData["data"], columns=columns, index=hostData["index"]
+                    )
+                data.reset_index(inplace=True)
+                if "Datetime" in data.columns and "Date" not in data.columns:
+                    data.rename(columns={"Datetime": "Date"}, inplace=True)
+                else:
+                    data.rename(columns={"index": "Date"}, inplace=True)
+                data.set_index("Date", inplace=True)
+                data.index = pd.to_datetime(data.index)
+                prediction, pText, sText = screener.getNiftyPrediction(df=data)
                 warningText = "\nNifty AI prediction works best if you request after market is closed. It may not be accurate while market is still open!" if "open" in Utility.marketStatus() else ""
                 try:
                     todayHoliday, todayOccassion = PKDateUtilities.isHoliday(PKDateUtilities.currentDateTime())
