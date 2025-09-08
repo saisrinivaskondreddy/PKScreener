@@ -189,7 +189,7 @@ class PKAssetsManager:
     def afterMarketStockDataExists(intraday=False, forceLoad=False):
         exists, cache_file = Archiver.afterMarketStockDataExists(intraday=intraday,
                                                                  forceLoad=forceLoad,
-                                                                 date_suffix=False)
+                                                                 date_suffix=True)
         return exists, cache_file
 
     @Halo(text='', spinner='dots')
