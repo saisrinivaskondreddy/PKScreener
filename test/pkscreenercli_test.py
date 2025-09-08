@@ -70,10 +70,10 @@ class TestPKScreenerFunctions(unittest.TestCase):
         setupLogger(shouldLog=False)
         self.assertNotIn('PKDevTools_Default_Log_Level', os.environ)
 
-    @patch.dict(Imports, {"talib": False, "pandas_ta": False})
+    @patch.dict(Imports, {"talib": False, "pandas_ta_classic": False})
     def test_warnAboutDependencies(self):
         with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput') as mock_output_controls:
-            # Positive case: TA-Lib not installed, pandas_ta installed
+            # Positive case: TA-Lib not installed, pandas_ta_classic installed
             warnAboutDependencies()
             mock_output_controls.assert_called()
 
@@ -373,7 +373,7 @@ def test_pkscreenercli_warnAboutDependencies():
                 mock_print.assert_called()
                 mock_print.call_count = 2
                 mock_input.assert_not_called()
-    with patch.dict("pkscreener.Imports", {"talib": False, "pandas_ta":False}):
+    with patch.dict("pkscreener.Imports", {"talib": False, "pandas_ta_classic":False}):
         with patch("builtins.print") as mock_print:
             with patch("builtins.input") as mock_input:
                 from PKDevTools.classes.OutputControls import OutputControls
@@ -384,7 +384,7 @@ def test_pkscreenercli_warnAboutDependencies():
                 mock_print.assert_called()
                 mock_print.call_count = 2
                 mock_input.assert_called()
-    with patch.dict("pkscreener.Imports", {"talib": True, "pandas_ta":True}):
+    with patch.dict("pkscreener.Imports", {"talib": True, "pandas_ta_classic":True}):
         with patch("builtins.print") as mock_print:
             with patch("builtins.input") as mock_input:
                 pkscreenercli.warnAboutDependencies()

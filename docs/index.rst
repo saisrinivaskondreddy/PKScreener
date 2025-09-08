@@ -65,7 +65,7 @@ Installing the latest version from PyPi.
 ----------------------------------------
 * Go ahead and install using ``pip install pkscreener``
 * This should install all of the major dependencies, except maybe, TA-Lib. 
-* This app can still run without TA-Lib, but if you need to install TA-Lib for technical indicators (which otherwise is used from ``pandas_ta`` in the absence of TA-Lib), you can do this: Head to ``.github/dependencies/`` under this repo. Download the respective TA-Lib file/whl file and install either from the .whl file or from source. Check out any of the workflow files for steps to install TA-Lib.
+* This app can still run without TA-Lib, but if you need to install TA-Lib for technical indicators (which otherwise is used from ``pandas_ta_classic`` in the absence of TA-Lib), you can do this: Head to ``.github/dependencies/`` under this repo. Download the respective TA-Lib file/whl file and install either from the .whl file or from source. Check out any of the workflow files for steps to install TA-Lib.
 * Now launch your favorite command line CLI and issue ``pkscreener``. This will launch the pkscreener executable.
 
 Building from source repo

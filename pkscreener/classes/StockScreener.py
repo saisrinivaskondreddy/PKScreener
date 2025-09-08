@@ -492,7 +492,7 @@ class StockScreener:
                 # Must-run, but only at the end
                 try:
                     if executeOption != 7 or (executeOption == 7 and respChartPattern != 7):
-                    # Only 'doji' and 'inside' is internally implemented by pandas_ta.
+                    # Only 'doji' and 'inside' is internally implemented by pandas_ta_classic.
                     # Otherwise, for the rest of the candle patterns, they also need
                     # TA-Lib. So if TA-Lib is not available, it will throw exception
                     # We can live with no-patterns if user has not installed ta-lib

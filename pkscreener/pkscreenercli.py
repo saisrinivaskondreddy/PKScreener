@@ -439,25 +439,25 @@ def warnAboutDependencies():
     if not Imports["talib"]:
         OutputControls().printOutput(
                 colorText.FAIL
-                + "  [+] TA-Lib is not installed. Looking for pandas_ta."
+                + "  [+] TA-Lib is not installed. Looking for pandas_ta_classic."
                 + colorText.END
             )
         sleep(1)
         issueLink = "https://github.com/pkjmesra/PKScreener"
         issueLink = f"\x1b[97m\x1b]8;;{issueLink}\x1b\\{issueLink}\x1b]8;;\x1b\\\x1b[0m"
-        if Imports["pandas_ta"]:
+        if Imports["pandas_ta_classic"]:
             taLink = "https://github.com/ta-lib/ta-lib-python"
             taLink = f"\x1b[97m\x1b]8;;{taLink}\x1b\\{taLink}\x1b]8;;\x1b\\\x1b[0m"
             OutputControls().printOutput(
                 colorText.GREEN
-                + f"  [+] Found and falling back on pandas_ta.\n  [+] For full coverage(candle patterns), you may wish to read the README file in PKScreener repo :  {issueLink}\n  [+] or follow instructions from\n  [+] {taLink}"
+                + f"  [+] Found and falling back on pandas_ta_classic.\n  [+] For full coverage(candle patterns), you may wish to read the README file in PKScreener repo :  {issueLink}\n  [+] or follow instructions from\n  [+] {taLink}"
                 + colorText.END
             )
             sleep(1)
         else:
             OutputControls().printOutput(
                 colorText.FAIL
-                + f"  [+] Neither ta-lib nor pandas_ta was located. You need at least one of them to continue! \n  [+] Please follow instructions from README file under PKScreener repo: {issueLink}"
+                + f"  [+] Neither ta-lib nor pandas_ta_classic was located. You need at least one of them to continue! \n  [+] Please follow instructions from README file under PKScreener repo: {issueLink}"
                 + colorText.END
             )
             OutputControls().takeUserInput("Press any key to try anyway...")

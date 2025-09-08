@@ -49,26 +49,26 @@ if Imports["talib"]:
                 + colorText.END
             )
         try:
-            import pandas_ta as talib
+            import pandas_ta_classic as talib
             OutputControls().printOutput(
                 colorText.FAIL
-                + f"  [+] TA-Lib is not installed. Falling back on pandas_ta.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] {taLink}"
+                + f"  [+] TA-Lib is not installed. Falling back on pandas_ta_classic.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] {taLink}"
                 + colorText.END
             )
         except: # pragma: no cover
             OutputControls().printOutput(
                 colorText.FAIL
-                + f"  [+] pandas_ta is not installed. Falling back on pandas_ta also failed.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] {taLink}"
+                + f"  [+] pandas_ta_classic is not installed. Falling back on pandas_ta_classic also failed.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] {taLink}"
                 + colorText.END
             )
             pass
         pass
 else:
     try:
-        import pandas_ta as talib
+        import pandas_ta_classic as talib
         OutputControls().printOutput(
             colorText.FAIL
-            + "  [+] TA-Lib is not installed. Falling back on pandas_ta.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
+            + "  [+] TA-Lib is not installed. Falling back on pandas_ta_classic.\n  [+] For full coverage(candle patterns), you may wish to follow instructions from\n  [+] https://github.com/ta-lib/ta-lib-python"
             + colorText.END
         )
         sleep(3)
@@ -132,7 +132,7 @@ class pktalib:
     @classmethod
     def VWAP(self, high, low, close, volume,anchor=None):
         try:
-            import pandas_ta as talib
+            import pandas_ta_classic as talib
             # Aligning the series
             # high,low,close = pktalib.align_series(high, low, close, fill_value=0)
             return talib.vwap(high, low, close, volume,anchor=anchor)
@@ -204,7 +204,7 @@ class pktalib:
     @classmethod
     def TriMA(self, close,length=10):
         try:
-            import pandas_ta as talib
+            import pandas_ta_classic as talib
             return talib.trima(close=close, length=length)
         except Exception:  # pragma: no cover
             # default_logger().debug(e, exc_info=True)
@@ -213,7 +213,7 @@ class pktalib:
     @classmethod
     def MACD(self, close, fast, slow, signal):
         try:
-            # import pandas_ta as talib
+            # import pandas_ta_classic as talib
             return talib.macd(close, fast, slow, signal, talib=Imports["talib"])
         except Exception:  # pragma: no cover
             # default_logger().debug(e, exc_info=True)
@@ -346,7 +346,7 @@ class pktalib:
     def ichimoku(
         self, df, tenkan=None, kijun=None, senkou=None, include_chikou=True, offset=None
     ):
-        import pandas_ta as ta
+        import pandas_ta_classic as ta
 
         ichimokudf, spandf = ta.ichimoku(
             df["high"], df["low"], df["close"], tenkan, kijun, senkou, False, 26
@@ -355,7 +355,7 @@ class pktalib:
 
     @classmethod
     def supertrend(self, df, length=7, multiplier=3):
-        import pandas_ta as ta
+        import pandas_ta_classic as ta
 
         sti = ta.supertrend(
             df["high"], df["low"], df["close"], length=length, multiplier=multiplier
