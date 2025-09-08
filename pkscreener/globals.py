@@ -1916,7 +1916,7 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 pass
         loadCount = len(stockDictPrimary) if stockDictPrimary is not None else 0
         # Let's use screening only for the stocks for which we could get the data.
-        savedOrDownloadedKeys = list(stockDictPrimary.keys())
+        savedOrDownloadedKeys = listStockCodes if (userArgs.options is not None and "," in userArgs.options) else list(stockDictPrimary.keys())
         missingStocks = set(listStockCodes) - set([ x.replace("-BE","").replace("-BZ","") for x in savedOrDownloadedKeys ])
         # print(missingStocks)
         # default_logger().debug(missingStocks)
