@@ -34,7 +34,7 @@ on:
         description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
         required: false
         type: string
-        default: '3.12'
+        default: '3.11'
       runson:
         description: 'Runner OS. e.g: ubuntu-latest, windows-latest or macos-latest'
         required: false
