@@ -34,7 +34,7 @@ on:
         description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
         required: false
         type: string
-        default: '3.11'
+        default: '3.12'
       runson:
         description: 'Runner OS. e.g: ubuntu-latest, windows-latest or macos-latest'
         required: false
@@ -63,7 +63,7 @@ jobs:
     - name: Set up Python 
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ inputs.targetPythonVersion || 3.11 }}
+        python-version: ${{ inputs.targetPythonVersion || 3.12 }}
 
     - name: Restore Dependencies from Cache
       uses: actions/cache@v4
@@ -72,6 +72,13 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
+
+    - name: Activate virtualenv for MacOS
+      if: startsWith(runner.os, 'MacOS')
+      run: |
+        python3 -m venv venv
+        source venv/bin/activate
+        echo PATH=$PATH >> $GITHUB_ENV
 
     - name: Load Cache for Linux Dependencies
       uses: actions/cache@v4
