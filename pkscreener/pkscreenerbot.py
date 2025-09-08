@@ -61,6 +61,7 @@ MINUTES_2_IN_SECONDS = 120
 OWNER_USER = "Itsonlypk"
 APOLOGY_TEXT = "Apologies! The @nse_pkscreener_bot is NOT available for the time being! We are working with our host GitHub and other data source providers to sort out pending invoices and restore the services soon! Thanks for your patience and support! 🙏"
 
+from pkscreener.classes import VERSION
 from PKDevTools.classes.Environment import PKEnvironment
 from PKDevTools.classes.PKDateUtilities import PKDateUtilities
 from PKDevTools.classes.ColorText import colorText
@@ -297,7 +298,8 @@ def matchUTR(update: Update, context: CallbackContext) -> str:
     return START_ROUTES
 
 def editMessageText(query,editedText,reply_markup):
-    editedText = f"{PKDateUtilities.currentDateTime()}:\n{editedText}"
+    # .replace(microsecond=0).isoformat()
+    editedText = f"PKScreener <b>v{VERSION}</b>\n{PKDateUtilities.currentDateTime()}:\n{editedText}"
     if query is not None and hasattr(query, "edit_message_text"):
         query.edit_message_text(text=editedText, reply_markup=reply_markup,parse_mode="HTML")
 
