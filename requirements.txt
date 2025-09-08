@@ -13,7 +13,7 @@ lxml==4.9.4 # 5.0.0 or above causes problems.
 numpy #>=1.26.4
 openpyxl #>=3.1.5
 pandas #>=2.2.3
-pandas_ta #>=0.3.14b0
+pandas_ta #>=0.4.67b0
 # This is required because https://github.com/erocarrera/pefile/issues/420 
 # and https://github.com/pyinstaller/pyinstaller/issues/8762
 # and https://github.com/pyinstaller/pyinstaller/issues/7269
