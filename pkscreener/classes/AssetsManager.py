@@ -326,6 +326,22 @@ class PKAssetsManager:
         leftOutStocks = None
         recentDownloadFromOriginAttempted = False
         isTrading = PKDateUtilities.isTradingTime() and (PKDateUtilities.wasTradedOn() or not PKDateUtilities.isTodayHoliday()[0])
+        if isTrading:
+            # For GitHub Actions, write to GITHUB_OUTPUT file if the environment variable exists
+            try:
+                os.remove(os.path.join(Archiver.get_user_data_dir(),cache_file))
+            except:
+                pass
+            github_output = os.environ.get("GITHUB_OUTPUT")
+            if github_output:
+                # We must be running in GitHub actions job
+                try:
+                    from pkbrokers.kite.examples.pkkite import kite_fetch_save_pickle
+                    if kite_fetch_save_pickle():
+                        default_logger().info("pkl file update succeeded!")
+                except Exception as e:
+                    default_logger().error(f"Error downloading latest file:{e}")
+            isTrading = False
         if userDownloadOption is not None and "B" in userDownloadOption: # Backtests
             isTrading = False
         # Check if NSEI data is requested
