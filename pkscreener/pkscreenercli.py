@@ -946,6 +946,7 @@ def pkscreenercli():
         OutputControls(enableMultipleLineOutput=(args is None or args.monitor is None or args.runintradayanalysis),enableUserInput=(args is None or args.answerdefault is None)).printOutput("",end="\r")
         configManager.getConfig(ConfigManager.parser)
         userAcceptance = configManager.tosAccepted
+        inContainer = os.environ.get("PKSCREENER_DOCKER", "").lower() in ("yes", "y", "on", "true", "1")
         if not configManager.tosAccepted:
             if (args is not None and args.answerdefault is not None and str(args.answerdefault).lower() == "n"):
                 OutputControls().printOutput(f"{colorText.FAIL}You seem to have passed disagreement to the Disclaimer and Terms Of Service of PKScreener by passing in {colorText.END}{colorText.WARN}--answerdefault N or -a N{colorText.END}. Exiting now!")
