@@ -1607,6 +1607,7 @@ class DataManager:
         self.loaded_stock_data = False
         self.list_stock_codes = None
         self.last_scan_output_stock_codes = None
+        self.run_clean_up = False
 
     @exit_after(10)
     def try_load_data_on_background_thread(self):
@@ -1849,8 +1850,8 @@ class DataManager:
 
     def cleanup_local_results(self):
         """Clean up local results and temporary files."""
-        global run_clean_up
-        run_clean_up = True
+        # global run_clean_up
+        self.run_clean_up = True
         
         if self.user_passed_args.answerdefault is not None or self.user_passed_args.systemlaunched or self.user_passed_args.testbuild:
             return

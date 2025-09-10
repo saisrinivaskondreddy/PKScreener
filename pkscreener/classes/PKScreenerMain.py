@@ -112,7 +112,7 @@ from pkscreener.classes.PKMarketOpenCloseAnalyser import PKMarketOpenCloseAnalys
 from pkscreener.classes.PKPremiumHandler import PKPremiumHandler
 from pkscreener.classes.AssetsManager import PKAssetsManager
 from pkscreener.classes.PKAnalytics import PKAnalyticsService
-
+from pkscreener.classes.MenuManager import MenuManager, ScanExecutor, ResultProcessor, TelegramNotifier, DataManager, BacktestManager
 if __name__ == '__main__':
     multiprocessing.freeze_support()
 
@@ -213,7 +213,7 @@ class PKScreenerMain:
             self.data_manager.load_count = 0
             
         # Handle cleanup if needed
-        if not self.data_manager.runCleanUp and self.user_passed_args is not None and not self.user_passed_args.systemlaunched:
+        if not self.data_manager.run_clean_up and self.user_passed_args is not None and not self.user_passed_args.systemlaunched:
             self.data_manager.cleanup_local_results()
             
         # Log user arguments if enabled
@@ -372,7 +372,7 @@ class PKScreenerMain:
         self.handle_google_sheets_integration()
         
         # Handle pinned menu options
-        self.handle_pinned_menu_options()
+        self.handle_pinned_menu_options(testing)
         
         # Handle intraday analysis if requested
         if self.user_passed_args is not None and self.user_passed_args.runintradayanalysis:
@@ -704,7 +704,7 @@ class PKScreenerMain:
         except:
             pass
 
-    def handle_pinned_menu_options(self):
+    def handle_pinned_menu_options(self,testing):
         """Handle pinned menu options for monitoring and quick access."""
         if ("RUNNER" not in os.environ.keys() and 
             not testing and 
