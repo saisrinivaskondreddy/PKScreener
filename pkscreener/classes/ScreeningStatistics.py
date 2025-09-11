@@ -3573,6 +3573,8 @@ class ScreeningStatistics:
                 raise KeyboardInterrupt
             except Exception as e: # pragma: no cover
                 self.default_logger.debug(e, exc_info=True)
+                ltpValid = False
+                verifyStageTwo = False
                 pass
             
             return ltpValid, verifyStageTwo
