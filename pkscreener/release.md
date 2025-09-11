@@ -2,9 +2,7 @@
 
 ## What's New?
 1. [v0.46.20250911.771] release
-* Python 3.12 upgrade
-* Fixed multiple bugs.
-* Subscription model added.
+* Integration with new data provider for period=day
 
 ## Older Releases
 * [https://github.com/pkjmesra/PKScreener/releases] : Discarded to save on storage costs!
@@ -41,12 +39,12 @@
 * MIT: https://github.com/pkjmesra/PKScreener/blob/main/LICENSE
 
 [Windows-badge]: https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white
-[Windows]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250810.756/pkscreenercli.exe
+[Windows]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250911.771/pkscreenercli.exe
 [Linux-badge_x64]: https://img.shields.io/badge/Linux(x64)-FCC624?logo=linux&logoColor=black
-[Linux_x64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250810.756/pkscreenercli_x64.bin
+[Linux_x64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250911.771/pkscreenercli_x64.bin
 [Linux-badge_arm64]: https://img.shields.io/badge/Linux(arm64)-FCC624?logo=linux&logoColor=black
-[Linux_arm64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250810.756/pkscreenercli_arm64.bin
+[Linux_arm64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250911.771/pkscreenercli_arm64.bin
 [Mac OS-badge_x64]: https://img.shields.io/badge/mac%20os(x64)-D3D3D3?logo=apple&logoColor=000000
-[Mac OS_x64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250810.756/pkscreenercli_x64.run
+[Mac OS_x64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250911.771/pkscreenercli_x64.run
 [Mac OS-badge_arm64]: https://img.shields.io/badge/mac%20os(arm64)-D3D3D3?logo=apple&logoColor=000000
-[Mac OS_arm64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250810.756/pkscreenercli_arm64.run
+[Mac OS_arm64]: https://github.com/pkjmesra/PKScreener/releases/download/0.46.20250911.771/pkscreenercli_arm64.run
