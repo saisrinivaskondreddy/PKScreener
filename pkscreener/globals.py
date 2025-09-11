@@ -1820,7 +1820,9 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                     sys.exit(0)
             elif indexOption == "N":
                 import pandas as pd
-                os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+                os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+                import tensorflow as tf
+                tf.get_logger().setLevel('ERROR')
                 if stockDictPrimary is None or (len(stockDictPrimary.keys()) == 0):
                     stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly=False, listStockCodes=["NIFTY 50"], menuOption=menuOption,indexOption=indexOption)
                 hostData = stockDictPrimary.get("NIFTY 50") if (stockDictPrimary is not None and len(stockDictPrimary) > 0) else None

@@ -2457,16 +2457,20 @@ class ScreeningStatistics:
 
         warnings.filterwarnings("ignore")
         data = df.copy()
+        data = data.rename(columns=str.capitalize)
+        # df.columns = df.columns.str.title()
+        # data.columns = [col.capitalize() for col in data.columns]
+
         model, pkl = Utility.tools.getNiftyModel()
         if model is None or pkl is None:
             return 0, "Unknown", "Unknown"
         with SuppressOutput(suppress_stderr=True, suppress_stdout=True):
             data = data[pkl["columns"]]
             ### v2 Preprocessing
-            data["high"] = data["high"].pct_change() * 100
-            data["low"] = data["low"].pct_change() * 100
-            data["open"] = data["open"].pct_change() * 100
-            data["close"] = data["close"].pct_change() * 100
+            data["High"] = data["High"].pct_change() * 100
+            data["Low"] = data["Low"].pct_change() * 100
+            data["Open"] = data["Open"].pct_change() * 100
+            data["Close"] = data["Close"].pct_change() * 100
             data = data.iloc[-1]
             ###
             data = pkl["scaler"].transform([data])
