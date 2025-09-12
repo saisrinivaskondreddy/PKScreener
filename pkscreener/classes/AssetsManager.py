@@ -329,7 +329,7 @@ class PKAssetsManager:
         isTrading = PKDateUtilities.isTradingTime() and (PKDateUtilities.wasTradedOn() or not PKDateUtilities.isTodayHoliday()[0])
         if isTrading or not os.path.exists(srcFilePath):
             try:
-                from pkbrokers.kite.examples.pkkite import kite_fetch_save_pickle
+                from pkbrokers.kite.examples.externals import kite_fetch_save_pickle
                 if kite_fetch_save_pickle():
                     default_logger().info("pkl file update succeeded!")
             except Exception as e:
