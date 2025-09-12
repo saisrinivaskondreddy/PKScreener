@@ -206,9 +206,9 @@ jobs:
         TEL_SESSION_DATA: ${{ secrets.TEL_SESSION_DATA }}
       run: |
         cat > .env.dev << EOF
-        CHAT_ID_DEV : $CHAT_ID_DEV
-        TOKEN_DEV : $TOKEN_DEV
-        CHAT_IDADMIN_DEV : $CHAT_IDADMIN_DEV
+        CHAT_ID_DEV=$CHAT_ID_DEV
+        TOKEN_DEV=$TOKEN_DEV
+        CHAT_IDADMIN_DEV=$CHAT_IDADMIN_DEV
         CHAT_ID=$CHAT_ID
         TOKEN=$TOKEN
         chat_idADMIN=$chat_idADMIN
