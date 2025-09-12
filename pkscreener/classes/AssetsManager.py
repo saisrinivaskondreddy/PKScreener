@@ -325,16 +325,9 @@ class PKAssetsManager:
         initialLoadCount = len(stockDict)
         leftOutStocks = None
         recentDownloadFromOriginAttempted = False
+        srcFilePath = os.path.join(Archiver.get_user_data_dir(), cache_file)
         isTrading = PKDateUtilities.isTradingTime() and (PKDateUtilities.wasTradedOn() or not PKDateUtilities.isTodayHoliday()[0])
-        if isTrading:
-            # For GitHub Actions, write to GITHUB_OUTPUT file if the environment variable exists
-            # try:
-            #     os.remove(os.path.join(Archiver.get_user_data_dir(),cache_file))
-            # except:
-            #     pass
-            # github_output = os.environ.get("GITHUB_OUTPUT")
-            # if github_output:
-            # We must be running in GitHub actions job
+        if isTrading or not os.path.exists(srcFilePath):
             try:
                 from pkbrokers.kite.examples.pkkite import kite_fetch_save_pickle
                 if kite_fetch_save_pickle():
@@ -367,7 +360,6 @@ class PKAssetsManager:
         )
         stockDataLoaded = False
         # copyFilePath = os.path.join(Archiver.get_user_data_dir(), f"copy_{cache_file}")
-        srcFilePath = os.path.join(Archiver.get_user_data_dir(), cache_file)
         # if os.path.exists(copyFilePath):
         #     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
         if os.path.exists(srcFilePath) and not forceRedownload:
