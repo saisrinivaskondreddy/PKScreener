@@ -129,8 +129,8 @@ level1_P_MenuDict = {
     "M": "Back to the Top/Main menu",
 }
 LEVEL_1_DATA_DOWNLOADS = {
-    "D": "Download Daily OHLC Data for the Past Year",
-    "I": "Download Intraday OHLC Data for the Last Trading Day",
+    "D": "Download Daily OHLCV Data for the Past Year",
+    "I": "Download Intraday OHLCV Data for the Last Trading Day",
     "N": "NSE Equity Symbols",
     "S": "NSE Symbols with Sector/Industry Details",
     "M": "Back to the Top/Main menu",
@@ -902,7 +902,8 @@ class menus:
                                                          asList=asList, 
                                                          renderStyle=renderStyle, 
                                                          parent=selectedMenu,
-                                                         checkUpdate=False)
+                                                         checkUpdate=False,
+                                                         subOnly=["D","I"])
                 else:
                     # sub-menu of the top level main selected menu
                     return self.renderMenuFromDictionary(dict=level1_X_MenuDict,
