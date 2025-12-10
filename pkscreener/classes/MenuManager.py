@@ -762,6 +762,11 @@ class ScanExecutor:
         self.elapsed_time = 0
         self.start_time = 0
         self.scan_cycle_running = False
+        self.screen_results = None
+        self.save_results = None
+        self.backtest_df = None
+        self.selected_choice = {"0": "", "1": "", "2": "", "3": "", "4": ""}
+        self.criteria_date_time = None
 
     def run_scanners(self, menu_option, items, tasks_queue, results_queue, num_stocks,
                     backtest_period, iterations, consumers, screen_results, save_results,
@@ -1742,8 +1747,8 @@ class DataManager:
         Returns:
             list: Prepared list of stock codes
         """
-        if not download_only:
-            self.update_menu_choice_hierarchy()
+        # Note: update_menu_choice_hierarchy should be called by PKScreenerMain, not here
+        # since DataManager doesn't have access to menu state
             
         index_option = int(index_option)
         

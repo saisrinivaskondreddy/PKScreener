@@ -30,3 +30,20 @@ The MIT License (MIT)
 # commit the changes into the main/checked-out branch.
 # major.minor.dateOfRelease.pipelineJobNumber
 VERSION = '0.46.20250914.779'
+
+# Expose refactored modules for clean imports
+from pkscreener.classes.GlobalState import GlobalState, get_global_state
+from pkscreener.classes.ScanEngine import ScanEngine, ScanConfig, ScanResult
+from pkscreener.classes.ResultsProcessor import ResultsProcessor
+from pkscreener.classes.ScreenerOrchestrator import ScreenerOrchestrator
+
+__all__ = [
+    'VERSION',
+    'GlobalState',
+    'get_global_state',
+    'ScanEngine',
+    'ScanConfig',
+    'ScanResult',
+    'ResultsProcessor',
+    'ScreenerOrchestrator',
+]
