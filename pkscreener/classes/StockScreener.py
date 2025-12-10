@@ -646,7 +646,7 @@ class StockScreener:
                         or (executeOption == 9 and hasMinVolumeRatio)
                         or (executeOption == 10 and isPriceRisingByAtLeast2Percent)
                         or (executeOption == 11 and isShortTermBullish)
-                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39,42,43] and isValidityCheckMet)
+                        or (executeOption in [12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39,42,43,44,45,46,47] and isValidityCheckMet)
                         or (executeOption == 21 and (mfiStake > 0 and reversalOption in [3,5]))
                         or (executeOption == 21 and (mfiStake < 0 and reversalOption in [6,7]))
                         or (executeOption == 21 and (fairValueDiff > 0 and reversalOption in [8]))
@@ -804,7 +804,7 @@ class StockScreener:
 
     def performValidityCheckForExecuteOptions(self,executeOption,screener,fullData,screeningDictionary,saveDictionary,processedData,configManager,subMenuOption=3,intraday_data=None):
         isValid = True
-        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39,42,43]:
+        if executeOption not in [11,12,13,14,15,16,17,18,19,20,23,24,25,27,28,30,31,32,33,34,35,36,37,38,39,42,43,44,45,46,47]:
             return True
         if executeOption == 11:
             isValid = screener.validateShortTermBullish(
@@ -873,6 +873,14 @@ class StockScreener:
             isValid = screener.findSuperGainersLosers(fullData,subMenuOption)
         elif executeOption == 43:
             isValid = screener.findSuperGainersLosers(fullData,subMenuOption,gainer=False)
+        elif executeOption == 44:  # Strong Buy Signals
+            isValid = screener.findStrongBuySignals(fullData, screeningDictionary, saveDictionary)
+        elif executeOption == 45:  # Strong Sell Signals
+            isValid = screener.findStrongSellSignals(fullData, screeningDictionary, saveDictionary)
+        elif executeOption == 46:  # All Buy Signals
+            isValid = screener.findAllBuySignals(fullData, screeningDictionary, saveDictionary)
+        elif executeOption == 47:  # All Sell Signals
+            isValid = screener.findAllSellSignals(fullData, screeningDictionary, saveDictionary)
         return isValid        
                     
     def performBasicVolumeChecks(self, executeOption, volumeRatio, screeningDictionary, saveDictionary, processedData, configManager, screener):

@@ -38,7 +38,7 @@ import pytest
 from PKDevTools.classes.Fetcher import StockDataEmptyException
 
 from pkscreener.classes import ConfigManager
-from pkscreener.classes.Fetcher import screenerStockDataFetcher, yf_session
+from pkscreener.classes.Fetcher import screenerStockDataFetcher
 from pkscreener.classes.PKTask import PKTask
 
 @pytest.fixture

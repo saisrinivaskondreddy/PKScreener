@@ -1957,6 +1957,102 @@ class ScreeningStatistics:
         percentChange = round((recent["close"].iloc[1] - recent["close"].iloc[0]) *100/recent["close"].iloc[0],1)
         return percentChange >= percentChangeRequired if gainer else percentChange <= percentChangeRequired
 
+    def findStrongBuySignals(self, df, screenDict=None, saveDict=None):
+        """
+        Find stocks with Strong Buy signals using multi-indicator analysis.
+        
+        Uses the TradingSignals class to analyze multiple technical indicators
+        and returns True if the stock qualifies as a Strong Buy.
+        
+        Args:
+            df: OHLCV DataFrame
+            screenDict: Dictionary for screen display results
+            saveDict: Dictionary for saving results
+            
+        Returns:
+            True if stock is a Strong Buy, False otherwise
+        """
+        try:
+            from pkscreener.classes.screening.signals import TradingSignals
+            signals = TradingSignals(self.configManager)
+            return signals.find_strong_buys(df, saveDict, screenDict)
+        except Exception as e:
+            if self.default_logger:
+                self.default_logger.debug(f"findStrongBuySignals error: {e}")
+            return False
+
+    def findStrongSellSignals(self, df, screenDict=None, saveDict=None):
+        """
+        Find stocks with Strong Sell signals using multi-indicator analysis.
+        
+        Uses the TradingSignals class to analyze multiple technical indicators
+        and returns True if the stock qualifies as a Strong Sell.
+        
+        Args:
+            df: OHLCV DataFrame
+            screenDict: Dictionary for screen display results
+            saveDict: Dictionary for saving results
+            
+        Returns:
+            True if stock is a Strong Sell, False otherwise
+        """
+        try:
+            from pkscreener.classes.screening.signals import TradingSignals
+            signals = TradingSignals(self.configManager)
+            return signals.find_strong_sells(df, saveDict, screenDict)
+        except Exception as e:
+            if self.default_logger:
+                self.default_logger.debug(f"findStrongSellSignals error: {e}")
+            return False
+
+    def findAllBuySignals(self, df, screenDict=None, saveDict=None):
+        """
+        Find stocks with any Buy signal (Strong, Regular, or Weak).
+        
+        Uses the TradingSignals class to analyze multiple technical indicators
+        and returns True if the stock has any buy signal.
+        
+        Args:
+            df: OHLCV DataFrame
+            screenDict: Dictionary for screen display results
+            saveDict: Dictionary for saving results
+            
+        Returns:
+            True if stock has a buy signal, False otherwise
+        """
+        try:
+            from pkscreener.classes.screening.signals import TradingSignals
+            signals = TradingSignals(self.configManager)
+            return signals.find_buy_signals(df, saveDict, screenDict)
+        except Exception as e:
+            if self.default_logger:
+                self.default_logger.debug(f"findAllBuySignals error: {e}")
+            return False
+
+    def findAllSellSignals(self, df, screenDict=None, saveDict=None):
+        """
+        Find stocks with any Sell signal (Strong, Regular, or Weak).
+        
+        Uses the TradingSignals class to analyze multiple technical indicators
+        and returns True if the stock has any sell signal.
+        
+        Args:
+            df: OHLCV DataFrame
+            screenDict: Dictionary for screen display results
+            saveDict: Dictionary for saving results
+            
+        Returns:
+            True if stock has a sell signal, False otherwise
+        """
+        try:
+            from pkscreener.classes.screening.signals import TradingSignals
+            signals = TradingSignals(self.configManager)
+            return signals.find_sell_signals(df, saveDict, screenDict)
+        except Exception as e:
+            if self.default_logger:
+                self.default_logger.debug(f"findAllSellSignals error: {e}")
+            return False
+
     #@measure_time
     # Find out trend for days to lookback
     def findTrend(self, df, screenDict, saveDict, daysToLookback=None, stockName=""):

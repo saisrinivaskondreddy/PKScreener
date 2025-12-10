@@ -369,12 +369,16 @@ level2_X_MenuDict = {
     "41": "Pivot Points                             ",
     "42": "Super Gainers                            ",
     "43": "Super Losers                             ",
+    "44": "Strong Buy Signals (Multi-Indicator)     ",
+    "45": "Strong Sell Signals (Multi-Indicator)    ",
+    "46": "All Buy Signals (Any strength)           ",
+    "47": "All Sell Signals (Any strength)          ",
     "50": "Show Last Screened Results               ",
 
     "M": "Back to the Top/Main menu                 ",
     "Z": "Exit (Ctrl + C)                           ",
 }
-MAX_SUPPORTED_MENU_OPTION = 43
+MAX_SUPPORTED_MENU_OPTION = 47
 MAX_MENU_OPTION = 50
 
 level3_X_Reversal_MenuDict = {

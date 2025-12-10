@@ -7,7 +7,29 @@
 | Package / Docs | [![Documentation][Documentation-badge]][Documentation] [![OpenSSF Best Practices][OpenSSF-Badge]][OpenSSF-pkscreener]  | [![PyPI][pypi-badge]][pypi] | [![is wheel][wheel-badge]][pypi] | ![github license][github-license] |
 | Tests/Code-Quality | [![CodeFactor][Codefactor-badge]][Codefactor] | <a href="https://coveralls.io/github/pkjmesra/PKScreener?branch=main"><img src="https://coveralls.io/repos/github/pkjmesra/PKScreener/badge.svg?branch=main"></a> | [![codecov][codecov-badge]][codecov] | [![After Market][After Market-badge]][After Market] |
 
-## What is PKScreener?
+## 🚀 What is PKScreener?
+
+**PKScreener is India's #1 open-source stock screening and analysis platform for NSE traders and investors.**
+
+### ✨ Key Features at a Glance
+
+| 🎯 **Smart Scanning** | 📊 **Technical Analysis** | 🤖 **AI-Powered** | 📱 **Telegram Integration** |
+|:------------------:|:---------------------:|:---------------:|:------------------------:|
+| 40+ built-in scanners | RSI, MACD, CCI, ATR | Nifty prediction | Real-time alerts |
+| VCP (Mark Minervini) | Chart pattern detection | ML-based signals | On-demand bot |
+| Custom piped scanners | Volume analysis | Trend forecasting | Scheduled scans |
+
+### 💹 Trading Signals & Analysis
+
+| **Buy Signals** | **Sell Signals** | **Momentum** | **Patterns** |
+|:---------------:|:----------------:|:------------:|:------------:|
+| Bullish crossovers | Bearish divergence | High RSI/MFI/CCI | Head & Shoulders |
+| Breakout detection | Death crossover | Volume breakouts | Double Top/Bottom |
+| Support bounces | 52-week lows | Momentum gainers | Cup & Handle |
+| Golden cross | Trend reversal | ATR expansion | Inside Bar |
+
+### 📈 Comprehensive Market Coverage
+
 | Telegram Alerts | Nifty AI Prediction | Scheduling Cron Jobs | On-Demand Telegram Bot | Backtesting / Growth of 10k|
 | :-------------: | :-----------------: | :------------------: | :--------------------: | :-----------: |
 | Nifty screening | Volume scanners | Breakout detection | Consolidating stocks | Reversal Signals |
@@ -26,6 +48,16 @@
 | Moving Average Signals | Candle-stick Patterns | Trendline Support Stocks | Bullish/Bearish Inside Bar | Volume Spread Analysis |
 | Narrow Range (NRx) Reversal | Lorentzian Classifier | PSAR and RSI reversal | Rising RSI | RSI MA Reversal |
 | Upcoming CA stocks | High Dividend Stocks | Fair Value Buy Opportunities | Shareholding by number of Mutual Funds/FIIs | Bullish for next day |
+
+### 🏆 Why Choose PKScreener?
+
+- **🆓 100% Free & Open Source** - No subscription fees for free tier, no hidden costs. High value in subscription tiers and real-time alerts for strong buy-sell signals.
+- **🇮🇳 Made in India** - Specifically designed for NSE/BSE markets
+- **⚡ Real-time Analysis** - Get live market data and instant alerts
+- **📱 Multi-platform** - Works on Windows, macOS, Linux, and Docker
+- **🤖 Telegram Bot** - Get alerts on your phone anytime, anywhere
+- **📈 Backtesting** - Validate strategies with historical data
+- **🔧 Highly Customizable** - Configure everything to match your trading style
 
 ### A Python-based stock screener for NSE, India.
 
