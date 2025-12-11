@@ -1,396 +1,477 @@
 """
 Tests for the refactored modular components of PKScreener.
 
-These tests verify that the new modular architecture works correctly:
-- GlobalState: Centralized state management
-- MenuHandlers: Menu processing logic
-- ScanEngine: Scanning orchestration
-- ResultsProcessor: Results handling
-- ScreenerOrchestrator: High-level coordinator
+These tests verify that the modular functions extracted from globals.py work correctly:
+- CoreFunctions: Review date, iterations, results processing
+- OutputFunctions: Error messages, config toggles, file operations
+- MenuNavigation: Menu choice hierarchy building
+- MainLogic: Menu option handling
+- NotificationService: Telegram notifications
+- ResultsLabeler: Data labeling and formatting
+- BacktestUtils: Backtest result handling
+- DataLoader: Stock data saving
 """
 
 import pytest
 import pandas as pd
+import os
 from unittest.mock import Mock, patch, MagicMock
+from datetime import datetime
 
 
-class TestGlobalState:
-    """Tests for GlobalState class"""
+class TestCoreFunctions:
+    """Tests for CoreFunctions module"""
     
-    def test_singleton_pattern(self):
-        """GlobalState should be a singleton"""
-        from pkscreener.classes.GlobalState import GlobalState, get_global_state
+    def test_get_review_date_with_none(self):
+        """Should return current date when no args provided"""
+        from pkscreener.classes.CoreFunctions import get_review_date
         
-        state1 = get_global_state()
-        state2 = get_global_state()
-        
-        assert state1 is state2
+        result = get_review_date(None)
+        assert result is not None
     
-    def test_reset_clears_state(self):
-        """Reset should clear all state to defaults"""
-        from pkscreener.classes.GlobalState import get_global_state
-        
-        state = get_global_state()
-        state.user_passed_args = "test"
-        state.menu_choice.level0 = "X"
-        
-        state.reset()
-        
-        assert state.user_passed_args is None
-        assert state.menu_choice.level0 == ""
-    
-    def test_update_from_args(self):
-        """Should update state from user arguments"""
-        from pkscreener.classes.GlobalState import get_global_state
-        
-        state = get_global_state()
-        state.reset()
+    def test_get_review_date_with_backtest(self):
+        """Should return past date when backtestdaysago is set"""
+        from pkscreener.classes.CoreFunctions import get_review_date
         
         mock_args = Mock()
-        mock_args.answerdefault = "Y"
-        mock_args.user = "12345"
+        mock_args.backtestdaysago = 5
         
-        state.update_from_args(mock_args)
-        
-        assert state.default_answer == "Y"
-        assert state.user == "12345"
-        
-        state.reset()  # Cleanup
+        result = get_review_date(mock_args)
+        # Should be a date in the past
+        assert result is not None
     
-    def test_is_interrupted(self):
-        """Should track keyboard interrupt state"""
-        from pkscreener.classes.GlobalState import get_global_state
+    def test_get_max_allowed_results_count(self):
+        """Should calculate max allowed results"""
+        from pkscreener.classes.CoreFunctions import get_max_allowed_results_count
         
-        state = get_global_state()
-        state.reset()
+        mock_config = Mock()
+        mock_config.maxdisplayresults = 100
+        mock_args = Mock()
+        mock_args.maxdisplayresults = None
         
-        assert state.is_interrupted() is False
+        # Testing mode should limit to 1
+        result = get_max_allowed_results_count(10, True, mock_config, mock_args)
+        assert result == 1
         
-        state.set_interrupted(True)
-        assert state.is_interrupted() is True
+        # Normal mode should return iterations * maxdisplayresults
+        result = get_max_allowed_results_count(10, False, mock_config, mock_args)
+        assert result == 1000
+    
+    def test_get_iterations_and_stock_counts(self):
+        """Should calculate iterations and stock counts"""
+        from pkscreener.classes.CoreFunctions import get_iterations_and_stock_counts
         
-        state.reset()  # Cleanup
+        # For small number of stocks, should return single iteration
+        iterations, stocks_per = get_iterations_and_stock_counts(100, 5)
+        
+        assert iterations == 1
+        assert stocks_per == 100
+    
+    def test_get_iterations_large_stock_count(self):
+        """Should handle large stock count"""
+        from pkscreener.classes.CoreFunctions import get_iterations_and_stock_counts
+        
+        # For large number of stocks, should split into iterations
+        iterations, stocks_per = get_iterations_and_stock_counts(3000, 1)
+        
+        assert iterations > 1
+        assert stocks_per <= 500
 
 
-class TestMenuChoice:
-    """Tests for MenuChoice dataclass"""
+class TestOutputFunctions:
+    """Tests for OutputFunctions module"""
     
-    def test_to_dict(self):
-        """Should convert to dictionary format"""
-        from pkscreener.classes.GlobalState import MenuChoice
+    def test_show_option_error_message(self):
+        """Should print error message"""
+        from pkscreener.classes.OutputFunctions import show_option_error_message
         
-        choice = MenuChoice(level0="X", level1="12", level2="9")
-        d = choice.to_dict()
-        
-        assert d["0"] == "X"
-        assert d["1"] == "12"
-        assert d["2"] == "9"
+        with patch('pkscreener.classes.OutputFunctions.OutputControls') as mock_output:
+            show_option_error_message()
+            mock_output().printOutput.assert_called()
     
-    def test_from_dict(self):
-        """Should create from dictionary"""
-        from pkscreener.classes.GlobalState import MenuChoice
+    def test_cleanup_local_results_handles_missing_dir(self):
+        """Should handle missing directory gracefully"""
+        from pkscreener.classes.OutputFunctions import cleanup_local_results
         
-        choice = MenuChoice()
-        choice.from_dict({"0": "X", "1": "12", "2": "9"})
-        
-        assert choice.level0 == "X"
-        assert choice.level1 == "12"
-        assert choice.level2 == "9"
+        with patch('os.path.isdir', return_value=False):
+            # Should not raise an exception
+            cleanup_local_results()
     
-    def test_reset(self):
-        """Should reset all levels to empty"""
-        from pkscreener.classes.GlobalState import MenuChoice
+    def test_describe_user_disabled(self):
+        """Should skip when analytics disabled"""
+        from pkscreener.classes.OutputFunctions import describe_user
         
-        choice = MenuChoice(level0="X", level1="12")
-        choice.reset()
+        mock_config = Mock()
+        mock_config.enableUsageAnalytics = False
         
-        assert choice.level0 == ""
-        assert choice.level1 == ""
+        # Should not raise an exception
+        describe_user(mock_config)
 
 
-class TestScanConfig:
-    """Tests for ScanConfig dataclass"""
+class TestMenuNavigation:
+    """Tests for MenuNavigation module"""
     
-    def test_defaults(self):
-        """Should have sensible defaults"""
-        from pkscreener.classes.ScanEngine import ScanConfig
+    def test_menu_navigator_init(self):
+        """Should initialize MenuNavigator properly"""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
         
-        config = ScanConfig()
+        mock_config = Mock()
+        nav = MenuNavigator(mock_config)
         
-        assert config.menu_option == "X"
-        assert config.index_option == 12
-        assert config.execute_option == 0
-        assert config.volume_ratio == 2.5
+        assert nav.config_manager == mock_config
     
-    def test_custom_values(self):
-        """Should accept custom values"""
-        from pkscreener.classes.ScanEngine import ScanConfig
+    def test_update_menu_choice_hierarchy_import(self):
+        """Should be able to import update_menu_choice_hierarchy_impl"""
+        try:
+            from pkscreener.classes.MenuNavigation import update_menu_choice_hierarchy_impl
+            assert callable(update_menu_choice_hierarchy_impl)
+        except ImportError as e:
+            pytest.fail(f"Import failed: {e}")
+
+
+class TestNotificationService:
+    """Tests for NotificationService module"""
+    
+    def test_notification_service_init(self):
+        """Should initialize with default values"""
+        from pkscreener.classes.NotificationService import NotificationService
         
-        config = ScanConfig(
-            menu_option="C",
-            index_option=15,
-            execute_option=44,
-            volume_ratio=3.0
+        service = NotificationService()
+        
+        assert service.test_messages_queue == []
+        assert service.media_group_dict == {}
+    
+    def test_send_message_skipped_without_runner(self):
+        """Should skip sending when not in RUNNER mode"""
+        from pkscreener.classes.NotificationService import send_message_to_telegram_channel_impl
+        
+        mock_args = Mock()
+        mock_args.log = False
+        mock_args.telegram = False
+        
+        with patch.dict(os.environ, {}, clear=True):
+            # Remove RUNNER from environment
+            result = send_message_to_telegram_channel_impl(
+                message="test",
+                user_passed_args=mock_args
+            )
+        
+        # Should return early without sending
+        assert result is not None
+    
+    def test_handle_alert_subscriptions_none_user(self):
+        """Should handle None user gracefully"""
+        from pkscreener.classes.NotificationService import handle_alert_subscriptions_impl
+        
+        # Should not raise an exception
+        handle_alert_subscriptions_impl(None, "test message")
+    
+    def test_handle_alert_subscriptions_invalid_message(self):
+        """Should handle message without | gracefully"""
+        from pkscreener.classes.NotificationService import handle_alert_subscriptions_impl
+        
+        # Should not raise an exception
+        handle_alert_subscriptions_impl("123", "test message without pipe")
+
+
+class TestResultsLabeler:
+    """Tests for ResultsLabeler module"""
+    
+    def test_label_data_none_results(self):
+        """Should handle None save results"""
+        from pkscreener.classes.ResultsLabeler import label_data_for_printing_impl
+        
+        mock_config = Mock()
+        
+        result = label_data_for_printing_impl(
+            None, None, mock_config, 2.5, 9, None, "X"
         )
         
-        assert config.menu_option == "C"
-        assert config.index_option == 15
-        assert config.execute_option == 44
-        assert config.volume_ratio == 3.0
-
-
-class TestScanEngine:
-    """Tests for ScanEngine class"""
+        assert result == (None, None)
     
-    def test_initialization(self):
-        """Should initialize with config manager"""
-        from pkscreener.classes.ScanEngine import ScanEngine
+    def test_label_data_basic(self):
+        """Should label data correctly"""
+        from pkscreener.classes.ResultsLabeler import label_data_for_printing_impl
         
         mock_config = Mock()
-        engine = ScanEngine(mock_config)
+        mock_config.calculatersiintraday = False
+        mock_config.daysToLookback = 22
         
-        assert engine.config_manager == mock_config
-        assert engine.tasks_queue is None
-        assert engine.keyboard_interrupt_fired is False
-    
-    def test_configure(self):
-        """Should accept scan configuration"""
-        from pkscreener.classes.ScanEngine import ScanEngine, ScanConfig
-        
-        mock_config = Mock()
-        engine = ScanEngine(mock_config)
-        
-        config = ScanConfig(menu_option="X", execute_option=44)
-        engine.configure(config)
-        
-        assert engine.scan_config.menu_option == "X"
-        assert engine.scan_config.execute_option == 44
-
-
-class TestResultsProcessor:
-    """Tests for ResultsProcessor class"""
-    
-    def test_initialization(self):
-        """Should initialize with config manager"""
-        from pkscreener.classes.ResultsProcessor import ResultsProcessor
-        
-        mock_config = Mock()
-        processor = ResultsProcessor(mock_config)
-        
-        assert processor.config_manager == mock_config
-        assert processor.strategy_filter == []
-    
-    def test_get_summary_stats_empty(self):
-        """Should return zeros for empty results"""
-        from pkscreener.classes.ResultsProcessor import ResultsProcessor
-        
-        mock_config = Mock()
-        processor = ResultsProcessor(mock_config)
-        
-        stats = processor.get_summary_stats(pd.DataFrame())
-        
-        assert stats["total_stocks"] == 0
-        assert stats["bullish_count"] == 0
-    
-    def test_get_summary_stats_with_data(self):
-        """Should calculate stats from results"""
-        from pkscreener.classes.ResultsProcessor import ResultsProcessor
-        
-        mock_config = Mock()
-        processor = ResultsProcessor(mock_config)
-        
-        df = pd.DataFrame({
-            "Stock": ["A", "B", "C"],
-            "Trend": ["Bullish", "Bearish", "Strong Up"],
-            "%Chng": [5.0, -2.0, 3.0]
+        screen_df = pd.DataFrame({
+            "Stock": ["A", "B"],
+            "volume": [2.5, 3.0],
+            "RSI": [50, 60]
         })
         
-        stats = processor.get_summary_stats(df)
+        save_df = pd.DataFrame({
+            "Stock": ["A", "B"],
+            "volume": [2.5, 3.0],
+            "RSI": [50, 60]
+        })
         
-        assert stats["total_stocks"] == 3
-        assert stats["bullish_count"] == 2  # "Bullish" and "Strong Up"
-        assert stats["bearish_count"] == 1
+        with patch.dict(os.environ, {}, clear=True):
+            with patch('pkscreener.classes.ResultsLabeler.PKDateUtilities') as mock_date:
+                mock_date.isTradingTime.return_value = False
+                mock_date.isTodayHoliday.return_value = (False, None)
+                
+                screen_result, save_result = label_data_for_printing_impl(
+                    screen_df, save_df, mock_config, 2.5, 9, None, "X",
+                    menu_choice_hierarchy="Test", user_passed_args=None
+                )
+        
+        assert screen_result is not None
+        assert save_result is not None
 
 
-class TestMenuContext:
-    """Tests for MenuContext class"""
+class TestBacktestUtils:
+    """Tests for BacktestUtils module"""
     
-    def test_initialization(self):
-        """Should initialize with defaults"""
-        from pkscreener.classes.MenuHandlers import MenuContext
+    def test_get_backtest_report_filename(self):
+        """Should generate proper filename"""
+        from pkscreener.classes.BacktestUtils import get_backtest_report_filename
         
-        ctx = MenuContext()
+        choices = {"0": "X", "1": "12", "2": "9"}
         
-        assert ctx.menu_option == ""
-        assert ctx.index_option is None
-        assert ctx.testing is False
+        directory, filename = get_backtest_report_filename(choices=choices)
+        
+        # Directory should be a valid path
+        assert directory is not None
+        assert ".html" in filename
     
-    def test_update_from_args(self):
-        """Should update from user arguments"""
-        from pkscreener.classes.MenuHandlers import MenuContext
+    def test_backtest_results_handler_init(self):
+        """Should initialize properly"""
+        from pkscreener.classes.BacktestUtils import BacktestResultsHandler
         
+        mock_config = Mock()
+        handler = BacktestResultsHandler(mock_config)
+        
+        assert handler.config_manager == mock_config
+        assert handler.backtest_df is None
+    
+    def test_show_backtest_results_empty_df(self):
+        """Should handle empty dataframe"""
+        from pkscreener.classes.BacktestUtils import show_backtest_results_impl
+        
+        with patch('pkscreener.classes.BacktestUtils.OutputControls') as mock_output:
+            show_backtest_results_impl(
+                pd.DataFrame(), "Stock", "test", None,
+                menu_choice_hierarchy="Test", selected_choice={},
+                user_passed_args=None, elapsed_time=0
+            )
+            mock_output().printOutput.assert_called()
+    
+    def test_finish_backtest_data_cleanup(self):
+        """Should cleanup backtest data properly"""
+        from pkscreener.classes.BacktestUtils import finish_backtest_data_cleanup_impl
+        
+        df = pd.DataFrame({
+            "Stock": ["A", "B"],
+            "Date": ["2024-01-01", "2024-01-02"],
+            "1-Pd": [5.0, 3.0]
+        })
+        
+        mock_show_cb = Mock()
+        mock_summary_cb = Mock(return_value=pd.DataFrame())
+        mock_config = Mock()
+        mock_config.enablePortfolioCalculations = False
+        
+        summary_df, sorting, sort_keys = finish_backtest_data_cleanup_impl(
+            df, None,
+            default_answer="Y",
+            config_manager=mock_config,
+            show_backtest_cb=mock_show_cb,
+            backtest_summary_cb=mock_summary_cb
+        )
+        
+        assert sorting is False  # default_answer is not None
+        assert "S" in sort_keys
+        assert "D" in sort_keys
+
+
+class TestDataLoader:
+    """Tests for DataLoader module"""
+    
+    def test_stock_data_loader_init(self):
+        """Should initialize with config"""
+        from pkscreener.classes.DataLoader import StockDataLoader
+        
+        mock_config = Mock()
+        mock_fetcher = Mock()
+        
+        loader = StockDataLoader(mock_config, mock_fetcher)
+        
+        assert loader.config_manager == mock_config
+        assert loader.fetcher == mock_fetcher
+    
+    def test_save_downloaded_data_skipped_when_interrupted(self):
+        """Should skip saving when keyboard interrupt fired"""
+        from pkscreener.classes.DataLoader import save_downloaded_data_impl
+        
+        mock_config = Mock()
+        
+        with patch('pkscreener.classes.DataLoader.OutputControls') as mock_output:
+            save_downloaded_data_impl(
+                download_only=False,
+                testing=False,
+                stock_dict_primary={},
+                config_manager=mock_config,
+                load_count=0,
+                keyboard_interrupt_fired=True
+            )
+            # Should print "Skipped Saving!"
+            mock_output().printOutput.assert_called()
+
+
+class TestMainLogic:
+    """Tests for MainLogic module"""
+    
+    def test_handle_secondary_menu_choices_H(self):
+        """Should handle H (Help) menu option"""
+        from pkscreener.classes.MainLogic import handle_secondary_menu_choices_impl
+        
+        mock_m0 = Mock()
+        mock_m1 = Mock()
+        mock_m2 = Mock()
+        mock_config = Mock()
         mock_args = Mock()
-        mock_args.testbuild = True
-        mock_args.prodbuild = True
-        mock_args.download = False
-        mock_args.answerdefault = "Y"
-        mock_args.user = None
-        mock_args.options = "X:12:9"
         
-        ctx = MenuContext()
-        ctx.update_from_args(mock_args)
+        mock_help_cb = Mock()
         
-        assert ctx.testing is True
-        assert ctx.download_only is False
-        assert ctx.startup_options == "X:12:9"
-
-
-class TestMenuHandlerFactory:
-    """Tests for MenuHandlerFactory"""
-    
-    def test_get_handler_for_monitor(self):
-        """Should return MonitorMenuHandler for M"""
-        from pkscreener.classes.MenuHandlers import (
-            MenuContext, MenuHandlerFactory, MonitorMenuHandler
+        result = handle_secondary_menu_choices_impl(
+            "H", mock_m0, mock_m1, mock_m2, mock_config, mock_args, None,
+            testing=False, defaultAnswer="Y", user=None,
+            show_config_info_cb=None, show_help_info_cb=mock_help_cb
         )
         
-        ctx = MenuContext()
-        handler = MenuHandlerFactory.get_handler("M", ctx, {})
-        
-        assert isinstance(handler, MonitorMenuHandler)
+        mock_help_cb.assert_called_once()
     
-    def test_get_handler_for_download(self):
-        """Should return DownloadMenuHandler for D"""
-        from pkscreener.classes.MenuHandlers import (
-            MenuContext, MenuHandlerFactory, DownloadMenuHandler
-        )
+    def test_handle_secondary_menu_choices_Y(self):
+        """Should handle Y (Config) menu option"""
+        from pkscreener.classes.MainLogic import handle_secondary_menu_choices_impl
         
-        ctx = MenuContext()
-        handler = MenuHandlerFactory.get_handler("D", ctx, {})
-        
-        assert isinstance(handler, DownloadMenuHandler)
-    
-    def test_get_handler_returns_none_for_unknown(self):
-        """Should return None for unknown menu options"""
-        from pkscreener.classes.MenuHandlers import MenuContext, MenuHandlerFactory
-        
-        ctx = MenuContext()
-        handler = MenuHandlerFactory.get_handler("UNKNOWN", ctx, {})
-        
-        assert handler is None
-
-
-class TestScreenerOrchestrator:
-    """Tests for ScreenerOrchestrator class"""
-    
-    def test_initialization(self):
-        """Should initialize with components"""
-        from pkscreener.classes.ScreenerOrchestrator import ScreenerOrchestrator
-        
+        mock_m0 = Mock()
+        mock_m1 = Mock()
+        mock_m2 = Mock()
         mock_config = Mock()
-        orchestrator = ScreenerOrchestrator(mock_config)
+        mock_args = Mock()
         
-        assert orchestrator.config_manager == mock_config
-        assert orchestrator.scan_engine is not None
-        assert orchestrator.results_processor is not None
-    
-    def test_configure_scan(self):
-        """Should configure scan parameters"""
-        from pkscreener.classes.ScreenerOrchestrator import ScreenerOrchestrator
+        mock_config_cb = Mock()
         
-        mock_config = Mock()
-        orchestrator = ScreenerOrchestrator(mock_config)
-        
-        config = orchestrator.configure_scan(
-            menu_option="X",
-            index_option=12,
-            execute_option=44,
-            volume_ratio=3.0
+        result = handle_secondary_menu_choices_impl(
+            "Y", mock_m0, mock_m1, mock_m2, mock_config, mock_args, None,
+            testing=False, defaultAnswer="Y", user=None,
+            show_config_info_cb=mock_config_cb, show_help_info_cb=None
         )
         
-        assert config.menu_option == "X"
-        assert config.execute_option == 44
-        assert config.volume_ratio == 3.0
+        mock_config_cb.assert_called_once()
 
 
-class TestScanParameters:
-    """Tests for ScanParameters dataclass"""
+class TestExecuteOptionHandlers:
+    """Tests for ExecuteOptionHandlers module"""
     
-    def test_defaults(self):
-        """Should have sensible defaults"""
-        from pkscreener.classes.GlobalState import ScanParameters
+    def test_handle_execute_option_3_import(self):
+        """Should be able to import handle_execute_option_3"""
+        try:
+            from pkscreener.classes.ExecuteOptionHandlers import handle_execute_option_3
+            assert callable(handle_execute_option_3)
+        except ImportError as e:
+            pytest.fail(f"Import failed: {e}")
+    
+    def test_handle_execute_option_5_import(self):
+        """Should be able to import handle_execute_option_5"""
+        try:
+            from pkscreener.classes.ExecuteOptionHandlers import handle_execute_option_5
+            assert callable(handle_execute_option_5)
+        except ImportError as e:
+            pytest.fail(f"Import failed: {e}")
+    
+    def test_handle_execute_option_6_import(self):
+        """Should be able to import handle_execute_option_6"""
+        try:
+            from pkscreener.classes.ExecuteOptionHandlers import handle_execute_option_6
+            assert callable(handle_execute_option_6)
+        except ImportError as e:
+            pytest.fail(f"Import failed: {e}")
+    
+    def test_all_handlers_exist(self):
+        """All execute option handlers should exist"""
+        from pkscreener.classes.ExecuteOptionHandlers import (
+            handle_execute_option_3, handle_execute_option_4, handle_execute_option_5,
+            handle_execute_option_6, handle_execute_option_7, handle_execute_option_8,
+            handle_execute_option_9, handle_execute_option_12
+        )
         
-        params = ScanParameters()
-        
-        assert params.min_rsi == 0
-        assert params.max_rsi == 100
-        assert params.volume_ratio == 2.5
-        assert params.backtest_period == 0
+        assert all([
+            callable(handle_execute_option_3),
+            callable(handle_execute_option_4),
+            callable(handle_execute_option_5),
+            callable(handle_execute_option_6),
+            callable(handle_execute_option_7),
+            callable(handle_execute_option_8),
+            callable(handle_execute_option_9),
+            callable(handle_execute_option_12)
+        ])
 
 
 class TestIntegration:
-    """Integration tests for the refactored modules"""
+    """Integration tests for the refactored modules working together"""
     
-    def test_end_to_end_configuration(self):
-        """Should work together for configuration"""
-        from pkscreener.classes.GlobalState import get_global_state
-        from pkscreener.classes.ScreenerOrchestrator import ScreenerOrchestrator
-        
-        mock_config = Mock()
-        mock_args = Mock()
-        mock_args.answerdefault = "Y"
-        mock_args.user = None
-        
-        # Initialize state
-        state = get_global_state()
-        state.reset()
-        state.update_from_args(mock_args)
-        
-        # Create orchestrator
-        orchestrator = ScreenerOrchestrator(mock_config, mock_args)
-        orchestrator.initialize()
-        
-        # Configure scan
-        config = orchestrator.configure_scan(
-            menu_option="X",
-            index_option=12,
-            execute_option=44
+    def test_globals_imports_work(self):
+        """Should be able to import from globals without errors"""
+        try:
+            from pkscreener.globals import (
+                labelDataForPrinting,
+                sendMessageToTelegramChannel,
+                showBacktestResults,
+                updateMenuChoiceHierarchy,
+                saveDownloadedData,
+                FinishBacktestDataCleanup,
+                prepareGroupedXRay,
+                showSortedBacktestData,
+                tabulateBacktestResults
+            )
+            assert True
+        except ImportError as e:
+            pytest.fail(f"Import failed: {e}")
+    
+    def test_classes_init_imports_work(self):
+        """Should be able to import from classes __init__"""
+        try:
+            from pkscreener.classes import (
+                VERSION,
+                MenuNavigator,
+                StockDataLoader,
+                NotificationService,
+                BacktestResultsHandler,
+                ResultsLabeler
+            )
+            assert VERSION is not None
+        except ImportError as e:
+            pytest.fail(f"Import failed: {e}")
+    
+    def test_core_functions_integration(self):
+        """Core functions should work together"""
+        from pkscreener.classes.CoreFunctions import (
+            get_review_date,
+            get_max_allowed_results_count,
+            get_iterations_and_stock_counts
         )
         
-        assert config.menu_option == "X"
-        assert state.default_answer == "Y"
-        
-        state.reset()  # Cleanup
-
-
-class TestBacktestResultsProcessor:
-    """Tests for BacktestResultsProcessor class"""
-    
-    def test_cleanup_empty(self):
-        """Should handle empty backtest data"""
-        from pkscreener.classes.ResultsProcessor import BacktestResultsProcessor
-        
         mock_config = Mock()
-        processor = BacktestResultsProcessor(mock_config)
+        mock_config.maxdisplayresults = 100
+        mock_args = Mock()
+        mock_args.maxdisplayresults = None
+        mock_args.backtestdaysago = None
         
-        result_df, xray_df = processor.cleanup_backtest_data(None, None)
+        # Get review date
+        date = get_review_date(mock_args)
+        assert date is not None
         
-        assert result_df is None
-        assert xray_df is None
-    
-    def test_cleanup_with_data(self):
-        """Should clean up backtest data"""
-        from pkscreener.classes.ResultsProcessor import BacktestResultsProcessor
+        # Calculate max allowed
+        max_allowed = get_max_allowed_results_count(10, False, mock_config, mock_args)
+        assert max_allowed == 1000
         
-        mock_config = Mock()
-        processor = BacktestResultsProcessor(mock_config)
-        
-        df = pd.DataFrame({
-            "Stock": ["A", "B", "A"],
-            "Value": [1, 2, 1]
-        })
-        
-        result_df, _ = processor.cleanup_backtest_data(df, None)
-        
-        # Should remove duplicates
-        assert len(result_df) == 2
+        # Calculate iterations - small count returns single iteration
+        iterations, stocks_per = get_iterations_and_stock_counts(100, 4)
+        assert iterations == 1
+        assert stocks_per == 100

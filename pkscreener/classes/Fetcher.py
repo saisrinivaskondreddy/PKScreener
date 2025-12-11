@@ -32,6 +32,7 @@ warnings.simplefilter("ignore", DeprecationWarning)
 warnings.simplefilter("ignore", FutureWarning)
 
 import pandas as pd
+import yfinance as yf
 from PKDevTools.classes.Utils import USER_AGENTS
 import random
 from concurrent.futures import ThreadPoolExecutor

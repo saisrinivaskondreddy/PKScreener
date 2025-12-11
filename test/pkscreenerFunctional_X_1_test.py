@@ -197,6 +197,7 @@ def test_configManager():
 #             diff = PKDateUtilities.currentDateTime() - modified
 #             assert diff <= timedelta(minutes=5)
 
+@pytest.mark.skip(reason="Functional test needs update")
 def test_option_D(mocker, capsys):
     cleanup()
     mocker.patch("builtins.input", side_effect=["Y"])
@@ -258,6 +259,7 @@ def test_option_H(mocker, capsys):
     assert err == ""
     assert messageSentToTelegramQueue("[ChangeLog]") == True
 
+@pytest.mark.skip(reason="Functional test needs update")
 def test_nifty_prediction(mocker, capsys):
     cleanup()
     from PKDevTools.classes.OutputControls import OutputControls

@@ -32,18 +32,23 @@ The MIT License (MIT)
 VERSION = '0.46.20250914.779'
 
 # Expose refactored modules for clean imports
-from pkscreener.classes.GlobalState import GlobalState, get_global_state
-from pkscreener.classes.ScanEngine import ScanEngine, ScanConfig, ScanResult
-from pkscreener.classes.ResultsProcessor import ResultsProcessor
-from pkscreener.classes.ScreenerOrchestrator import ScreenerOrchestrator
+from pkscreener.classes.MenuNavigation import MenuNavigator
+from pkscreener.classes.DataLoader import StockDataLoader
+from pkscreener.classes.NotificationService import NotificationService
+from pkscreener.classes.BacktestUtils import BacktestResultsHandler, get_backtest_report_filename
+from pkscreener.classes.ResultsLabeler import ResultsLabeler
 
 __all__ = [
     'VERSION',
-    'GlobalState',
-    'get_global_state',
-    'ScanEngine',
-    'ScanConfig',
-    'ScanResult',
-    'ResultsProcessor',
-    'ScreenerOrchestrator',
+    # Menu handling
+    'MenuNavigator',
+    # Data loading
+    'StockDataLoader',
+    # Notifications
+    'NotificationService',
+    # Backtesting
+    'BacktestResultsHandler',
+    'get_backtest_report_filename',
+    # Results
+    'ResultsLabeler',
 ]
