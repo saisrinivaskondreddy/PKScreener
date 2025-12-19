@@ -5,7 +5,7 @@
 | :-------------: | :-----------------: | :-----------------: | :-----------------: | :-----------------: |
 | Platforms | [![Windows][Windows-badge]][Windows] | [![Linux(x64)][Linux-badge_x64]][Linux_x64] [![Linux(arm64)][Linux-badge_arm64]][Linux_arm64] | [![Mac OS(x64)][Mac OS-badge_x64]][Mac OS_x64] [![Mac OS(arm64)][Mac OS-badge_arm64]][Mac OS_arm64] | [![Docker Status][Docker Status-badge]][Docker Status] |
 | Package / Docs | [![Documentation][Documentation-badge]][Documentation] [![OpenSSF Best Practices][OpenSSF-Badge]][OpenSSF-pkscreener]  | [![PyPI][pypi-badge]][pypi] | [![is wheel][wheel-badge]][pypi] | ![github license][github-license] |
-| Tests/Code-Quality | [![CodeFactor][Codefactor-badge]][Codefactor] | <a href="https://coveralls.io/github/pkjmesra/PKScreener?branch=main"><img src="https://coveralls.io/repos/github/pkjmesra/PKScreener/badge.svg?branch=main"></a> | [![codecov][codecov-badge]][codecov] | [![After Market][After Market-badge]][After Market] |
+| Tests/Code-Quality | [![CodeFactor][Codefactor-badge]][Codefactor] | [![Coverage](https://coveralls.io/repos/github/pkjmesra/PKScreener/badge.svg?branch=main)](https://coveralls.io/github/pkjmesra/PKScreener?branch=main) | [![codecov][codecov-badge]][codecov] | [![After Market][After Market-badge]][After Market] |
 
 ## 🚀 What is PKScreener?
 
