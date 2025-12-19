@@ -1,5 +1,13 @@
 # PKScreener Dependencies - Python 3.12
-# Last updated: 2024-09 (compatible with v0.46.20250914.779)
+# Last updated: 2024-12 (compatible with v0.46.20250914.779)
+#
+# IMPORTANT: numpy version MUST be 1.26.4 for compatibility with:
+# - tensorflow 2.16.1 (requires numpy<2.0.0)
+# - scipy 1.12.0 (compiled against numpy 1.x)
+# - scikit-learn 1.4.2 (requires compatible scipy)
+# - advanced-ta 0.1.8 (requires numpy<2.0.0)
+#
+# Do NOT allow pip to upgrade numpy above 1.26.4!
 
 # Core technical analysis libraries
 advanced_ta==0.1.8
@@ -26,12 +34,13 @@ gspread_pandas>=3.3.0
 # Job scheduling and processing
 joblib>=1.4.2
 
-# Machine Learning and Data Science
+# Machine Learning and Data Science - ORDER MATTERS!
+# Install numpy first, then scipy, then sklearn to avoid version conflicts
+numpy==1.26.4  # CRITICAL: Must be exactly 1.26.4 for tensorflow/scipy compatibility
+scipy==1.12.0  # CRITICAL: Must be exactly 1.12.0 (compiled with numpy 1.x)
+scikit-learn==1.4.2  # Compatible with scipy 1.12.0 and numpy 1.26.4
+pandas>=2.2.3,<2.3  # Avoid pandas 2.3+ which may require numpy 2.x
 keras==3.6.0  # Compatible with tensorflow 2.16.1
-numpy==1.26.4  # Required for tensorflow 2.16.1 and other packages
-pandas>=2.2.3
-scikit-learn>=1.5.2
-scipy<=1.12.0  # cdflib removed from >=1.13.0 which breaks the build
 tensorflow==2.16.1  # https://github.com/tensorflow/tensorflow/issues/62075
 
 # Data formats and file handling
@@ -71,6 +80,5 @@ urllib3>=1.26.20
 vectorbt>=0.26.2
 
 # Note: pandas-ta-classic is excluded due to numpy>=2.0.0 requirement
-# which conflicts with tensorflow 2.16.1. TA-Lib should be used instead.
-# If you need pandas-ta functionality without TA-Lib, you'll need to
-# choose between tensorflow and pandas-ta-classic.
+# which conflicts with tensorflow 2.16.1. A fallback VWAP implementation
+# is provided in Pktalib.py. TA-Lib should be used for full functionality.
