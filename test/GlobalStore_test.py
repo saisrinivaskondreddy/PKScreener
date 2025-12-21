@@ -103,6 +103,9 @@ class TestPKGlobalStore:
         PKGlobalStore._instances = {}
         store = PKGlobalStore()
         
+        # Re-initialize to get fresh state
+        store._initialize_scan_state()
+        
         assert store.keyboardInterruptEvent is None
         assert store.keyboardInterruptEventFired == False
         assert store.loadCount == 0
@@ -177,6 +180,9 @@ class TestPKGlobalStore:
         
         PKGlobalStore._instances = {}
         store = PKGlobalStore()
+        
+        # Re-initialize to get fresh state
+        store._initialize_results_state()
         
         assert store.screenResults is None
         assert store.backtest_df is None
