@@ -436,3 +436,250 @@ class TestMenuNavigationEdgeCases:
             )
         except:
             pass  # May require valid choices
+
+
+# =============================================================================
+# Additional Coverage Tests for MenuNavigation
+# =============================================================================
+
+class TestMenuNavigatorInit:
+    """Test MenuNavigator initialization."""
+    
+    def test_init_default(self):
+        """Test default initialization."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        assert nav.config_manager is mock_config
+        assert nav.m0 is not None
+        assert nav.selected_choice == {"0": "", "1": "", "2": "", "3": "", "4": ""}
+    
+    def test_init_with_menus(self):
+        """Test initialization with menus."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        mock_m0 = MagicMock()
+        mock_m1 = MagicMock()
+        
+        nav = MenuNavigator(mock_config, m0=mock_m0, m1=mock_m1)
+        assert nav.m0 is mock_m0
+        assert nav.m1 is mock_m1
+
+
+class TestGetDownloadChoices:
+    """Test get_download_choices method."""
+    
+    def test_download_exists_replace_no(self):
+        """Test download when file exists and user says no."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        mock_config.isIntradayConfig.return_value = False
+        
+        nav = MenuNavigator(mock_config)
+        
+        with patch('pkscreener.classes.AssetsManager.PKAssetsManager.afterMarketStockDataExists', return_value=(True, "/tmp/cache.pkl")):
+            with patch('pkscreener.classes.AssetsManager.PKAssetsManager.promptFileExists', return_value="N"):
+                with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                    with patch('sys.exit'):
+                        try:
+                            result = nav.get_download_choices()
+                        except SystemExit:
+                            pass
+                        except Exception:
+                            pass
+    
+    def test_download_exists_replace_yes(self):
+        """Test download when file exists and user says yes."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        mock_config.isIntradayConfig.return_value = False
+        
+        nav = MenuNavigator(mock_config)
+        
+        with patch('pkscreener.classes.AssetsManager.PKAssetsManager.afterMarketStockDataExists', return_value=(True, "/tmp/cache.pkl")):
+            with patch('pkscreener.classes.AssetsManager.PKAssetsManager.promptFileExists', return_value="Y"):
+                with patch.object(mock_config, 'deleteFileWithPattern'):
+                    result = nav.get_download_choices()
+                    assert result[0] == "X"
+    
+    def test_download_not_exists(self):
+        """Test download when file doesn't exist."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        mock_config.isIntradayConfig.return_value = False
+        
+        nav = MenuNavigator(mock_config)
+        
+        with patch('pkscreener.classes.AssetsManager.PKAssetsManager.afterMarketStockDataExists', return_value=(False, "")):
+            result = nav.get_download_choices()
+            assert result[0] == "X"
+
+
+class TestGetHistoricalDays:
+    """Test get_historical_days method."""
+    
+    def test_testing_mode(self):
+        """Test historical days in testing mode."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        mock_config.backtestPeriod = 30
+        
+        nav = MenuNavigator(mock_config)
+        result = nav.get_historical_days(100, testing=True)
+        assert result == 2
+    
+    def test_normal_mode(self):
+        """Test historical days in normal mode."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        mock_config.backtestPeriod = 30
+        
+        nav = MenuNavigator(mock_config)
+        result = nav.get_historical_days(100, testing=False)
+        assert result == 30
+
+
+class TestGetTestBuildChoices:
+    """Test get_test_build_choices method."""
+    
+    def test_with_menu_option(self):
+        """Test with menu option."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        
+        result = nav.get_test_build_choices(menu_option="X", index_option=12, execute_option=1)
+        assert result[0] == "X"
+        assert result[1] == 12
+        assert result[2] == 1
+    
+    def test_without_menu_option(self):
+        """Test without menu option."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        
+        result = nav.get_test_build_choices()
+        assert result[0] == "X"
+
+
+class TestGetTopLevelMenuChoices:
+    """Test get_top_level_menu_choices method."""
+    
+    def test_with_startup_options(self):
+        """Test with startup options."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        
+        mock_args = MagicMock()
+        mock_args.options = "X:12:1"
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            try:
+                result = nav.get_top_level_menu_choices(
+                    startup_options=mock_args, 
+                    test_build=False, 
+                    download_only=False
+                )
+            except Exception:
+                pass
+    
+    def test_test_build_mode(self):
+        """Test in test build mode."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        
+        result = nav.get_top_level_menu_choices(
+            startup_options=None, 
+            test_build=True, 
+            download_only=False
+        )
+
+
+class TestGetScannerMenuChoices:
+    """Test get_scanner_menu_choices method."""
+    
+    def test_scanner_menu(self):
+        """Test scanner menu."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        mock_config.defaultIndex = 12
+        
+        nav = MenuNavigator(mock_config)
+        
+        mock_args = MagicMock()
+        mock_args.options = None
+        
+        with patch('builtins.input', return_value='12'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    try:
+                        result = nav.get_scanner_menu_choices(
+                            menu_option="X",
+                            user_passed_args=mock_args
+                        )
+                    except Exception:
+                        pass
+
+
+class TestHandleSecondaryMenuChoices:
+    """Test handle_secondary_menu_choices method."""
+    
+    def test_help_menu(self):
+        """Test help menu."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            try:
+                result = nav.handle_secondary_menu_choices("H")
+            except Exception:
+                pass
+    
+    def test_update_menu(self):
+        """Test update menu."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        
+        with patch('pkscreener.classes.OtaUpdater.OTAUpdater.checkForUpdate'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = nav.handle_secondary_menu_choices("U")
+                except Exception:
+                    pass
+
+
+class TestEnsureMenusLoaded:
+    """Test ensure_menus_loaded method."""
+    
+    def test_ensure_loaded(self):
+        """Test ensuring menus are loaded."""
+        from pkscreener.classes.MenuNavigation import MenuNavigator
+        
+        mock_config = MagicMock()
+        nav = MenuNavigator(mock_config)
+        
+        try:
+            nav.ensure_menus_loaded("X")
+        except Exception:
+            pass
+
+

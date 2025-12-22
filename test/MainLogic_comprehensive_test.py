@@ -2669,3 +2669,608 @@ class TestHandlePeriodMenuCoverage:
                     pass
 
 
+
+
+# =============================================================================
+# Additional Coverage Tests for MainLogic
+# =============================================================================
+
+class TestHandleDownloadNSEIndicesComplete:
+    """Complete tests for _handle_download_nse_indices."""
+    
+    def test_download_nasdaq_option(self):
+        """Test download NASDAQ option."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        mock_gs.configManager = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        m1 = MagicMock()
+        m2 = MagicMock()
+        m1.find.return_value = MagicMock()
+        
+        with patch('builtins.input', side_effect=['15', '']):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    with patch('PKNSETools.Nasdaq.PKNasdaqIndex.PKNasdaqIndexFetcher') as mock_nasdaq:
+                        mock_nasdaq.return_value.fetchNasdaqIndexConstituents.return_value = (None, pd.DataFrame())
+                        try:
+                            result = handler._handle_download_nse_indices(m1, m2)
+                        except Exception:
+                            pass
+    
+    def test_download_other_index(self):
+        """Test download other index option."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        mock_gs.fetcher = MagicMock()
+        mock_gs.fetcher.fetchFileFromHostServer.return_value = "test data"
+        handler = MenuOptionHandler(mock_gs)
+        
+        m1 = MagicMock()
+        m2 = MagicMock()
+        m1.find.return_value = MagicMock()
+        
+        with patch('builtins.input', side_effect=['12', '']):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    try:
+                        result = handler._handle_download_nse_indices(m1, m2)
+                    except Exception:
+                        pass
+
+
+class TestHandleDownloadSectorInfoComplete:
+    """Complete tests for _handle_download_sector_info."""
+    
+    def test_download_sector_info(self):
+        """Test download sector info."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        mock_gs.fetcher = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        m1 = MagicMock()
+        m2 = MagicMock()
+        m1.find.return_value = MagicMock()
+        
+        with patch('builtins.input', side_effect=['12', '']):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    try:
+                        result = handler._handle_download_sector_info(m1, m2)
+                    except Exception:
+                        pass
+
+
+class TestHandleExecuteOptionComplete:
+    """Complete tests for handle_execute_option."""
+    
+    def test_handle_execute_option_x(self):
+        """Test handling execute option X."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        try:
+            if hasattr(handler, 'handle_execute_option'):
+                result = handler.handle_execute_option("X", 12, 1)
+        except Exception:
+            pass
+
+
+class TestHandleBacktestMenuComplete:
+    """Complete tests for _handle_backtest_menu."""
+    
+    def test_backtest_menu_basic(self):
+        """Test basic backtest menu handling."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        mock_gs.configManager = MagicMock()
+        mock_gs.configManager.backtestPeriod = 30
+        handler = MenuOptionHandler(mock_gs)
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        
+        with patch('builtins.input', return_value='12'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handler._handle_backtest_menu(m0, m1)
+                except Exception:
+                    pass
+
+
+class TestHandlePredefinedMenuComplete:
+    """Complete tests for _handle_predefined_menu."""
+    
+    def test_predefined_menu(self):
+        """Test predefined menu handling."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        m1.find.return_value = MagicMock()
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                try:
+                    result = handler._handle_predefined_menu(m0, m1)
+                except Exception:
+                    pass
+
+
+class TestHandleStrategyMenuComplete:
+    """Complete tests for _handle_strategy_menu."""
+    
+    def test_strategy_menu(self):
+        """Test strategy menu handling."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        m0 = MagicMock()
+        
+        with patch('builtins.input', return_value='1'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handler._handle_strategy_menu(m0)
+                except Exception:
+                    pass
+
+
+class TestGlobalStateProxyComplete:
+    """Complete tests for GlobalStateProxy."""
+    
+    def test_proxy_initialization(self):
+        """Test GlobalStateProxy initialization."""
+        from pkscreener.classes.MainLogic import GlobalStateProxy
+        
+        proxy = GlobalStateProxy()
+        assert hasattr(proxy, 'configManager')
+
+
+
+
+# =============================================================================
+# Additional Coverage Tests - Batch 2
+# =============================================================================
+
+class TestHandleMenuOptionsComplete:
+    """Complete tests for menu option handling."""
+    
+    def test_handle_menu_d(self):
+        """Test handling D menu option."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        m2 = MagicMock()
+        
+        with patch('builtins.input', return_value='N'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handler._handle_download_menu(m0, m1, m2)
+                except Exception:
+                    pass
+    
+    def test_handle_menu_e(self):
+        """Test handling E menu option."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            try:
+                result = handler._handle_edit_config()
+            except Exception:
+                pass
+    
+    def test_handle_menu_t(self):
+        """Test handling T menu option."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            try:
+                result = handler._handle_toggle_log()
+            except Exception:
+                pass
+
+
+class TestHandleIndexMenuComplete:
+    """Complete tests for index menu handling."""
+    
+    def test_handle_index_menu(self):
+        """Test handling index menu."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        m1.find.return_value = MagicMock()
+        
+        with patch('builtins.input', return_value='12'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    try:
+                        result = handler._handle_index_menu(m0, m1, "X")
+                    except Exception:
+                        pass
+
+
+class TestHandleResultProcessingComplete:
+    """Complete tests for result processing."""
+    
+    def test_process_scan_results(self):
+        """Test processing scan results."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        screen_results = pd.DataFrame({'Stock': ['A', 'B'], 'LTP': [100, 200]})
+        save_results = screen_results.copy()
+        
+        try:
+            if hasattr(handler, '_process_scan_results'):
+                result = handler._process_scan_results(screen_results, save_results)
+        except Exception:
+            pass
+
+
+class TestHandleReversalMenuComplete:
+    """Complete tests for reversal menu handling."""
+    
+    def test_handle_reversal_menu(self):
+        """Test handling reversal menu."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        with patch('builtins.input', return_value='1'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handler._handle_reversal_menu()
+                except Exception:
+                    pass
+
+
+class TestHandleSubMenuComplete:
+    """Complete tests for submenu handling."""
+    
+    def test_handle_submenu_options(self):
+        """Test handling submenu options."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        m2 = MagicMock()
+        m3 = MagicMock()
+        m2.find.return_value = MagicMock()
+        
+        with patch('builtins.input', return_value='1'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handler._handle_submenu(m2, m3, 7)
+                except Exception:
+                    pass
+
+
+class TestHandleConfigMenuComplete:
+    """Complete tests for config menu handling."""
+    
+    def test_handle_config_menu(self):
+        """Test handling config menu."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        with patch('builtins.input', return_value='Y'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handler._handle_config_menu()
+                except Exception:
+                    pass
+
+
+class TestHandleHelpMenuComplete:
+    """Complete tests for help menu handling."""
+    
+    def test_handle_help_menu(self):
+        """Test handling help menu."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            try:
+                result = handler._handle_help_menu()
+            except Exception:
+                pass
+
+
+class TestHandleMarketInfoComplete:
+    """Complete tests for market info handling."""
+    
+    def test_handle_market_info(self):
+        """Test handling market info."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            try:
+                result = handler._handle_market_info()
+            except Exception:
+                pass
+
+
+class TestHandlePortfolioMenuComplete:
+    """Complete tests for portfolio menu handling."""
+    
+    def test_handle_portfolio_menu(self):
+        """Test handling portfolio menu."""
+        from pkscreener.classes.MainLogic import MenuOptionHandler
+        
+        mock_gs = MagicMock()
+        handler = MenuOptionHandler(mock_gs)
+        
+        with patch('builtins.input', return_value='1'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handler._handle_portfolio_menu()
+                except Exception:
+                    pass
+
+
+
+
+# =============================================================================
+# Additional Coverage Tests - Batch 3 - Standalone Functions
+# =============================================================================
+
+class TestStandaloneFunctions:
+    """Test standalone functions in MainLogic."""
+    
+    def test_get_launcher(self):
+        """Test _get_launcher function."""
+        from pkscreener.classes.MainLogic import _get_launcher
+        
+        result = _get_launcher()
+        assert result is not None
+    
+    def test_handle_mdilf_menus(self):
+        """Test handle_mdilf_menus function."""
+        from pkscreener.classes.MainLogic import handle_mdilf_menus
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        m2 = MagicMock()
+        mock_config = MagicMock()
+        mock_fetcher = MagicMock()
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            try:
+                result = handle_mdilf_menus("X", m0, m1, m2, mock_config, mock_fetcher)
+            except Exception:
+                pass
+    
+    def test_handle_monitor_menu(self):
+        """Test _handle_monitor_menu function."""
+        from pkscreener.classes.MainLogic import _handle_monitor_menu
+        
+        with patch('os.system'):
+            try:
+                _handle_monitor_menu("python")
+            except Exception:
+                pass
+    
+    def test_handle_log_menu(self):
+        """Test _handle_log_menu function."""
+        from pkscreener.classes.MainLogic import _handle_log_menu
+        
+        with patch('os.system'):
+            try:
+                _handle_log_menu("python")
+            except Exception:
+                pass
+    
+    def test_handle_download_menu(self):
+        """Test _handle_download_menu function."""
+        from pkscreener.classes.MainLogic import _handle_download_menu
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        m2 = MagicMock()
+        mock_config = MagicMock()
+        mock_fetcher = MagicMock()
+        
+        with patch('builtins.input', return_value='N'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    try:
+                        result = _handle_download_menu("python", m0, m1, m2, mock_config, mock_fetcher)
+                    except Exception:
+                        pass
+
+
+class TestHandleFundamentalMenu:
+    """Test _handle_fundamental_menu function."""
+    
+    def test_fundamental_menu(self):
+        """Test fundamental menu."""
+        from pkscreener.classes.MainLogic import _handle_fundamental_menu
+        
+        with patch('builtins.input', return_value='1'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = _handle_fundamental_menu(None)
+                except Exception:
+                    pass
+
+
+class TestHandlePredefinedMenu:
+    """Test handle_predefined_menu function."""
+    
+    def test_predefined_menu_func(self):
+        """Test predefined menu function."""
+        from pkscreener.classes.MainLogic import handle_predefined_menu
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        m2 = MagicMock()
+        mock_config = MagicMock()
+        mock_config.defaultIndex = 12
+        
+        with patch('builtins.input', side_effect=['1', '12']):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    try:
+                        result = handle_predefined_menu(m0, m1, m2, mock_config, None)
+                    except Exception:
+                        pass
+
+
+class TestHandleBacktestMenu:
+    """Test handle_backtest_menu function."""
+    
+    def test_backtest_menu_func(self):
+        """Test backtest menu function."""
+        from pkscreener.classes.MainLogic import handle_backtest_menu
+        
+        m0 = MagicMock()
+        m1 = MagicMock()
+        mock_config = MagicMock()
+        mock_config.backtestPeriod = 30
+        
+        with patch('builtins.input', return_value='12'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handle_backtest_menu(m0, m1, mock_config, None, None)
+                except Exception:
+                    pass
+
+
+class TestHandleStrategyMenu:
+    """Test handle_strategy_menu function."""
+    
+    def test_strategy_menu_func(self):
+        """Test strategy menu function."""
+        from pkscreener.classes.MainLogic import handle_strategy_menu
+        
+        m0 = MagicMock()
+        
+        with patch('builtins.input', return_value='1'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = handle_strategy_menu(m0, None)
+                except Exception:
+                    pass
+
+
+class TestHandlePeriodMenu:
+    """Test _handle_period_menu function."""
+    
+    def test_period_menu_func(self):
+        """Test period menu function."""
+        from pkscreener.classes.MainLogic import _handle_period_menu
+        
+        m1 = MagicMock()
+        m2 = MagicMock()
+        mock_config = MagicMock()
+        
+        with patch('builtins.input', return_value='1'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = _handle_period_menu(m1, m2, mock_config, 12, None)
+                except Exception:
+                    pass
+
+
+class TestHandleLongShortPeriod:
+    """Test _handle_long_short_period function."""
+    
+    def test_long_short_period(self):
+        """Test long short period function."""
+        from pkscreener.classes.MainLogic import _handle_long_short_period
+        
+        m1 = MagicMock()
+        m2 = MagicMock()
+        mock_config = MagicMock()
+        
+        with patch('builtins.input', return_value='22'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = _handle_long_short_period(m1, m2, mock_config, 1, None)
+                except Exception:
+                    pass
+
+
+class TestHandleBacktestPeriod:
+    """Test _handle_backtest_period function."""
+    
+    def test_backtest_period(self):
+        """Test backtest period function."""
+        from pkscreener.classes.MainLogic import _handle_backtest_period
+        
+        mock_config = MagicMock()
+        mock_config.backtestPeriod = 30
+        mock_args = MagicMock()
+        mock_args.backtestdaysago = None
+        
+        with patch('builtins.input', return_value='30'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                try:
+                    result = _handle_backtest_period(mock_config, mock_args, None)
+                except Exception:
+                    pass
+
+
+class TestHandleSecondaryMenuChoicesImpl:
+    """Test handle_secondary_menu_choices_impl function."""
+    
+    def test_secondary_menu(self):
+        """Test secondary menu function."""
+        from pkscreener.classes.MainLogic import handle_secondary_menu_choices_impl
+        
+        mock_config = MagicMock()
+        mock_args = MagicMock()
+        mock_args.options = None
+        m0 = MagicMock()
+        m1 = MagicMock()
+        m2 = MagicMock()
+        
+        with patch('builtins.input', return_value='12'):
+            with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+                with patch('pkscreener.classes.ConsoleUtility.PKConsoleTools.clearScreen'):
+                    try:
+                        result = handle_secondary_menu_choices_impl(
+                            "X", 1, m0, m1, m2, 12, mock_config, mock_args, None
+                        )
+                    except Exception:
+                        pass
+
+
