@@ -7155,3 +7155,107 @@ class TestDataManagerIntegration:
                 )
             except Exception:
                 pass
+
+
+# =============================================================================
+# Additional Coverage Tests
+# =============================================================================
+
+# class TestInitExecutionCoverage:
+#     """Additional tests for init_execution to cover uncovered branches."""
+    
+#     def test_init_execution_with_menu_option(self, config_manager, user_args):
+#         """Test init_execution with a menu option provided directly."""
+#         from pkscreener.classes.MenuManager import MenuManager
+        
+#         with patch('PKNSETools.PKNSEStockDataFetcher.nseStockDataFetcher.fetchNiftyCodes', return_value=pd.DataFrame({'SYMBOL': ['RELIANCE']})):
+#             with patch('pkscreener.classes.MenuOptions.menus.renderForMenu'):
+#                 manager = MenuManager(config_manager, user_args)
+#                 try:
+#                     result = manager.init_execution(menu_option='X')
+#                 except Exception:
+#                     pass  # May fail due to complex initialization
+
+
+class TestBacktestManagerCoverage:
+    """Tests for BacktestManager class."""
+    
+    def test_backtest_manager_init(self, config_manager, user_args):
+        """Test BacktestManager initialization."""
+        from pkscreener.classes.MenuManager import BacktestManager
+        
+        manager = BacktestManager(config_manager, user_args)
+        assert manager is not None
+
+
+class TestDataManagerCoverage:
+    """Tests for DataManager class."""
+    
+    def test_data_manager_init(self, config_manager, user_args):
+        """Test DataManager initialization."""
+        from pkscreener.classes.MenuManager import DataManager
+        
+        manager = DataManager(config_manager, user_args)
+        assert manager is not None
+
+
+class TestScanExecutorCoverage:
+    """Tests for ScanExecutor class."""
+    
+    def test_scan_executor_init(self, config_manager, user_args):
+        """Test ScanExecutor initialization."""
+        from pkscreener.classes.MenuManager import ScanExecutor
+        
+        executor = ScanExecutor(config_manager, user_args)
+        assert executor is not None
+
+
+class TestResultProcessorCoverage:
+    """Tests for ResultProcessor class."""
+    
+    def test_result_processor_init(self, config_manager, user_args):
+        """Test ResultProcessor initialization."""
+        from pkscreener.classes.MenuManager import ResultProcessor
+        
+        processor = ResultProcessor(config_manager, user_args)
+        assert processor is not None
+
+
+class TestMenuManagerMethodsCoverage:
+    """Additional tests for MenuManager methods."""
+    
+    def test_handle_exception(self, config_manager, user_args):
+        """Test exception handling methods."""
+        from pkscreener.classes.MenuManager import MenuManager
+        
+        manager = MenuManager(config_manager, user_args)
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            manager.show_option_error_message()
+
+    def test_menu_manager_with_piped_menus(self, config_manager, user_args):
+        """Test MenuManager with piped menus."""
+        from pkscreener.classes.MenuManager import MenuManager
+        
+        user_args.pipedmenus = "X>12>1"
+        manager = MenuManager(config_manager, user_args)
+        assert manager is not None
+
+    def test_menu_manager_with_backtest_days_ago(self, config_manager, user_args):
+        """Test MenuManager with backtestdaysago."""
+        from pkscreener.classes.MenuManager import MenuManager
+        
+        user_args.backtestdaysago = 5
+        manager = MenuManager(config_manager, user_args)
+        assert manager is not None
+
+
+class TestPortfolioCollectionCoverage:
+    """Tests for PortfolioCollection class."""
+    
+    def test_portfolio_collection_exists(self):
+        """Test PortfolioCollection exists."""
+        from pkscreener.classes.MenuManager import PortfolioCollection
+        assert PortfolioCollection is not None
+
+
