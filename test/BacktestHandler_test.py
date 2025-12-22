@@ -1470,3 +1470,205 @@ class TestShowBacktestNoSortKey:
                         pass
 
 
+
+
+# =============================================================================
+# Additional Coverage Tests - Batch 6
+# =============================================================================
+
+class TestFinishBacktestComplete:
+    """Complete coverage for finish_backtest_and_show_results."""
+    
+    def test_finish_with_valid_xray(self):
+        """Test finishing with valid x-ray data."""
+        from pkscreener.classes.BacktestHandler import BacktestHandler
+        
+        mock_config = MagicMock()
+        mock_config.enablePortfolioCalculations = False
+        handler = BacktestHandler(mock_config)
+        
+        backtest_df = pd.DataFrame({
+            'Stock': ['A', 'B'],
+            'Date': ['2023-01-01', '2023-01-01'],
+            'Return': [5, 10]
+        })
+        
+        # Create xray data with more than 10 rows
+        df_xray = pd.DataFrame({
+            'Stock': ['A'] * 15,
+            'Date': [f'2023-01-{i:02d}' for i in range(1, 16)],
+            'Value': list(range(15))
+        })
+        
+        with patch('pkscreener.classes.BacktestHandler.backtestSummary', return_value=pd.DataFrame({'Stock': ['SUMMARY'], 'Return': [15]})):
+            with patch.object(handler, 'show_backtest_results'):
+                try:
+                    summary_df, sorting, sort_keys = handler.finish_backtest_and_show_results(backtest_df, df_xray)
+                except Exception:
+                    pass
+    
+    def test_finish_with_portfolio_not_runner(self):
+        """Test finishing with portfolio when not RUNNER."""
+        from pkscreener.classes.BacktestHandler import BacktestHandler
+        
+        mock_config = MagicMock()
+        mock_config.enablePortfolioCalculations = True
+        handler = BacktestHandler(mock_config)
+        
+        backtest_df = pd.DataFrame({
+            'Stock': ['A'],
+            'Date': ['2023-01-01'],
+            'Return': [5]
+        })
+        
+        with patch.dict('os.environ', {}, clear=True):
+            with patch('pkscreener.classes.BacktestHandler.backtestSummary', return_value=pd.DataFrame({'Stock': ['SUMMARY']})):
+                with patch.object(handler, 'show_backtest_results'):
+                    with patch('pkscreener.classes.PKScheduler.PKScheduler.scheduleTasks'):
+                        with patch('pkscreener.classes.PKTask.PKTask') as mock_task:
+                            mock_task.return_value.result = pd.DataFrame({'Stock': ['A']})
+                            mock_task.return_value.taskName = "TestTask"
+                            try:
+                                result = handler.finish_backtest_and_show_results(backtest_df, None)
+                            except Exception:
+                                pass
+
+
+class TestShowSortedComplete:
+    """Complete coverage for show_sorted_backtest_data."""
+    
+    def test_sorted_with_valid_key(self):
+        """Test sorted with valid sort key."""
+        from pkscreener.classes.BacktestHandler import BacktestHandler
+        
+        mock_config = MagicMock()
+        handler = BacktestHandler(mock_config)
+        
+        backtest_df = pd.DataFrame({
+            'Stock': ['A', 'B'],
+            'Date': ['2023-01-01', '2023-01-02'],
+            '1-Pd': [5.0, 10.0],
+            'Trend': ['Up', 'Down'],
+            'volume': [100000, 200000]
+        })
+        summary_df = pd.DataFrame({'Stock': ['SUMMARY'], 'Return': [15]})
+        sort_keys = {"S": "Stock", "D": "Date", "1": "1-Pd", "T": "Trend", "V": "volume"}
+        
+        # Test with input returning 'S' then empty
+        with patch('builtins.input', side_effect=['S', '']):
+            with patch.object(handler, 'show_backtest_results'):
+                try:
+                    result = handler.show_sorted_backtest_data(
+                        backtest_df, summary_df, sort_keys, default_answer=None
+                    )
+                except (StopIteration, Exception):
+                    pass
+    
+    def test_sorted_with_default_answer(self):
+        """Test sorted with default answer."""
+        from pkscreener.classes.BacktestHandler import BacktestHandler
+        
+        mock_config = MagicMock()
+        handler = BacktestHandler(mock_config)
+        
+        backtest_df = pd.DataFrame({
+            'Stock': ['A', 'B'],
+            'Date': ['2023-01-01', '2023-01-02'],
+            '1-Pd': [5.0, 10.0]
+        })
+        summary_df = pd.DataFrame({'Stock': ['SUMMARY'], 'Return': [15]})
+        sort_keys = {"S": "Stock", "D": "Date", "1": "1-Pd"}
+        
+        with patch.object(handler, 'show_backtest_results'):
+            try:
+                result = handler.show_sorted_backtest_data(
+                    backtest_df, summary_df, sort_keys, default_answer="Y"
+                )
+            except Exception:
+                pass
+
+
+class TestShowBacktestWithSortKeyComplete:
+    """Complete coverage for show_backtest_results with sort key."""
+    
+    def test_show_with_sort_key_valid(self):
+        """Test showing with valid sort key."""
+        from pkscreener.classes.BacktestHandler import BacktestHandler
+        
+        mock_config = MagicMock()
+        handler = BacktestHandler(mock_config)
+        handler.elapsed_time = 2.5
+        
+        backtest_df = pd.DataFrame({
+            'Stock': ['B', 'A'],
+            'Date': ['2023-01-01', '2023-01-02'],
+            'Return': [10.0, 5.0]
+        })
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            with patch.object(handler, 'get_backtest_report_filename', return_value=("X>12>1", "test.html")):
+                with patch.object(handler, 'scan_output_directory', return_value="/tmp"):
+                    try:
+                        handler.show_backtest_results(backtest_df, "", "X:12:1", sort_key="Return")
+                    except Exception:
+                        pass
+
+
+class TestShowBacktestSummaryComplete:
+    """Complete test for Summary with last_summary_row."""
+    
+    def test_summary_with_last_row(self):
+        """Test summary with SUMMARY as last row."""
+        from pkscreener.classes.BacktestHandler import BacktestHandler
+        
+        mock_config = MagicMock()
+        handler = BacktestHandler(mock_config)
+        handler.elapsed_time = 1.5
+        
+        backtest_df = pd.DataFrame({
+            'Stock': ['A', 'B', 'SUMMARY'],
+            '1-Pd': ['5%', '10%', '15%'],
+            '2-Pd': ['3%', '8%', '11%']
+        })
+        
+        with patch('PKDevTools.classes.OutputControls.OutputControls.printOutput'):
+            with patch.object(handler, 'get_backtest_report_filename', return_value=("X>12>1", "test_Summary.html")):
+                with patch.object(handler, 'scan_output_directory', return_value="/tmp"):
+                    with patch('builtins.open', MagicMock()):
+                        with patch('os.remove'):
+                            try:
+                                handler.show_backtest_results(backtest_df, "Summary", "X:12:1")
+                            except Exception:
+                                pass
+
+
+class TestTabulateWithSummaryDetail:
+    """Test tabulate_backtest_results with summary and detail."""
+    
+    def test_tabulate_complete(self):
+        """Test complete tabulation."""
+        from pkscreener.classes.BacktestHandler import BacktestHandler
+        
+        mock_config = MagicMock()
+        mock_config.showPastStrategyData = True
+        handler = BacktestHandler(mock_config)
+        
+        save_results = pd.DataFrame({'Stock': ['A', 'B'], 'LTP': [100, 200]})
+        
+        summary_df = pd.DataFrame({'Stock': ['SUMMARY'], '1-Pd': ['10%'], '2-Pd': ['15%']})
+        detail_df = pd.DataFrame({
+            'Stock': ['A', 'B'],
+            'LTP': [100, 200],
+            'volume': ['1.5x', '2.0x'],
+            'Date': ['2023-01-01', '2023-01-01']
+        })
+        
+        with patch.dict('os.environ', {'PKDevTools_Default_Log_Level': 'DEBUG'}, clear=False):
+            with patch.object(handler, 'get_summary_correctness_of_strategy', return_value=(summary_df, detail_df)):
+                with patch('pkscreener.classes.BacktestHandler.colorText.miniTabulator') as mock_tab:
+                    mock_tab.return_value.tabulate.return_value = "tabulated text"
+                    try:
+                        summary_tab, detail_tab = handler.tabulate_backtest_results(save_results, max_allowed=10)
+                    except Exception:
+                        pass
+

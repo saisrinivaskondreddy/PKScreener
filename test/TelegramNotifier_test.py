@@ -248,8 +248,3 @@ class TestTelegramNotifierAlertSubscriptions:
             notifier._handle_alert_subscriptions(None, "Message | with pipe")
             
             mock_send.assert_not_called()
-
-
-
-
-
