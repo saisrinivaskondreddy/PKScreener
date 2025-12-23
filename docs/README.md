@@ -8,6 +8,7 @@ Welcome to the PKScreener developer documentation. This documentation is designe
 |----------|-------------|
 | [Developer Guide](DEVELOPER_GUIDE.md) | Getting started, project structure, development workflow |
 | [Architecture](ARCHITECTURE.md) | System architecture, component details, data flow |
+| [High-Performance Data](HIGH_PERFORMANCE_DATA.md) | Real-time data system, in-memory candle store |
 | [Scan Workflows](SCAN_WORKFLOWS.md) | Detailed scan category workflows, option formats |
 | [API Reference](API_REFERENCE.md) | Key classes, methods, and function signatures |
 | [Testing Guide](TESTING.md) | Writing and running tests, mocking guidelines |
@@ -45,11 +46,19 @@ PKScreener is a stock screening and analysis tool that provides:
 └─────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────┐
-│                     Data Layer                               │
-│      Fetcher → DataLoader → AssetsManager                   │
-│   (Yahoo Finance, NSE, GitHub cached data)                  │
+│                High-Performance Data Layer                   │
+│  ┌───────────────────────────────────────────────────────┐ │
+│  │ PKBrokers: InMemoryCandleStore (Real-time)            │ │
+│  │    ↓ fallback                                          │ │
+│  │ PKDevTools: PKDataProvider (Unified Access)           │ │
+│  │    ↓ fallback                                          │ │
+│  │ Local/Remote Pickle Files (Cached)                    │ │
+│  └───────────────────────────────────────────────────────┘ │
+│  Intervals: 1m, 2m, 3m, 4m, 5m, 10m, 15m, 30m, 60m, daily  │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**Data Flow**: See [High-Performance Data](HIGH_PERFORMANCE_DATA.md) for details.
 
 ## Key Concepts
 

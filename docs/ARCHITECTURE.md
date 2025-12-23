@@ -236,10 +236,14 @@ Contains 47+ validation methods:
 
 #### Stock Data Loading
 ```python
-# Data sources priority
+# Data sources priority (High-Performance Mode)
+1. In-Memory Candle Store (PKBrokers) - Real-time during market hours
+2. Local pickle files - Cached historical data
+3. Remote GitHub pickle files - Fallback for historical data
+
+# Legacy Mode (fallback if PKBrokers unavailable)
 1. Local cache (pickle files)
 2. GitHub Actions pre-downloaded data
-3. Real-time fetch from Yahoo Finance / NSE
 ```
 
 #### Cache Structure
@@ -247,9 +251,152 @@ Contains 47+ validation methods:
 ~/.pkscreener/
 ├── stock_data_DDMMYY.pkl       # Daily OHLCV data
 ├── stock_data_intraday.pkl     # Intraday data
+├── candle_store.pkl            # In-memory candle store backup
+├── ticks.json                  # Real-time tick data
 ├── indices/                    # Index constituent lists
 └── outputs/                    # Scan results
 ```
+
+---
+
+### 6.1 High-Performance Real-Time Data Architecture
+
+The system includes a high-performance, in-memory candle data system that provides instant access to OHLCV candles across all supported timeframes without database dependency.
+
+#### Supported Timeframes
+
+| Interval | Description | Max Candles Stored |
+|----------|-------------|-------------------|
+| `1m` | 1 minute | 390 (full trading day) |
+| `2m` | 2 minutes | 195 |
+| `3m` | 3 minutes | 130 |
+| `4m` | 4 minutes | 98 |
+| `5m` | 5 minutes | 78 |
+| `10m` | 10 minutes | 39 |
+| `15m` | 15 minutes | 26 |
+| `30m` | 30 minutes | 13 |
+| `60m` | 60 minutes (1 hour) | 7 |
+| `day` | Daily candles | 365 (1 year) |
+
+#### Real-Time Data Flow Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ZERODHA KITE WEBSOCKET API                            │
+│  Real-time tick data for all NSE/BSE instruments                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      ZerodhaWebSocketClient (PKBrokers)                      │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  • Manages multiple WebSocket connections (500 instruments each)     │   │
+│  │  • Parses binary tick data into structured format                   │   │
+│  │  • Puts ticks into multiprocessing queue                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       KiteTokenWatcher (PKBrokers)                           │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  • Processes tick batches every 5 seconds                           │   │
+│  │  • Maintains only latest tick per instrument (deduplication)        │   │
+│  │  • Updates InMemoryCandleStore with each batch                      │   │
+│  │  • Sends data to JSON writer for persistence                        │   │
+│  │  • Optionally sends to database (Turso/SQLite)                      │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+┌─────────────────────────────────┐ ┌─────────────────────────────────────────┐
+│    InMemoryCandleStore          │ │         JSONFileWriter                   │
+│    (PKBrokers - Singleton)      │ │  • Writes ticks.json every 5 seconds    │
+│  ┌─────────────────────────┐   │ │  • Maintains OHLCV per instrument        │
+│  │ • All intervals stored  │   │ └─────────────────────────────────────────┘
+│  │ • O(1) access time      │   │
+│  │ • Thread-safe (RLock)   │   │
+│  │ • Auto-aggregation      │   │
+│  │ • Rolling windows       │   │
+│  │ • 5-min auto-persist    │   │
+│  └─────────────────────────┘   │
+└─────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       PKDataProvider (PKDevTools)                            │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  Unified Data Access Layer with Priority:                           │   │
+│  │    1. InMemoryCandleStore (real-time) ◄──── PRIMARY                 │   │
+│  │    2. Local pickle files (cached)                                   │   │
+│  │    3. Remote GitHub pickle files (fallback)                         │   │
+│  │                                                                      │   │
+│  │  Features:                                                           │   │
+│  │    • Automatic source selection                                     │   │
+│  │    • In-memory caching with TTL                                     │   │
+│  │    • Statistics tracking                                            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┴───────────────┐
+                    ▼                               ▼
+┌─────────────────────────────────┐ ┌─────────────────────────────────────────┐
+│  nseStockDataFetcher            │ │    screenerStockDataFetcher              │
+│     (PKNSETools)                │ │       (PKScreener)                       │
+│  ┌─────────────────────────┐   │ │  ┌─────────────────────────────────┐    │
+│  │ • fetchStockData()      │   │ │  │ • fetchStockData()              │    │
+│  │ • getLatestPrice()      │   │ │  │ • getLatestPrice()              │    │
+│  │ • getRealtimeOHLCV()    │   │ │  │ • getRealtimeOHLCV()            │    │
+│  │ • isRealtimeAvailable() │   │ │  │ • isRealtimeDataAvailable()     │    │
+│  └─────────────────────────┘   │ │  │ • getAllRealtimeData()          │    │
+└─────────────────────────────────┘ │  │ • fetchFiveEmaData()            │    │
+                                    │  │ • fetchLatestNiftyDaily()       │    │
+                                    │  └─────────────────────────────────┘    │
+                                    └─────────────────────────────────────────┘
+                                                    │
+                                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PKScreener Scan Engine                               │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │  • StockScreener.screenStocks() - Uses real-time data              │   │
+│  │  • ScreeningStatistics - Technical analysis on live data           │   │
+│  │  • CandlePatterns - Pattern detection on current candles           │   │
+│  │  • Multiprocessing pool - Parallel screening                       │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+│  Benefits:                                                                   │
+│    ✓ No database latency for real-time data                                │
+│    ✓ Instant access to any timeframe                                       │
+│    ✓ No Yahoo Finance dependency (removed)                                 │
+│    ✓ No rate limiting issues                                               │
+│    ✓ Automatic fallback to cached data                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Component Responsibilities
+
+| Component | Location | Responsibility |
+|-----------|----------|----------------|
+| `ZerodhaWebSocketClient` | PKBrokers | WebSocket connection management |
+| `KiteTokenWatcher` | PKBrokers | Tick processing and distribution |
+| `InMemoryCandleStore` | PKBrokers | Real-time candle storage |
+| `CandleAggregator` | PKBrokers | Timeframe aggregation |
+| `TickProcessor` | PKBrokers | Tick-to-candle bridge |
+| `HighPerformanceDataProvider` | PKBrokers | Convenience API |
+| `PKDataProvider` | PKDevTools | Unified data access |
+| `screenerStockDataFetcher` | PKScreener | Scan data fetching |
+
+#### Performance Characteristics
+
+| Metric | Value |
+|--------|-------|
+| Access Time | O(1) for any candle |
+| Memory Usage | ~100 bytes per candle |
+| Memory per Instrument | ~50KB (all intervals) |
+| Total Memory (2000 stocks) | ~100MB |
+| Persistence Interval | 5 minutes |
+| Recovery Time | < 1 second from disk |
 
 ---
 

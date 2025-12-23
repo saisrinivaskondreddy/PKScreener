@@ -32,7 +32,6 @@ warnings.simplefilter("ignore", DeprecationWarning)
 warnings.simplefilter("ignore", FutureWarning)
 
 import pandas as pd
-import yfinance as yf
 from PKDevTools.classes.Utils import USER_AGENTS
 import random
 from concurrent.futures import ThreadPoolExecutor
@@ -52,9 +51,23 @@ from requests_cache import CacheMixin, SQLiteCache
 from requests_ratelimiter import LimiterMixin, MemoryQueueBucket
 from pyrate_limiter import Duration, RequestRate, Limiter
 
+# Import high-performance data provider (replaces Yahoo Finance)
+try:
+    from PKDevTools.classes.PKDataProvider import get_data_provider, PKDataProvider
+    _HP_DATA_AVAILABLE = True
+except ImportError:
+    _HP_DATA_AVAILABLE = False
+
+# Keep yfinance as optional fallback (deprecated)
+try:
+    import yfinance as yf
+    _YF_AVAILABLE = True
+except ImportError:
+    _YF_AVAILABLE = False
+
 
 # ============================================================================
-# Rate Limiting Configuration
+# Rate Limiting Configuration (for fallback sources)
 # ============================================================================
 
 class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
@@ -62,8 +75,8 @@ class CachedLimiterSession(CacheMixin, LimiterMixin, Session):
     pass
 
 
-# Rate limit configuration based on Yahoo Finance API limits
-# Reference: https://help.yahooinc.com/dsp-api/docs/rate-limits
+# Rate limit configuration for fallback data sources
+# Note: Primary data source (PKBrokers candle store) has no rate limits
 TRY_FACTOR = 1
 yf_limiter = Limiter(
     RequestRate(60 * TRY_FACTOR, Duration.MINUTE),    # Max 60 requests per minute
@@ -81,16 +94,33 @@ class screenerStockDataFetcher(nseStockDataFetcher):
     Enhanced stock data fetcher with additional functionality for the PKScreener.
     
     This class extends nseStockDataFetcher to provide:
+    - High-performance data access via PKBrokers candle store
     - Task-based stock data fetching for parallel processing
     - Additional ticker information retrieval
     - Watchlist management
-    - Data fetching from multiple sources
+    - Data fetching from multiple sources (real-time, pickle, remote)
+    
+    Data Source Priority:
+        1. In-memory candle store (PKBrokers) - Real-time during market hours
+        2. Local pickle files - Cached historical data
+        3. Remote GitHub pickle files - Fallback for historical data
     
     Attributes:
         _tickersInfoDict (dict): Cache for storing ticker information
+        _hp_provider: High-performance data provider instance
     """
     
     _tickersInfoDict = {}
+    
+    def __init__(self, configManager=None):
+        """Initialize the screener stock data fetcher."""
+        super().__init__(configManager)
+        self._hp_provider = None
+        if _HP_DATA_AVAILABLE:
+            try:
+                self._hp_provider = get_data_provider()
+            except Exception:
+                pass
     
     # ========================================================================
     # Task-Based Data Fetching
@@ -216,16 +246,19 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         attempt=0
     ):
         """
-        Fetch stock price data from external sources.
+        Fetch stock price data using high-performance data provider.
         
         This is the main data fetching method that retrieves historical
-        price data for one or more stocks.
+        price data for one or more stocks. Uses the following priority:
+        1. In-memory candle store (real-time, during market hours)
+        2. Local pickle files
+        3. Remote GitHub pickle files
         
         Args:
             stockCode: Single stock symbol or list of symbols
             period: Data period (e.g., "1d", "5d", "1mo", "1y")
             duration: Candle duration/interval (e.g., "1m", "5m", "1d")
-            proxyServer: Optional proxy server URL
+            proxyServer: Optional proxy server URL (deprecated, unused)
             screenResultsCounter: Counter for screening results (for display)
             screenCounter: Current screen position counter
             totalSymbols: Total number of symbols being processed
@@ -240,28 +273,163 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             
         Raises:
             StockDataEmptyException: If no data is fetched and printCounter is True
-            
-        Note:
-            The actual yfinance-based fetching code is currently commented out.
-            This method returns None until the data source is re-enabled.
         """
-        # Note: yfinance integration is currently disabled
-        # The commented code below shows the intended implementation
         data = None
         
         # Display progress if requested
         if printCounter and type(screenCounter) != int:
             self._printFetchProgress(stockCode, screenResultsCounter, screenCounter, totalSymbols)
         
+        # Normalize symbol
+        symbol = stockCode.replace(exchangeSuffix, "").upper() if exchangeSuffix else stockCode.upper()
+        
+        # Map period to count
+        count = self._period_to_count(period, duration)
+        
+        # Map interval format
+        normalized_interval = self._normalize_interval(duration)
+        
+        # Try high-performance data provider first
+        if self._hp_provider is not None:
+            try:
+                data = self._hp_provider.get_stock_data(
+                    symbol,
+                    interval=normalized_interval,
+                    count=count,
+                    start=start,
+                    end=end,
+                )
+            except Exception as e:
+                default_logger().debug(f"HP provider failed for {symbol}: {e}")
+        
+        # If HP provider didn't return data, try parent class method
+        if data is None or (hasattr(data, 'empty') and data.empty):
+            try:
+                data = super().fetchStockData(
+                    stockCode,
+                    period=period,
+                    interval=duration,
+                    start=start,
+                    end=end,
+                    exchangeSuffix=exchangeSuffix,
+                )
+            except Exception as e:
+                default_logger().debug(f"Parent fetchStockData failed for {symbol}: {e}")
+        
         # Handle empty data case
-        if (data is None or len(data) == 0) and printCounter:
+        if (data is None or (hasattr(data, '__len__') and len(data) == 0)) and printCounter:
             self._printFetchError()
             raise StockDataEmptyException
             
-        if printCounter:
+        if printCounter and data is not None:
             self._printFetchSuccess()
             
         return data
+    
+    def _period_to_count(self, period: str, interval: str) -> int:
+        """Convert period string to candle count."""
+        period_days = {
+            "1d": 1,
+            "5d": 5,
+            "1wk": 7,
+            "1mo": 30,
+            "3mo": 90,
+            "6mo": 180,
+            "1y": 365,
+            "2y": 730,
+            "5y": 1825,
+            "10y": 3650,
+            "max": 5000,
+        }
+        
+        interval_minutes = {
+            "1m": 1,
+            "2m": 2,
+            "3m": 3,
+            "4m": 4,
+            "5m": 5,
+            "10m": 10,
+            "15m": 15,
+            "30m": 30,
+            "60m": 60,
+            "1h": 60,
+            "1d": 1440,
+            "day": 1440,
+        }
+        
+        days = period_days.get(period, 365)
+        interval_mins = interval_minutes.get(interval, 1440)
+        
+        if interval_mins >= 1440:
+            return days
+        else:
+            # Intraday: market hours are ~6.25 hours = 375 minutes
+            trading_minutes_per_day = 375
+            return min(int((days * trading_minutes_per_day) / interval_mins), 5000)
+    
+    def _normalize_interval(self, interval: str) -> str:
+        """Normalize interval string to standard format."""
+        interval_map = {
+            "1m": "1m",
+            "2m": "2m",
+            "3m": "3m",
+            "4m": "4m",
+            "5m": "5m",
+            "10m": "10m",
+            "15m": "15m",
+            "30m": "30m",
+            "60m": "60m",
+            "1h": "60m",
+            "1d": "day",
+            "day": "day",
+            "1wk": "day",
+            "1mo": "day",
+        }
+        return interval_map.get(interval, "day")
+    
+    def getLatestPrice(self, symbol: str, exchangeSuffix: str = ".NS") -> float:
+        """Get the latest price for a stock."""
+        clean_symbol = symbol.replace(exchangeSuffix, "").upper()
+        
+        if self._hp_provider is not None:
+            try:
+                price = self._hp_provider.get_latest_price(clean_symbol)
+                if price is not None:
+                    return price
+            except Exception:
+                pass
+        return 0.0
+    
+    def getRealtimeOHLCV(self, symbol: str, exchangeSuffix: str = ".NS") -> dict:
+        """Get real-time OHLCV for a stock."""
+        clean_symbol = symbol.replace(exchangeSuffix, "").upper()
+        
+        if self._hp_provider is not None:
+            try:
+                ohlcv = self._hp_provider.get_realtime_ohlcv(clean_symbol)
+                if ohlcv is not None:
+                    return ohlcv
+            except Exception:
+                pass
+        return {}
+    
+    def isRealtimeDataAvailable(self) -> bool:
+        """Check if real-time data is available."""
+        if self._hp_provider is not None:
+            try:
+                return self._hp_provider.is_realtime_available()
+            except Exception:
+                pass
+        return False
+    
+    def getAllRealtimeData(self) -> dict:
+        """Get real-time OHLCV for all available stocks."""
+        if self._hp_provider is not None:
+            try:
+                return self._hp_provider.get_all_realtime_data()
+            except Exception:
+                pass
+        return {}
     
     def _printFetchProgress(self, stockCode, screenResultsCounter, screenCounter, totalSymbols):
         """Print the current fetch progress to console."""
@@ -310,25 +478,22 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         Fetch daily Nifty 50 index data.
         
         Args:
-            proxyServer: Optional proxy server URL
+            proxyServer: Optional proxy server URL (deprecated, unused)
             
         Returns:
             pandas.DataFrame or None: Nifty 50 daily data
-            
-        Note:
-            Currently returns None as yfinance integration is disabled.
         """
+        # Try high-performance provider first
+        if self._hp_provider is not None:
+            try:
+                # NIFTY 50 is typically tracked as "NIFTY" or index
+                data = self._hp_provider.get_stock_data("NIFTY 50", interval="day", count=5)
+                if data is not None and not data.empty:
+                    return data
+            except Exception as e:
+                default_logger().debug(f"HP provider failed for NIFTY: {e}")
+        
         return None
-        # Disabled yfinance code:
-        # data = yf.download(
-        #     tickers="^NSEI",
-        #     period="5d",
-        #     interval="1d",
-        #     proxy=proxyServer,
-        #     progress=False,
-        #     timeout=self.configManager.longTimeout,
-        # )
-        # return data
     
     def fetchFiveEmaData(self, proxyServer=None):
         """
@@ -338,18 +503,42 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         different intervals for EMA-based analysis.
         
         Args:
-            proxyServer: Optional proxy server URL
+            proxyServer: Optional proxy server URL (deprecated, unused)
             
         Returns:
-            tuple: (nifty_buy, banknifty_buy, nifty_sell, banknifty_sell)
-            
-        Note:
-            Currently returns None as yfinance integration is disabled.
+            tuple: (nifty_buy, banknifty_buy, nifty_sell, banknifty_sell) or None
         """
+        if self._hp_provider is None:
+            return None
+        
+        try:
+            # Fetch Nifty data for buy signals (15m interval)
+            nifty_buy = self._hp_provider.get_stock_data("NIFTY 50", interval="15m", count=50)
+            
+            # Fetch Bank Nifty data for buy signals (15m interval)
+            banknifty_buy = self._hp_provider.get_stock_data("NIFTY BANK", interval="15m", count=50)
+            
+            # Fetch Nifty data for sell signals (5m interval)
+            nifty_sell = self._hp_provider.get_stock_data("NIFTY 50", interval="5m", count=50)
+            
+            # Fetch Bank Nifty data for sell signals (5m interval)
+            banknifty_sell = self._hp_provider.get_stock_data("NIFTY BANK", interval="5m", count=50)
+            
+            # Check if we got valid data for all
+            all_valid = all([
+                nifty_buy is not None and not nifty_buy.empty,
+                banknifty_buy is not None and not banknifty_buy.empty,
+                nifty_sell is not None and not nifty_sell.empty,
+                banknifty_sell is not None and not banknifty_sell.empty,
+            ])
+            
+            if all_valid:
+                return (nifty_buy, banknifty_buy, nifty_sell, banknifty_sell)
+            
+        except Exception as e:
+            default_logger().debug(f"Error fetching Five EMA data: {e}")
+        
         return None
-        # Disabled yfinance code would fetch:
-        # - Nifty/BankNifty sell signals (5m interval)
-        # - Nifty/BankNifty buy signals (15m interval)
     
     # ========================================================================
     # Watchlist Methods

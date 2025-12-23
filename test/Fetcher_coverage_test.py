@@ -238,3 +238,184 @@ class TestFetcherCoverage:
         from pkscreener.classes.Fetcher import TRY_FACTOR
         
         assert TRY_FACTOR == 1
+    
+    # =========================================================================
+    # Tests for High-Performance Data Provider Integration
+    # =========================================================================
+    
+    def test_period_to_count_daily(self, fetcher):
+        """Test _period_to_count for daily intervals."""
+        count = fetcher._period_to_count("1y", "1d")
+        assert count == 365
+        
+        count = fetcher._period_to_count("1mo", "1d")
+        assert count == 30
+        
+        count = fetcher._period_to_count("5d", "1d")
+        assert count == 5
+    
+    def test_period_to_count_intraday(self, fetcher):
+        """Test _period_to_count for intraday intervals."""
+        count = fetcher._period_to_count("1d", "5m")
+        # 1 day * 375 minutes / 5 = 75
+        assert count == 75
+        
+        count = fetcher._period_to_count("1d", "1m")
+        # 1 day * 375 minutes / 1 = 375
+        assert count == 375
+        
+        count = fetcher._period_to_count("1d", "15m")
+        # 1 day * 375 minutes / 15 = 25
+        assert count == 25
+    
+    def test_period_to_count_unknown_period(self, fetcher):
+        """Test _period_to_count with unknown period defaults to 1y."""
+        count = fetcher._period_to_count("unknown", "1d")
+        assert count == 365
+    
+    def test_normalize_interval(self, fetcher):
+        """Test _normalize_interval."""
+        assert fetcher._normalize_interval("1m") == "1m"
+        assert fetcher._normalize_interval("5m") == "5m"
+        assert fetcher._normalize_interval("15m") == "15m"
+        assert fetcher._normalize_interval("1h") == "60m"
+        assert fetcher._normalize_interval("60m") == "60m"
+        assert fetcher._normalize_interval("1d") == "day"
+        assert fetcher._normalize_interval("day") == "day"
+        assert fetcher._normalize_interval("unknown") == "day"
+    
+    def test_normalize_interval_new_intervals(self, fetcher):
+        """Test _normalize_interval for new 2m, 3m, 4m intervals."""
+        assert fetcher._normalize_interval("2m") == "2m"
+        assert fetcher._normalize_interval("3m") == "3m"
+        assert fetcher._normalize_interval("4m") == "4m"
+        assert fetcher._normalize_interval("10m") == "10m"
+        assert fetcher._normalize_interval("30m") == "30m"
+    
+    def test_get_latest_price_no_provider(self, fetcher):
+        """Test getLatestPrice when no HP provider is available."""
+        # Mock _hp_provider to be None
+        fetcher._hp_provider = None
+        
+        price = fetcher.getLatestPrice("SBIN")
+        assert price == 0.0
+    
+    def test_get_latest_price_with_suffix(self, fetcher):
+        """Test getLatestPrice strips exchange suffix."""
+        fetcher._hp_provider = None
+        
+        price = fetcher.getLatestPrice("SBIN.NS", ".NS")
+        assert price == 0.0
+    
+    def test_get_realtime_ohlcv_no_provider(self, fetcher):
+        """Test getRealtimeOHLCV when no HP provider is available."""
+        fetcher._hp_provider = None
+        
+        ohlcv = fetcher.getRealtimeOHLCV("SBIN")
+        assert ohlcv == {}
+    
+    def test_is_realtime_data_available_no_provider(self, fetcher):
+        """Test isRealtimeDataAvailable when no HP provider is available."""
+        fetcher._hp_provider = None
+        
+        available = fetcher.isRealtimeDataAvailable()
+        assert available is False
+    
+    def test_get_all_realtime_data_no_provider(self, fetcher):
+        """Test getAllRealtimeData when no HP provider is available."""
+        fetcher._hp_provider = None
+        
+        data = fetcher.getAllRealtimeData()
+        assert data == {}
+    
+    def test_get_latest_price_with_mock_provider(self, fetcher):
+        """Test getLatestPrice with mocked HP provider."""
+        mock_provider = MagicMock()
+        mock_provider.get_latest_price.return_value = 500.50
+        fetcher._hp_provider = mock_provider
+        
+        price = fetcher.getLatestPrice("SBIN")
+        
+        assert price == 500.50
+        mock_provider.get_latest_price.assert_called_once_with("SBIN")
+    
+    def test_get_realtime_ohlcv_with_mock_provider(self, fetcher):
+        """Test getRealtimeOHLCV with mocked HP provider."""
+        mock_provider = MagicMock()
+        mock_provider.get_realtime_ohlcv.return_value = {
+            'open': 500, 'high': 510, 'low': 495, 'close': 505, 'volume': 100000
+        }
+        fetcher._hp_provider = mock_provider
+        
+        ohlcv = fetcher.getRealtimeOHLCV("SBIN")
+        
+        assert ohlcv['open'] == 500
+        assert ohlcv['close'] == 505
+    
+    def test_is_realtime_data_available_with_mock_provider(self, fetcher):
+        """Test isRealtimeDataAvailable with mocked HP provider."""
+        mock_provider = MagicMock()
+        mock_provider.is_realtime_available.return_value = True
+        fetcher._hp_provider = mock_provider
+        
+        available = fetcher.isRealtimeDataAvailable()
+        
+        assert available is True
+    
+    def test_get_all_realtime_data_with_mock_provider(self, fetcher):
+        """Test getAllRealtimeData with mocked HP provider."""
+        mock_provider = MagicMock()
+        mock_provider.get_all_realtime_data.return_value = {
+            'SBIN': {'close': 500},
+            'INFY': {'close': 1500}
+        }
+        fetcher._hp_provider = mock_provider
+        
+        data = fetcher.getAllRealtimeData()
+        
+        assert 'SBIN' in data
+        assert 'INFY' in data
+    
+    def test_fetch_stock_data_with_hp_provider(self, fetcher):
+        """Test fetchStockData uses HP provider when available."""
+        mock_provider = MagicMock()
+        mock_df = pd.DataFrame({'close': [100, 105, 110]})
+        mock_provider.get_stock_data.return_value = mock_df
+        fetcher._hp_provider = mock_provider
+        
+        result = fetcher.fetchStockData(
+            "SBIN", "5d", "1d", None, 0, 0, 0,
+            printCounter=False
+        )
+        
+        assert result is not None
+        mock_provider.get_stock_data.assert_called_once()
+    
+    def test_fetch_stock_data_hp_provider_exception(self, fetcher):
+        """Test fetchStockData handles HP provider exceptions gracefully."""
+        mock_provider = MagicMock()
+        mock_provider.get_stock_data.side_effect = Exception("Provider error")
+        fetcher._hp_provider = mock_provider
+        
+        # Should not raise, should return None or fallback
+        result = fetcher.fetchStockData(
+            "SBIN", "5d", "1d", None, 0, 0, 0,
+            printCounter=False
+        )
+        
+        # May be None if parent also returns None
+        assert result is None or isinstance(result, pd.DataFrame)
+    
+    def test_hp_data_available_flag(self):
+        """Test _HP_DATA_AVAILABLE flag exists."""
+        from pkscreener.classes import Fetcher
+        
+        # Should be True since PKDevTools is installed
+        assert hasattr(Fetcher, '_HP_DATA_AVAILABLE')
+    
+    def test_yf_available_flag(self):
+        """Test _YF_AVAILABLE flag exists."""
+        from pkscreener.classes import Fetcher
+        
+        # Should exist
+        assert hasattr(Fetcher, '_YF_AVAILABLE')

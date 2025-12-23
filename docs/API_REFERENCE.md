@@ -469,14 +469,67 @@ class pktalib:
 
 **Location**: `pkscreener/classes/Fetcher.py`
 
-Stock data fetching from various sources.
+Stock data fetching from various sources with high-performance real-time support.
 
 ```python
 class screenerStockDataFetcher:
-    """Fetches stock data from various sources."""
+    """
+    Fetches stock data from various sources with priority:
+    1. In-memory candle store (real-time during market hours)
+    2. Local pickle files
+    3. Remote GitHub pickle files
+    """
     
     def __init__(self, configManager: ConfigManager):
-        """Initialize with configuration."""
+        """
+        Initialize with configuration.
+        
+        Also initializes high-performance data provider if available.
+        """
+    
+    def fetchStockData(
+        self,
+        stockCode: str,
+        period: str,
+        duration: str,
+        proxyServer: str = None,
+        screenResultsCounter: int = 0,
+        screenCounter: int = 0,
+        totalSymbols: int = 0,
+        printCounter: bool = False,
+        start: datetime = None,
+        end: datetime = None,
+        exchangeSuffix: str = ".NS",
+        attempt: int = 0
+    ) -> pd.DataFrame:
+        """
+        Fetch stock price data using high-performance data provider.
+        
+        Uses the following priority:
+        1. In-memory candle store (real-time, during market hours)
+        2. Local pickle files
+        3. Remote GitHub pickle files
+        
+        Args:
+            stockCode: Stock symbol (e.g., "RELIANCE")
+            period: Data period (e.g., "1d", "5d", "1mo", "1y")
+            duration: Candle interval (e.g., "1m", "5m", "1d")
+            proxyServer: Optional proxy URL (deprecated, unused)
+            screenResultsCounter: Counter for screening results
+            screenCounter: Current screen position counter
+            totalSymbols: Total number of symbols being processed
+            printCounter: Whether to print progress to console
+            start: Optional start date for data range
+            end: Optional end date for data range
+            exchangeSuffix: Exchange suffix (default: ".NS")
+            attempt: Current retry attempt number
+            
+        Returns:
+            pandas.DataFrame with OHLCV data or None
+            
+        Raises:
+            StockDataEmptyException: If no data is fetched and printCounter is True
+        """
     
     def fetchStockDataWithArgs(
         self,
@@ -492,11 +545,120 @@ class screenerStockDataFetcher:
         Args:
             stockCodes: List of stock symbols
             period: Data period (1d, 5d, 1mo, 3mo, 6mo, 1y, etc.)
-            duration: Candle duration (1m, 5m, 15m, 1h, 1d, etc.)
+            duration: Candle duration (1m, 2m, 3m, 4m, 5m, 10m, 15m, 30m, 60m, 1d)
             exchangeSuffix: Exchange suffix (.NS, .BO, etc.)
             
         Returns:
             Tuple of (stock_data_dict, metadata_dict)
+        """
+    
+    # High-Performance Real-Time Methods
+    
+    def getLatestPrice(
+        self, 
+        symbol: str, 
+        exchangeSuffix: str = ".NS"
+    ) -> float:
+        """
+        Get the latest price for a stock from real-time data.
+        
+        Args:
+            symbol: Stock symbol (e.g., "RELIANCE" or "RELIANCE.NS")
+            exchangeSuffix: Exchange suffix to strip
+            
+        Returns:
+            float: Latest price or 0.0 if not available
+        """
+    
+    def getRealtimeOHLCV(
+        self, 
+        symbol: str, 
+        exchangeSuffix: str = ".NS"
+    ) -> dict:
+        """
+        Get real-time OHLCV data for a stock.
+        
+        Args:
+            symbol: Stock symbol
+            exchangeSuffix: Exchange suffix to strip
+            
+        Returns:
+            dict: {'open': float, 'high': float, 'low': float, 
+                   'close': float, 'volume': int} or empty dict
+        """
+    
+    def isRealtimeDataAvailable(self) -> bool:
+        """
+        Check if real-time data is available.
+        
+        Real-time data is available when:
+        1. PKBrokers is installed
+        2. InMemoryCandleStore has instruments
+        3. Last tick was received within 5 minutes
+        
+        Returns:
+            bool: True if real-time data is available
+        """
+    
+    def getAllRealtimeData(self) -> dict:
+        """
+        Get real-time OHLCV for all available stocks.
+        
+        Returns:
+            dict: Mapping of symbol to OHLCV data
+        """
+    
+    def fetchLatestNiftyDaily(self, proxyServer: str = None) -> pd.DataFrame:
+        """
+        Fetch daily Nifty 50 index data.
+        
+        Args:
+            proxyServer: Optional proxy URL (deprecated)
+            
+        Returns:
+            pandas.DataFrame with Nifty 50 daily data or None
+        """
+    
+    def fetchFiveEmaData(self, proxyServer: str = None) -> tuple:
+        """
+        Fetch data required for the Five EMA strategy.
+        
+        Fetches both Nifty 50 and Bank Nifty data at 5m and 15m intervals.
+        
+        Args:
+            proxyServer: Optional proxy URL (deprecated)
+            
+        Returns:
+            tuple: (nifty_buy, banknifty_buy, nifty_sell, banknifty_sell)
+                   or None if data unavailable
+        """
+    
+    # Internal Helper Methods
+    
+    def _period_to_count(self, period: str, interval: str) -> int:
+        """
+        Convert period string to candle count.
+        
+        Args:
+            period: Period string (e.g., "1y", "1mo", "5d")
+            interval: Interval string (e.g., "5m", "1d")
+            
+        Returns:
+            int: Number of candles
+        """
+    
+    def _normalize_interval(self, interval: str) -> str:
+        """
+        Normalize interval string to standard format.
+        
+        Supported intervals:
+        - 1m, 2m, 3m, 4m, 5m, 10m, 15m, 30m, 60m, day
+        
+        Args:
+            interval: Input interval string
+            
+        Returns:
+            str: Normalized interval
         """
     
     def fetchFileFromHostServer(
