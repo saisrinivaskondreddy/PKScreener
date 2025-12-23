@@ -139,6 +139,9 @@ jobs:
         pwd
         sudo dpkg -i ta-lib_0.6.4_amd64.deb
         cd /home/runner/work/PKScreener/PKScreener/
+        # Pin numpy<2.0 to avoid incompatibility with ta-lib 0.6.0
+        # ta-lib uses deprecated NumPy C API that was removed in NumPy 2.x
+        pip3 install "numpy<2.0"
         pip3 install ta-lib==0.6.0
 
     - name: Environment setup to get latest EXE
