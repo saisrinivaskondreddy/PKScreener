@@ -141,7 +141,7 @@ jobs:
         cd /home/runner/work/PKScreener/PKScreener/
         # Pin numpy<2.0 to avoid incompatibility with ta-lib 0.6.0
         # ta-lib uses deprecated NumPy C API that was removed in NumPy 2.x
-        pip3 install "numpy<2.0" setuptools cython
+        pip3 install "numpy<2.0" setuptools "cython<3.0"
         pip3 install --no-build-isolation ta-lib==0.6.0
 
     - name: Environment setup to get latest EXE
@@ -178,9 +178,20 @@ jobs:
         /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -d -a Y
         /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -d -a Y -i 1m
         rm -rf results/*.lck || true
-        ls -l results
-        cp results/*.pkl actions-data-download
-        ls -l actions-data-download
+        echo "=== Listing results directory ==="
+        ls -la results/ || echo "results/ not found"
+        echo "=== Listing results/Data directory ==="
+        ls -la results/Data/ || echo "results/Data/ not found"
+        echo "=== Copying pkl files ==="
+        # Copy pkl files from results/Data/ (where Archiver saves them)
+        cp results/Data/*.pkl actions-data-download/ 2>/dev/null && echo "Copied from results/Data/" || true
+        # Also try copying from results/ directly
+        cp results/*.pkl actions-data-download/ 2>/dev/null && echo "Copied from results/" || true
+        # List all pkl files found recursively
+        echo "=== All pkl files in results ==="
+        find results -name "*.pkl" -type f 2>/dev/null || echo "No pkl files found"
+        echo "=== Contents of actions-data-download ==="
+        ls -la actions-data-download/
         git status
       env:
         GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
