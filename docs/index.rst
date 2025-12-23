@@ -260,3 +260,41 @@ Troubleshooting and Logs
 If you are having issues running the program, you can just launch a command line interface (On windows> Start > Run > cmd) and then launch PKScreener with a command line option of ``-l``. For example, ``python pkscreenercli.py -l``. This will show you the path where the program will save all the log outputs from this run. Copy that path and go ahead and run the application. Altenatively, you can just go ahead and modify the ``logsEnabled`` value to ``y``, save & close it and then run ``python pkscreenercli.py``.
 
 After you have finished the run, go to that copied path, zip the contents of the file ``pkscreener-logs.txt`` and create an issue at https://github.com/pkjmesra/PKScreener/issues. Please do not forget to attach the log files in the issue.
+
+Developer Documentation
+-----------------------
+
+For developers looking to contribute to PKScreener, comprehensive documentation is available:
+
+.. list-table:: Developer Documentation
+   :widths: 25 75
+   :header-rows: 1
+
+   * - Document
+     - Description
+   * - `Developer Guide <DEVELOPER_GUIDE.md>`_
+     - Getting started, project structure, development workflow
+   * - `Architecture <ARCHITECTURE.md>`_
+     - System architecture, component details, data flow diagrams
+   * - `Scan Workflows <SCAN_WORKFLOWS.md>`_
+     - Detailed documentation for all 47+ scan categories and options
+   * - `API Reference <API_REFERENCE.md>`_
+     - Key classes, methods, and function signatures
+   * - `Testing Guide <TESTING.md>`_
+     - Writing and running tests, mocking guidelines, coverage targets
+
+Contributing
+------------
+
+We welcome contributions! Please see our `Contributing Guide <../CONTRIBUTING.md>`_ for:
+
+* Code style guidelines
+* Pull request process
+* Testing requirements
+* Issue reporting
+
+Quick links for developers:
+
+* **GitHub Issues**: https://github.com/pkjmesra/PKScreener/issues
+* **GitHub Discussions**: https://github.com/pkjmesra/PKScreener/discussions
+* **Source Code**: https://github.com/pkjmesra/PKScreener
