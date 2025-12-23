@@ -666,3 +666,4 @@ class BacktestHandler:
             
         return True
 
+

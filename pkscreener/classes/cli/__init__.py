@@ -7,3 +7,4 @@ from pkscreener.classes.cli.PKCliRunner import PKCliRunner, IntradayAnalysisRunn
 
 __all__ = ['PKCliRunner', 'IntradayAnalysisRunner', 'CliConfigManager']
 
+

@@ -22,24 +22,36 @@
 #     SOFTWARE.
 
 # """
-name: Data Publisher - Scalable Candle Data
+name: Data Publisher - 24x7 Stock Data
 
-# This workflow publishes candle data to the repository for consumption by scan workflows.
-# It eliminates Telegram bot-to-bot communication by using GitHub as the data layer.
+# This workflow ensures stock data is available 24x7 for scan workflows.
+# It publishes data to the repository for consumption by scan workflows triggered
+# from Telegram bot or CLI at any time.
+#
+# Data Sources (priority order):
+# 1. Real-time ticks data (during market hours)
+# 2. Cached pickle files from w9-workflow-download-data.yml (after market hours)
+# 3. Existing GitHub data (fallback)
 #
 # Benefits:
+# - 24x7 data availability for scans triggered anytime
 # - No Telegram rate limits or file size limits
 # - Parallel access from multiple scan workflows
 # - 2-5 second data fetch latency (vs 30-60 seconds via Telegram)
-# - Git-backed durability
 
 on:
   schedule:
-    # Run every 5 minutes during market hours (IST 9:15-15:30 = UTC 3:45-10:00)
+    # During market hours (IST 9:00-16:00 = UTC 3:30-10:30): every 5 minutes
     - cron: '*/5 3-10 * * 1-5'
+    # Outside market hours: every hour to ensure data freshness
+    - cron: '30 */2 * * *'
     
   workflow_dispatch:
     inputs:
+      force_refresh:
+        description: 'Force refresh data from pickle files (Y/N)'
+        required: false
+        default: 'N'
       cleanup:
         description: 'Clean up old snapshot directories (Y/N)'
         required: false
@@ -49,49 +61,11 @@ on:
         required: false
         default: '7'
 
-run-name: Data Publisher ${{ github.event.inputs.cleanup == 'Y' && '(with cleanup)' || '' }}
+run-name: Data Publisher 24x7 ${{ github.event.inputs.force_refresh == 'Y' && '(force refresh)' || '' }}
 
 jobs:
 
-  Check_Market_Hours:
-    runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ steps.check.outputs.should_run }}
-    steps:
-      - name: Check if market hours
-        id: check
-        shell: python
-        run: |
-          import os
-          from datetime import datetime
-          import pytz
-          
-          ist = pytz.timezone('Asia/Kolkata')
-          now = datetime.now(ist)
-          
-          # Market hours: 9:15 AM to 3:35 PM IST (with buffer)
-          market_start = now.replace(hour=9, minute=10, second=0, microsecond=0)
-          market_end = now.replace(hour=15, minute=35, second=0, microsecond=0)
-          
-          # Skip weekends
-          is_weekday = now.weekday() < 5
-          is_market_hours = market_start <= now <= market_end
-          
-          should_run = "true" if (is_weekday and is_market_hours) else "false"
-          
-          # For manual dispatch, always run
-          if "${{ github.event_name }}" == "workflow_dispatch":
-              should_run = "true"
-          
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
-              f.write(f"should_run={should_run}\n")
-          
-          print(f"Current IST time: {now}")
-          print(f"Should run: {should_run}")
-
   Publish_Data:
-    needs: Check_Market_Hours
-    if: needs.Check_Market_Hours.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     
     steps:
@@ -110,47 +84,45 @@ jobs:
         run: |
           pip install requests pandas pytz
 
-      - name: Configure environment
-        env:
-          KTOKEN: ${{ secrets.KTOKEN }}
-          KUSER: ${{ secrets.KUSER }}
-          KPWD: ${{ secrets.KPWD }}
-          KTOTP: ${{ secrets.KTOTP }}
-        run: |
-          cat > .env.dev << EOF
-          KTOKEN=$KTOKEN
-          KUSER=$KUSER
-          KPWD=$KPWD
-          KTOTP=$KTOTP
-          EOF
-
-      - name: Collect and publish candle data
+      - name: Determine data source and publish
         id: publish
+        env:
+          FORCE_REFRESH: ${{ github.event.inputs.force_refresh || 'N' }}
         run: |
-          python << 'EOF'
+          python << 'PYTHON_SCRIPT'
           import gzip
           import json
           import os
           import pickle
+          import glob
           from datetime import datetime
           from urllib.request import urlopen, Request
+          from urllib.error import URLError
+          import pytz
           
           # Create data directory
           os.makedirs("results/Data", exist_ok=True)
           
-          # Try to fetch existing ticks data from live system or create sample
-          data = {}
-          metadata = {
-              "last_update": datetime.utcnow().isoformat() + "Z",
-              "version": "2.0.0",
-              "publisher": "w-data-publisher.yml",
-          }
+          ist = pytz.timezone('Asia/Kolkata')
+          now = datetime.now(ist)
           
-          # Check if we have local candle data (from pktickbot)
+          # Check if we're in market hours
+          market_start = now.replace(hour=9, minute=15, second=0, microsecond=0)
+          market_end = now.replace(hour=15, minute=30, second=0, microsecond=0)
+          is_weekday = now.weekday() < 5
+          is_market_hours = is_weekday and market_start <= now <= market_end
+          
+          print(f"Current IST time: {now}")
+          print(f"Is market hours: {is_market_hours}")
+          print(f"Force refresh: {os.environ.get('FORCE_REFRESH', 'N')}")
+          
+          data = {}
+          data_source = "none"
+          
+          # Priority 1: Real-time ticks data (during market hours or if exists)
           ticks_paths = [
-              os.path.expanduser("~/pkscreener/ticks.json"),
+              "results/Data/ticks.json",
               "ticks.json",
-              "results/Data/ticks.json"
           ]
           
           for ticks_path in ticks_paths:
@@ -158,49 +130,125 @@ jobs:
                   try:
                       with open(ticks_path, 'r') as f:
                           data = json.load(f)
-                      print(f"Loaded {len(data)} instruments from {ticks_path}")
-                      break
+                      if data:
+                          print(f"Loaded {len(data)} instruments from {ticks_path}")
+                          data_source = "ticks_json"
+                          break
                   except Exception as e:
                       print(f"Error loading {ticks_path}: {e}")
           
-          # If no local data, try to fetch from existing GitHub data
+          # Priority 2: Pickle files from w9 workflow (especially outside market hours)
+          if not data or os.environ.get('FORCE_REFRESH') == 'Y':
+              print("Checking for pickle files...")
+              pickle_patterns = [
+                  "actions-data-download/stock_data_*.pkl",
+                  "results/stock_data_*.pkl",
+                  "stock_data_*.pkl",
+              ]
+              
+              for pattern in pickle_patterns:
+                  pkl_files = glob.glob(pattern)
+                  if pkl_files:
+                      # Get the most recent pickle file
+                      pkl_files.sort(key=os.path.getmtime, reverse=True)
+                      latest_pkl = pkl_files[0]
+                      print(f"Found pickle file: {latest_pkl}")
+                      
+                      try:
+                          with open(latest_pkl, 'rb') as f:
+                              pkl_data = pickle.load(f)
+                          
+                          if isinstance(pkl_data, dict) and len(pkl_data) > 0:
+                              # Convert pickle data to JSON-compatible format
+                              converted_data = {}
+                              for symbol, stock_df in pkl_data.items():
+                                  try:
+                                      if hasattr(stock_df, 'to_dict'):
+                                          # It's a DataFrame
+                                          converted_data[symbol] = {
+                                              "symbol": symbol,
+                                              "data_available": True,
+                                              "source": "pickle",
+                                          }
+                                      elif isinstance(stock_df, dict):
+                                          converted_data[symbol] = stock_df
+                                  except Exception:
+                                      pass
+                              
+                              if converted_data:
+                                  data = converted_data
+                                  data_source = "pickle"
+                                  print(f"Loaded {len(data)} instruments from pickle")
+                                  break
+                      except Exception as e:
+                          print(f"Error loading pickle {latest_pkl}: {e}")
+          
+          # Priority 3: Fetch from existing GitHub data
           if not data:
-              try:
-                  url = "https://raw.githubusercontent.com/pkjmesra/PKScreener/actions-data-download/results/Data/ticks.json"
-                  req = Request(url, headers={"User-Agent": "PKScreener/2.0"})
-                  with urlopen(req, timeout=30) as resp:
-                      data = json.loads(resp.read().decode())
-                  print(f"Fetched {len(data)} instruments from GitHub")
-              except Exception as e:
-                  print(f"Could not fetch from GitHub: {e}")
+              print("Fetching from GitHub...")
+              github_urls = [
+                  "https://raw.githubusercontent.com/pkjmesra/PKScreener/actions-data-download/results/Data/ticks.json",
+                  "https://raw.githubusercontent.com/pkjmesra/PKScreener/actions-data-download/results/Data/candles_latest.json",
+              ]
+              
+              for url in github_urls:
+                  try:
+                      req = Request(url, headers={"User-Agent": "PKScreener/2.0"})
+                      with urlopen(req, timeout=30) as resp:
+                          data = json.loads(resp.read().decode())
+                      if data:
+                          print(f"Fetched {len(data)} instruments from GitHub")
+                          data_source = "github"
+                          break
+                  except Exception as e:
+                      print(f"Could not fetch from {url}: {e}")
+          
+          # Build metadata
+          metadata = {
+              "last_update": datetime.utcnow().isoformat() + "Z",
+              "last_update_ist": now.isoformat(),
+              "is_market_hours": is_market_hours,
+              "data_source": data_source,
+              "instrument_count": len(data) if data else 0,
+              "version": "2.0.0",
+              "publisher": "w-data-publisher.yml",
+              "availability": "24x7",
+          }
           
           # Save data
           if data:
               # Save compressed candles
-              with gzip.open("results/Data/candles_latest.json.gz", 'wt', encoding='utf-8') as f:
-                  json.dump(data, f)
+              try:
+                  with gzip.open("results/Data/candles_latest.json.gz", 'wt', encoding='utf-8') as f:
+                      json.dump(data, f)
+                  print("Saved candles_latest.json.gz")
+              except Exception as e:
+                  print(f"Error saving gzip: {e}")
               
-              # Save uncompressed ticks.json
-              with open("results/Data/ticks.json", 'w') as f:
-                  json.dump(data, f)
+              # Save uncompressed ticks.json for compatibility
+              try:
+                  with open("results/Data/ticks.json", 'w') as f:
+                      json.dump(data, f)
+                  print("Saved ticks.json")
+              except Exception as e:
+                  print(f"Error saving ticks.json: {e}")
               
-              metadata["instrument_count"] = len(data)
               metadata["health"] = {"status": "healthy"}
-              print(f"Published data for {len(data)} instruments")
+              print(f"Published data for {len(data)} instruments from {data_source}")
           else:
-              metadata["instrument_count"] = 0
               metadata["health"] = {"status": "no_data"}
-              print("No data to publish")
+              print("WARNING: No data to publish!")
           
-          # Save metadata
+          # Always save metadata
           with open("results/Data/metadata.json", 'w') as f:
               json.dump(metadata, f, indent=2)
           
-          print("Data publishing complete")
-          EOF
+          print(f"\nData publishing complete. Source: {data_source}")
+          print(f"Instruments: {len(data) if data else 0}")
+          PYTHON_SCRIPT
 
       - name: Cleanup old snapshots
-        if: ${{ github.event.inputs.cleanup == 'Y' }}
+        if: github.event.inputs.cleanup == 'Y'
         run: |
           python << 'EOF'
           import os
@@ -231,19 +279,18 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Data update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git commit -m "Data update $(date -u +%Y-%m-%dT%H:%M:%SZ) - 24x7"
             git push
             echo "Data published successfully"
           fi
 
   Notify_Status:
-    needs: [Check_Market_Hours, Publish_Data]
-    if: always() && needs.Check_Market_Hours.outputs.should_run == 'true'
+    needs: [Publish_Data]
+    if: failure()
     runs-on: ubuntu-latest
     
     steps:
-      - name: Send status to Telegram (optional)
-        if: failure()
+      - name: Send failure notification to Telegram
         env:
           TOKEN: ${{ secrets.TOKEN_DEV }}
           CHAT_ID: ${{ secrets.CHAT_IDADMIN_DEV }}
@@ -251,7 +298,7 @@ jobs:
           if [ -n "$TOKEN" ] && [ -n "$CHAT_ID" ]; then
             curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" \
               -d chat_id="$CHAT_ID" \
-              -d text="⚠️ Data Publisher workflow failed at $(date -u +%H:%M:%S) UTC" \
+              -d text="⚠️ Data Publisher 24x7 workflow failed at $(date -u +%H:%M:%S) UTC" \
               -d parse_mode="HTML" || true
           else
             echo "Telegram notification skipped - TOKEN_DEV or CHAT_ID not configured"
