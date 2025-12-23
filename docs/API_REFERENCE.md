@@ -6,11 +6,9 @@ This document provides detailed API documentation for the key classes and functi
 
 ## Table of Contents
 1. [Core Classes](#core-classes)
-2. [Screening Classes](#screening-classes)
-3. [Data Classes](#data-classes)
-4. [Utility Classes](#utility-classes)
-5. [Configuration](#configuration)
-6. [Global Functions](#global-functions)
+2. [Data Classes](#data-classes)
+3. [Utility Classes](#utility-classes)
+4. [Global Functions](#global-functions)
 
 ---
 

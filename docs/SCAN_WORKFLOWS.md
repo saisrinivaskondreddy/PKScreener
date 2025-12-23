@@ -9,9 +9,8 @@ This document provides detailed documentation for each scan category and their e
 2. [Main Scan Categories (Level 0)](#main-scan-categories-level-0)
 3. [Index Selection (Level 1)](#index-selection-level-1)
 4. [Scanner Options (Level 2)](#scanner-options-level-2)
-5. [Sub-Options (Level 3+)](#sub-options-level-3)
-6. [Piped Scanners](#piped-scanners)
-7. [Adding New Scanners](#adding-new-scanners)
+5. [Piped Scanners](#piped-scanners)
+6. [Adding New Scanners](#adding-new-scanners)
 
 ---
 

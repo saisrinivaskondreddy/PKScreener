@@ -75,7 +75,7 @@ Volume>2.5x → High Momentum → ATR Cross
 
 ## Contributing
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for:
+See [Contributing Guidelines](https://github.com/pkjmesra/PKScreener/blob/main/CONTRIBUTING.md) for:
 - Code style guidelines
 - Pull request process
 - Testing requirements

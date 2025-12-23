@@ -521,4 +521,4 @@ def test_fetch_data():
 ## See Also
 - [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) - Development setup
 - [API_REFERENCE.md](API_REFERENCE.md) - API documentation
-- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
+- [Contributing Guidelines](https://github.com/pkjmesra/PKScreener/blob/main/CONTRIBUTING.md) - Contribution guidelines

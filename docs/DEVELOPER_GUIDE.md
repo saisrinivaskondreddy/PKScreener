@@ -354,4 +354,4 @@ print(json.dumps(screenDict, indent=2, default=str))
 ## Next Steps
 - See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed system architecture
 - See [SCAN_WORKFLOWS.md](SCAN_WORKFLOWS.md) for scan category details
-- See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines
+- See [Contributing Guidelines](https://github.com/pkjmesra/PKScreener/blob/main/CONTRIBUTING.md) for contribution guidelines
