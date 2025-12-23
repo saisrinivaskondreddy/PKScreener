@@ -104,7 +104,7 @@ jobs:
               ulimit -n
               coverage erase
               # coverage run --source=${package_name} --branch -m pytest -vv --durations-min=0.005 --cov-config=.coveragerc --disable-warnings --durations=0
-              coverage run --branch -m pytest -vv --cov-config=.coveragerc
+              coverage run --branch -m pytest -vv --cov-config=.coveragerc --timeout=60
           # - os: windows-latest
           #   TARGET: Windows
           #   CMD_BUILD: |
