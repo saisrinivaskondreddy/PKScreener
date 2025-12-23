@@ -275,8 +275,47 @@ print(f"Cache size: {stats['cache_size']}")
 provider.clear_cache()
 ```
 
+
+## 24x7 Data Availability
+
+The high-performance data system is designed to work 24x7, ensuring stock data is always available for scans:
+
+| Time Period | Data Source | Description |
+|-------------|-------------|-------------|
+| **Market Hours** (9:15 AM - 3:30 PM IST) | InMemoryCandleStore | Real-time tick aggregation |
+| **After Market** | Pickle Files | EOD data from w9-workflow |
+| **Weekends/Holidays** | Cached Data | Last trading session data |
+
+### Data Source Priority (24x7)
+
+```
++------------------------------------------------------------------+
+| Priority 1: InMemoryCandleStore (Real-time)                       |
+|    -> Live tick data during market hours                          |
+|                                                                   |
+| Priority 2: PKScalableDataFetcher (GitHub Raw)                    |
+|    -> Pre-published data via w-data-publisher.yml                 |
+|                                                                   |
+| Priority 3: Local Pickle Cache                                    |
+|    -> Downloaded data from previous sessions                      |
+|                                                                   |
+| Priority 4: Remote GitHub Pickle Files                            |
+|    -> 52-week historical data from w9-workflow                    |
++------------------------------------------------------------------+
+```
+
+### How It Works
+
+1. **During Market Hours**: Real-time ticks from Zerodha WebSocket are aggregated into candles
+2. **After Market Close**: w9-workflow downloads 52-week data and saves to pickle files
+3. **24x7 Publisher**: w-data-publisher.yml runs every 5 min during market, every 2 hours otherwise
+4. **Scan Anytime**: Users can trigger scans from Telegram bot at any time with available data
+
+See [Scalable Architecture](SCALABLE_ARCHITECTURE.md) for detailed 24x7 implementation.
+
 ## See Also
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
+- [Scalable Architecture](SCALABLE_ARCHITECTURE.md) - 24x7 data availability, GitHub-based data layer
 - [API_REFERENCE.md](API_REFERENCE.md) - API documentation
 - [PKBrokers HIGH_PERFORMANCE_CANDLES.md](../../PKBrokers/pkbrokers/kite/HIGH_PERFORMANCE_CANDLES.md) - PKBrokers documentation

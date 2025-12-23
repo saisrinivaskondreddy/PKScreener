@@ -530,6 +530,132 @@ class PKTickBot:
 }
 ```
 
+
+## 24x7 Data Availability
+
+The system is designed to provide stock data availability around the clock, enabling users to trigger scans from the Telegram bot at any time.
+
+### Architecture Overview
+
+```
++---------------------------------------------------------------------+
+|                      24x7 DATA AVAILABILITY                          |
++---------------------------------------------------------------------+
+|                                                                      |
+|  MARKET HOURS (9:15 AM - 3:30 PM IST, Mon-Fri)                      |
+|  +-- w-data-publisher.yml runs every 5 minutes                      |
+|  +-- Uses real-time ticks from PKTickBot/InMemoryCandleStore        |
+|  +-- Aggregates into 1m, 2m, 3m, 4m, 5m, 10m, 15m, 30m, 60m candles |
+|  +-- Publishes fresh data to GitHub (results/Data/)                 |
+|                                                                      |
+|  AFTER MARKET HOURS                                                  |
+|  +-- w9-workflow-download-data.yml runs at 3:28 PM IST             |
+|  +-- Downloads 52-week historical data for all stocks              |
+|  +-- Saves pickle files to actions-data-download/                   |
+|  +-- w-data-publisher.yml runs every 2 hours, uses pickle data     |
+|                                                                      |
+|  WEEKENDS & HOLIDAYS                                                 |
+|  +-- Data publisher continues running every 2 hours                 |
+|  +-- Uses last available pickle/cached data                         |
+|  +-- Ensures data is always accessible via GitHub                   |
+|                                                                      |
+|  USER TRIGGERS SCAN (anytime, 24x7)                                 |
+|  +-- Telegram bot -> GitHub workflow dispatch                        |
+|  +-- Scan workflow fetches from GitHub raw content                  |
+|  +-- Data always available (fresh during market, cached otherwise)  |
+|  +-- 2-5 second latency vs 30-60 seconds via Telegram              |
+|                                                                      |
++---------------------------------------------------------------------+
+```
+
+### Data Source Priority (24x7)
+
+The system uses a layered approach to ensure data is always available:
+
+| Priority | Source | When Used | Latency |
+|----------|--------|-----------|---------|
+| 1 | Real-time ticks (InMemoryCandleStore) | Market hours, live tick collection | Instant |
+| 2 | GitHub ticks.json | Fresh data published during market | 2-5s |
+| 3 | Pickle files (w9 workflow) | After market, weekends, holidays | 2-5s |
+| 4 | Local disk cache | Network issues, fallback | Instant |
+| 5 | Stale cache data | All sources fail | Instant |
+
+### Workflow Schedule
+
+```yaml
+# w-data-publisher.yml schedule
+on:
+  schedule:
+    # During market hours: every 5 minutes
+    - cron: '*/5 3-10 * * 1-5'  # UTC (IST 9:00-16:00)
+    # Outside market hours: every 2 hours for 24x7 availability
+    - cron: '30 */2 * * *'
+```
+
+### Data Freshness Guarantees
+
+| Time Period | Data Type | Max Age | Update Frequency |
+|-------------|-----------|---------|------------------|
+| Market hours | Real-time ticks | 5 min | Every 5 min |
+| After market (same day) | End-of-day OHLCV | 2 hours | Every 2 hours |
+| Weekends/Holidays | Last trading day | 2 hours | Every 2 hours |
+| Network failure | Cached data | 24 hours | On recovery |
+
+### Integration with Existing Workflows
+
+The 24x7 data availability integrates with existing PKScreener workflows:
+
+1. **w7-workflow-prod-scans-trigger.yml** - Scheduled production scans
+   - Now uses GitHub data layer instead of Telegram
+   - Can run anytime with available data
+
+2. **w8-workflow-alert-scan_generic.yml** - User-triggered scans
+   - Fetches data from GitHub raw content
+   - Works 24x7 with appropriate data (fresh or cached)
+
+3. **w9-workflow-download-data.yml** - After-market data download
+   - Downloads 52-week historical data
+   - Pickle files used by data publisher for non-market hours
+
+### User Experience
+
+Users can trigger scans from Telegram at any time:
+
+```
++------------------------------------------------------------------+
+| User: /scan X:12:7:4 (at 11:00 PM IST)                            |
+|                                                                    |
+| System:                                                            |
+| 1. Bot receives command -> Triggers GitHub workflow               |
+| 2. Workflow starts -> Fetches data from GitHub                    |
+| 3. Data source: End-of-day OHLCV from last trading session        |
+| 4. Scan runs with available data                                   |
+| 5. Results posted to Telegram                                      |
+|                                                                    |
+| Response: "Scan complete! Using data from 2024-01-15 EOD"         |
++------------------------------------------------------------------+
+```
+
+### Metadata Tracking
+
+The data publisher maintains metadata for transparency:
+
+```json
+{
+  "last_update": "2024-01-15T22:30:00Z",
+  "last_update_ist": "2024-01-16T04:00:00+05:30",
+  "is_market_hours": false,
+  "data_source": "pickle",
+  "instrument_count": 2500,
+  "version": "2.0.0",
+  "publisher": "w-data-publisher.yml",
+  "availability": "24x7",
+  "health": {
+    "status": "healthy"
+  }
+}
+```
+
 ## Summary
 
 | Aspect | Before | After |
@@ -540,3 +666,5 @@ class PKTickBot:
 | Reliability | Depends on Telegram | Git-backed durability |
 | Cost | High GitHub minutes | 66% reduction |
 | Complexity | Bot-to-bot messaging | Simple HTTP GET |
+| **Availability** | **Market hours only** | **24x7** |
+| **After-hours scans** | **Not supported** | **Full support with EOD data** |
