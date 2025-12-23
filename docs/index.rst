@@ -272,21 +272,21 @@ For developers looking to contribute to PKScreener, comprehensive documentation 
 
    * - Document
      - Description
-   * - `Developer Guide <DEVELOPER_GUIDE.md>`_
+   * - :doc:`Developer Guide <DEVELOPER_GUIDE>`
      - Getting started, project structure, development workflow
-   * - `Architecture <ARCHITECTURE.md>`_
+   * - :doc:`Architecture <ARCHITECTURE>`
      - System architecture, component details, data flow diagrams
-   * - `Scan Workflows <SCAN_WORKFLOWS.md>`_
+   * - :doc:`Scan Workflows <SCAN_WORKFLOWS>`
      - Detailed documentation for all 47+ scan categories and options
-   * - `API Reference <API_REFERENCE.md>`_
+   * - :doc:`API Reference <API_REFERENCE>`
      - Key classes, methods, and function signatures
-   * - `Testing Guide <TESTING.md>`_
+   * - :doc:`Testing Guide <TESTING>`
      - Writing and running tests, mocking guidelines, coverage targets
 
 Contributing
 ------------
 
-We welcome contributions! Please see our `Contributing Guide <../CONTRIBUTING.md>`_ for:
+We welcome contributions! Please see our `Contributing Guide <https://github.com/pkjmesra/PKScreener/blob/main/CONTRIBUTING.md>`_ for:
 
 * Code style guidelines
 * Pull request process
@@ -298,3 +298,15 @@ Quick links for developers:
 * **GitHub Issues**: https://github.com/pkjmesra/PKScreener/issues
 * **GitHub Discussions**: https://github.com/pkjmesra/PKScreener/discussions
 * **Source Code**: https://github.com/pkjmesra/PKScreener
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Developer Documentation
+
+   DEVELOPER_GUIDE
+   ARCHITECTURE
+   SCAN_WORKFLOWS
+   API_REFERENCE
+   TESTING
+   README

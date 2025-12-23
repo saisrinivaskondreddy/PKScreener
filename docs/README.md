@@ -6,11 +6,12 @@ Welcome to the PKScreener developer documentation. This documentation is designe
 
 | Document | Description |
 |----------|-------------|
-| [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md) | Getting started, project structure, development workflow |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture, component details, data flow |
-| [SCAN_WORKFLOWS.md](SCAN_WORKFLOWS.md) | Detailed scan category workflows, option formats |
-| [API_REFERENCE.md](API_REFERENCE.md) | Key classes, methods, and function signatures |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | Contribution guidelines, code of conduct |
+| [Developer Guide](DEVELOPER_GUIDE.md) | Getting started, project structure, development workflow |
+| [Architecture](ARCHITECTURE.md) | System architecture, component details, data flow |
+| [Scan Workflows](SCAN_WORKFLOWS.md) | Detailed scan category workflows, option formats |
+| [API Reference](API_REFERENCE.md) | Key classes, methods, and function signatures |
+| [Testing Guide](TESTING.md) | Writing and running tests, mocking guidelines |
+| [Contributing](https://github.com/pkjmesra/PKScreener/blob/main/CONTRIBUTING.md) | Contribution guidelines, code of conduct |
 
 ## Overview
 
