@@ -8,6 +8,7 @@ Welcome to the PKScreener developer documentation. This documentation is designe
 |----------|-------------|
 | [Developer Guide](DEVELOPER_GUIDE.md) | Getting started, project structure, development workflow |
 | [Architecture](ARCHITECTURE.md) | System architecture, component details, data flow |
+| [Scalable Architecture](SCALABLE_ARCHITECTURE.md) | **NEW** GitHub-based data layer, workflow orchestration |
 | [High-Performance Data](HIGH_PERFORMANCE_DATA.md) | Real-time data system, in-memory candle store |
 | [Scan Workflows](SCAN_WORKFLOWS.md) | Detailed scan category workflows, option formats |
 | [API Reference](API_REFERENCE.md) | Key classes, methods, and function signatures |
@@ -34,6 +35,13 @@ PKScreener is a stock screening and analysis tool that provides:
 └─────────────────────────────────────────────────────────────┘
                               │
 ┌─────────────────────────────────────────────────────────────┐
+│              GitHub Actions Workflow Layer                   │
+│   w7-workflow-prod-scans-trigger.yml (Scheduler)            │
+│   w8-workflow-alert-scan_generic.yml (Scan Runner)          │
+│   w-data-publisher.yml (Data Publisher)                     │
+└─────────────────────────────────────────────────────────────┘
+                              │
+┌─────────────────────────────────────────────────────────────┐
 │                  Core Orchestration                          │
 │                     globals.py                               │
 │   main() → getScannerMenuChoices() → runScanners()          │
@@ -48,17 +56,18 @@ PKScreener is a stock screening and analysis tool that provides:
 ┌─────────────────────────────────────────────────────────────┐
 │                High-Performance Data Layer                   │
 │  ┌───────────────────────────────────────────────────────┐ │
-│  │ PKBrokers: InMemoryCandleStore (Real-time)            │ │
-│  │    ↓ fallback                                          │ │
-│  │ PKDevTools: PKDataProvider (Unified Access)           │ │
-│  │    ↓ fallback                                          │ │
-│  │ Local/Remote Pickle Files (Cached)                    │ │
+│  │ Priority 1: PKBrokers InMemoryCandleStore (Real-time) │ │
+│  │ Priority 2: PKScalableDataFetcher (GitHub Raw)        │ │
+│  │ Priority 3: PKDataProvider (Local Cache)              │ │
+│  │ Priority 4: Remote Pickle Files (Fallback)            │ │
 │  └───────────────────────────────────────────────────────┘ │
 │  Intervals: 1m, 2m, 3m, 4m, 5m, 10m, 15m, 30m, 60m, daily  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-**Data Flow**: See [High-Performance Data](HIGH_PERFORMANCE_DATA.md) for details.
+**Data Flow**: 
+- Real-time: See [High-Performance Data](HIGH_PERFORMANCE_DATA.md)
+- Workflow-based: See [Scalable Architecture](SCALABLE_ARCHITECTURE.md)
 
 ## Key Concepts
 

@@ -58,6 +58,13 @@ try:
 except ImportError:
     _HP_DATA_AVAILABLE = False
 
+# Import scalable data fetcher (GitHub-based, no Telegram dependency)
+try:
+    from PKDevTools.classes.PKScalableDataFetcher import get_scalable_fetcher, PKScalableDataFetcher
+    _SCALABLE_FETCHER_AVAILABLE = True
+except ImportError:
+    _SCALABLE_FETCHER_AVAILABLE = False
+
 # Keep yfinance as optional fallback (deprecated)
 try:
     import yfinance as yf
@@ -116,9 +123,19 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         """Initialize the screener stock data fetcher."""
         super().__init__(configManager)
         self._hp_provider = None
+        self._scalable_fetcher = None
+        
+        # Initialize high-performance data provider (real-time)
         if _HP_DATA_AVAILABLE:
             try:
                 self._hp_provider = get_data_provider()
+            except Exception:
+                pass
+        
+        # Initialize scalable fetcher (GitHub-based, for workflows)
+        if _SCALABLE_FETCHER_AVAILABLE:
+            try:
+                self._scalable_fetcher = get_scalable_fetcher()
             except Exception:
                 pass
     
@@ -289,7 +306,7 @@ class screenerStockDataFetcher(nseStockDataFetcher):
         # Map interval format
         normalized_interval = self._normalize_interval(duration)
         
-        # Try high-performance data provider first
+        # Priority 1: Try high-performance data provider first (in-memory candle store)
         if self._hp_provider is not None:
             try:
                 data = self._hp_provider.get_stock_data(
@@ -302,7 +319,18 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             except Exception as e:
                 default_logger().debug(f"HP provider failed for {symbol}: {e}")
         
-        # If HP provider didn't return data, try parent class method
+        # Priority 2: Try scalable fetcher (GitHub-based, works in workflows)
+        if (data is None or (hasattr(data, 'empty') and data.empty)) and self._scalable_fetcher is not None:
+            try:
+                data = self._scalable_fetcher.get_stock_data(
+                    symbol,
+                    interval=normalized_interval,
+                    count=count,
+                )
+            except Exception as e:
+                default_logger().debug(f"Scalable fetcher failed for {symbol}: {e}")
+        
+        # Priority 3: If both failed, try parent class method (pickle files)
         if data is None or (hasattr(data, 'empty') and data.empty):
             try:
                 data = super().fetchStockData(
@@ -430,6 +458,121 @@ class screenerStockDataFetcher(nseStockDataFetcher):
             except Exception:
                 pass
         return {}
+    
+    def isDataFresh(self, max_age_seconds: int = 900) -> bool:
+        """
+        Check if the available data is fresh enough for scans.
+        
+        This method checks both the real-time provider and the scalable
+        fetcher to determine if we have recent data.
+        
+        Args:
+            max_age_seconds: Maximum acceptable age in seconds (default 15 min)
+            
+        Returns:
+            bool: True if data is fresh
+        """
+        # Check real-time provider first
+        if self._hp_provider is not None:
+            try:
+                if self._hp_provider.is_realtime_available():
+                    return True
+            except Exception:
+                pass
+        
+        # Check scalable fetcher
+        if self._scalable_fetcher is not None:
+            try:
+                if self._scalable_fetcher.is_data_fresh(max_age_seconds):
+                    return True
+            except Exception:
+                pass
+        
+        return False
+    
+    def getDataSourceStats(self) -> dict:
+        """
+        Get statistics from all data sources.
+        
+        Returns:
+            dict: Statistics from HP provider and scalable fetcher
+        """
+        stats = {
+            'hp_provider_available': self._hp_provider is not None,
+            'scalable_fetcher_available': self._scalable_fetcher is not None,
+            'hp_stats': {},
+            'scalable_stats': {},
+        }
+        
+        if self._hp_provider is not None:
+            try:
+                stats['hp_stats'] = self._hp_provider.get_stats()
+            except Exception:
+                pass
+        
+        if self._scalable_fetcher is not None:
+            try:
+                stats['scalable_stats'] = self._scalable_fetcher.get_stats()
+            except Exception:
+                pass
+        
+        return stats
+    
+    def healthCheck(self) -> dict:
+        """
+        Perform health check on all data sources.
+        
+        This is useful for monitoring and debugging data availability
+        in GitHub Actions workflows.
+        
+        Returns:
+            dict: Health status for each data source
+        """
+        health = {
+            'overall_status': 'unhealthy',
+            'hp_provider': {'status': 'unavailable'},
+            'scalable_fetcher': {'status': 'unavailable'},
+        }
+        
+        # Check HP provider
+        if self._hp_provider is not None:
+            try:
+                if self._hp_provider.is_realtime_available():
+                    health['hp_provider'] = {'status': 'healthy', 'type': 'realtime'}
+                else:
+                    health['hp_provider'] = {'status': 'degraded', 'type': 'cache_only'}
+            except Exception as e:
+                health['hp_provider'] = {'status': 'error', 'error': str(e)}
+        
+        # Check scalable fetcher
+        if self._scalable_fetcher is not None:
+            try:
+                fetcher_health = self._scalable_fetcher.health_check()
+                if fetcher_health.get('github_raw', False):
+                    health['scalable_fetcher'] = {
+                        'status': 'healthy',
+                        'github_raw': True,
+                        'data_age_seconds': fetcher_health.get('data_age_seconds'),
+                    }
+                elif fetcher_health.get('cache_available', False):
+                    health['scalable_fetcher'] = {
+                        'status': 'degraded',
+                        'cache_only': True,
+                    }
+                else:
+                    health['scalable_fetcher'] = {'status': 'unhealthy'}
+            except Exception as e:
+                health['scalable_fetcher'] = {'status': 'error', 'error': str(e)}
+        
+        # Determine overall status
+        if health['hp_provider'].get('status') == 'healthy' or \
+           health['scalable_fetcher'].get('status') == 'healthy':
+            health['overall_status'] = 'healthy'
+        elif health['hp_provider'].get('status') == 'degraded' or \
+             health['scalable_fetcher'].get('status') == 'degraded':
+            health['overall_status'] = 'degraded'
+        
+        return health
     
     def _printFetchProgress(self, stockCode, screenResultsCounter, screenCounter, totalSymbols):
         """Print the current fetch progress to console."""

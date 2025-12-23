@@ -419,3 +419,214 @@ class TestFetcherCoverage:
         
         # Should exist
         assert hasattr(Fetcher, '_YF_AVAILABLE')
+    
+    def test_scalable_fetcher_available_flag(self):
+        """Test _SCALABLE_FETCHER_AVAILABLE flag exists."""
+        from pkscreener.classes import Fetcher
+        
+        # Should exist
+        assert hasattr(Fetcher, '_SCALABLE_FETCHER_AVAILABLE')
+    
+    def test_scalable_fetcher_initialized(self, fetcher):
+        """Test that _scalable_fetcher is initialized."""
+        # Should have the attribute (may be None if not available)
+        assert hasattr(fetcher, '_scalable_fetcher')
+    
+    def test_is_data_fresh_no_providers(self, fetcher):
+        """Test isDataFresh when no providers available."""
+        fetcher._hp_provider = None
+        fetcher._scalable_fetcher = None
+        
+        result = fetcher.isDataFresh(max_age_seconds=900)
+        
+        assert result is False
+    
+    def test_is_data_fresh_with_hp_provider(self, fetcher):
+        """Test isDataFresh with HP provider available."""
+        mock_provider = MagicMock()
+        mock_provider.is_realtime_available.return_value = True
+        fetcher._hp_provider = mock_provider
+        
+        result = fetcher.isDataFresh(max_age_seconds=900)
+        
+        assert result is True
+    
+    def test_is_data_fresh_with_scalable_fetcher(self, fetcher):
+        """Test isDataFresh with scalable fetcher available."""
+        fetcher._hp_provider = None
+        
+        mock_scalable = MagicMock()
+        mock_scalable.is_data_fresh.return_value = True
+        fetcher._scalable_fetcher = mock_scalable
+        
+        result = fetcher.isDataFresh(max_age_seconds=900)
+        
+        assert result is True
+    
+    def test_is_data_fresh_exception_handling(self, fetcher):
+        """Test isDataFresh handles exceptions gracefully."""
+        mock_provider = MagicMock()
+        mock_provider.is_realtime_available.side_effect = Exception("Error")
+        fetcher._hp_provider = mock_provider
+        fetcher._scalable_fetcher = None
+        
+        result = fetcher.isDataFresh(max_age_seconds=900)
+        
+        assert result is False
+    
+    def test_get_data_source_stats_no_providers(self, fetcher):
+        """Test getDataSourceStats when no providers available."""
+        fetcher._hp_provider = None
+        fetcher._scalable_fetcher = None
+        
+        stats = fetcher.getDataSourceStats()
+        
+        assert stats['hp_provider_available'] is False
+        assert stats['scalable_fetcher_available'] is False
+        assert stats['hp_stats'] == {}
+        assert stats['scalable_stats'] == {}
+    
+    def test_get_data_source_stats_with_providers(self, fetcher):
+        """Test getDataSourceStats with providers available."""
+        mock_hp = MagicMock()
+        mock_hp.get_stats.return_value = {'hits': 10}
+        fetcher._hp_provider = mock_hp
+        
+        mock_scalable = MagicMock()
+        mock_scalable.get_stats.return_value = {'cache_hits': 5}
+        fetcher._scalable_fetcher = mock_scalable
+        
+        stats = fetcher.getDataSourceStats()
+        
+        assert stats['hp_provider_available'] is True
+        assert stats['scalable_fetcher_available'] is True
+        assert stats['hp_stats'] == {'hits': 10}
+        assert stats['scalable_stats'] == {'cache_hits': 5}
+    
+    def test_get_data_source_stats_exception_handling(self, fetcher):
+        """Test getDataSourceStats handles exceptions gracefully."""
+        mock_hp = MagicMock()
+        mock_hp.get_stats.side_effect = Exception("Error")
+        fetcher._hp_provider = mock_hp
+        fetcher._scalable_fetcher = None
+        
+        stats = fetcher.getDataSourceStats()
+        
+        assert stats['hp_stats'] == {}
+    
+    def test_health_check_no_providers(self, fetcher):
+        """Test healthCheck when no providers available."""
+        fetcher._hp_provider = None
+        fetcher._scalable_fetcher = None
+        
+        health = fetcher.healthCheck()
+        
+        assert health['overall_status'] == 'unhealthy'
+        assert health['hp_provider']['status'] == 'unavailable'
+        assert health['scalable_fetcher']['status'] == 'unavailable'
+    
+    def test_health_check_hp_provider_healthy(self, fetcher):
+        """Test healthCheck with healthy HP provider."""
+        mock_hp = MagicMock()
+        mock_hp.is_realtime_available.return_value = True
+        fetcher._hp_provider = mock_hp
+        fetcher._scalable_fetcher = None
+        
+        health = fetcher.healthCheck()
+        
+        assert health['overall_status'] == 'healthy'
+        assert health['hp_provider']['status'] == 'healthy'
+        assert health['hp_provider']['type'] == 'realtime'
+    
+    def test_health_check_hp_provider_degraded(self, fetcher):
+        """Test healthCheck with degraded HP provider."""
+        mock_hp = MagicMock()
+        mock_hp.is_realtime_available.return_value = False
+        fetcher._hp_provider = mock_hp
+        fetcher._scalable_fetcher = None
+        
+        health = fetcher.healthCheck()
+        
+        assert health['overall_status'] == 'degraded'
+        assert health['hp_provider']['status'] == 'degraded'
+    
+    def test_health_check_scalable_fetcher_healthy(self, fetcher):
+        """Test healthCheck with healthy scalable fetcher."""
+        fetcher._hp_provider = None
+        
+        mock_scalable = MagicMock()
+        mock_scalable.health_check.return_value = {
+            'github_raw': True,
+            'data_age_seconds': 120,
+        }
+        fetcher._scalable_fetcher = mock_scalable
+        
+        health = fetcher.healthCheck()
+        
+        assert health['overall_status'] == 'healthy'
+        assert health['scalable_fetcher']['status'] == 'healthy'
+        assert health['scalable_fetcher']['github_raw'] is True
+    
+    def test_health_check_scalable_fetcher_degraded(self, fetcher):
+        """Test healthCheck with degraded scalable fetcher (cache only)."""
+        fetcher._hp_provider = None
+        
+        mock_scalable = MagicMock()
+        mock_scalable.health_check.return_value = {
+            'github_raw': False,
+            'cache_available': True,
+        }
+        fetcher._scalable_fetcher = mock_scalable
+        
+        health = fetcher.healthCheck()
+        
+        assert health['overall_status'] == 'degraded'
+        assert health['scalable_fetcher']['status'] == 'degraded'
+    
+    def test_health_check_exception_handling(self, fetcher):
+        """Test healthCheck handles exceptions gracefully."""
+        mock_hp = MagicMock()
+        mock_hp.is_realtime_available.side_effect = Exception("Connection error")
+        fetcher._hp_provider = mock_hp
+        fetcher._scalable_fetcher = None
+        
+        health = fetcher.healthCheck()
+        
+        assert health['hp_provider']['status'] == 'error'
+        assert 'error' in health['hp_provider']
+    
+    def test_fetch_stock_data_with_scalable_fetcher(self, fetcher):
+        """Test fetchStockData uses scalable fetcher as fallback."""
+        fetcher._hp_provider = None
+        
+        mock_df = pd.DataFrame({'close': [100, 101, 102]})
+        mock_scalable = MagicMock()
+        mock_scalable.get_stock_data.return_value = mock_df
+        fetcher._scalable_fetcher = mock_scalable
+        
+        # The scalable fetcher should be called when HP provider is None
+        result = fetcher.fetchStockData("SBIN", "5d", "1d", printCounter=False)
+        
+        # Scalable fetcher should be called
+        mock_scalable.get_stock_data.assert_called()
+        # Result should be from scalable fetcher or parent (either is valid)
+        assert result is not None or mock_scalable.get_stock_data.called
+    
+    def test_fetch_stock_data_scalable_fetcher_exception(self, fetcher):
+        """Test fetchStockData handles scalable fetcher exceptions."""
+        fetcher._hp_provider = None
+        
+        mock_scalable = MagicMock()
+        mock_scalable.get_stock_data.side_effect = Exception("Fetch error")
+        fetcher._scalable_fetcher = mock_scalable
+        
+        # Should not raise even when scalable fetcher fails
+        try:
+            result = fetcher.fetchStockData("SBIN", "5d", "1d", printCounter=False)
+            # If parent returns None, this is expected
+            # Just verify no exception was raised
+        except Exception as e:
+            # StockDataEmptyException is acceptable if printCounter is False
+            from PKDevTools.classes.Fetcher import StockDataEmptyException
+            if not isinstance(e, StockDataEmptyException):
+                pytest.fail(f"Unexpected exception: {e}")
