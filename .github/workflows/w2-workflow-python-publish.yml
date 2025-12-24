@@ -121,7 +121,7 @@ jobs:
         - id: should_run
           continue-on-error: true
           name: check latest commit is less than a week
-          if: ${{ github.event_name == 'workflow_call' }} || ${{ github.event_name == 'workflow_dispatch' }}
+          if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' }}
           shell: bash
           run: test -z $(git rev-list  --after="7 days"  ${{ github.sha }} --max-count=1) && echo "::set-output name=should_run::false"
 
@@ -152,7 +152,7 @@ jobs:
             platform_id: manylinux_x86_64
             manylinux_image: manylinux2014
 
-          - os: macos-13
+          - os: macos-15
             python: 312
             platform_id: macosx_x86_64
 
