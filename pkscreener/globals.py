@@ -843,7 +843,8 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
         )
         if should_return:
             if new_menu is None:
-                if predefinedOption == "3" and userPassedArgs.pipedmenus is not None:
+                # If pipedmenus exists and we're returning early, run the piped menus
+                if userPassedArgs.pipedmenus is not None:
                     return addOrRunPipedMenus()
                 return None, None
         if new_menu == "X":
