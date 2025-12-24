@@ -77,6 +77,7 @@ pyrate_limiter>=2.10.0
 urllib3>=1.26.20
 
 # Backtesting and trading
+numba>=0.57.0  # Required for numpy 1.26.4 compatibility
 vectorbt>=0.26.2
 
 # Note: pandas-ta-classic is excluded due to numpy>=2.0.0 requirement
