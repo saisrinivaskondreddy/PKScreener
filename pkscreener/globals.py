@@ -502,8 +502,8 @@ def ensureMenusLoaded(menuOption=None,indexOption=None,executeOption=None):
             m2.renderForMenu(selectedMenu=m1.find(indexOption),asList=True)
         if len(m3.menuDict.keys()) == 0:
             m3.renderForMenu(selectedMenu=m2.find(executeOption),asList=True)
-    except:
-        pass
+    except Exception as e:
+        default_logger().debug(f"Error loading menus: {e}")
 
 def initExecution(menuOption=None):
     global selectedChoice, userPassedArgs
