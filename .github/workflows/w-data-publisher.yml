@@ -336,7 +336,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "actions@github.com"
           
-          git add results/Data/
+          # Use -f flag to force add files that may be in .gitignore
+          git add -f results/Data/ 2>/dev/null || true
           
           # Check if there are changes to commit
           if git diff --staged --quiet; then
