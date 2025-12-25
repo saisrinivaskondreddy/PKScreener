@@ -244,6 +244,11 @@ jobs:
       - name: Install Python Dependencies for ${{ matrix.TARGET }}
         if: ${{ matrix.platform_id != 'win_amd64' }}
         run: |
+          # Install numba via conda for macOS to avoid llvmlite build issues
+          if [[ "${{ matrix.platform_id }}" == "macosx_x86_64" || "${{ matrix.platform_id }}" == "macosx_arm64" ]]; then
+            source $CONDA_HOME/bin/activate py312
+            conda install -y numba llvmlite -c conda-forge
+          fi
           pip3 install -r requirements.txt
           pip3 install -r requirements-dev.txt
       
