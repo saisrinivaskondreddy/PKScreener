@@ -190,10 +190,29 @@ jobs:
         curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -JL $exe_path
         chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
 
-    - name: Ensure binary is executable (from cache)
+    - name: Validate and ensure binary is executable
       shell: bash
-      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit == 'true'
-      run: chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
+      if: startsWith(runner.os, 'Linux')
+      env:
+        exe_path: ${{ steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
+      run: |
+        BINARY_PATH="/home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin"
+        # Check if binary exists and is valid ELF format
+        if [ -f "$BINARY_PATH" ]; then
+          if file "$BINARY_PATH" | grep -q "ELF 64-bit"; then
+            echo "Binary is valid ELF format"
+            chmod +x "$BINARY_PATH"
+          else
+            echo "Binary is corrupted or wrong format, re-downloading..."
+            rm -f "$BINARY_PATH"
+            curl -o "$BINARY_PATH" -JL $exe_path
+            chmod +x "$BINARY_PATH"
+          fi
+        else
+          echo "Binary not found, downloading..."
+          curl -o "$BINARY_PATH" -JL $exe_path
+          chmod +x "$BINARY_PATH"
+        fi
     - name: Configure env.dev file
       shell: bash
       env:
