@@ -1127,6 +1127,13 @@ def main(userArgs=None,optionalFinalOutcome_df=None):
                 if stockDictPrimary is None or (len(stockDictPrimary.keys()) == 0):
                     stockDictPrimary,stockDictSecondary = loadDatabaseOrFetch(downloadOnly=False, listStockCodes=["NIFTY 50"], menuOption=menuOption,indexOption=indexOption)
                 hostData = stockDictPrimary.get("NIFTY 50") if (stockDictPrimary is not None and len(stockDictPrimary) > 0) else None
+                if hostData is None:
+                    messageToUser = "Nifty AI prediction NOT available right now! No data available. Please try again later."
+                    OutputControls().printOutput(messageToUser)
+                    sendMessageToTelegramChannel(message=messageToUser,user=user)
+                    if defaultAnswer is None:
+                        input("\nPress <Enter> to Continue...\n")
+                    return None, None
                 columns = hostData["columns"]
                 data = pd.DataFrame(
                         hostData["data"], columns=columns, index=hostData["index"]
