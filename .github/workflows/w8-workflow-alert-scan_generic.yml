@@ -197,6 +197,15 @@ jobs:
         exe_path: ${{ steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
         BINARY_PATH="/home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin"
+        download_binary() {
+          echo "Downloading binary from: $exe_path"
+          curl -f -o "$BINARY_PATH" -JL "$exe_path" || {
+            echo "ERROR: Failed to download binary. The release may not include Linux binaries yet."
+            echo "Please ensure the build workflow has completed and created the Linux binary."
+            exit 1
+          }
+          chmod +x "$BINARY_PATH"
+        }
         # Check if binary exists and is valid ELF format
         if [ -f "$BINARY_PATH" ]; then
           if file "$BINARY_PATH" | grep -q "ELF 64-bit"; then
@@ -205,13 +214,17 @@ jobs:
           else
             echo "Binary is corrupted or wrong format, re-downloading..."
             rm -f "$BINARY_PATH"
-            curl -o "$BINARY_PATH" -JL $exe_path
-            chmod +x "$BINARY_PATH"
+            download_binary
           fi
         else
           echo "Binary not found, downloading..."
-          curl -o "$BINARY_PATH" -JL $exe_path
-          chmod +x "$BINARY_PATH"
+          download_binary
+        fi
+        # Final validation
+        if ! file "$BINARY_PATH" | grep -q "ELF 64-bit"; then
+          echo "ERROR: Downloaded file is not a valid Linux binary"
+          file "$BINARY_PATH"
+          exit 1
         fi
     - name: Configure env.dev file
       shell: bash
