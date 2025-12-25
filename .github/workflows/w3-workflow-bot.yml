@@ -155,9 +155,30 @@ jobs:
         pip3 install requests
         python3 .github/workflows/githubutilities.py -d
 
+    # Phase 1: Binary caching to reduce scan latency by 30-60s
+    - name: Cache PKScreener Binary (Linux)
+      if: startsWith(runner.os, 'Linux')
+      uses: actions/cache@v4
+      id: binary-cache-linux
+      with:
+        path: /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
+        key: ${{ runner.os }}-pkscreener-bin-${{ steps.releaseurlsetter.outputs.VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-pkscreener-bin-
+
+    - name: Cache PKScreener Binary (Windows)
+      if: startsWith(runner.os, 'Windows')
+      uses: actions/cache@v4
+      id: binary-cache-windows
+      with:
+        path: pkscreenercli.exe
+        key: ${{ runner.os }}-pkscreener-bin-${{ steps.releaseurlsetter.outputs.VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-pkscreener-bin-
+
     - name: Download latest executable on Windows
       shell: cmd
-      if: startsWith(runner.os, 'Windows')
+      if: startsWith(runner.os, 'Windows') && steps.binary-cache-windows.outputs.cache-hit != 'true'
       env:
         exe_path: ${{ inputs.DOWNLOAD_URL || steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
@@ -165,13 +186,17 @@ jobs:
 
     - name: Download latest executable on Ubuntu
       shell: bash
-      if: startsWith(runner.os, 'Linux')
+      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
       env:
         exe_path: ${{ inputs.DOWNLOAD_URL || steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
         curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -JL $exe_path
         chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
-        
+
+    - name: Ensure binary is executable (from cache)
+      shell: bash
+      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit == 'true'
+      run: chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin        
     - name: Configure env.dev file
       shell: bash
       env:
