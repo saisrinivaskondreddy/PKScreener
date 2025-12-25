@@ -87,7 +87,7 @@ jobs:
         python-version: ${{ inputs.targetPythonVersion || 3.12 }}
 
     - name: Restore Dependencies from Windows Cache
-      if: startsWith(runner.os, 'Windows') && steps.binary-cache-windows.outputs.cache-hit != 'true'
+      if: startsWith(runner.os, 'Windows')
       uses: actions/cache@v4
       with:
         path: ~\AppData\Local\pip\Cache
@@ -97,7 +97,7 @@ jobs:
 
     - name: Load Cache for Linux Dependencies
       uses: actions/cache@v4
-      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
+      if: startsWith(runner.os, 'Linux')
       with:
         path: |
           /usr/include/ta-lib
@@ -109,7 +109,7 @@ jobs:
           ${{ runner.os }}-talib
         
     - name: Restore Dependencies from Ubuntu Cache
-      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
+      if: startsWith(runner.os, 'Linux')
       uses: actions/cache@v4
       id: cache-venv  # name for referring later
       with:
@@ -154,7 +154,7 @@ jobs:
 
     # Phase 1: Binary caching to reduce scan latency by 30-60s
     - name: Cache PKScreener Binary (Linux)
-      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
+      if: startsWith(runner.os, 'Linux')
       uses: actions/cache@v4
       id: binary-cache-linux
       with:
@@ -164,7 +164,7 @@ jobs:
           ${{ runner.os }}-pkscreener-bin-
 
     - name: Cache PKScreener Binary (Windows)
-      if: startsWith(runner.os, 'Windows') && steps.binary-cache-windows.outputs.cache-hit != 'true'
+      if: startsWith(runner.os, 'Windows')
       uses: actions/cache@v4
       id: binary-cache-windows
       with:
@@ -278,7 +278,7 @@ jobs:
     - name: Run Scan on Windows
       shell: cmd
       timeout-minutes: 10
-      if: startsWith(runner.os, 'Windows') && steps.binary-cache-windows.outputs.cache-hit != 'true'
+      if: startsWith(runner.os, 'Windows')
       env:
         RUNNER : "GitHub_Actions"
         GSHEET_SERVICE_ACCOUNT_DEV: ${{secrets.GSHEET_SERVICE_ACCOUNT_DEV}}
@@ -292,7 +292,7 @@ jobs:
     - name: Run Scan on Ubuntu
       shell: bash
       timeout-minutes: 10
-      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
+      if: startsWith(runner.os, 'Linux')
       env:
         RUNNER : "GitHub_Actions"
         GSHEET_SERVICE_ACCOUNT_DEV: ${{secrets.GSHEET_SERVICE_ACCOUNT_DEV}}
