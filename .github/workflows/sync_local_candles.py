@@ -2,21 +2,94 @@
 """
 Sync Local Candle Database
 
-This script syncs candle data from Turso (or existing pickle files) to local SQLite
-databases and exports them in PKScreener-compatible format.
+This script syncs candle data from multiple sources:
+1. Turso database (primary)
+2. PKBrokers tick data from GitHub (fallback)
+3. Existing pickle files (last resort)
+
+It exports data in PKScreener-compatible format.
 """
 
 import os
 import sys
 import glob
+import json
 import pickle
+import requests
 from datetime import datetime
 from pathlib import Path
 
 import pytz
+import pandas as pd
 
 # Ensure results/Data directory exists
 os.makedirs('results/Data', exist_ok=True)
+
+
+def fetch_ticks_from_github():
+    """Fetch tick data from PKBrokers main branch."""
+    # Ticks are committed to PKBrokers main branch by the orchestrator
+    ticks_url = "https://raw.githubusercontent.com/pkjmesra/PKBrokers/main/pkbrokers/kite/examples/results/Data/ticks.json"
+    print(f"Fetching ticks from: {ticks_url}")
+    
+    try:
+        response = requests.get(ticks_url, timeout=30)
+        if response.status_code == 200:
+            ticks_data = response.json()
+            print(f"Fetched ticks for {len(ticks_data)} instruments")
+            return ticks_data
+        else:
+            print(f"Failed to fetch ticks: HTTP {response.status_code}")
+            return None
+    except Exception as e:
+        print(f"Error fetching ticks: {e}")
+        return None
+
+
+def aggregate_ticks_to_daily(ticks_data):
+    """Convert tick data to daily OHLCV format."""
+    daily_data = {}
+    
+    if not ticks_data:
+        return daily_data
+    
+    tz = pytz.timezone('Asia/Kolkata')
+    today = datetime.now(tz).strftime('%Y-%m-%d')
+    
+    for symbol, ticks in ticks_data.items():
+        if not ticks or len(ticks) == 0:
+            continue
+        
+        try:
+            # Extract OHLCV from ticks
+            prices = []
+            volumes = []
+            
+            for tick in ticks:
+                if isinstance(tick, dict):
+                    ltp = tick.get('last_price', tick.get('ltp', tick.get('close')))
+                    vol = tick.get('volume', tick.get('traded_volume', 0))
+                    if ltp:
+                        prices.append(float(ltp))
+                    if vol:
+                        volumes.append(int(vol))
+            
+            if prices:
+                daily_data[symbol] = {
+                    'date': today,
+                    'open': prices[0],
+                    'high': max(prices),
+                    'low': min(prices),
+                    'close': prices[-1],
+                    'volume': max(volumes) if volumes else 0
+                }
+        except Exception as e:
+            print(f"Error aggregating {symbol}: {e}")
+            continue
+    
+    print(f"Aggregated {len(daily_data)} symbols from ticks")
+    return daily_data
+
 
 def main():
     tz = pytz.timezone('Asia/Kolkata')
@@ -39,8 +112,47 @@ def main():
             success = db.sync_from_turso()
         
         if not success:
-            print("Turso sync failed or skipped, using existing pickle data...")
-            # Find and load existing pickle files
+            print("Turso sync failed or skipped...")
+            
+            # Fallback 1: Try fetching ticks from PKBrokers GitHub
+            print("Trying PKBrokers tick data from GitHub...")
+            ticks_data = fetch_ticks_from_github()
+            daily_from_ticks = aggregate_ticks_to_daily(ticks_data)
+            
+            if daily_from_ticks:
+                print(f"Importing {len(daily_from_ticks)} symbols from ticks...")
+                now = datetime.now(tz).isoformat()
+                
+                daily_conn = db._get_daily_connection()
+                cursor = daily_conn.cursor()
+                
+                for symbol, ohlcv in daily_from_ticks.items():
+                    try:
+                        cursor.execute('''
+                            INSERT OR REPLACE INTO daily_candles 
+                            (symbol, date, open, high, low, close, volume, updated_at)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        ''', (
+                            symbol.replace('.NS', ''),
+                            ohlcv['date'],
+                            ohlcv['open'],
+                            ohlcv['high'],
+                            ohlcv['low'],
+                            ohlcv['close'],
+                            ohlcv['volume'],
+                            now
+                        ))
+                    except Exception as e:
+                        print(f"Error importing {symbol}: {e}")
+                        continue
+                
+                daily_conn.commit()
+                print(f"Imported tick data into local database")
+                success = True
+        
+        if not success:
+            # Fallback 2: Use existing pickle files
+            print("Using existing pickle data as last resort...")
             pkl_files = sorted(glob.glob('results/Data/stock_data_*.pkl'))
             if pkl_files:
                 latest_pkl = pkl_files[-1]
