@@ -478,3 +478,6 @@ class ResultsManager:
             pass
             
         return last_trade_date, last_trade_time
+
+
+

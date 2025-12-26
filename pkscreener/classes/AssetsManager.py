@@ -55,6 +55,95 @@ class PKAssetsManager:
     configManager = ConfigManager.tools()
     configManager.getConfig(ConfigManager.parser)
 
+    @staticmethod
+    def is_data_fresh(stock_data, max_stale_days=1):
+        """
+        Check if stock data is fresh (within max_stale_days).
+        
+        Args:
+            stock_data: DataFrame or dict with stock data
+            max_stale_days: Maximum acceptable age in days
+            
+        Returns:
+            tuple: (is_fresh: bool, data_date: date or None, age_days: int)
+        """
+        try:
+            from datetime import datetime
+            today = datetime.now().date()
+            
+            # Handle DataFrame
+            if isinstance(stock_data, pd.DataFrame) and not stock_data.empty:
+                last_date = stock_data.index[-1]
+                if hasattr(last_date, 'date'):
+                    last_date = last_date.date()
+                elif isinstance(last_date, str):
+                    last_date = datetime.strptime(last_date[:10], '%Y-%m-%d').date()
+                
+                age_days = (today - last_date).days
+                return age_days <= max_stale_days, last_date, age_days
+            
+            # Handle dict with 'index' key (from to_dict("split"))
+            elif isinstance(stock_data, dict) and 'index' in stock_data:
+                index = stock_data['index']
+                if index:
+                    last_date = index[-1]
+                    if hasattr(last_date, 'date'):
+                        last_date = last_date.date()
+                    elif isinstance(last_date, str):
+                        last_date = datetime.strptime(str(last_date)[:10], '%Y-%m-%d').date()
+                    
+                    age_days = (today - last_date).days
+                    return age_days <= max_stale_days, last_date, age_days
+            
+            return True, None, 0  # Can't determine, assume fresh
+            
+        except Exception as e:
+            default_logger().debug(f"Error checking data freshness: {e}")
+            return True, None, 0  # On error, assume fresh to not block
+
+    @staticmethod
+    def validate_data_freshness(stockDict, isTrading=False):
+        """
+        Validate freshness of stock data and log warnings for stale data.
+        
+        Args:
+            stockDict: Dictionary of stock data
+            isTrading: Whether market is currently trading
+            
+        Returns:
+            tuple: (fresh_count, stale_count, oldest_date)
+        """
+        from datetime import datetime
+        
+        fresh_count = 0
+        stale_count = 0
+        oldest_date = None
+        stale_stocks = []
+        
+        for stock, data in stockDict.items():
+            is_fresh, data_date, age_days = PKAssetsManager.is_data_fresh(data)
+            
+            if is_fresh:
+                fresh_count += 1
+            else:
+                stale_count += 1
+                stale_stocks.append((stock, data_date, age_days))
+                
+            if data_date and (oldest_date is None or data_date < oldest_date):
+                oldest_date = data_date
+        
+        # Log warning for stale data during trading hours
+        if isTrading and stale_count > 0:
+            default_logger().warning(
+                f"[DATA-FRESHNESS] {stale_count} stocks have stale data (older than 1 day). "
+                f"Oldest data from: {oldest_date}. Consider fetching fresh tick data."
+            )
+            if stale_count <= 5:
+                for stock, date, age in stale_stocks:
+                    default_logger().warning(f"[DATA-FRESHNESS] {stock}: data from {date} ({age} days old)")
+        
+        return fresh_count, stale_count, oldest_date
+
     def make_hyperlink(value):
         url = "https://in.tradingview.com/chart?symbol=NSE:{}"
         return '=HYPERLINK("%s", "%s")' % (url.format(ImageUtility.PKImageTools.stockNameFromDecoratedName(value)), value)
@@ -429,6 +518,19 @@ class PKAssetsManager:
                 elif not isTrading:
                     stockDict[stock] = df_or_dict
             stockDataLoaded = True
+            
+            # Validate data freshness and warn if stale during trading hours
+            if stockDict and isTrading:
+                fresh_count, stale_count, oldest_date = PKAssetsManager.validate_data_freshness(
+                    stockDict, isTrading=isTrading
+                )
+                if stale_count > 0:
+                    OutputControls().printOutput(
+                        colorText.WARN
+                        + f"  [!] Warning: {stale_count} stocks have stale data (oldest: {oldest_date}). "
+                        + "Fresh tick data from PKBrokers should be preferred during trading hours."
+                        + colorText.END
+                    )
         except (pickle.UnpicklingError, EOFError) as e:
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
@@ -539,6 +641,17 @@ class PKAssetsManager:
                                     # and so, was not found in stockDict
                                 continue
                         stockDataLoaded = True
+                        
+                        # Validate data freshness after server download
+                        if stockDict and isTrading:
+                            fresh_count, stale_count, oldest_date = PKAssetsManager.validate_data_freshness(
+                                stockDict, isTrading=isTrading
+                            )
+                            if stale_count > 0:
+                                default_logger().warning(
+                                    f"[DATA-FRESHNESS] Server data has {stale_count} stale stocks. "
+                                    f"Oldest: {oldest_date}. Fresh ticks recommended."
+                                )
                         # copyFilePath = os.path.join(Archiver.get_user_data_dir(), f"copy_{cache_file}")
                         # srcFilePath = os.path.join(Archiver.get_user_data_dir(), cache_file)
                         # if os.path.exists(copyFilePath) and os.path.exists(srcFilePath):
