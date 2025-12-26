@@ -221,34 +221,38 @@ done
 
 ### Ideal Flow (When Implemented)
 
-```mermaid
-flowchart TD
-    A[PKDevTools Change] --> B[Run PKDevTools Tests]
-    B --> C{Tests Pass?}
-    C -->|Yes| D[Publish PKDevTools to PyPI]
-    C -->|No| E[Fix Tests]
-    
-    D --> F[Update PKNSETools requirements.txt]
-    F --> G[Run PKNSETools Tests]
-    G --> H{Tests Pass?}
-    H -->|Yes| I[Publish PKNSETools to PyPI]
-    H -->|No| J[Fix Tests]
-    
-    I --> K[Update PKBrokers requirements.txt]
-    K --> L[Run PKBrokers Tests]
-    L --> M{Tests Pass?}
-    M -->|Yes| N[Publish PKBrokers to PyPI]
-    M -->|No| O[Fix Tests]
-    
-    N --> P[Update PKScreener requirements.txt]
-    P --> Q[Run PKScreener Tests]
-    Q --> R{Tests Pass?}
-    R -->|Yes| S[Release PKScreener]
-    R -->|No| T[Fix Tests]
-    
-    S --> U[Test All Menus - Bot]
-    U --> V[Test All Menus - CLI]
-    V --> W[Complete]
+```text
+Release Pipeline Flow:
+
+PKDevTools Change
+    ↓
+Run PKDevTools Tests
+    ↓ (Pass)
+Publish PKDevTools to PyPI
+    ↓
+Update PKNSETools requirements.txt
+    ↓
+Run PKNSETools Tests
+    ↓ (Pass)
+Publish PKNSETools to PyPI
+    ↓
+Update PKBrokers requirements.txt
+    ↓
+Run PKBrokers Tests
+    ↓ (Pass)
+Publish PKBrokers to PyPI
+    ↓
+Update PKScreener requirements.txt
+    ↓
+Run PKScreener Tests
+    ↓ (Pass)
+Release PKScreener
+    ↓
+Test All Menus - Bot
+    ↓
+Test All Menus - CLI
+    ↓
+Complete
 ```
 
 ## Manual Release Checklist

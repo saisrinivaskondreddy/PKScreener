@@ -311,4 +311,5 @@ Quick links for developers:
    SCAN_WORKFLOWS
    API_REFERENCE
    TESTING
+   RELEASE_PROCESS
    README
