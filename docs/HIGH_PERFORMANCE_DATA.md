@@ -318,4 +318,4 @@ See [Scalable Architecture](SCALABLE_ARCHITECTURE.md) for detailed 24x7 implemen
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
 - [Scalable Architecture](SCALABLE_ARCHITECTURE.md) - 24x7 data availability, GitHub-based data layer
 - [API_REFERENCE.md](API_REFERENCE.md) - API documentation
-- [PKBrokers HIGH_PERFORMANCE_CANDLES.md](../../PKBrokers/pkbrokers/kite/HIGH_PERFORMANCE_CANDLES.md) - PKBrokers documentation
+- [PKBrokers Documentation](https://github.com/pkjmesra/PKBrokers) - PKBrokers high performance candles documentation
