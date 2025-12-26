@@ -56,20 +56,30 @@ class PKAssetsManager:
     configManager.getConfig(ConfigManager.parser)
 
     @staticmethod
-    def is_data_fresh(stock_data, max_stale_days=1):
+    def is_data_fresh(stock_data, max_stale_trading_days=1):
         """
-        Check if stock data is fresh (within max_stale_days).
+        Check if stock data is fresh (within max_stale_trading_days).
+        
+        Uses PKDateUtilities to account for weekends and market holidays.
+        Data is considered fresh if its date >= the last trading day.
         
         Args:
             stock_data: DataFrame or dict with stock data
-            max_stale_days: Maximum acceptable age in days
+            max_stale_trading_days: Maximum acceptable age in TRADING days (not calendar days)
             
         Returns:
-            tuple: (is_fresh: bool, data_date: date or None, age_days: int)
+            tuple: (is_fresh: bool, data_date: date or None, trading_days_old: int)
         """
         try:
             from datetime import datetime
-            today = datetime.now().date()
+            from PKDevTools.classes.PKDateUtilities import PKDateUtilities
+            
+            # Get the last trading date (accounts for weekends and holidays)
+            last_trading_date = PKDateUtilities.tradingDate()
+            if isinstance(last_trading_date, datetime):
+                last_trading_date = last_trading_date.date()
+            
+            last_date = None
             
             # Handle DataFrame
             if isinstance(stock_data, pd.DataFrame) and not stock_data.empty:
@@ -78,9 +88,6 @@ class PKAssetsManager:
                     last_date = last_date.date()
                 elif isinstance(last_date, str):
                     last_date = datetime.strptime(last_date[:10], '%Y-%m-%d').date()
-                
-                age_days = (today - last_date).days
-                return age_days <= max_stale_days, last_date, age_days
             
             # Handle dict with 'index' key (from to_dict("split"))
             elif isinstance(stock_data, dict) and 'index' in stock_data:
@@ -91,11 +98,20 @@ class PKAssetsManager:
                         last_date = last_date.date()
                     elif isinstance(last_date, str):
                         last_date = datetime.strptime(str(last_date)[:10], '%Y-%m-%d').date()
-                    
-                    age_days = (today - last_date).days
-                    return age_days <= max_stale_days, last_date, age_days
             
-            return True, None, 0  # Can't determine, assume fresh
+            if last_date is None:
+                return True, None, 0  # Can't determine, assume fresh
+            
+            # Calculate trading days between data date and last trading date
+            # Data is fresh if it's from the last trading day or more recent
+            if last_date >= last_trading_date:
+                return True, last_date, 0
+            
+            # Count trading days between last_date and last_trading_date
+            trading_days_old = PKDateUtilities.trading_days_between(last_date, last_trading_date)
+            is_fresh = trading_days_old <= max_stale_trading_days
+            
+            return is_fresh, last_date, trading_days_old
             
         except Exception as e:
             default_logger().debug(f"Error checking data freshness: {e}")
@@ -135,12 +151,12 @@ class PKAssetsManager:
         # Log warning for stale data during trading hours
         if isTrading and stale_count > 0:
             default_logger().warning(
-                f"[DATA-FRESHNESS] {stale_count} stocks have stale data (older than 1 day). "
+                f"[DATA-FRESHNESS] {stale_count} stocks have stale data (older than last trading day). "
                 f"Oldest data from: {oldest_date}. Consider fetching fresh tick data."
             )
             if stale_count <= 5:
                 for stock, date, age in stale_stocks:
-                    default_logger().warning(f"[DATA-FRESHNESS] {stock}: data from {date} ({age} days old)")
+                    default_logger().warning(f"[DATA-FRESHNESS] {stock}: data from {date} ({age} trading days old)")
         
         return fresh_count, stale_count, oldest_date
 
