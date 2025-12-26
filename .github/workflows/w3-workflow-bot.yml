@@ -76,6 +76,7 @@ jobs:
   Prod_Telegram_Bot:
     # https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
     runs-on: ${{ inputs.runson || 'ubuntu-latest' }} #ubuntu-latest #windows-latest ubuntu-24.04-arm, ubuntu-22.04-arm
+    permissions: write-all
 
     steps:
     - uses: actions/checkout@v4
