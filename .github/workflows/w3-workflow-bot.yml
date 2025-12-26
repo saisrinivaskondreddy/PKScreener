@@ -302,6 +302,8 @@ jobs:
       env:
         RUNNER : "GitHub_Actions"
         MONITORING_BOT_RUNNER: "MONITORING_BOT_RUNNER"
+        CI_PAT: ${{ secrets.CI_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         pkscreenercli.exe --bot --botavailable ${{ inputs.cliOptions || '' }}
 
@@ -313,6 +315,8 @@ jobs:
       env:
         RUNNER : "GitHub_Actions"
         MONITORING_BOT_RUNNER: "MONITORING_BOT_RUNNER"
+        CI_PAT: ${{ secrets.CI_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin --bot --botavailable ${{ inputs.cliOptions || '' }}
 
