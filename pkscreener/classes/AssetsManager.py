@@ -144,6 +144,124 @@ class PKAssetsManager:
         
         return fresh_count, stale_count, oldest_date
 
+    @staticmethod
+    def _apply_fresh_ticks_to_data(stockDict):
+        """
+        Apply fresh tick data from PKBrokers to update stale stock data.
+        
+        This method downloads the latest ticks.json from PKBrokers/PKScreener
+        and merges today's OHLCV data into the existing stockDict.
+        
+        Args:
+            stockDict: Dictionary of stock data (symbol -> dict with 'data', 'columns', 'index')
+            
+        Returns:
+            dict: Updated stockDict with fresh tick data merged
+        """
+        import requests
+        from datetime import datetime
+        
+        try:
+            # Try to download fresh ticks from multiple sources
+            ticks_sources = [
+                "https://raw.githubusercontent.com/pkjmesra/PKScreener/actions-data-download/results/Data/ticks.json",
+                "https://raw.githubusercontent.com/pkjmesra/PKBrokers/main/pkbrokers/kite/examples/results/Data/ticks.json",
+            ]
+            
+            ticks_data = None
+            for url in ticks_sources:
+                try:
+                    response = requests.get(url, timeout=30)
+                    if response.status_code == 200:
+                        ticks_data = response.json()
+                        if ticks_data and len(ticks_data) > 0:
+                            default_logger().info(f"Downloaded {len(ticks_data)} ticks from {url}")
+                            break
+                except Exception as e:
+                    default_logger().debug(f"Failed to fetch ticks from {url}: {e}")
+                    continue
+            
+            if not ticks_data:
+                default_logger().debug("No tick data available to apply")
+                return stockDict
+            
+            # Get today's date for the merge
+            today_str = datetime.now().strftime('%Y-%m-%d')
+            updated_count = 0
+            
+            # Apply ticks to stockDict
+            for instrument_token, tick_info in ticks_data.items():
+                if not isinstance(tick_info, dict):
+                    continue
+                
+                symbol = tick_info.get('trading_symbol', '')
+                ohlcv = tick_info.get('ohlcv', {})
+                
+                if not symbol or not ohlcv or ohlcv.get('close', 0) <= 0:
+                    continue
+                
+                # Find matching symbol in stockDict
+                if symbol not in stockDict:
+                    continue
+                
+                stock_data = stockDict[symbol]
+                if not isinstance(stock_data, dict) or 'data' not in stock_data:
+                    continue
+                
+                try:
+                    # Create today's candle row
+                    today_row = [
+                        float(ohlcv.get('open', 0)),
+                        float(ohlcv.get('high', 0)),
+                        float(ohlcv.get('low', 0)),
+                        float(ohlcv.get('close', 0)),
+                        int(ohlcv.get('volume', 0))
+                    ]
+                    
+                    # Check if we have 6 columns (with Adj Close)
+                    columns = stock_data.get('columns', [])
+                    if len(columns) == 6:
+                        today_row.append(float(ohlcv.get('close', 0)))  # Adj Close = Close
+                    
+                    # Check if today's data already exists and update/append
+                    data_rows = stock_data.get('data', [])
+                    index_list = stock_data.get('index', [])
+                    
+                    # Find and remove today's existing data
+                    new_rows = []
+                    new_index = []
+                    for idx, row in zip(index_list, data_rows):
+                        idx_str = str(idx)[:10] if len(str(idx)) >= 10 else str(idx)
+                        if idx_str != today_str:
+                            new_rows.append(row)
+                            new_index.append(idx)
+                    
+                    # Append today's fresh data
+                    new_rows.append(today_row)
+                    new_index.append(today_str)
+                    
+                    stock_data['data'] = new_rows
+                    stock_data['index'] = new_index
+                    stockDict[symbol] = stock_data
+                    updated_count += 1
+                    
+                except Exception as e:
+                    default_logger().debug(f"Error applying tick for {symbol}: {e}")
+                    continue
+            
+            if updated_count > 0:
+                default_logger().info(f"Applied fresh tick data to {updated_count} symbols")
+                OutputControls().printOutput(
+                    colorText.GREEN
+                    + f"  [+] Applied fresh tick data to {updated_count} stocks."
+                    + colorText.END
+                )
+            
+        except Exception as e:
+            default_logger().debug(f"Error applying fresh ticks: {e}")
+        
+        return stockDict
+
     def make_hyperlink(value):
         url = "https://in.tradingview.com/chart?symbol=NSE:{}"
         return '=HYPERLINK("%s", "%s")' % (url.format(ImageUtility.PKImageTools.stockNameFromDecoratedName(value)), value)
@@ -519,7 +637,7 @@ class PKAssetsManager:
                     stockDict[stock] = df_or_dict
             stockDataLoaded = True
             
-            # Validate data freshness and warn if stale during trading hours
+            # Validate data freshness and apply ticks if stale during trading hours
             if stockDict and isTrading:
                 fresh_count, stale_count, oldest_date = PKAssetsManager.validate_data_freshness(
                     stockDict, isTrading=isTrading
@@ -528,9 +646,11 @@ class PKAssetsManager:
                     OutputControls().printOutput(
                         colorText.WARN
                         + f"  [!] Warning: {stale_count} stocks have stale data (oldest: {oldest_date}). "
-                        + "Fresh tick data from PKBrokers should be preferred during trading hours."
+                        + "Attempting to apply fresh tick data..."
                         + colorText.END
                     )
+                    # Try to apply fresh ticks to stale data
+                    stockDict = PKAssetsManager._apply_fresh_ticks_to_data(stockDict)
         except (pickle.UnpicklingError, EOFError) as e:
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
