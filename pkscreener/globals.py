@@ -526,7 +526,7 @@ def initExecution(menuOption=None):
                 OutputControls().printOutput(colorText.FAIL + "\n      [+] Logs will be written to:"+colorText.END)
                 OutputControls().printOutput(colorText.GREEN + f"      [+] {log_file_path}"+colorText.END)
                 OutputControls().printOutput(colorText.FAIL + "      [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at https://github.com/pkjmesra/PKScreener/issues .\n" + colorText.END)
-            menuOption = input(colorText.FAIL + f"{pastDate}  [+] Select option: ") or "P"
+            menuOption = OutputControls().takeUserInput(colorText.FAIL + f"{pastDate}  [+] Select option: ", defaultInput="P")
             OutputControls().printOutput(colorText.END, end="")
         if menuOption == "" or menuOption is None:
             menuOption = "X"

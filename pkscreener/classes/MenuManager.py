@@ -204,7 +204,7 @@ class MenuManager:
                     OutputControls().printOutput(colorText.GREEN + f"      [+] {log_file_path}" + colorText.END)
                     OutputControls().printOutput(colorText.FAIL + "      [+] If you need to share,run through the menus that are causing problems. At the end, open this folder, zip the log file to share at https://github.com/pkjmesra/PKScreener/issues .\n" + colorText.END)
                     
-                menu_option = input(colorText.FAIL + f"{past_date}  [+] Select option: ") or "P"
+                menu_option = OutputControls().takeUserInput(colorText.FAIL + f"{past_date}  [+] Select option: ", defaultInput="P")
                 OutputControls().printOutput(colorText.END, end="")
                 
             if menu_option == "" or menu_option is None:
@@ -564,7 +564,11 @@ class MenuManager:
         return self.menu_choice_hierarchy
 
     def show_option_error_message(self):
-        """Display an error message for invalid menu options."""
+        """Display an error message for invalid menu options - only in interactive mode."""
+        # Only show error message and wait if in interactive mode
+        if not OutputControls().enableUserInput:
+            return  # Skip error message in non-interactive/bot mode
+        
         OutputControls().printOutput(
             colorText.FAIL
             + "\n  [+] Please enter a valid option & try Again!"
