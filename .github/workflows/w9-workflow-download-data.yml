@@ -115,6 +115,15 @@ jobs:
         key: ${{ runner.os }}-talib
         restore-keys: |
           ${{ runner.os }}-talib
+
+    - name: Restore pip cache for Linux
+      if: startsWith(runner.os, 'Linux')
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
           
     - name: Install TA-Lib for Windows
       if: ${{ inputs.installtalib != 'N' && inputs.skipDownload == '' && startsWith(runner.os, 'Windows') }}
