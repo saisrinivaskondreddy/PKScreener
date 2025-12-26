@@ -47,7 +47,22 @@ def fetch_ticks_from_github():
 
 
 def aggregate_ticks_to_daily(ticks_data):
-    """Convert tick data to daily OHLCV format."""
+    """
+    Convert tick data to daily OHLCV format.
+    
+    Expected ticks_data format (from PKBrokers InMemoryCandleStore.export_to_ticks_json):
+    {
+        "instrument_token": {
+            "instrument_token": 12345,
+            "trading_symbol": "RELIANCE",
+            "tick_count": 100,
+            "ohlcv": {
+                "open": 100.0, "high": 110.0, "low": 95.0, "close": 105.0, "volume": 1000000
+            },
+            "last_update": 1234567890.123
+        }
+    }
+    """
     daily_data = {}
     
     if not ticks_data:
@@ -56,35 +71,49 @@ def aggregate_ticks_to_daily(ticks_data):
     tz = pytz.timezone('Asia/Kolkata')
     today = datetime.now(tz).strftime('%Y-%m-%d')
     
-    for symbol, ticks in ticks_data.items():
-        if not ticks or len(ticks) == 0:
-            continue
-        
+    for instrument_token, data in ticks_data.items():
         try:
-            # Extract OHLCV from ticks
-            prices = []
-            volumes = []
+            # New format: data contains trading_symbol and ohlcv
+            if isinstance(data, dict) and 'ohlcv' in data:
+                symbol = data.get('trading_symbol', str(instrument_token))
+                ohlcv = data.get('ohlcv', {})
+                
+                if ohlcv and ohlcv.get('close', 0) > 0:
+                    daily_data[symbol] = {
+                        'date': today,
+                        'open': float(ohlcv.get('open', 0)),
+                        'high': float(ohlcv.get('high', 0)),
+                        'low': float(ohlcv.get('low', 0)),
+                        'close': float(ohlcv.get('close', 0)),
+                        'volume': int(ohlcv.get('volume', 0))
+                    }
+                    continue
             
-            for tick in ticks:
-                if isinstance(tick, dict):
-                    ltp = tick.get('last_price', tick.get('ltp', tick.get('close')))
-                    vol = tick.get('volume', tick.get('traded_volume', 0))
-                    if ltp:
-                        prices.append(float(ltp))
-                    if vol:
-                        volumes.append(int(vol))
-            
-            if prices:
-                daily_data[symbol] = {
-                    'date': today,
-                    'open': prices[0],
-                    'high': max(prices),
-                    'low': min(prices),
-                    'close': prices[-1],
-                    'volume': max(volumes) if volumes else 0
-                }
+            # Legacy format: data is a list of ticks
+            if isinstance(data, list) and len(data) > 0:
+                prices = []
+                volumes = []
+                
+                for tick in data:
+                    if isinstance(tick, dict):
+                        ltp = tick.get('last_price', tick.get('ltp', tick.get('close')))
+                        vol = tick.get('volume', tick.get('traded_volume', 0))
+                        if ltp:
+                            prices.append(float(ltp))
+                        if vol:
+                            volumes.append(int(vol))
+                
+                if prices:
+                    daily_data[instrument_token] = {
+                        'date': today,
+                        'open': prices[0],
+                        'high': max(prices),
+                        'low': min(prices),
+                        'close': prices[-1],
+                        'volume': max(volumes) if volumes else 0
+                    }
         except Exception as e:
-            print(f"Error aggregating {symbol}: {e}")
+            print(f"Error aggregating {instrument_token}: {e}")
             continue
     
     print(f"Aggregated {len(daily_data)} symbols from ticks")
