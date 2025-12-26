@@ -370,7 +370,7 @@ class MenuManager:
                         sys.exit(0)
                         
                     index_keys = level1_index_options_sectoral.keys()
-                    stock_index_code = input(
+                    stock_index_code = OutputControls().takeUserInput(
                         colorText.FAIL + "  [+] Select option: "
                     ) or str(len(index_keys))
                     OutputControls().printOutput(colorText.END, end="")
@@ -392,7 +392,7 @@ class MenuManager:
             
             if index_option is not None and index_option != "W":
                 if execute_option is None:
-                    execute_option = input(
+                    execute_option = OutputControls().takeUserInput(
                         colorText.FAIL + f"{past_date}  [+] Select option: "
                     ) or "9"
                     OutputControls().printOutput(colorText.END, end="")
@@ -597,7 +597,7 @@ class MenuManager:
             if self.user_passed_args is None or self.user_passed_args.options is None:
                 selected_menu = self.m0.find(menu_option)
                 self.m1.renderForMenu(selected_menu=selected_menu)
-                period_option = input(
+                period_option = OutputControls().takeUserInput(
                     colorText.FAIL + "  [+] Select option: "
                 ) or ('L' if self.config_manager.period == '1y' else 'S')
                 OutputControls().printOutput(colorText.END, end="")
@@ -610,7 +610,7 @@ class MenuManager:
                 if period_option.upper() in ["L", "S"]:
                     selected_menu = self.m1.find(period_option)
                     self.m2.renderForMenu(selected_menu=selected_menu)
-                    duration_option = input(
+                    duration_option = OutputControls().takeUserInput(
                         colorText.FAIL + "  [+] Select option: "
                     ) or "1"
                     OutputControls().printOutput(colorText.END, end="")
@@ -633,7 +633,7 @@ class MenuManager:
                     return
                 elif period_option.upper() in ["B"]:
                     last_trading_date = PKDateUtilities.nthPastTradingDateStringFromFutureDate(n=(22 if self.config_manager.period == '1y' else 15))
-                    backtest_days_ago = input(
+                    backtest_days_ago = OutputControls().takeUserInput(
                         f"{colorText.FAIL}  [+] Enter no. of days/candles in the past as starting candle for which you'd like to run the scans\n  [+] You can also enter a past date in {colorText.END}{colorText.GREEN}YYYY-MM-DD{colorText.END}{colorText.FAIL} format\n  [+] (e.g. {colorText.GREEN}10{colorText.END} for 10 candles ago or {colorText.GREEN}0{colorText.END} for today or {colorText.GREEN}{last_trading_date}{colorText.END}):"
                     ) or ('22' if self.config_manager.period == '1y' else '15')
                     OutputControls().printOutput(colorText.END, end="")
@@ -1875,7 +1875,7 @@ class DataManager:
         response = "N"
         
         if should_prompt:
-            response = input(f"  [+] {colorText.WARN}Clean up local non-essential system generated data?{colorText.END}{colorText.FAIL}[Default: {response}]{colorText.END}\n    (User generated reports won't be deleted.)        :") or response
+            response = OutputControls().takeUserInput(f"  [+] {colorText.WARN}Clean up local non-essential system generated data?{colorText.END}{colorText.FAIL}[Default: {response}]{colorText.END}\n    (User generated reports won't be deleted.)        :") or response
             
         if "y" in response.lower():
             dirs = [Archiver.get_user_data_dir(), Archiver.get_user_cookies_dir(), 
@@ -1884,7 +1884,7 @@ class DataManager:
             for dir in dirs:
                 self.config_manager.deleteFileWithPattern(rootDir=dir, pattern="*")
                 
-            response = input(f"\n  [+] {colorText.WARN}Clean up local user generated reports as well?{colorText.END} {colorText.FAIL}[Default: N]{colorText.END} :") or "n"
+            response = OutputControls().takeUserInput(f"\n  [+] {colorText.WARN}Clean up local user generated reports as well?{colorText.END} {colorText.FAIL}[Default: N]{colorText.END} :") or "n"
             
             if "y" in response.lower():
                 self.config_manager.deleteFileWithPattern(rootDir=Archiver.get_user_reports_dir(), pattern="*.*")
@@ -2098,7 +2098,7 @@ class BacktestManager:
         )
         
         if self.default_answer is None:
-            choice = input(
+            choice = OutputControls().takeUserInput(
                 colorText.FAIL + "  [+] Select option:"
             )
             OutputControls().printOutput(colorText.END, end="")
