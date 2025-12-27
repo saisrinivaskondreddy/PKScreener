@@ -391,14 +391,3 @@ class TextSanitizer:
         """
         import html
         return html.escape(str(text))
-
-
-
-
-
-
-
-
-
-
-
