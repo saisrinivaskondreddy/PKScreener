@@ -77,10 +77,13 @@ class TestDataFreshness:
             }
         }
         
-        is_fresh, stale_count = PKAssetsManager.is_data_fresh(test_data)
+        # Returns (is_fresh, data_date, trading_days_old)
+        result = PKAssetsManager.is_data_fresh(test_data)
         
+        assert isinstance(result, tuple)
+        assert len(result) == 3
+        is_fresh, data_date, trading_days_old = result
         assert isinstance(is_fresh, bool)
-        assert isinstance(stale_count, int)
     
     def test_is_data_fresh_with_old_data(self):
         """Test is_data_fresh with old data."""
@@ -96,11 +99,12 @@ class TestDataFreshness:
             }
         }
         
-        is_fresh, stale_count = PKAssetsManager.is_data_fresh(test_data)
+        # Returns (is_fresh, data_date, trading_days_old)
+        result = PKAssetsManager.is_data_fresh(test_data)
         
         # Should detect stale data
-        assert isinstance(is_fresh, bool)
-        assert isinstance(stale_count, int)
+        assert isinstance(result, tuple)
+        assert len(result) == 3
     
     def test_ensure_data_freshness(self):
         """Test ensure_data_freshness method."""
