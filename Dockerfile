@@ -38,12 +38,22 @@ COPY requirements.txt .
 RUN pip3 install --upgrade pip && \
     pip3 uninstall pkscreener PKNSETools PKDevTools -y && \
     pip3 install --no-cache-dir -r requirements.txt && \
-    pip3 install https://github.com/pkjmesra/libsql-python/releases/download/released/libsql-0.1.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl && \
     pip3 install . && \
     mv /PKScreener-main/pkscreener/pkscreenercli.py /pkscreenercli.py && \
     rm -rf /PKScreener-main && \
     mkdir -p /PKScreener-main/pkscreener/ && \
     mv /pkscreenercli.py /PKScreener-main/pkscreener/pkscreenercli.py
+
+# Install libsql for database support (architecture-specific)
+# Only install on x86_64 - ARM uses fallback SQLite
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        pip3 install https://github.com/pkjmesra/libsql-python/releases/download/released/libsql-0.1.6-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl || true; \
+    elif [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then \
+        pip3 install https://github.com/pkjmesra/libsql-python/releases/download/released/libsql-0.1.6-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl || true; \
+    else \
+        echo "libsql not available for architecture: $ARCH, using SQLite fallback"; \
+    fi
 
 ENV TERM=xterm
 COPY cve-fixes.txt .
