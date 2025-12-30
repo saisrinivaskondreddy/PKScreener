@@ -78,6 +78,13 @@ class PKUserRegistration(SingletonMixin, metaclass=SingletonType):
             if "RUNNER" in os.environ.keys():
                 return True, ValidationResult.Success
             PKPikey.removeSavedFile(f"{PKUserRegistration().userID}")
+            # Remove the sqlite db file if exists to ensure it does not interfere with validation
+            try:
+                db_path=os.path.join(Archiver.get_user_data_dir(), "PKDevTools_cache.sqlite")
+                os.remove(db_path)
+            except:
+                pass
+
             resp = Utility.tools.tryFetchFromServer(cache_file=f"{PKUserRegistration().userID}.pdf",directory="results/Data",hideOutput=True, branchName="SubData")
             if resp is None or resp.status_code != 200:
                 return False, ValidationResult.BadUserID
