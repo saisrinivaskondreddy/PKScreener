@@ -162,6 +162,7 @@ jobs:
         ls -l results/Data/
 
     - name: Upload artifacts (if script generates output files)
+      timeout-minutes: 5
       uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -182,6 +183,7 @@ jobs:
         ls -la actions-data-download/ || echo "Directory empty or not found"
 
     - name: Push pkl files to repository
+      timeout-minutes: 5
       if: success()
       run: |
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
