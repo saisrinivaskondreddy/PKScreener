@@ -198,7 +198,12 @@ jobs:
           git add actions-data-download/*.pkl --force
           git add actions-data-download/*.json --force 2>/dev/null || true
           git commit -m "GitHub-Action-Workflow-PKBrokers-Pickle-Save-$(date +%Y-%m-%d)" || echo "No changes to commit"
-          git push -v -u origin +actions-data-download
+          # Pull and rebase before pushing to avoid overwriting good commits from other workflows
+          for i in 1 2 3; do
+            git pull --rebase origin actions-data-download || true
+            git push -v -u origin actions-data-download && break || echo "Push failed, retry $i..."
+            sleep 5
+          done
           echo "Successfully pushed pkl files to repository"
         else
           echo "No pkl files found to commit"
