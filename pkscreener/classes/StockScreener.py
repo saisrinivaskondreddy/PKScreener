@@ -756,7 +756,26 @@ class StockScreener:
             try:
                 data = hostRef.objectDictionaryPrimary.get(stock)
                 if data is not None:
-                    data = pd.DataFrame(data["data"], columns=data["columns"], index=data["index"])
+                    # Parse index to datetime with proper format handling
+                    index_data = data.get("index", [])
+                    if index_data and len(index_data) > 0:
+                        try:
+                            parsed_index = pd.to_datetime(index_data, format='mixed', utc=True, errors='coerce')
+                            if hasattr(parsed_index, 'tz') and parsed_index.tz is not None:
+                                parsed_index = parsed_index.tz_localize(None)
+                        except:
+                            try:
+                                parsed_index = pd.to_datetime(index_data, errors='coerce')
+                                if hasattr(parsed_index, 'tz') and parsed_index.tz is not None:
+                                    parsed_index = parsed_index.tz_localize(None)
+                            except:
+                                parsed_index = index_data
+                    else:
+                        parsed_index = index_data
+                    
+                    data = pd.DataFrame(data["data"], columns=data["columns"], index=parsed_index)
+                    # Ensure index is sorted (latest date at end)
+                    data = data.sort_index()
                     screener.getMutualFundStatus(stock, hostData=data, force=True, exchangeName=exchangeName)
                     hostRef.objectDictionaryPrimary[stock] = data.to_dict("split")
             except KeyboardInterrupt: # pragma: no cover
@@ -1040,8 +1059,29 @@ class StockScreener:
             # data = hostData
             try:
                 columns = hostData["columns"]
+                # Parse index to datetime before creating DataFrame to ensure proper date handling
+                index_data = hostData["index"]
+                if index_data and len(index_data) > 0:
+                    # Try to parse index as datetime with multiple format support
+                    try:
+                        parsed_index = pd.to_datetime(index_data, format='mixed', utc=True, errors='coerce')
+                        # Convert to tz-naive for consistency
+                        if hasattr(parsed_index, 'tz') and parsed_index.tz is not None:
+                            parsed_index = parsed_index.tz_localize(None)
+                    except:
+                        # Fallback: try without format specification
+                        try:
+                            parsed_index = pd.to_datetime(index_data, errors='coerce')
+                            if hasattr(parsed_index, 'tz') and parsed_index.tz is not None:
+                                parsed_index = parsed_index.tz_localize(None)
+                        except:
+                            # Last resort: use as-is
+                            parsed_index = index_data
+                else:
+                    parsed_index = index_data
+                
                 data = pd.DataFrame(
-                        hostData["data"], columns=columns, index=hostData["index"]
+                        hostData["data"], columns=columns, index=parsed_index
                     )
             except (ValueError, AssertionError) as e: # pragma: no cover
                 # 9 columns passed, passed data had 11 columns
@@ -1053,8 +1093,9 @@ class StockScreener:
                     while (num_diff > 0):
                         columns.append(f"temp{num_diff}")
                         num_diff -= 1
+                    # Use parsed index here too
                     data = pd.DataFrame(
-                            hostData["data"], columns=columns, index=hostData["index"]
+                            hostData["data"], columns=columns, index=parsed_index
                         )
                 else:
                     hostRef.default_logger.debug(e, exc_info=True)
@@ -1069,8 +1110,14 @@ class StockScreener:
             else:
                 data.rename(columns={"index": "Date"}, inplace=True)
             data.set_index("Date", inplace=True)
-            data.index = pd.to_datetime(data.index)
-        except: # pragma: no cover
+            # Ensure index is datetime and tz-naive
+            data.index = pd.to_datetime(data.index, format='mixed', utc=True, errors='coerce')
+            if hasattr(data.index, 'tz') and data.index.tz is not None:
+                data.index = data.index.tz_localize(None)
+            # Sort by index to ensure latest date is at the end
+            data = data.sort_index()
+        except Exception as e: # pragma: no cover
+            hostRef.default_logger.debug(f"Error parsing date index: {e}", exc_info=True)
             pass
         if ((shouldCache and not self.isTradingTime and (hostData is None  or hostDataLength == 0)) or downloadOnly) \
             or (shouldCache and hostData is None):  # and backtestDuration == 0 # save only if we're NOT backtesting
