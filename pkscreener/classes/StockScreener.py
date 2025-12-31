@@ -1114,8 +1114,9 @@ class StockScreener:
             data.index = pd.to_datetime(data.index, format='mixed', utc=True, errors='coerce')
             if hasattr(data.index, 'tz') and data.index.tz is not None:
                 data.index = data.index.tz_localize(None)
-            # Sort by index to ensure latest date is at the end
-            data = data.sort_index()
+            # Sort by index in descending order to ensure latest date is at the beginning (index[0])
+            # This is the expected format for validation functions like validate15MinutePriceVolumeBreakout
+            data = data.sort_index(ascending=False)
         except Exception as e: # pragma: no cover
             hostRef.default_logger.debug(f"Error parsing date index: {e}", exc_info=True)
             pass
