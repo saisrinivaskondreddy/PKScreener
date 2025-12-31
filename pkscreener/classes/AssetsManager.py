@@ -779,7 +779,41 @@ class PKAssetsManager:
         # if os.path.exists(copyFilePath):
         #     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
         if os.path.exists(srcFilePath) and not forceRedownload:
-            stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
+            # Check if local cache is stale before loading
+            is_local_stale = False
+            try:
+                with open(srcFilePath, "rb") as f:
+                    sample_data = pickle.load(f)
+                    if sample_data and len(sample_data) > 0:
+                        # Check freshness of first available stock
+                        sample_stock = list(sample_data.keys())[0]
+                        sample_stock_data = sample_data[sample_stock]
+                        is_fresh, data_date, trading_days_old = PKAssetsManager.is_data_fresh(sample_stock_data, max_stale_trading_days=1)
+                        if not is_fresh:
+                            is_local_stale = True
+                            default_logger().info(f"Local cache is stale (data_date={data_date}, trading_days_old={trading_days_old}), will download fresh data")
+                            OutputControls().printOutput(
+                                colorText.WARN
+                                + f"  [!] Local cache is stale (data from {data_date}), downloading fresh data..."
+                                + colorText.END
+                            )
+            except Exception as e:
+                default_logger().debug(f"Error checking local cache freshness: {e}")
+                # If we can't check, assume it's OK and try loading
+            
+            # Only load from local cache if it's fresh
+            if not is_local_stale:
+                stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
+            else:
+                # Try to download fresh data from GitHub first
+                success, github_path, num_instruments = PKAssetsManager.download_fresh_pkl_from_github()
+                if success and github_path:
+                    # Replace local cache with fresh GitHub data
+                    import shutil
+                    shutil.copy(github_path, srcFilePath)
+                    default_logger().info(f"Replaced stale local cache with fresh data from GitHub ({num_instruments} instruments)")
+                    # Now load from the updated local cache
+                    stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
         if (
             not stockDataLoaded
             and ("1d" if isIntraday else ConfigManager.default_period)
