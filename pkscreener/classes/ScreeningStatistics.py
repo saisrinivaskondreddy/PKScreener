@@ -1870,13 +1870,20 @@ class ScreeningStatistics:
         if rsiKey not in df.columns:
             return False
         data = df.copy()
-        data = data[::-1]
-        data = data.tail(3)
-        if len(data) < 3:
+        # Ensure data is sorted with latest date first (descending)
+        if not data.empty and hasattr(data.index, 'sort_values'):
+            try:
+                data = data.sort_index(ascending=False)
+            except:
+                pass
+        # Get the 3 most recent rows (latest date first, so head(3) gets newest 3)
+        recent = data.head(3)
+        if len(recent) < 3:
             return False
-        dayMinus2RSI = data["RSI"].iloc[0]
-        dayMinus1RSI = data["RSI"].iloc[1]
-        dayRSI = data["RSI"].iloc[2]
+        # recent.iloc[0] = today (most recent), iloc[1] = yesterday, iloc[2] = day before yesterday
+        dayRSI = recent["RSI"].iloc[0]  # Today's RSI
+        dayMinus1RSI = recent["RSI"].iloc[1]  # Yesterday's RSI
+        dayMinus2RSI = recent["RSI"].iloc[2]  # Day before yesterday's RSI
         returnValue = (dayMinus2RSI <= 35 and dayMinus1RSI > dayMinus2RSI and dayRSI > dayMinus1RSI) or \
                 (dayMinus1RSI <= 35 and dayRSI > dayMinus1RSI)
         if rsiKey == "RSI":
@@ -2919,6 +2926,9 @@ class ScreeningStatistics:
         data = df.copy()
         data = data.fillna(0)
         data = data.replace([np.inf, -np.inf], 0)
+        # Need at least 20 rows for SMA20 calculation
+        if len(data) < 20:
+            return False
         # Ensure data is sorted with oldest date first for SMA calculation
         if not data.empty and hasattr(data.index, 'sort_values'):
             try:
@@ -2926,9 +2936,6 @@ class ScreeningStatistics:
             except:
                 pass
         data = data[::-1]  # Reverse the dataframe so that its the oldest date first
-        # Need at least 20 rows for SMA20 calculation
-        if len(data) < 20:
-            return False
         data["SMA20"] = pktalib.SMA(data["close"], 20)
         data["SMA20V"] = pktalib.SMA(data["volume"], 20)
         data = data[

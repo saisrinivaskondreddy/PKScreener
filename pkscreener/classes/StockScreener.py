@@ -1117,6 +1117,16 @@ class StockScreener:
             # Sort by index in descending order to ensure latest date is at the beginning (index[0])
             # This is the expected format for validation functions like validate15MinutePriceVolumeBreakout
             data = data.sort_index(ascending=False)
+            # Log date range for debugging (only for first few stocks to avoid spam)
+            if hasattr(hostRef, '_data_date_logged_count'):
+                hostRef._data_date_logged_count = getattr(hostRef, '_data_date_logged_count', 0) + 1
+            else:
+                hostRef._data_date_logged_count = 1
+            
+            if hostRef._data_date_logged_count <= 3 and not data.empty:
+                latest_date = data.index[0]
+                oldest_date = data.index[-1]
+                hostRef.default_logger.info(f"Data date range for {stock}: {oldest_date} to {latest_date} ({len(data)} rows)")
         except Exception as e: # pragma: no cover
             hostRef.default_logger.debug(f"Error parsing date index: {e}", exc_info=True)
             pass
