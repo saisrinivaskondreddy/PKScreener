@@ -835,8 +835,10 @@ class PKAssetsManager:
         # if os.path.exists(copyFilePath):
         #     shutil.copy(copyFilePath,srcFilePath) # copy is the saved source of truth
         if os.path.exists(srcFilePath) and not forceRedownload:
-            # Check if local cache is stale before loading
+            # Check if local cache is stale OR has insufficient data before loading
             is_local_stale = False
+            has_insufficient_data = False
+            MIN_ROWS_REQUIRED = 20  # Minimum rows needed for technical indicators (SMA20)
             try:
                 with open(srcFilePath, "rb") as f:
                     sample_data = pickle.load(f)
@@ -853,12 +855,30 @@ class PKAssetsManager:
                                 + f"  [!] Local cache is stale (data from {data_date}), downloading fresh data..."
                                 + colorText.END
                             )
+                        
+                        # Check data quality (minimum rows per stock)
+                        row_count = 0
+                        if isinstance(sample_stock_data, pd.DataFrame):
+                            row_count = len(sample_stock_data)
+                        elif isinstance(sample_stock_data, dict) and 'data' in sample_stock_data:
+                            row_count = len(sample_stock_data.get('data', []))
+                        elif isinstance(sample_stock_data, dict) and 'index' in sample_stock_data:
+                            row_count = len(sample_stock_data.get('index', []))
+                        
+                        if row_count < MIN_ROWS_REQUIRED:
+                            has_insufficient_data = True
+                            default_logger().info(f"Local cache has insufficient data ({row_count} rows < {MIN_ROWS_REQUIRED} required), will download fresh data")
+                            OutputControls().printOutput(
+                                colorText.WARN
+                                + f"  [!] Local cache has insufficient data ({row_count} rows), downloading fresh data..."
+                                + colorText.END
+                            )
             except Exception as e:
                 default_logger().debug(f"Error checking local cache freshness: {e}")
                 # If we can't check, assume it's OK and try loading
             
-            # Only load from local cache if it's fresh
-            if not is_local_stale:
+            # Only load from local cache if it's fresh AND has sufficient data
+            if not is_local_stale and not has_insufficient_data:
                 stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
             else:
                 # Try to download fresh data from GitHub first
@@ -867,17 +887,17 @@ class PKAssetsManager:
                     # Replace local cache with fresh GitHub data
                     import shutil
                     shutil.copy(github_path, srcFilePath)
-                    default_logger().info(f"Replaced stale local cache with fresh data from GitHub ({num_instruments} instruments)")
+                    default_logger().info(f"Replaced stale/insufficient local cache with fresh data from GitHub ({num_instruments} instruments)")
                     OutputControls().printOutput(
                         colorText.GREEN
-                        + f"  [+] Downloaded and replaced stale cache with fresh data ({num_instruments} instruments)"
+                        + f"  [+] Downloaded and replaced cache with fresh data ({num_instruments} instruments)"
                         + colorText.END
                     )
                     # Now load from the updated local cache
                     stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
                 else:
                     # If GitHub download failed, still try to load from local (might be better than nothing)
-                    default_logger().warning("Failed to download fresh data from GitHub, using stale local cache")
+                    default_logger().warning("Failed to download fresh data from GitHub, using stale/insufficient local cache")
                     stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
         if (
             not stockDataLoaded
@@ -932,7 +952,30 @@ class PKAssetsManager:
                 listStockCodes = [x.replace(exchangeSuffix, "") for x in listStockCodes]
             for stock in listStockCodes:
                 df_or_dict = stockData.get(stock)
-                df_or_dict = df_or_dict.to_dict("split") if isinstance(df_or_dict, pd.DataFrame) else df_or_dict
+                # Handle DataFrame with duplicate lowercase/uppercase columns
+                if isinstance(df_or_dict, pd.DataFrame):
+                    # Merge lowercase and uppercase OHLCV columns
+                    ohlcv_cols = ['open', 'high', 'low', 'close', 'volume']
+                    clean_df = pd.DataFrame(index=df_or_dict.index)
+                    for col in ohlcv_cols:
+                        lower_col = col
+                        upper_col = col.capitalize()
+                        has_lower = lower_col in df_or_dict.columns
+                        has_upper = upper_col in df_or_dict.columns
+                        if has_lower and has_upper:
+                            # Both exist - merge (fillna from lowercase with uppercase)
+                            lower_data = df_or_dict[lower_col].iloc[:, 0] if isinstance(df_or_dict[lower_col], pd.DataFrame) else df_or_dict[lower_col]
+                            upper_data = df_or_dict[upper_col].iloc[:, 0] if isinstance(df_or_dict[upper_col], pd.DataFrame) else df_or_dict[upper_col]
+                            clean_df[col] = lower_data.fillna(upper_data)
+                        elif has_lower:
+                            clean_df[col] = df_or_dict[lower_col].iloc[:, 0] if isinstance(df_or_dict[lower_col], pd.DataFrame) else df_or_dict[lower_col]
+                        elif has_upper:
+                            clean_df[col] = df_or_dict[upper_col].iloc[:, 0] if isinstance(df_or_dict[upper_col], pd.DataFrame) else df_or_dict[upper_col]
+                    # Copy other non-OHLCV columns
+                    for col in df_or_dict.columns:
+                        if col.lower() not in ohlcv_cols and col not in clean_df.columns:
+                            clean_df[col] = df_or_dict[col]
+                    df_or_dict = clean_df.to_dict("split")
                 existingPreLoadedData = stockDict.get(stock)
                 if existingPreLoadedData:
                     if isTrading:
