@@ -2897,8 +2897,15 @@ def runScanners(
             criteria_dateTime = PKDateUtilities.utc_to_ist(criteria_dateTime,localTz=localtz)
     if result is not None and len(result) >=1 and "Date" not in saveResults.columns:
         temp_df = result[2].copy()
+        # Ensure data is sorted to get the latest date
+        if not temp_df.empty and hasattr(temp_df.index, 'sort_values'):
+            try:
+                temp_df = temp_df.sort_index(ascending=False)  # Latest first
+            except:
+                pass
         temp_df.reset_index(inplace=True)
-        temp_df = temp_df.tail(1)
+        # Use head(1) to get the most recent date (since we sorted latest first)
+        temp_df = temp_df.head(1)
         temp_df.rename(columns={"index": "Date"}, inplace=True)
         targetDate = (
             temp_df["Date"].iloc[0]
