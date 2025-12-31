@@ -97,7 +97,24 @@ class PKAssetsManager:
                     if hasattr(last_date, 'date'):
                         last_date = last_date.date()
                     elif isinstance(last_date, str):
-                        last_date = datetime.strptime(str(last_date)[:10], '%Y-%m-%d').date()
+                        # Try multiple date formats
+                        date_str = str(last_date)
+                        # Remove timezone info if present
+                        if 'T' in date_str:
+                            date_str = date_str.split('T')[0]
+                        elif '+' in date_str:
+                            date_str = date_str.split('+')[0]
+                        elif ' ' in date_str:
+                            date_str = date_str.split(' ')[0]
+                        # Try parsing
+                        try:
+                            last_date = datetime.strptime(date_str[:10], '%Y-%m-%d').date()
+                        except:
+                            # Try other formats
+                            try:
+                                last_date = pd.to_datetime(date_str).date()
+                            except:
+                                last_date = None
             
             if last_date is None:
                 return True, None, 0  # Can't determine, assume fresh
@@ -812,7 +829,16 @@ class PKAssetsManager:
                     import shutil
                     shutil.copy(github_path, srcFilePath)
                     default_logger().info(f"Replaced stale local cache with fresh data from GitHub ({num_instruments} instruments)")
+                    OutputControls().printOutput(
+                        colorText.GREEN
+                        + f"  [+] Downloaded and replaced stale cache with fresh data ({num_instruments} instruments)"
+                        + colorText.END
+                    )
                     # Now load from the updated local cache
+                    stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
+                else:
+                    # If GitHub download failed, still try to load from local (might be better than nothing)
+                    default_logger().warning("Failed to download fresh data from GitHub, using stale local cache")
                     stockDict, stockDataLoaded = PKAssetsManager.loadDataFromLocalPickle(stockDict,configManager, downloadOnly, defaultAnswer, exchangeSuffix, cache_file, isTrading)
         if (
             not stockDataLoaded
