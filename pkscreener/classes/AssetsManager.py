@@ -336,31 +336,70 @@ class PKAssetsManager:
             
             output_path = os.path.join(data_dir, "stock_data_github.pkl")
             
+            # Track best file (most rows per stock)
+            best_file = None
+            best_url = None
+            best_rows_per_stock = 0
+            best_num_instruments = 0
+            
             for url in urls_to_try:
                 try:
                     default_logger().debug(f"Trying to download pkl from: {url}")
                     response = requests.get(url, timeout=60)
                     
                     if response.status_code == 200 and len(response.content) > 10000:
-                        with open(output_path, 'wb') as f:
+                        # Check data quality before accepting
+                        temp_path = output_path + ".tmp"
+                        with open(temp_path, 'wb') as f:
                             f.write(response.content)
                         
-                        # Verify it's a valid pkl
-                        with open(output_path, 'rb') as f:
+                        # Verify it's a valid pkl and check quality
+                        with open(temp_path, 'rb') as f:
                             data = pickle.load(f)
                         
                         if data and len(data) > 0:
-                            default_logger().info(f"Downloaded pkl from GitHub: {url} ({len(data)} instruments)")
-                            OutputControls().printOutput(
-                                colorText.GREEN
-                                + f"  [+] Downloaded fresh data from GitHub ({len(data)} instruments)"
-                                + colorText.END
-                            )
-                            return True, output_path, len(data)
+                            # Check average rows per stock (quality indicator)
+                            sample_symbols = ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'SBIN']
+                            rows_count = []
+                            for sym in sample_symbols:
+                                if sym in data:
+                                    item = data[sym]
+                                    if isinstance(item, pd.DataFrame):
+                                        rows_count.append(len(item))
+                                    elif isinstance(item, dict) and 'data' in item:
+                                        rows_count.append(len(item['data']))
+                            
+                            avg_rows = sum(rows_count) / len(rows_count) if rows_count else 0
+                            
+                            # Prefer files with more rows (full history = ~251 rows, incomplete = 1-10 rows)
+                            if avg_rows > best_rows_per_stock:
+                                best_file = temp_path
+                                best_url = url
+                                best_rows_per_stock = avg_rows
+                                best_num_instruments = len(data)
+                                default_logger().debug(f"Found better file: {url} ({len(data)} instruments, avg {avg_rows:.1f} rows/stock)")
                             
                 except Exception as e:
                     default_logger().debug(f"Failed to download from {url}: {e}")
                     continue
+            
+            # Use the best file found
+            if best_file and best_rows_per_stock >= 100:  # Require at least 100 rows per stock (full history)
+                import shutil
+                shutil.move(best_file, output_path)
+                default_logger().info(f"Downloaded best pkl from GitHub: {best_url} ({best_num_instruments} instruments, avg {best_rows_per_stock:.1f} rows/stock)")
+                OutputControls().printOutput(
+                    colorText.GREEN
+                    + f"  [+] Downloaded fresh data from GitHub ({best_num_instruments} instruments, {best_rows_per_stock:.0f} rows/stock)"
+                    + colorText.END
+                )
+                return True, output_path, best_num_instruments
+            elif best_file:
+                # Even if not ideal, use it if it's the best we found
+                import shutil
+                shutil.move(best_file, output_path)
+                default_logger().warning(f"Downloaded pkl with limited history: {best_url} ({best_num_instruments} instruments, avg {best_rows_per_stock:.1f} rows/stock)")
+                return True, output_path, best_num_instruments
             
             default_logger().warning("Could not download pkl from GitHub")
             return False, None, 0
