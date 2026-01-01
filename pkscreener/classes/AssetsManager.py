@@ -950,6 +950,9 @@ class PKAssetsManager:
                 listStockCodes = list(stockData.keys())
             if exchangeSuffix and any(exchangeSuffix in code for code in listStockCodes):
                 listStockCodes = [x.replace(exchangeSuffix, "") for x in listStockCodes]
+            # Filter out numeric keys (instrument tokens) - they have stale data
+            # and the same stocks exist with proper symbol keys with fresh data
+            listStockCodes = [code for code in listStockCodes if not str(code).isdigit()]
             for stock in listStockCodes:
                 df_or_dict = stockData.get(stock)
                 # Handle DataFrame with duplicate lowercase/uppercase columns
