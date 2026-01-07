@@ -1025,20 +1025,20 @@ class PKAssetsManager:
                     stockDict[stock] = df_or_dict
             stockDataLoaded = True
             
-            # Validate data freshness and apply ticks if stale during trading hours
+            # During trading hours, always try to apply fresh real-time data
+            # This ensures we have the latest 1-minute candles with timestamps
             if stockDict and isTrading:
+                # Always apply fresh ticks during market hours to get latest timestamps
+                stockDict = PKAssetsManager._apply_fresh_ticks_to_data(stockDict)
+                
+                # Also validate and warn if still stale
                 fresh_count, stale_count, oldest_date = PKAssetsManager.validate_data_freshness(
                     stockDict, isTrading=isTrading
                 )
                 if stale_count > 0:
-                    OutputControls().printOutput(
-                        colorText.WARN
-                        + f"  [!] Warning: {stale_count} stocks have stale data (oldest: {oldest_date}). "
-                        + "Attempting to apply fresh tick data..."
-                        + colorText.END
+                    default_logger().debug(
+                        f"Warning: {stale_count} stocks still have stale data after applying fresh ticks (oldest: {oldest_date})"
                     )
-                    # Try to apply fresh ticks to stale data
-                    stockDict = PKAssetsManager._apply_fresh_ticks_to_data(stockDict)
         except (pickle.UnpicklingError, EOFError) as e:
             default_logger().debug(e, exc_info=True)
             OutputControls().printOutput(
