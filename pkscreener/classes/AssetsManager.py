@@ -219,7 +219,13 @@ class PKAssetsManager:
                 return stockDict
             
             # Get today's date for the merge
-            today_str = datetime.now().strftime('%Y-%m-%d')
+            import pytz
+            from PKDevTools.classes.PKDateUtilities import PKDateUtilities
+            
+            timezone = pytz.timezone("Asia/Kolkata")
+            now = datetime.now(timezone)
+            today_str = now.strftime('%Y-%m-%d')
+            is_trading_hours = PKDateUtilities.isTradingTime()
             updated_count = 0
             
             # Apply ticks to stockDict
@@ -256,22 +262,50 @@ class PKAssetsManager:
                     if len(columns) == 6:
                         today_row.append(float(ohlcv.get('close', 0)))  # Adj Close = Close
                     
+                    # Determine the timestamp for the index
+                    # During market hours, use current time; otherwise use market close time or last_update
+                    if is_trading_hours:
+                        # Use current time during market hours to show latest data
+                        timestamp_str = now.strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        # Use last_update timestamp if available, otherwise use market close time
+                        last_update = tick_info.get('last_update')
+                        if last_update:
+                            try:
+                                # last_update might be a timestamp (float) or ISO string
+                                if isinstance(last_update, (int, float)):
+                                    timestamp_dt = datetime.fromtimestamp(last_update, tz=timezone)
+                                else:
+                                    timestamp_dt = datetime.fromisoformat(str(last_update).replace('Z', '+00:00'))
+                                    if timestamp_dt.tzinfo is None:
+                                        timestamp_dt = timezone.localize(timestamp_dt)
+                                    timestamp_dt = timestamp_dt.astimezone(timezone)
+                                timestamp_str = timestamp_dt.strftime('%Y-%m-%d %H:%M:%S')
+                            except:
+                                # Fallback to market close time (3:30 PM)
+                                timestamp_str = f"{today_str} 15:30:00"
+                        else:
+                            # Fallback to market close time (3:30 PM)
+                            timestamp_str = f"{today_str} 15:30:00"
+                    
                     # Check if today's data already exists and update/append
                     data_rows = stock_data.get('data', [])
                     index_list = stock_data.get('index', [])
                     
-                    # Find and remove today's existing data
+                    # Find and remove today's existing data (by date, not full timestamp)
                     new_rows = []
                     new_index = []
                     for idx, row in zip(index_list, data_rows):
-                        idx_str = str(idx)[:10] if len(str(idx)) >= 10 else str(idx)
-                        if idx_str != today_str:
+                        idx_str = str(idx)
+                        idx_date = idx_str[:10] if len(idx_str) >= 10 else idx_str
+                        # Remove all entries from today - we'll replace with fresh data
+                        if idx_date != today_str:
                             new_rows.append(row)
                             new_index.append(idx)
                     
-                    # Append today's fresh data
+                    # Append today's fresh data with proper timestamp
                     new_rows.append(today_row)
-                    new_index.append(today_str)
+                    new_index.append(timestamp_str)
                     
                     stock_data['data'] = new_rows
                     stock_data['index'] = new_index
@@ -279,7 +313,7 @@ class PKAssetsManager:
                     updated_count += 1
                     
                 except Exception as e:
-                    default_logger().debug(f"Error applying tick for {symbol}: {e}")
+                    default_logger().debug(f"Error applying tick for {symbol}: {e}", exc_info=True)
                     continue
             
             if updated_count > 0:
