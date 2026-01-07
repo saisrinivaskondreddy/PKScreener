@@ -301,6 +301,9 @@ class PKAssetsManager:
                 if not symbol or not ohlcv or ohlcv.get('close', 0) <= 0:
                     continue
                 
+                # Check if ohlcv has a timestamp field (alternative to last_update)
+                ohlcv_timestamp = ohlcv.get('timestamp')
+                
                 # Find matching symbol in stockDict
                 if symbol not in stockDict:
                     continue
@@ -327,10 +330,25 @@ class PKAssetsManager:
                     # Determine the timestamp for the index
                     # During market hours: use last_update from ticks (when data was captured)
                     # After market hours: always use market close time (15:30)
+                    # #region agent log
+                    import json
+                    log_path = '/Users/praveen.jha1/Downloads/codes/PKScreener-main/.cursor/debug.log'
+                    try:
+                        with open(log_path, 'a') as f:
+                            f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:327","message":"Determining timestamp for symbol","data":{"symbol":symbol,"is_trading_hours":is_trading_hours,"tick_info_keys":list(tick_info.keys())[:5] if isinstance(tick_info, dict) else None,"has_last_update":"last_update" in tick_info if isinstance(tick_info, dict) else False},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                    except: pass
+                    # #endregion
                     if is_trading_hours:
-                        # Use last_update timestamp from ticks.json (when the data was actually captured)
+                        # Use timestamp from ticks.json (when the data was actually captured)
                         # This shows the actual time when the tick data was saved for each stock
-                        last_update = tick_info.get('last_update')
+                        # Try multiple sources: last_update, last_updated (top level), ohlcv.timestamp, or current time
+                        last_update = tick_info.get('last_update') or tick_info.get('last_updated') or ohlcv_timestamp
+                        # #region agent log
+                        try:
+                            with open(log_path, 'a') as f:
+                                f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:333","message":"Checking last_update","data":{"symbol":symbol,"last_update":str(last_update) if last_update else None,"last_update_type":type(last_update).__name__ if last_update else None,"ohlcv_timestamp":str(ohlcv_timestamp) if ohlcv_timestamp else None},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                        except: pass
+                        # #endregion
                         if last_update:
                             try:
                                 # last_update might be a timestamp (float) or ISO string
@@ -342,16 +360,76 @@ class PKAssetsManager:
                                         timestamp_dt = timezone.localize(timestamp_dt)
                                     timestamp_dt = timestamp_dt.astimezone(timezone)
                                 timestamp_str = timestamp_dt.strftime('%Y-%m-%d %H:%M:%S')
-                            except:
+                                # #region agent log
+                                try:
+                                    with open(log_path, 'a') as f:
+                                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:344","message":"Using last_update timestamp","data":{"symbol":symbol,"timestamp_str":timestamp_str},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                                except: pass
+                                # #endregion
+                            except Exception as e:
                                 # Fallback to current time if last_update parsing fails
                                 timestamp_str = now.strftime('%Y-%m-%d %H:%M:%S')
+                                # #region agent log
+                                try:
+                                    with open(log_path, 'a') as f:
+                                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:347","message":"last_update parsing failed, using current time","data":{"symbol":symbol,"error":str(e),"timestamp_str":timestamp_str},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                                except: pass
+                                # #endregion
                         else:
                             # Fallback to current time if last_update not available
                             timestamp_str = now.strftime('%Y-%m-%d %H:%M:%S')
+                            # #region agent log
+                            try:
+                                with open(log_path, 'a') as f:
+                                    f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:350","message":"last_update not available, using current time","data":{"symbol":symbol,"timestamp_str":timestamp_str},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                            except: pass
+                            # #endregion
                     else:
-                        # After market hours, always use market close time (15:30)
-                        # This ensures consistent display of market close time in scan results
-                        timestamp_str = f"{today_str} 15:30:00"
+                        # After market hours, try to use the actual timestamp when data was captured
+                        # This shows when each stock's data was actually updated, not just market close time
+                        last_update = tick_info.get('last_update') or tick_info.get('last_updated') or ohlcv_timestamp
+                        if last_update:
+                            try:
+                                # Parse the timestamp (could be ISO string or float)
+                                if isinstance(last_update, (int, float)):
+                                    timestamp_dt = datetime.fromtimestamp(last_update, tz=timezone)
+                                else:
+                                    # Handle ISO format strings like "2026-01-07T10:29:13.827168" or "2026-01-07T10:29:09"
+                                    timestamp_str_clean = str(last_update).replace('Z', '+00:00')
+                                    if 'T' in timestamp_str_clean:
+                                        # ISO format with T separator
+                                        timestamp_dt = datetime.fromisoformat(timestamp_str_clean)
+                                    else:
+                                        # Try parsing as regular datetime string
+                                        timestamp_dt = datetime.strptime(timestamp_str_clean, '%Y-%m-%d %H:%M:%S')
+                                    if timestamp_dt.tzinfo is None:
+                                        timestamp_dt = timezone.localize(timestamp_dt)
+                                    timestamp_dt = timestamp_dt.astimezone(timezone)
+                                timestamp_str = timestamp_dt.strftime('%Y-%m-%d %H:%M:%S')
+                                # #region agent log
+                                try:
+                                    with open(log_path, 'a') as f:
+                                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:354","message":"Market closed, using data capture timestamp","data":{"symbol":symbol,"timestamp_str":timestamp_str,"last_update":str(last_update)},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                                except: pass
+                                # #endregion
+                            except Exception as e:
+                                # Fallback to market close time if parsing fails
+                                timestamp_str = f"{today_str} 15:30:00"
+                                # #region agent log
+                                try:
+                                    with open(log_path, 'a') as f:
+                                        f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:375","message":"Market closed, timestamp parsing failed, using market close time","data":{"symbol":symbol,"timestamp_str":timestamp_str,"error":str(e)},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                                except: pass
+                                # #endregion
+                        else:
+                            # No timestamp available, use market close time
+                            timestamp_str = f"{today_str} 15:30:00"
+                            # #region agent log
+                            try:
+                                with open(log_path, 'a') as f:
+                                    f.write(json.dumps({"sessionId":"debug-session","runId":"run1","hypothesisId":"F","location":"AssetsManager.py:_apply_fresh_ticks_to_data:382","message":"Market closed, no timestamp available, using market close time","data":{"symbol":symbol,"timestamp_str":timestamp_str},"timestamp":int(__import__('time').time()*1000)}) + '\n')
+                            except: pass
+                            # #endregion
                     
                     # Check if today's data already exists and update/append
                     data_rows = stock_data.get('data', [])
