@@ -39,9 +39,10 @@ RUN printf "I'm building for TARGETPLATFORM=${TARGETPLATFORM}" \
 RUN apt-get install -y apt-transport-https
 RUN apt-get -y update && apt-get upgrade -y
 
-RUN apt-get install -y gcc curl make build-essential wget unzip tar pkg-config libhdf5-serial-dev
+RUN apt-get install -y gcc curl make build-essential wget unzip tar pkg-config libhdf5-serial-dev git
 
 ENV LANG C.UTF-8
+ENV GIT_PYTHON_REFRESH=quiet
 
 RUN wget https://github.com/pkjmesra/PKScreener/archive/refs/heads/main.zip && unzip main.zip
 WORKDIR /PKScreener-main

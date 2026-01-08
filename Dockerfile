@@ -28,6 +28,7 @@
 
 FROM pkjmesra/pkscreener:base AS base
 ENV PYTHONUNBUFFERED=1
+ENV GIT_PYTHON_REFRESH=quiet
 WORKDIR /
 RUN rm -rf /PKScreener-main main.zip* && \
     curl -JL https://github.com/pkjmesra/PKScreener/archive/refs/heads/main.zip -o main.zip && \
