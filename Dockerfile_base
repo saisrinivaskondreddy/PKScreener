@@ -42,7 +42,6 @@ RUN apt-get -y update && apt-get upgrade -y
 RUN apt-get install -y gcc curl make build-essential wget unzip tar pkg-config libhdf5-serial-dev git
 
 ENV LANG C.UTF-8
-ENV GIT_PYTHON_REFRESH=quiet
 
 RUN wget https://github.com/pkjmesra/PKScreener/archive/refs/heads/main.zip && unzip main.zip
 WORKDIR /PKScreener-main
@@ -70,6 +69,8 @@ RUN export TERM=xterm
 COPY cve-fixes.txt .
 RUN pip3 install -r cve-fixes.txt
 ENV PKSCREENER_DOCKER=1
+# Set GitPython to quiet mode to avoid errors if git is not available (though we install it above)
+ENV GIT_PYTHON_REFRESH=quiet
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

@@ -28,7 +28,6 @@
 
 FROM pkjmesra/pkscreener:base AS base
 ENV PYTHONUNBUFFERED=1
-ENV GIT_PYTHON_REFRESH=quiet
 WORKDIR /
 RUN rm -rf /PKScreener-main main.zip* && \
     curl -JL https://github.com/pkjmesra/PKScreener/archive/refs/heads/main.zip -o main.zip && \
@@ -68,6 +67,8 @@ ENV TERM=xterm
 COPY cve-fixes.txt .
 RUN pip3 install -r cve-fixes.txt
 ENV PKSCREENER_DOCKER=1
+# Set GitPython to quiet mode to avoid errors if git is not available
+ENV GIT_PYTHON_REFRESH=quiet
 ENTRYPOINT ["python3","pkscreener/pkscreenercli.py"]
 # Run with 
 # docker run -it pkjmesra/pkscreener:latest
