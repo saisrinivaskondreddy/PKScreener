@@ -125,11 +125,16 @@ def main():
     date_suffix = datetime.now(tz).strftime('%y%m%d')
     force_fallback = os.environ.get('FORCE_TICK_FALLBACK', 'N') == 'Y'
     
+    # Check DB_TYPE from environment - determines if we use Turso or local SQLite
+    db_type = os.environ.get('DB_TYPE', 'local').lower()
+    use_turso = (db_type == 'turso')
+    
     print(f"Starting candle sync for {date_suffix}")
+    print(f"DB_TYPE: {db_type} (use_turso: {use_turso})")
     print(f"Force tick fallback: {force_fallback}")
     
     try:
-        # Try to import LocalCandleDatabase (requires libsql for Turso, but optional)
+        # Try to import LocalCandleDatabase (requires libsql for Turso, but optional for local SQLite)
         try:
             from pkbrokers.kite.localCandleDatabase import LocalCandleDatabase
             _LOCAL_DB_AVAILABLE = True
@@ -143,14 +148,24 @@ def main():
             # Create local database in results/Data
             db = LocalCandleDatabase(base_path='results/Data')
             
-            if not force_fallback:
-                # Try Turso sync first (requires libsql)
+            # Only try Turso sync if DB_TYPE=turso and not forcing fallback
+            if use_turso and not force_fallback:
+                # Try Turso sync (requires libsql)
                 try:
-                    print("Attempting Turso sync...")
+                    print("Attempting Turso sync (DB_TYPE=turso)...")
                     success = db.sync_from_turso()
+                    if success:
+                        print("Turso sync successful")
                 except Exception as e:
                     print(f"Turso sync failed (libsql may not be available): {e}")
                     success = False
+            elif not use_turso:
+                print(f"DB_TYPE={db_type}, skipping Turso sync (using local SQLite only)")
+                # For local mode, we'll use fallback methods (ticks or pickle files)
+                success = False
+            else:
+                print("Force fallback enabled, skipping Turso sync")
+                success = False
         
         if not success:
             print("Turso sync failed or skipped...")

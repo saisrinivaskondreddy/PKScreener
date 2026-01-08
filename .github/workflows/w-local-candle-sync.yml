@@ -64,8 +64,10 @@ jobs:
       env:
         DB_URL: ${{ secrets.DB_URL }}
         DB_AUTH_TOKEN: ${{ secrets.DB_AUTH_TOKEN }}
+        DB_TYPE: ${{ secrets.DB_TYPE || 'local' }}
         FORCE_TICK_FALLBACK: ${{ inputs.force_tick_fallback }}
       run: |
+        echo "DB_TYPE is set to: $DB_TYPE"
         python .github/workflows/sync_local_candles.py
         
     - name: List generated files
