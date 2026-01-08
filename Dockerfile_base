@@ -56,8 +56,12 @@ RUN rm -rf main.zip
 RUN pip3 install ta-lib==0.6.4
 
 COPY requirements.txt .
-RUN pip3 install --no-cache-dir -r requirements.txt
+# Filter out libsql from requirements if present (it's optional)
+RUN grep -v "^libsql" requirements.txt > requirements_no_libsql.txt || cp requirements.txt requirements_no_libsql.txt
+RUN pip3 install --no-cache-dir -r requirements_no_libsql.txt
 RUN pip3 install --no-deps advanced-ta
+# Try to install pkbrokers without libsql dependency (it should handle missing libsql gracefully)
+RUN pip3 install --no-deps pkbrokers || pip3 install pkbrokers || echo "pkbrokers installation issue (libsql may be missing), continuing..."
 RUN pip3 install .
 RUN wget https://raw.githubusercontent.com/pkjmesra/PKScreener/main/pkscreener/courbd.ttf && \
   cp courbd.ttf /usr/local/share/fonts/courbd.ttf

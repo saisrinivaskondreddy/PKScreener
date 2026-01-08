@@ -129,16 +129,28 @@ def main():
     print(f"Force tick fallback: {force_fallback}")
     
     try:
-        from pkbrokers.kite.localCandleDatabase import LocalCandleDatabase
-        
-        # Create local database in results/Data
-        db = LocalCandleDatabase(base_path='results/Data')
+        # Try to import LocalCandleDatabase (requires libsql for Turso, but optional)
+        try:
+            from pkbrokers.kite.localCandleDatabase import LocalCandleDatabase
+            _LOCAL_DB_AVAILABLE = True
+        except ImportError as e:
+            print(f"LocalCandleDatabase not available (libsql may be missing): {e}")
+            print("Will use fallback methods only...")
+            _LOCAL_DB_AVAILABLE = False
         
         success = False
-        if not force_fallback:
-            # Try Turso sync first
-            print("Attempting Turso sync...")
-            success = db.sync_from_turso()
+        if _LOCAL_DB_AVAILABLE:
+            # Create local database in results/Data
+            db = LocalCandleDatabase(base_path='results/Data')
+            
+            if not force_fallback:
+                # Try Turso sync first (requires libsql)
+                try:
+                    print("Attempting Turso sync...")
+                    success = db.sync_from_turso()
+                except Exception as e:
+                    print(f"Turso sync failed (libsql may not be available): {e}")
+                    success = False
         
         if not success:
             print("Turso sync failed or skipped...")
@@ -148,7 +160,7 @@ def main():
             ticks_data = fetch_ticks_from_github()
             daily_from_ticks = aggregate_ticks_to_daily(ticks_data)
             
-            if daily_from_ticks:
+            if daily_from_ticks and _LOCAL_DB_AVAILABLE:
                 print(f"Importing {len(daily_from_ticks)} symbols from ticks...")
                 now = datetime.now(tz).isoformat()
                 
@@ -191,69 +203,75 @@ def main():
                         data = pickle.load(f)
                     print(f"Loaded {len(data)} symbols")
                     
-                    # Import into local database
-                    now = datetime.now(tz).isoformat()
-                    today = datetime.now(tz).strftime('%Y-%m-%d')
-                    
-                    daily_conn = db._get_daily_connection()
-                    cursor = daily_conn.cursor()
-                    
-                    import pandas as pd
-                    for symbol, sym_data in data.items():
-                        try:
-                            if isinstance(sym_data, pd.DataFrame):
-                                df = sym_data
-                            elif isinstance(sym_data, dict) and 'data' in sym_data:
-                                df = pd.DataFrame(
-                                    data=sym_data['data'],
-                                    columns=sym_data.get('columns', ['open', 'high', 'low', 'close', 'volume']),
-                                    index=sym_data.get('index', [])
-                                )
-                            else:
+                    # Import into local database (only if available)
+                    if _LOCAL_DB_AVAILABLE:
+                        now = datetime.now(tz).isoformat()
+                        today = datetime.now(tz).strftime('%Y-%m-%d')
+                        
+                        daily_conn = db._get_daily_connection()
+                        cursor = daily_conn.cursor()
+                        
+                        import pandas as pd
+                        for symbol, sym_data in data.items():
+                            try:
+                                if isinstance(sym_data, pd.DataFrame):
+                                    df = sym_data
+                                elif isinstance(sym_data, dict) and 'data' in sym_data:
+                                    df = pd.DataFrame(
+                                        data=sym_data['data'],
+                                        columns=sym_data.get('columns', ['open', 'high', 'low', 'close', 'volume']),
+                                        index=sym_data.get('index', [])
+                                    )
+                                else:
+                                    continue
+                                
+                                for idx, row in df.iterrows():
+                                    date_str = idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else str(idx)[:10]
+                                    cursor.execute('''
+                                        INSERT OR REPLACE INTO daily_candles 
+                                        (symbol, date, open, high, low, close, volume, updated_at)
+                                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                    ''', (
+                                        symbol.replace('.NS', ''),
+                                        date_str,
+                                        float(row.get('open', row.iloc[0]) if hasattr(row, 'get') else row.iloc[0]),
+                                        float(row.get('high', row.iloc[1]) if hasattr(row, 'get') else row.iloc[1]),
+                                        float(row.get('low', row.iloc[2]) if hasattr(row, 'get') else row.iloc[2]),
+                                        float(row.get('close', row.iloc[3]) if hasattr(row, 'get') else row.iloc[3]),
+                                        int(row.get('volume', row.iloc[4]) if hasattr(row, 'get') else row.iloc[4]),
+                                        now
+                                    ))
+                            except Exception as e:
+                                print(f"Error importing {symbol}: {e}")
                                 continue
-                            
-                            for idx, row in df.iterrows():
-                                date_str = idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else str(idx)[:10]
-                                cursor.execute('''
-                                    INSERT OR REPLACE INTO daily_candles 
-                                    (symbol, date, open, high, low, close, volume, updated_at)
-                                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                                ''', (
-                                    symbol.replace('.NS', ''),
-                                    date_str,
-                                    float(row.get('open', row.iloc[0]) if hasattr(row, 'get') else row.iloc[0]),
-                                    float(row.get('high', row.iloc[1]) if hasattr(row, 'get') else row.iloc[1]),
-                                    float(row.get('low', row.iloc[2]) if hasattr(row, 'get') else row.iloc[2]),
-                                    float(row.get('close', row.iloc[3]) if hasattr(row, 'get') else row.iloc[3]),
-                                    int(row.get('volume', row.iloc[4]) if hasattr(row, 'get') else row.iloc[4]),
-                                    now
-                                ))
-                        except Exception as e:
-                            print(f"Error importing {symbol}: {e}")
-                            continue
-                    
-                    daily_conn.commit()
-                    print(f"Imported data into local database")
+                        
+                        daily_conn.commit()
+                        print(f"Imported data into local database")
+                    else:
+                        print("Local database not available, skipping import")
                     
                 except Exception as e:
                     print(f"Error loading pickle: {e}")
         
-        # Export to pickle format
-        print("Exporting to pickle format...")
-        daily_path, intraday_path = db.export_to_pickle(output_dir='results/Data')
-        
-        # Print stats
-        stats = db.get_stats()
-        print(f"\nSync Complete:")
-        print(f"  Daily: {stats['daily']['symbols']} symbols, {stats['daily']['records']} records")
-        print(f"  Intraday: {stats['intraday']['symbols']} symbols, {stats['intraday']['records']} records")
-        print(f"  Daily DB: {stats['daily']['db_size_mb']:.2f} MB")
-        print(f"  Intraday DB: {stats['intraday']['db_size_mb']:.2f} MB")
-        print(f"\nExported to:")
-        print(f"  Daily: {daily_path}")
-        print(f"  Intraday: {intraday_path}")
-        
-        db.close()
+        # Export to pickle format (only if database is available)
+        if _LOCAL_DB_AVAILABLE:
+            print("Exporting to pickle format...")
+            daily_path, intraday_path = db.export_to_pickle(output_dir='results/Data')
+            
+            # Print stats
+            stats = db.get_stats()
+            print(f"\nSync Complete:")
+            print(f"  Daily: {stats['daily']['symbols']} symbols, {stats['daily']['records']} records")
+            print(f"  Intraday: {stats['intraday']['symbols']} symbols, {stats['intraday']['records']} records")
+            print(f"  Daily DB: {stats['daily']['db_size_mb']:.2f} MB")
+            print(f"  Intraday DB: {stats['intraday']['db_size_mb']:.2f} MB")
+            print(f"\nExported to:")
+            print(f"  Daily: {daily_path}")
+            print(f"  Intraday: {intraday_path}")
+            
+            db.close()
+        else:
+            print("\nSync Complete (using pickle files only, no database)")
         
     except ImportError as e:
         print(f"PKBrokers not available: {e}")
