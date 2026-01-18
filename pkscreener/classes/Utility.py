@@ -73,6 +73,7 @@ artText = f"{getArtText()}\n"
 STD_ENCODING=sys.stdout.encoding if sys.stdout is not None else 'utf-8'
 
 def marketStatus():
+    return ""
     # task = PKTask("Nifty 50 Market Status",MarketStatus().getMarketStatus)
     lngStatus = MarketStatus().marketStatus
     nseStatus = ""
@@ -85,8 +86,8 @@ def marketStatus():
     # scheduleTasks(tasksList=[task])
     if lngStatus == "":
         lngStatus = MarketStatus().getMarketStatus(exchangeSymbol="^IXIC" if configManager.defaultIndex == 15 else "^NSEI")
-    if "Close" in lngStatus and nseStatus == "Open":
-        lngStatus = lngStatus.replace("Closed","Open")
+    if "close" in lngStatus and nseStatus == "open":
+        lngStatus = lngStatus.replace("Closed","open")
     if len(next_bell) > 0 and next_bell not in lngStatus:
         lngStatus = f"{lngStatus} | Next Bell: {colorText.WARN}{next_bell.replace('T',' ').split('+')[0]}{colorText.END}"
     return (lngStatus +"\n") if lngStatus is not None else "\n"
@@ -141,7 +142,7 @@ class tools:
                 pass
 
     @Halo(text='', spinner='dots')
-    def tryFetchFromServer(cache_file,repoOwner="pkjmesra",repoName="PKScreener",directory="actions-data-download",hideOutput=False,branchName="actions-data-download"):
+    def tryFetchFromServer(cache_file,repoOwner="pkjmesra",repoName="PKScreener",directory="results/Data",hideOutput=False,branchName="refs/heads/actions-data-download"):
         if not hideOutput:
             OutputControls().printOutput(
                         colorText.FAIL
@@ -178,6 +179,31 @@ class tools:
             contentLength = resp.headers.get("content-length")
             filesize = int(contentLength) if contentLength is not None else 0
             # File size should be more than at least 10 MB
+        
+        # If dated file not found in results/Data, try actions-data-download directory
+        if (resp is None or resp.status_code != 200) and cache_file.endswith(".pkl") and directory == "results/Data":
+            alt_directory = "actions-data-download"
+            if not hideOutput:
+                default_logger().info(f"File {cache_file} not found in {directory}, trying {alt_directory}")
+            alt_url = f"https://raw.githubusercontent.com/{repoOwner}/{repoName}/{branchName}/{alt_directory}/{cache_file}"
+            headers['referer'] = f'https://github.com/{repoOwner}/{repoName}/blob/{branchName}/{alt_directory}/{cache_file}'
+            resp = fetcher.fetchURL(alt_url, headers=headers, stream=True)
+            if resp is not None and resp.status_code == 200:
+                contentLength = resp.headers.get("content-length")
+                filesize = int(contentLength) if contentLength is not None else 0
+        
+        # If dated file not found, try the undated stock_data.pkl as fallback
+        if (resp is None or resp.status_code != 200) and cache_file.startswith("stock_data_") and cache_file.endswith(".pkl"):
+            fallback_file = "stock_data.pkl"
+            if not hideOutput:
+                default_logger().info(f"Dated file {cache_file} not found, trying fallback: {fallback_file}")
+            fallback_url = f"https://raw.githubusercontent.com/{repoOwner}/{repoName}/{branchName}/{directory}/{fallback_file}"
+            headers['referer'] = f'https://github.com/{repoOwner}/{repoName}/blob/{branchName}/{directory}/{fallback_file}'
+            resp = fetcher.fetchURL(fallback_url, headers=headers, stream=True)
+            if resp is not None and resp.status_code == 200:
+                contentLength = resp.headers.get("content-length")
+                filesize = int(contentLength) if contentLength is not None else 0
+        
         if (resp is None or (resp is not None and resp.status_code != 200) or filesize <= 10*1024*1024) and (repoOwner=="pkjmesra" and directory=="actions-data-download"):
             return tools.tryFetchFromServer(cache_file,repoOwner=repoName)
         return resp
@@ -289,16 +315,25 @@ class tools:
         return model, pkl
 
     def getSigmoidConfidence(x):
+        """
+        Calculate confidence percentage from model prediction.
+        - x > 0.5: BEARISH prediction, confidence increases as x approaches 1
+        - x <= 0.5: BULLISH prediction, confidence increases as x approaches 0
+        """
         out_min, out_max = 0, 100
         if x > 0.5:
+            # BEARISH: confidence increases as x goes from 0.5 to 1
             in_min = 0.50001
             in_max = 1
+            return round(
+                ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min), 3
+            )
         else:
-            in_min = 0
-            in_max = 0.5
-        return round(
-            ((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min), 3
-        )
+            # BULLISH: confidence increases as x goes from 0.5 to 0
+            # Invert the calculation: lower x = higher confidence
+            return round(
+                ((0.5 - x) * (out_max - out_min) / 0.5 + out_min), 3
+            )
 
     def alertSound(beeps=3, delay=0.2):
         for i in range(beeps):

@@ -22,7 +22,7 @@
 #     SOFTWARE.
 
 # """
-name: 3. Production Telegram bot
+name: 3. PTB
 on:
   workflow_dispatch:
     inputs:
@@ -35,18 +35,27 @@ on:
         required: false
         default: 'N'
       targetPythonVersion:
-        description: 'Target Python version: 3.9 , 3.10, 3.11,3.12,3.13 ?'
+        description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
         required: false
         type: string
         default: '3.12'
       runson:
-          description: 'Runner OS. e.g: ubuntu-latest, windows-latest or macos-latest'
+          description: 'Runner OS. e.g: ubuntu-latest, windows-latest or macos-latest or ubuntu-22.04-arm or ubuntu-24.04-arm'
           required: false
           default: 'ubuntu-latest'
       cliOptions:
         description: 'Enable Logging in the target app or pass any args to bot'
         required: false
         default: '-a Y -l'
+      DOWNLOAD_URL:
+        description: 'Download URL override for the bot. Provide full URL.'
+        required: false
+        default: ''
+      targetArch:
+        description: 'Target OS processor architecture? arm64 or x64 ?'
+        required: false
+        type: string
+        default: 'x64'
   # push:
   #   branches: [ main ]
     # workflow_run:
@@ -59,78 +68,273 @@ on:
     #       required: true
     #       type: string
     #       default: 'new-features'
-  # schedule:
-  #   - cron: '59 * * * *'
+  schedule:
+    - cron: '59 * * * *'
 
 jobs:
 
   Prod_Telegram_Bot:
-
-    runs-on: windows-latest
+    # https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+    runs-on: ${{ inputs.runson || 'ubuntu-latest' }} #ubuntu-latest #windows-latest ubuntu-24.04-arm, ubuntu-22.04-arm
+    permissions: write-all
 
     steps:
     - uses: actions/checkout@v4
       with:
         ref: ${{ inputs.branch-name }}
+        # repository: pkjmesra/PKScreener
+        # token: ${{secrets.GITHUB_TOKEN}}
 
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.targetPythonVersion || 3.12 }}
 
-    - name: Restore Dependencies from Cache
+    - name: Restore Dependencies from Windows Cache
+      if: startsWith(runner.os, 'Windows')
       uses: actions/cache@v4
       with:
         path: ~\AppData\Local\pip\Cache
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
+  
+    - name: Load Cache for Linux Dependencies
+      uses: actions/cache@v4
+      if: startsWith(runner.os, 'Linux')
+      with:
+        path: |
+          /usr/include/ta-lib
+          /usr/bin/ta-lib-config
+          /usr/lib/libta_lib.la
+          /usr/lib/libta_lib.a
+        key: ${{ runner.os }}-talib
+        restore-keys: |
+          ${{ runner.os }}-talib
+        
+    - name: Restore Dependencies from Ubuntu Cache
+      if: startsWith(runner.os, 'Linux')
+      uses: actions/cache@v4
+      id: cache-venv  # name for referring later
+      with:
+        path: ./.venv/  # what we cache: the virtualenv
+        # The cache key depends on requirements.txt
+        key: ${{ runner.os }}-venv-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-venv-
 
-    - name: Install TA-Lib on windows
-      if: ${{ inputs.installtalib != 'N' && startsWith(runner.os, 'Windows') }}
+    - name: Install TA-Lib for Windows
+      if: ${{ inputs.installtalib == 'Y' && startsWith(runner.os, 'Windows') }}
       shell: bash
       run: |
         python3 -m pip install --upgrade pip
+        pip3 install requests
         cd .github/dependencies/
         if [[ "${{ inputs.targetPythonVersion }}" == "" ]] ;then
-          pip3 install ta_lib-0.6.0-cp312-cp312-win_amd64.whl
+          pip3 install TA_Lib-0.4.28-cp312-cp312-win_amd64.whl
         elif [[ "${{ inputs.targetPythonVersion }}" == "3.9" ]] ;then
           pip3 install TA_Lib-0.4.19-cp39-cp39-win_amd64.whl
         elif [[ "${{ inputs.targetPythonVersion }}" == "3.11" ]] ;then
-          pip3 install TA_Lib-0.4.29-cp311-cp311-win_amd64.whl
+          pip3 install TA_Lib-0.4.28-cp311-cp311-win_amd64.whl
         elif [[ "${{ inputs.targetPythonVersion }}" == "3.12" ]] ;then
-          pip3 install ta_lib-0.6.0-cp312-cp312-win_amd64.whl
+          pip3 install TA_Lib-0.4.28-cp312-cp312-win_amd64.whl
         fi
 
-    - name: Install Python Dependencies
+    - name: Install TA-Lib for Linux
+      if: ${{ inputs.installtalib == 'Y' && startsWith(runner.os, 'Linux') }}
+      run: |
+        cd .github/dependencies/
+        pwd
+        sudo dpkg -i ta-lib_0.6.4_amd64.deb
+        cd /home/runner/work/PKScreener/PKScreener/
+        pip3 install ta-lib
+
+    - name: Environment setup to get latest EXE
       shell: bash
+      id: releaseurlsetter
       run: |
-        pip3 install -r requirements.txt
-        pip3 install .
-        
+        pip3 install requests
+        python3 .github/workflows/githubutilities.py -d
+
+    # Phase 1: Binary caching to reduce scan latency by 30-60s
+    - name: Cache PKScreener Binary (Linux)
+      if: startsWith(runner.os, 'Linux')
+      uses: actions/cache@v4
+      id: binary-cache-linux
+      with:
+        path: /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
+        key: ${{ runner.os }}-pkscreener-bin-${{ steps.releaseurlsetter.outputs.VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-pkscreener-bin-
+
+    - name: Cache PKScreener Binary (Windows)
+      if: startsWith(runner.os, 'Windows')
+      uses: actions/cache@v4
+      id: binary-cache-windows
+      with:
+        path: pkscreenercli.exe
+        key: ${{ runner.os }}-pkscreener-bin-${{ steps.releaseurlsetter.outputs.VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-pkscreener-bin-
+
+    - name: Download latest executable on Windows
+      shell: cmd
+      if: startsWith(runner.os, 'Windows') && steps.binary-cache-windows.outputs.cache-hit != 'true'
+      env:
+        exe_path: ${{ inputs.DOWNLOAD_URL || steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
+      run: |
+        curl -o pkscreenercli.exe -JL %exe_path%
+
+    - name: Download latest executable on Ubuntu
+      shell: bash
+      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
+      env:
+        exe_path: ${{ inputs.DOWNLOAD_URL || steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
+      run: |
+        curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -JL $exe_path
+        chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
+
+    - name: Validate and ensure binary is executable
+      shell: bash
+      if: startsWith(runner.os, 'Linux')
+      env:
+        exe_path: ${{ inputs.DOWNLOAD_URL || steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
+      run: |
+        BINARY_PATH="/home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin"
+        download_binary() {
+          echo "Downloading binary from: $exe_path"
+          curl -f -o "$BINARY_PATH" -JL "$exe_path" || {
+            echo "ERROR: Failed to download binary."
+            exit 1
+          }
+          chmod +x "$BINARY_PATH"
+        }
+        if [ -f "$BINARY_PATH" ]; then
+          if file "$BINARY_PATH" | grep -q "ELF 64-bit"; then
+            echo "Binary is valid ELF format"
+            chmod +x "$BINARY_PATH"
+          else
+            echo "Binary corrupted, re-downloading..."
+            rm -f "$BINARY_PATH"
+            download_binary
+          fi
+        else
+          echo "Binary not found, downloading..."
+          download_binary
+        fi
+        if ! file "$BINARY_PATH" | grep -q "ELF 64-bit"; then
+          echo "ERROR: Invalid binary"
+          file "$BINARY_PATH"
+          exit 1
+        fi        
     - name: Configure env.dev file
-      run: |
-        python3 -c "import os; file = open('pkscreener/.env.dev', 'w'); file.write('CHAT_ID='+os.environ['CHAT_ID_DEV']+'\n'); file.write('TOKEN='+os.environ['TOKEN_DEV']+'\n'); file.write('chat_idADMIN='+os.environ['CHAT_IDADMIN_DEV']+'\n'); file.write('GITHUB_TOKEN='+os.environ['GITHUB_TOKEN']+'\n'); file.write('REPO_URL=https://github.com/pkjmesra/PKScreener.git'+'\n'); file.close()"
       shell: bash
       env:
         CHAT_ID_DEV : ${{secrets.CHAT_ID_DEV}}
         TOKEN_DEV : ${{secrets.TOKEN_DEV}}
         CHAT_IDADMIN_DEV : ${{secrets.CHAT_IDADMIN_DEV}}
-        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+        TOKEN: ${{ secrets.TOKEN }}
+        chat_idADMIN: ${{ secrets.chat_idADMIN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI_PAT: ${{ secrets.CI_PAT }}
+        TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
+        TDU: ${{ secrets.TDU }}
+        TAT: ${{ secrets.TAT }}
+        MCU: ${{ secrets.MCU }}
+        MCAP: ${{ secrets.MCAP }}
+        MCL: ${{ secrets.MCL }}
+        MS: ${{ secrets.MS }}
+        PKG: ${{ secrets.PKG }}
+        REPO_URL: ${{ secrets.REPO_URL }}
+        KTOKEN: ${{ secrets.KTOKEN }}
+        KUSER: ${{ secrets.KUSER }}
+        KPWD: ${{ secrets.KPWD }}
+        KTOTP: ${{ secrets.KTOTP }}
+        DB_TYPE: "local"
+        DB_TICKS: ${{ secrets.DB_TICKS }}
+        TBTOKEN: ${{ secrets.TBTOKEN }}
+        BBTOKEN: ${{ secrets.BBTOKEN }}
+        Tel_API_ID: ${{ secrets.Tel_API_ID }}
+        Tel_API_Hash: ${{ secrets.Tel_API_Hash }}
+        Tel_Phone_Number: ${{ secrets.Tel_Phone_Number }}
+        TEL_SESSION_DATA: ${{ secrets.TEL_SESSION_DATA }}
+      run: |
+        cat > .env.dev << EOF
+        CHAT_ID_DEV=$CHAT_ID_DEV
+        TOKEN_DEV=$TOKEN_DEV
+        CHAT_IDADMIN_DEV=$CHAT_IDADMIN_DEV
+        CHAT_ID=$CHAT_ID
+        TOKEN=$TOKEN
+        chat_idADMIN=$chat_idADMIN
+        GITHUB_TOKEN=$GITHUB_TOKEN
+        CI_PAT=$CI_PAT
+        TURSO_TOKEN=$TURSO_TOKEN
+        TDU=$TDU
+        TAT=$TAT
+        MCU=$MCU
+        MCAP=$MCAP
+        MCL=$MCL
+        MS=$MS
+        PKG=$PKG
+        REPO_URL=$REPO_URL
+        KTOKEN=$KTOKEN
+        KUSER=$KUSER
+        KPWD=$KPWD
+        KTOTP=$KTOTP
+        DB_TYPE=$DB_TYPE
+        DB_TICKS=$DB_TICKS
+        TBTOKEN=$TBTOKEN
+        BBTOKEN=$BBTOKEN
+        Tel_API_ID=$Tel_API_ID
+        Tel_API_Hash=$Tel_API_Hash
+        Tel_Phone_Number=$Tel_Phone_Number
+        TEL_SESSION_DATA=$TEL_SESSION_DATA
+        EOF
+        
+        echo "Created .env.dev file with secrets"
 
-    - name: Telegram Bot
+    - name: Run Telegram bot on Windows
+      shell: cmd
       timeout-minutes: 350
       continue-on-error: true
-      shell: cmd
+      if: startsWith(runner.os, 'Windows')
+      env:
+        RUNNER : "GitHub_Actions"
+        MONITORING_BOT_RUNNER: "MONITORING_BOT_RUNNER"
+        CI_PAT: ${{ secrets.CI_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        cd pkscreener/
-        python3 pkscreenerbot.py
+        pkscreenercli.exe --bot --botavailable ${{ inputs.cliOptions || '' }}
 
-    - name: Delete this workflow run
+    - name: Telegram Bot on Ubuntu
+      timeout-minutes: 350
+      continue-on-error: true
+      shell: bash
+      if: startsWith(runner.os, 'Linux')
+      env:
+        RUNNER : "GitHub_Actions"
+        MONITORING_BOT_RUNNER: "MONITORING_BOT_RUNNER"
+        CI_PAT: ${{ secrets.CI_PAT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin --bot --botavailable ${{ inputs.cliOptions || '' }}
+
+    - name: Delete this repo workflow run
       shell: bash
       run: |
         gh run list --status success --limit 400 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
         gh run list --status cancelled --limit 400 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
+        gh run list --status completed --limit 400 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
+      env:
+        GH_TOKEN : ${{secrets.GITHUB_TOKEN}}
+
+    - name: Delete original repo workflow runs
+      shell: bash
+      run: |
+        gh run list --status success --limit 400 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
+        gh run list --status cancelled --limit 400 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
+        gh run list --status completed --limit 400 --json databaseId -q '.[].databaseId' | xargs -IID gh api "repos/$(gh repo view --json nameWithOwner -q .nameWithOwner)/actions/runs/ID" -X DELETE
       env:
         GH_TOKEN : ${{secrets.GITHUB_TOKEN}}
 
@@ -142,7 +346,6 @@ jobs:
   #     - uses: actions/checkout@v4
   #       with:
   #         ref: main
-          
   #     - name: Delete this workflow run
   #       if: startsWith(runner.os, 'Linux')
   #       shell: bash

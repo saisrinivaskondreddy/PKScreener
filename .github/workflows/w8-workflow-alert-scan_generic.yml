@@ -59,9 +59,9 @@ on:
         required: false
         default: 'N'
       alertTrigger:
-          description: 'Is this triggered by scheduled scan alerts (Y/N)'
-          required: false
-          default: 'N'
+        description: 'Is this triggered by scheduled scan alerts (Y/N)'
+        required: false
+        default: 'N'
       targetPythonVersion:
         description: 'Target Python version: 3.9 , 3.10, 3.11 ?'
         required: false
@@ -152,9 +152,30 @@ jobs:
         pip3 install requests
         python3 .github/workflows/githubutilities.py -d
 
+    # Phase 1: Binary caching to reduce scan latency by 30-60s
+    - name: Cache PKScreener Binary (Linux)
+      if: startsWith(runner.os, 'Linux')
+      uses: actions/cache@v4
+      id: binary-cache-linux
+      with:
+        path: /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
+        key: ${{ runner.os }}-pkscreener-bin-${{ steps.releaseurlsetter.outputs.VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-pkscreener-bin-
+
+    - name: Cache PKScreener Binary (Windows)
+      if: startsWith(runner.os, 'Windows')
+      uses: actions/cache@v4
+      id: binary-cache-windows
+      with:
+        path: pkscreenercli.exe
+        key: ${{ runner.os }}-pkscreener-bin-${{ steps.releaseurlsetter.outputs.VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-pkscreener-bin-
+
     - name: Download latest executable on Windows
       shell: cmd
-      if: startsWith(runner.os, 'Windows')
+      if: startsWith(runner.os, 'Windows') && steps.binary-cache-windows.outputs.cache-hit != 'true'
       env:
         exe_path: ${{ steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
@@ -162,34 +183,139 @@ jobs:
 
     - name: Download latest executable on Ubuntu
       shell: bash
-      if: startsWith(runner.os, 'Linux')
+      if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
       env:
         exe_path: ${{ steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
         curl -o /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin -JL $exe_path
         chmod +x /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin
 
-    - name: Configure env.dev file
+    - name: Validate and ensure binary is executable
+      shell: bash
+      if: startsWith(runner.os, 'Linux')
+      env:
+        exe_path: ${{ steps.releaseurlsetter.outputs.DOWNLOAD_URL }}
       run: |
-        python3 -c "import os; file = open('.env.dev', 'w'); file.write('CHAT_ID='+os.environ['CHAT_ID_PROD']+'\n'); file.write('TOKEN='+os.environ['TOKEN_DEV']+'\n'); file.write('chat_idADMIN='+os.environ['CHAT_IDADMIN_DEV']+'\n'); file.write('GITHUB_TOKEN='+os.environ['GITHUB_TOKEN']+'\n'); file.write('TURSO_TOKEN='+os.environ['TURSO_TOKEN']+'\n'); file.write('TDU='+os.environ['TDU']+'\n'); file.write('TAT='+os.environ['TAT']+'\n'); file.write('REPO_URL=https://github.com/pkjmesra/PKScreener.git'+'\n'); file.close()"
+        BINARY_PATH="/home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin"
+        download_binary() {
+          echo "Downloading binary from: $exe_path"
+          curl -f -o "$BINARY_PATH" -JL "$exe_path" || {
+            echo "ERROR: Failed to download binary. The release may not include Linux binaries yet."
+            echo "Please ensure the build workflow has completed and created the Linux binary."
+            exit 1
+          }
+          chmod +x "$BINARY_PATH"
+        }
+        # Check if binary exists and is valid ELF format
+        if [ -f "$BINARY_PATH" ]; then
+          if file "$BINARY_PATH" | grep -q "ELF 64-bit"; then
+            echo "Binary is valid ELF format"
+            chmod +x "$BINARY_PATH"
+          else
+            echo "Binary is corrupted or wrong format, re-downloading..."
+            rm -f "$BINARY_PATH"
+            download_binary
+          fi
+        else
+          echo "Binary not found, downloading..."
+          download_binary
+        fi
+        # Final validation
+        if ! file "$BINARY_PATH" | grep -q "ELF 64-bit"; then
+          echo "ERROR: Downloaded file is not a valid Linux binary"
+          file "$BINARY_PATH"
+          exit 1
+        fi
+    - name: Configure env.dev file
       shell: bash
       env:
-        CHAT_ID_PROD : ${{secrets.CHAT_ID_PROD}}
+        CHAT_ID_DEV : ${{secrets.CHAT_ID_DEV}}
         TOKEN_DEV : ${{secrets.TOKEN_DEV}}
         CHAT_IDADMIN_DEV : ${{secrets.CHAT_IDADMIN_DEV}}
-        GITHUB_TOKEN : ${{secrets.GITHUB_TOKEN}}
-        TURSO_TOKEN : ${{secrets.TURSO_TOKEN}}
-        TDU : ${{secrets.TURSO_DATABASE_URL}}
-        TAT : ${{secrets.TURSO_AUTH_TOKEN}}
+        CHAT_ID: ${{ secrets.CHAT_ID }}
+        TOKEN: ${{ secrets.TOKEN }}
+        chat_idADMIN: ${{ secrets.chat_idADMIN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CI_PAT: ${{ secrets.CI_PAT }}
+        TURSO_TOKEN: ${{ secrets.TURSO_TOKEN }}
+        TDU: ${{ secrets.TDU }}
+        TAT: ${{ secrets.TAT }}
+        MCU: ${{ secrets.MCU }}
+        MCAP: ${{ secrets.MCAP }}
+        MCL: ${{ secrets.MCL }}
+        MS: ${{ secrets.MS }}
+        PKG: ${{ secrets.PKG }}
+        REPO_URL: ${{ secrets.REPO_URL }}
+        KTOKEN: ${{ secrets.KTOKEN }}
+        KUSER: ${{ secrets.KUSER }}
+        KPWD: ${{ secrets.KPWD }}
+        KTOTP: ${{ secrets.KTOTP }}
+        DB_TYPE: "local"
+        DB_TICKS: ${{ secrets.DB_TICKS }}
+        TBTOKEN: ${{ secrets.TBTOKEN }}
+        BBTOKEN: ${{ secrets.BBTOKEN }}
+        Tel_API_ID: ${{ secrets.Tel_API_ID }}
+        Tel_API_Hash: ${{ secrets.Tel_API_Hash }}
+        Tel_Phone_Number: ${{ secrets.Tel_Phone_Number }}
+        TEL_SESSION_DATA: ${{ secrets.TEL_SESSION_DATA }}
+      run: |
+        cat > .env.dev << EOF
+        CHAT_ID_DEV=$CHAT_ID_DEV
+        TOKEN_DEV=$TOKEN_DEV
+        CHAT_IDADMIN_DEV=$CHAT_IDADMIN_DEV
+        CHAT_ID=$CHAT_ID
+        TOKEN=$TOKEN
+        chat_idADMIN=$chat_idADMIN
+        GITHUB_TOKEN=$GITHUB_TOKEN
+        CI_PAT=$CI_PAT
+        TURSO_TOKEN=$TURSO_TOKEN
+        TDU=$TDU
+        TAT=$TAT
+        MCU=$MCU
+        MCAP=$MCAP
+        MCL=$MCL
+        MS=$MS
+        PKG=$PKG
+        REPO_URL=$REPO_URL
+        KTOKEN=$KTOKEN
+        KUSER=$KUSER
+        KPWD=$KPWD
+        KTOTP=$KTOTP
+        DB_TYPE=$DB_TYPE
+        DB_TICKS=$DB_TICKS
+        TBTOKEN=$TBTOKEN
+        BBTOKEN=$BBTOKEN
+        Tel_API_ID=$Tel_API_ID
+        Tel_API_Hash=$Tel_API_Hash
+        Tel_Phone_Number=$Tel_Phone_Number
+        TEL_SESSION_DATA=$TEL_SESSION_DATA
+        EOF
         
+        echo "Created .env.dev file with secrets"
+
+
+    # Phase 2: Restore pre-cached stock data for faster scans
+    - name: Restore Stock Data Cache
+      uses: actions/cache@v4
+      with:
+        path: results/Data/
+        key: stock-data-
+        restore-keys: |
+          stock-data-
+    - name: Create session file
+      run: |
+        echo ${{ secrets.TEL_SESSION_DATA }} | base64 -d > user_session.session
+        chmod 600 user_session.session
   
     - name: Run Scan on Windows
       shell: cmd
+      timeout-minutes: 10
       if: startsWith(runner.os, 'Windows')
       env:
         RUNNER : "GitHub_Actions"
         GSHEET_SERVICE_ACCOUNT_DEV: ${{secrets.GSHEET_SERVICE_ACCOUNT_DEV}}
         GSHEET_VIEWONLY_LINK: ${{secrets.GSHEET_VIEWONLY_LINK}}
+        ALERT_TRIGGER: ${{ inputs.alertTrigger || 'N' }}
       run: |
         ${{ inputs.prerequisites }}
         pkscreenercli.exe ${{ inputs.params }}
@@ -197,7 +323,7 @@ jobs:
 
     - name: Run Scan on Ubuntu
       shell: bash
-      timeout-minutes: 360
+      timeout-minutes: 10
       if: startsWith(runner.os, 'Linux')
       env:
         RUNNER : "GitHub_Actions"
@@ -206,7 +332,7 @@ jobs:
         ALERT_TRIGGER: ${{ inputs.alertTrigger || 'N' }}
       run: |
         ${{ inputs.prerequisites }}
-        /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin ${{ inputs.params }}
+        /home/runner/work/PKScreener/PKScreener/pkscreenercli_x64.bin ${{ inputs.params }} -l
         ${{ inputs.postrun }}
 
   # Delete_Workflow_Run:
@@ -219,7 +345,7 @@ jobs:
   #         ref: main
           
   #     - name: Delete this workflow run
-  #       if: startsWith(runner.os, 'Linux')
+  #       if: startsWith(runner.os, 'Linux') && steps.binary-cache-linux.outputs.cache-hit != 'true'
   #       shell: bash
   #       run: |
   #         for id in $(gh run list --limit 100 --jq ".[] | select (.status == \"success\" ) | .databaseId" --json databaseId,status); do gh run delete $id; done
