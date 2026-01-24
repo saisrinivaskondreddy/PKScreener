@@ -39,8 +39,8 @@ on:
         description: 'Runner OS. e.g: ubuntu-latest, windows-latest or macos-latest'
         required: false
         default: 'ubuntu-latest'
-  schedule:
-  - cron: '55 9 * * 0-6'
+  #schedule:
+  #- cron: '55 9 * * 0-6'
 
 jobs:
 
