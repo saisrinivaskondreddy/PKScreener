@@ -6,13 +6,13 @@
 name: Local Candle DB Sync
 
 on:
-  schedule:
+  #schedule:
     # During market hours (IST 9:15-15:30 = UTC 3:45-10:00)
-    - cron: '*/30 4-9 * * 1-5'
+    #- cron: '*/30 4-9 * * 1-5'
     # After market close (IST 15:35 = UTC 10:05)
-    - cron: '5 10 * * 1-5'
+    #- cron: '5 10 * * 1-5'
     # Weekend maintenance
-    - cron: '0 10 * * 0,6'
+    #- cron: '0 10 * * 0,6'
   workflow_dispatch:
     inputs:
       force_tick_fallback:
